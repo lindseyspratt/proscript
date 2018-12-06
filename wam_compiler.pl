@@ -917,3 +917,8 @@ repl_1(Atom):-
         call(Query),
         flush_stdout,
         print_bindings(Bindings).
+
+
+call_atom(QueryAtom, Bindings) :-
+    atom_to_term(QueryAtom, Query, Bindings),
+    call(Query).

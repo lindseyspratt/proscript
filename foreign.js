@@ -11,32 +11,32 @@ function round(a)
 function evaluate_expression(expression, evaluated)
 {
     expression = deref(expression);
-    if (TAG(expression) == TAG_INT)
+    if (TAG(expression) === TAG_INT)
     {
-        if ((VAL(expression) & (1 << (WORD_BITS-1))) == (1 << (WORD_BITS-1)))
+        if ((VAL(expression) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
             evaluated.value = VAL(expression) - (1 << WORD_BITS);
         else
             evaluated.value = VAL(expression);
         return true;
     }
-    if (TAG(expression) == TAG_FLT)
+    if (TAG(expression) === TAG_FLT)
     {
         evaluated.value = floats[VAL(expression)];
         return true;
     }
-    if (TAG(expression) == TAG_REF)
+    if (TAG(expression) === TAG_REF)
     {
         return instantiation_error(expression);
     }
-    else if (TAG(expression) == TAG_ATM && expression == lookup_atom("pi"))
+    else if (TAG(expression) === TAG_ATM && expression === lookup_atom("pi"))
     {
         evaluated.value = Math.PI;
         return true;
     }
-    else if (TAG(expression) == TAG_STR)
+    else if (TAG(expression) === TAG_STR)
     {
+        var indicator;
         var v = [];
-        var value = 0;
         var arity = ftable[VAL(memory[VAL(expression)])][1];
         var name = atable[ftable[VAL(memory[VAL(expression)])][0]];
         for (var i = 0; i < arity; i++)
@@ -47,107 +47,107 @@ function evaluate_expression(expression, evaluated)
             else
                 v[i] = t.value;
         }
-        if (name == "+" && arity == 2)
+        if (name === "+" && arity === 2)
             evaluated.value = v[0] + v[1];
-        else if (name == "-" && arity == 2)
+        else if (name === "-" && arity === 2)
             evaluated.value = v[0] - v[1];
-        else if (name == "*" && arity == 2)
+        else if (name === "*" && arity === 2)
             evaluated.value = v[0] * v[1];
-        else if (name == "//" && arity == 2)
+        else if (name === "//" && arity === 2)
             evaluated.value = ~~(v[0] / v[1]);
-        else if (name == "/" && arity == 2)
+        else if (name === "/" && arity === 2)
             evaluated.value = v[0] / v[1];
-        else if (name == "rem" && arity == 2)
+        else if (name === "rem" && arity === 2)
         {
-            if (v[1] == 0)
+            if (v[1] === 0)
                 return evaluation_error("zero_divisor");
             evaluated.value = v[0] - (round(v[0]/v[1]) * v[1]);            
         }
-        else if (name == "mod" && arity == 2)
+        else if (name === "mod" && arity === 2)
         {
-            if (v[1] == 0)
+            if (v[1] === 0)
                 return evaluation_error("zero_divisor");            
             evaluated.value = v[0] - (Math.floor(v[0]/v[1]) * v[1]);
         }
-        else if (name == "-" && arity == 1)
+        else if (name === "-" && arity === 1)
             evaluated.value = -v[0];
-        else if (name == "abs" && arity == 1)
+        else if (name === "abs" && arity === 1)
             evaluated.value = Math.abs(v[0]);
-        else if (name == "sign" && arity == 1)
+        else if (name === "sign" && arity === 1)
         {
-            if (v[0] == 0)
+            if (v[0] === 0)
                 evaluated.value = 0;
             else if (v[0] > 0)
                 evaluated.value = 1;
             else
                 evaluated.value = -1;
         }
-        else if (name == "float_integer_part" && arity == 1)
+        else if (name === "float_integer_part" && arity === 1)
             evaluated.value = ~~v[0];
-        else if (name == "float_fractional_part" && arity == 1)
+        else if (name === "float_fractional_part" && arity === 1)
             evaluated.value = v[0] % 1;
-        else if (name == "float" && arity == 1)
+        else if (name === "float" && arity === 1)
             evaluated.value = v[0];
-        else if (name == "floor" && arity == 1)
+        else if (name === "floor" && arity === 1)
             evaluated.value = Math.floor(v[0]);
-        else if (name == "truncate" && arity == 1)
+        else if (name === "truncate" && arity === 1)
             evaluated.value = ~~v[0];
-        else if (name == "round" && arity == 1)
+        else if (name === "round" && arity === 1)
             evaluated.value = Math.round(v[0]);
-        else if (name == "ceiling" && arity == 1)
+        else if (name === "ceiling" && arity === 1)
             evaluated.value = Math.ceil(v[0]);
-        else if (name == "**" && arity == 2)
+        else if (name === "**" && arity === 2)
             evaluated.value = Math.pow(v[0], v[1]);
-        else if (name == "sin" && arity == 1)
+        else if (name === "sin" && arity === 1)
             evaluated.value = Math.sin(v[0]);
-        else if (name == "cos" && arity == 1)
+        else if (name === "cos" && arity === 1)
             evaluated.value = Math.cos(v[0]);
-        else if (name == "atan" && arity == 1)
+        else if (name === "atan" && arity === 1)
             evaluated.value = Math.atan(v[0]);
-        else if (name == "exp" && arity == 1)
+        else if (name === "exp" && arity === 1)
             evaluated.value = Math.exp(v[0]);
-        else if (name == "log" && arity == 1)
+        else if (name === "log" && arity === 1)
             evaluated.value = Math.log(v[0]);
-        else if (name == "sqrt" && arity == 1)
+        else if (name === "sqrt" && arity === 1)
             evaluated.value = Math.sqrt(v[0]);
-        else if (name == ">>" && arity == 2)
-            evaluated.value = v[0] >> [v1];
-        else if (name == "<<" && arity == 2)
-            evaluated.value = v[0] << [v1];
-        else if (name == "/\\" && arity == 2)
-            evaluated.value = v[0] & [v1];
-        else if (name == "\\/" && arity == 2)
-            evaluated.value = v[0] | [v1];
-        else if (name == "\\" && arity == 1)
+        else if (name === ">>" && arity === 2)
+            evaluated.value = v[0] >> v[1];
+        else if (name === "<<" && arity === 2)
+            evaluated.value = v[0] << v[1];
+        else if (name === "/\\" && arity === 2)
+            evaluated.value = v[0] & v[1];
+        else if (name === "\\/" && arity === 2)
+            evaluated.value = v[0] | v[1];
+        else if (name === "\\" && arity === 1)
             evaluated.value = ~v[0];
         // Corrigendum
-        else if (name == "+" && arity == 1)
+        else if (name === "+" && arity === 1)
             evaluated.value = v[0];
-        else if (name == "max" && arity == 2)
+        else if (name === "max" && arity === 2)
             evaluated.value = Math.max(v[0], v[1]);
-        else if (name == "min" && arity == 2)
+        else if (name === "min" && arity === 2)
             evaluated.value = Math.min(v[0], v[1]);
-        else if (name == "acos" && arity == 2)
-            evaluated.value = Math.acos(v[0], v[1]);
-        else if (name == "asin" && arity == 2)
-            evaluated.value = Math.asin(v[0], v[1]);
-        else if (name == "tan" && arity == 2)
-            evaluated.value = Math.tan(v[0], v[1]);
-        else if (name == "xor" && arity == 2)
+        else if (name === "acos" && arity === 1)
+            evaluated.value = Math.acos(v[0]);
+        else if (name === "asin" && arity === 1)
+            evaluated.value = Math.asin(v[0]);
+        else if (name === "tan" && arity === 1)
+            evaluated.value = Math.tan(v[0]);
+        else if (name === "xor" && arity === 2)
             evaluated.value = v[0] ^ v[1];
-        else if (name == "atan2" && arity == 2)
+        else if (name === "atan2" && arity === 2)
             evaluated.value = Math.atan2(v[0], v[1]);
-        else if (name == "^" && arity == 2)
+        else if (name === "^" && arity === 2)
             evaluated.value = Math.pow(v[0], v[1]);
-        else if (name == "div" && arity == 2)
+        else if (name === "div" && arity === 2)
         {
-            if (v[1] == 0)
+            if (v[1] === 0)
                 return evaluation_error("zero_divisor");
             evaluated.value = round(v[0] /v[1]);        
         }
         else
         {
-            var indicator = state.H ^ (TAG_STR << WORD_BITS);
+            indicator = state.H ^ (TAG_STR << WORD_BITS);
             memory[state.H++] = lookup_functor("/", 2);
             memory[state.H++] = lookup_atom(name);
             memory[state.H++] = arity ^ (TAG_INT << WORD_BITS);
@@ -155,15 +155,15 @@ function evaluate_expression(expression, evaluated)
         }
         return true;            
     }
-    else if (TAG(expression) == TAG_ATM)
+    else if (TAG(expression) === TAG_ATM)
     {
-        var indicator = state.H ^ (TAG_STR << WORD_BITS);
+        indicator = state.H ^ (TAG_STR << WORD_BITS);
         memory[state.H++] = lookup_functor("/", 2);
         memory[state.H++] = expression;
         memory[state.H++] = 0 ^ (TAG_INT << WORD_BITS);
         return type_error("evaluable", indicator)
     }
-    else if (TAG(expression) == TAG_STR)
+    else if (TAG(expression) === TAG_STR)
     {
         return type_error("evaluable", expression);
     }
@@ -204,15 +204,15 @@ function predicate_is(value, expression)
 //    else
 //        debug_msg("Failed to evaluate " + term_to_string(expression));
     // Note that e.value may be negative. Have to AND to get rid of any high bits
-    if (e.value == ~~e.value)
+    if (e.value === ~~e.value)
     {
         // FIXME: Is this right?! This just truncates to WORD_BITS bits!
         e.value &= ((1 << WORD_BITS) -1);
-        return (e.status != 0 && unify(e.value ^ (TAG_INT << WORD_BITS), value));
+        return (e.status !== 0 && unify(e.value ^ (TAG_INT << WORD_BITS), value));
     }
     else
     {
-        return (e.status != 0 && unify(lookup_float(e.value), value));
+        return (e.status !== 0 && unify(lookup_float(e.value), value));
     }
 }
 
@@ -222,7 +222,7 @@ function predicate_ne(a, b)
     var ae = {};
     var be = {};
     if (evaluate_expression(a, ae) && evaluate_expression(b, be))
-        return ae.value != be.value;
+        return ae.value !== be.value;
     return false;
 }
 
@@ -271,7 +271,7 @@ function predicate_eq(a, b)
     var ae = {};
     var be = {};
     if (evaluate_expression(a, ae) && evaluate_expression(b, be))
-        return ae.value == be.value;
+        return ae.value === be.value;
     return false;
 }
 
@@ -284,24 +284,24 @@ function term_variables(z)
 {
     var pdl = [z];
     var vars = [];
-    while (pdl.length != 0)
+    while (pdl.length !== 0)
     {
         var t = deref(pdl.pop());
-        if (TAG(t) == TAG_REF)
+        if (TAG(t) === TAG_REF)
         {
-            if (vars.indexOf(t) == -1)
+            if (vars.indexOf(t) === -1)
             {
                 vars.push(t);
             }
         }
-        else if (TAG(t) == TAG_LST)
+        else if (TAG(t) === TAG_LST)
         {
             pdl.push(memory[VAL(t)+1]);
             pdl.push(memory[VAL(t)]);
         }
-        else if (TAG(t) == TAG_STR)
+        else if (TAG(t) === TAG_STR)
         {
-            ftor = VAL(memory[VAL(t)]);
+            var ftor = VAL(memory[VAL(t)]);
             for (var i = ftable[ftor][1]-1; i >= 0 ; i--)
                 pdl.push(memory[VAL(t) + 1 + i]);
         }
@@ -317,6 +317,7 @@ function writeln(t)
     return true;
 }
 
+// noinspection JSUnusedLocalSymbols
 function predicate_halt(n)
 {
     state.running = false;
@@ -325,52 +326,51 @@ function predicate_halt(n)
 
 function predicate_univ(term, list_term)
 {
+    var list;
     debug_msg("Univ : " + hex(term));
     debug_msg(" ...... = " + term_to_string(term));
+    // noinspection JSBitwiseOperatorUsage
     if (term & M_BIT)
         abort("GC exception: M bit is still set");
-    switch(TAG(term))
-    {
-    case TAG_ATM:
-    case TAG_INT:
-    case TAG_FLT:
-        var list = term_from_list([term], NIL);
-        return unify(list_term, list);
-    case TAG_REF:
-        // Save space on heap for ftor
-        var tmp = state.H;
-        state.H++;
-        var arity = 0;
-        if (TAG(list_term) != TAG_LST)
-            return type_error("list", list_term);
-        if (TAG(deref(memory[VAL(list_term)])) != TAG_ATM)
-            return type_error("atom", deref(memory[VAL(list_term)]));
-        var ftor_name = atable[VAL(deref(memory[VAL(list_term)]))];
-        list_term = memory[VAL(list_term)+1];
-        // Now write the args
-        while (TAG(list_term) == TAG_LST)
-        {
-            // Write head
-            memory[state.H++] = memory[VAL(list_term)];
-            // Update tail
-            list_term = memory[VAL(list_term)+1];
-            arity++;
-        }
-        // Check tail
-        if (list_term != NIL)
-        {
-            if (TAG(list_term) == TAG_REF)
-                return instantiation_error(list_term);
-            else
+    switch (TAG(term)) {
+        case TAG_ATM:
+        case TAG_INT:
+        case TAG_FLT:
+            list = term_from_list([term], NIL);
+            return unify(list_term, list);
+        case TAG_REF:
+            // Save space on heap for ftor
+            var tmp = state.H;
+            state.H++;
+            var arity = 0;
+            if (TAG(list_term) !== TAG_LST)
                 return type_error("list", list_term);
-        }
-        memory[tmp] = lookup_functor(ftor_name, arity);
-        return unify(term, tmp ^ (TAG_STR << WORD_BITS));
-    case TAG_STR:
-        var ftor = VAL(memory[VAL(term)]);
-        if (ftable[ftor] === undefined)
-            abort("Garbage functor " + hex(ftor) + " pointed at by " + hex(term));
-        var list = [ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)];
+            if (TAG(deref(memory[VAL(list_term)])) !== TAG_ATM)
+                return type_error("atom", deref(memory[VAL(list_term)]));
+            var ftor_name = atable[VAL(deref(memory[VAL(list_term)]))];
+            list_term = memory[VAL(list_term) + 1];
+            // Now write the args
+            while (TAG(list_term) === TAG_LST) {
+                // Write head
+                memory[state.H++] = memory[VAL(list_term)];
+                // Update tail
+                list_term = memory[VAL(list_term) + 1];
+                arity++;
+            }
+            // Check tail
+            if (list_term !== NIL) {
+                if (TAG(list_term) === TAG_REF)
+                    return instantiation_error(list_term);
+                else
+                    return type_error("list", list_term);
+            }
+            memory[tmp] = lookup_functor(ftor_name, arity);
+            return unify(term, tmp ^ (TAG_STR << WORD_BITS));
+        case TAG_STR:
+            var ftor = VAL(memory[VAL(term)]);
+            if (ftable[ftor] === undefined)
+                abort("Garbage functor " + hex(ftor) + " pointed at by " + hex(term));
+            list = [ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)];
         for (var i = 0; i < ftable[ftor][1]; i++)
         {
             debug_msg("Arg " + i + " is at " + (VAL(term)+1+i) + " and has value " + hex(memory[VAL(term)+1+i]));
@@ -378,7 +378,7 @@ function predicate_univ(term, list_term)
         }
         return unify(list_term, term_from_list(list, NIL));
     case TAG_LST:
-        var list = [lookup_atom(".")];
+        list = [lookup_atom(".")];
         list.push(memory[VAL(term)]);
         list.push(memory[VAL(term)+1]);
         return unify(list_term, term_from_list(list, NIL));
@@ -387,80 +387,80 @@ function predicate_univ(term, list_term)
 
 function predicate_functor(term, name, arity)
 {
-    switch(TAG(term))
-    {
-    case TAG_REF:
-        if (TAG(name) == TAG_ATM && TAG(arity) == TAG_INT)
-        {
-            var name_string = atable[VAL(name)];
-            var ftor = lookup_functor(name_string, VAL(arity));
-            var t = state.H ^ (TAG_STR << WORD_BITS);
-            memory[state.H++] = ftor;
-            for (i = 0; i < VAL(arity); i++)
-                alloc_var();
-            return unify(term, t);
-        }
-        else if (TAG(name) == TAG_REF)
-            return instantiation_error(name);
-        else if (TAG(arity) == TAG_REF)
-            return instantiation_error(arity);
-        else if (TAG(name) != TAG_ATM)
-            return type_error("atom", name);
-        else if (TAG(arity) != TAG_INT)
-            return type_error("integer", arity);
-    case TAG_ATM:
-    case TAG_INT:
-    case TAG_FLT:
-        return unify(name, term) && unify(arity, 0 ^ (TAG_INT << WORD_BITS));        
-    case TAG_STR:
-        var ftor = VAL(memory[VAL(term)]);
-        return unify(name, ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)) && unify(arity, ftable[ftor][1] ^ (TAG_INT << WORD_BITS));
-    case TAG_LST:
-        return unify(name, NIL) && unify(arity, 2 ^ (TAG_INT << WORD_BITS));        
+    var ftor;
+    // noinspection FallThroughInSwitchStatementJS
+    switch (TAG(term)) {
+        case TAG_REF:
+            if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT) {
+                var name_string = atable[VAL(name)];
+                ftor = lookup_functor(name_string, VAL(arity));
+                var t = state.H ^ (TAG_STR << WORD_BITS);
+                memory[state.H++] = ftor;
+                for (var i = 0; i < VAL(arity); i++)
+                    alloc_var();
+                return unify(term, t);
+            }
+            else if (TAG(name) === TAG_REF)
+                return instantiation_error(name);
+            else if (TAG(arity) === TAG_REF)
+                return instantiation_error(arity);
+            else if (TAG(name) !== TAG_ATM)
+                return type_error("atom", name);
+            else if (TAG(arity) !== TAG_INT)
+                return type_error("integer", arity);
+        case TAG_ATM:
+        case TAG_INT:
+        case TAG_FLT:
+            return unify(name, term) && unify(arity, 0 ^ (TAG_INT << WORD_BITS));
+        case TAG_STR:
+            ftor = VAL(memory[VAL(term)]);
+            return unify(name, ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)) && unify(arity, ftable[ftor][1] ^ (TAG_INT << WORD_BITS));
+        case TAG_LST:
+            return unify(name, NIL) && unify(arity, 2 ^ (TAG_INT << WORD_BITS));
     }
 }
 
 function predicate_arg(n, t, a)
 {
-    if (TAG(n) == TAG_REF)
+    if (TAG(n) === TAG_REF)
         return instantiation_error(n);
-    if (TAG(t) == TAG_REF)
+    if (TAG(t) === TAG_REF)
         return instantiation_error(t);
-    if (TAG(n) != TAG_INT)
+    if (TAG(n) !== TAG_INT)
         return type_error("integer", n);
-    if (TAG(t) != TAG_STR)
+    if (TAG(t) !== TAG_STR)
         return type_error("compound", t);
     if (VAL(n) < 0)
         return domain_error("not_less_than_zero", n);
     var ftor = VAL(memory[VAL(t)]);
-    if (VAL(n) == 0 || VAL(n) > ftable[ftor][1])
+    if (VAL(n) === 0 || VAL(n) > ftable[ftor][1])
         return false;
     return unify(memory[VAL(t) + VAL(n)], a);
 }
 
 function predicate_var(v)
 {
-    return TAG(v) == TAG_REF;
+    return TAG(v) === TAG_REF;
 }
 
 function predicate_atom(v)
 {
-    return TAG(v) == TAG_ATM;
+    return TAG(v) === TAG_ATM;
 }
 
 function predicate_integer(v)
 {
-    return TAG(v) == TAG_INT;
+    return TAG(v) === TAG_INT;
 }
 
 function predicate_float(v)
 {
-    return TAG(v) == TAG_FLT;
+    return TAG(v) === TAG_FLT;
 }
 
 function predicate_compound(v)
 {
-    return TAG(V) == TAG_STR;
+    return TAG(v) === TAG_STR;
 }
 
 function predicate_ground(x)
@@ -468,7 +468,7 @@ function predicate_ground(x)
     var args = [x];
     while(args.length > 0)
     {
-        arg = args.pop();
+        var arg = args.pop();
         switch (TAG(arg))
         {
         case TAG_REF:
@@ -482,10 +482,10 @@ function predicate_ground(x)
             args.push(memory[VAL(arg)+1]);
             continue;
         case TAG_STR:
-            ftor = VAL(memory[VAL(arg)]);
-            for (i = 0; i < ftable[ftor][1]; i++)
+            var ftor = VAL(memory[VAL(arg)]);
+            for (var i = 0; i < ftable[ftor][1]; i++)
                 args.push(memory[VAL(arg)+1+i]);
-            continue;        
+
         }
     }
 }
@@ -500,35 +500,35 @@ function predicate_match(a, b)
     var match_pdl = [];
     match_pdl.push(a);
     match_pdl.push(b);
-    while (match_pdl.length != 0)
+    while (match_pdl.length !== 0)
     {
         var d1 = deref(match_pdl.pop());
         var d2 = deref(match_pdl.pop());
-        if (d1 != d2)
+        if (d1 !== d2)
         {
-            type1 = TAG(d1);
-            val1 = VAL(d1);
-            type2 = TAG(d2);
-            val2 = VAL(d2);          
+            var type1 = TAG(d1);
+            var val1 = VAL(d1);
+            var type2 = TAG(d2);
+            var val2 = VAL(d2);
             // If either is a variable or atomic then they must be equal in order to match. They are not equal if we get to this line, so bail.
-            if (type1 == TAG_REF || type2 == TAG_REF || type2 == TAG_ATM || type2 == TAG_INT || type2 == TAG_FLT)
+            if (type1 === TAG_REF || type2 === TAG_REF || type2 === TAG_ATM || type2 === TAG_INT || type2 === TAG_FLT)
                 return false;
 
-            if (type1 != type2) // Types must be equal for matching
+            if (type1 !== type2) // Types must be equal for matching
                 return false;
 
-            if (type1 == TAG_LST)
+            if (type1 === TAG_LST)
             {                        
                 match_pdl.push(memory[val1]); // unify heads
                 match_pdl.push(memory[val2]);
                 match_pdl.push(memory[val1+1]); // unify tails
                 match_pdl.push(memory[val2+1]);
             }
-            else if (type1 == TAG_STR)
+            else if (type1 === TAG_STR)
             {
-                f1 = VAL(memory[val1]);
-                f2 = VAL(memory[val2]);
-                if (f1 == f2)
+                var f1 = VAL(memory[val1]);
+                var f2 = VAL(memory[val2]);
+                if (f1 === f2)
                 {
                     for (var i = 0; i < ftable[f1][1]; i++)
                     {
@@ -557,7 +557,7 @@ function lookup_atom(name)
     var i;
     for (i = 0; i < atable.length; i++)
     {
-        if (atable[i] == name)
+        if (atable[i] === name)
             return i ^ (TAG_ATM << WORD_BITS);
     }
     i = atable.length;
@@ -570,7 +570,7 @@ function lookup_functor(name, arity)
     var a = VAL(lookup_atom(name));
     var i;
     for (i = 0; i < ftable.length; i++)
-        if (ftable[i][0] == a && ftable[i][1] == arity)
+        if (ftable[i][0] === a && ftable[i][1] === arity)
             return i ^ (TAG_ATM << WORD_BITS);
     i = ftable.length;
     ftable[i] = [a, arity];
@@ -602,47 +602,43 @@ function toByteArray(str)
     return byteArray;
 }
 
-function JSfromByteArray(byteArray)
-{
-    var str = '';
-    for (var i = 0; i < byteArray.length; i++)
-    {
-        str +=  byteArray[i] <= 0x7F?
-                byteArray[i] === 0x25 ? "%25" : // %
-                String.fromCharCode(byteArray[i]) :
-                "%" + byteArray[i].toString(16).toUpperCase();
-    }
-    return decodeURIComponent(str);
-}
+// function JSfromByteArray(byteArray)
+// {
+//     var str = '';
+//     for (var i = 0; i < byteArray.length; i++)
+//     {
+//         str +=  byteArray[i] <= 0x7F?
+//                 byteArray[i] === 0x25 ? "%25" : // %
+//                 String.fromCharCode(byteArray[i]) :
+//                 "%" + byteArray[i].toString(16).toUpperCase();
+//     }
+//     return decodeURIComponent(str);
+// }
 
 function fromByteArray(byteArray)
 {
     var str = '';
-    for (i = 0; i < byteArray.length; i++)
-    {
-        if (byteArray[i] <= 0x7F)
-        {
+    for (var i = 0; i < byteArray.length; i++) {
+        if (byteArray[i] <= 0x7F) {
             str += String.fromCharCode(byteArray[i]);
         }
-        else
-        {
+        else {
             // Have to decode manually
             var ch = 0;
-            var mask = 0x20;
             var j = 0;
-            for (var mask = 0x20; mask != 0; mask >>=1 )
+            for (var mask = 0x20; mask !== 0; mask >>=1 )
             {        
                 var next = byteArray[j+1];
-                if (next == undefined)
+                if (next === undefined)
                 {
                     abort("Unicode break in fromByteArray. The input is garbage");
                 }
                 ch = (ch << 6) ^ (next & 0x3f);
-                if ((byteArray[i] & mask) == 0)
+                if ((byteArray[i] & mask) === 0)
                     break;
                 j++;
             }
-            ch ^= (b & (0xff >> (i+3))) << (6*(i+1));
+            ch ^= (ch & (0xff >> (i+3))) << (6*(i+1));
             str += String.fromCharCode(ch);
         }
     }
@@ -662,12 +658,12 @@ function atom_to_memory_file(atom, memfile)
 
 function memory_file_to_atom(memfile, atom)
 {
-    if (TAG(memfile) != TAG_STR)
+    if (TAG(memfile) !== TAG_STR)
         return type_error("memory_file", memfile);
-    ftor = VAL(memory[VAL(memfile)]);
-    if (atable[ftable[ftor][0]] == "$memory_file" && ftable[ftor][1] == 1)
+    var ftor = VAL(memory[VAL(memfile)]);
+    if (atable[ftable[ftor][0]] === "$memory_file" && ftable[ftor][1] === 1)
     {
-        f = memory_files[VAL(memory[VAL(memfile)+1])];        
+        var f = memory_files[VAL(memory[VAL(memfile)+1])];
         return unify(atom, lookup_atom(fromByteArray(f.data)));
     }
     return type_error("memory_file", memfile);
@@ -686,6 +682,7 @@ function new_memory_file(memfile)
 
 function close_memory_file(stream)
 {
+    debug_msg("close " + stream);
     return true;
 }
 
@@ -698,7 +695,7 @@ function read_memory_file(stream, size, count, buffer)
     {
         for (var b = 0; b < size; b++)
         {
-            t = memfile.data[memfile.ptr++];            
+            var t = memfile.data[memfile.ptr++];
             if (t === undefined)
                 return records_read;
             buffer[bytes_read++] = t;
@@ -731,24 +728,24 @@ function tell_memory_file(stream)
 function open_memory_file(memfile, mode, stream)
 {
     var index = streams.length;
-    if (TAG(memfile) == TAG_REF)
+    if (TAG(memfile) === TAG_REF)
         return instantiation_error(memfile);
-    if (TAG(memfile) != TAG_STR || memory[VAL(memfile)] != lookup_functor("$memory_file", 1))
+    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
         return type_error("memory_file", memfile);
     var memindex = get_arg(memfile, 1);
-    if (TAG(memindex) != TAG_INT)
+    if (TAG(memindex) !== TAG_INT)
         return type_error("memory_file", memfile);
     memindex = VAL(memindex);
-    if (TAG(mode) == TAG_REF)
+    if (TAG(mode) === TAG_REF)
         return instantiation_error(mode);
-    else if (TAG(mode) != TAG_ATM)
+    else if (TAG(mode) !== TAG_ATM)
         return type_error("atom", mode);
-    if (atable[VAL(mode)] == 'read')
+    if (atable[VAL(mode)] === 'read')
     {
         streams[index] = new_stream(read_memory_file, null, null, close_memory_file, tell_memory_file, memindex);
         
     }
-    else if (atable[VAL(mode)] == 'write')
+    else if (atable[VAL(mode)] === 'write')
     {
         streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
     }
@@ -792,7 +789,7 @@ function predicate_lookup_functor(fname, arity, index)
     var i;
     for (i = 0; i < ftable.length; i++)
     {
-        if (ftable[i][0] == VAL(fname) && ftable[i][1] == VAL(arity))
+        if (ftable[i][0] === VAL(fname) && ftable[i][1] === VAL(arity))
         {
             return unify(index, i ^ (TAG_INT << WORD_BITS));            
         }
@@ -820,49 +817,49 @@ function predicate_trace_unify(a, b)
 
 function predicate_op(precedence, fixity, name)
 {
-    var names
-    if (TAG(fixity) == TAG_REF)
+    var op_name;
+    var names;
+    if (TAG(fixity) === TAG_REF)
         return instantiation_error(fixity);
-    if (TAG(precedence) == TAG_REF)
+    if (TAG(precedence) === TAG_REF)
         return instantiation_error(precedence);
-    if (TAG(precedence) != TAG_INT)
+    if (TAG(precedence) !== TAG_INT)
         return type_error("integer", precedence);
 
     var op_precedence = VAL(precedence);
-    var fixity = atable[VAL(fixity)];
+    var fixityJS = atable[VAL(fixity)];
     if (op_precedence < 0 || op_precedence > 1200)
         return domain_error("operator_priority", precedence);
 
-    if (TAG(name) == TAG_ATM)
-    {
-        var n = atable[VAL(name)];
-        if (n == ",")
+    if (TAG(name) === TAG_ATM) {
+        op_name = atable[VAL(name)];
+        if (op_name === ",")
             return permission_error("modify", "operator", name);
-        else if (op_name == "|" && op_precedence < 1001)
+        else if (op_name === "|" && op_precedence < 1001)
             return permission_error("modify", "operator", name);
-        names = [n];
+        names = [op_name];
     }
-    else if (TAG(name) == TAG_LST)
+    else if (TAG(name) === TAG_LST)
     {
         names = [];
         var head = name;
-        while (TAG(head) == TAG_LST)
+        while (TAG(head) === TAG_LST)
         {
-            if (TAG(deref(memory[VAL(head)])) == TAG_ATM)
+            if (TAG(deref(memory[VAL(head)])) === TAG_ATM)
             {
-                var n = atable[deref(memory[VAL(head)])];
-                if (n == ",")
+                op_name = atable[deref(memory[VAL(head)])];
+                if (op_name === ",")
                     return permission_error("modify", "operator", name);
-                else if (op_name == "|" && op_precedence < 1001)
-                    return permission_error("modify", "operator", name);                
-                names.push(n);
+                else if (op_name === "|" && op_precedence < 1001)
+                    return permission_error("modify", "operator", name);
+                names.push(op_name);
             }
             else
-                return type_error("atom", head);                
+                return type_error("atom", head);
         }
-        if (head != NIL)
+        if (head !== NIL)
         {
-            if (TAG(head) == TAG_REF)
+            if (TAG(head) === TAG_REF)
                 return instantiation_error(head);
             else
                 return type_error("atom", head);
@@ -873,24 +870,30 @@ function predicate_op(precedence, fixity, name)
 
     for (var i = 0; i < names.length; i++)
     {
-        var op_name = names[i];
+        op_name = names[i];
 
-        if (fixity == "fx" || fixity == "fy")
+        if (fixityJS === "fx" || fixityJS === "fy")
         {
-            if (op_precedence == 0)
+            if (op_precedence === 0)
                 prefix_operators[op_name] = undefined;
             else
-                prefix_operators[op_name] = {precedence: op_precedence, fixity:fixity};
+                prefix_operators[op_name] = {precedence: op_precedence, fixity:fixityJS};
+        }
+        else if (fixityJS === "xf" || fixityJS === "yf")
+        {
+            if (op_precedence === 0)
+                postfix_operators[op_name] = undefined;
+            else
+                postfix_operators[op_name] = {precedence: op_precedence, fixity:fixityJS};
         }
         else
         {
-            if (op_precedence == 0)
+            if (op_precedence === 0)
                 infix_operators[op_name] = undefined;
             else
-                infix_operators[op_name] = {precedence: op_precedence, fixity:fixity};
+                infix_operators[op_name] = {precedence: op_precedence, fixity:fixityJS};
         }
-    } while (TAG(name) == TAG_LST);
-
+    }
     return true;
 }
 
@@ -905,53 +908,53 @@ function predicate_gensym(root, sym)
 
 function prepend_clause_to_predicate(predicate, head, body)
 {
-    var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicate)+1]))], VAL(deref(memory[VAL(predicate)+2]))));
-    if (predicates[predicate] === undefined)
+    var predicateJS = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicate)+1]))], VAL(deref(memory[VAL(predicate)+2]))));
+    if (predicates[predicateJS] === undefined)
     {
         // Easy case. New predicate. Add it to the table then set up the <NOP,0> header
         compile_buffer[0] = 254;
         compile_buffer[1] = 0;
-        predicates[predicate] = {clauses: {0:{code:compile_buffer.slice(0), 
+        predicates[predicateJS] = {clauses: {0:{code:compile_buffer.slice(0),
                                               key:0, 
                                               head:record_term(head), 
                                               body:record_term(body)}},
                                  clause_keys: [0],
-                                 key:predicate,
+                                 key:predicateJS,
                                  is_public: true,
                                  next_key: 1};
     }
     else
     {
-        var first_key = predicates[predicate].clause_keys[0];
-        var first_clause = predicates[predicate].clauses[first_key];
-        if (first_clause.code[0] == 254)
+        var first_key = predicates[predicateJS].clause_keys[0];
+        var first_clause = predicates[predicateJS].clauses[first_key];
+        if (first_clause.code[0] === 254)
         {
             // First clause was NOP - ie only clause. Make it trust_me, and the new clause is try_me_else
             compile_buffer[0] = 28;
             compile_buffer[1] = first_key;
             first_clause.code[0] = 30;
             first_clause.code[1] = 0;
-            predicates[predicate].clauses[predicates[predicate].next_key] = {code:compile_buffer.slice(0),
-                                                                             key: predicates[predicate].next_key,
+            predicates[predicateJS].clauses[predicates[predicateJS].next_key] = {code:compile_buffer.slice(0),
+                                                                             key: predicates[predicateJS].next_key,
                                                                              head:record_term(head), 
                                                                              body:record_term(body)};
-            predicates[predicate].clause_keys.unshift(predicates[predicate].next_key);
-            predicates[predicate].next_key++;
+            predicates[predicateJS].clause_keys.unshift(predicates[predicateJS].next_key);
+            predicates[predicateJS].next_key++;
             
         }
-        else if (first_clause.code[0] == 28)
+        else if (first_clause.code[0] === 28)
         {
             // first clause was try_me_else. It becomes retry_me_else
             // Our new clause is try_me_else
             compile_buffer[0] = 28;
             compile_buffer[1] = first_key;
             first_clause.code[0] = 29;
-            predicates[predicate].clauses[predicates[predicate].next_key] = {code:compile_buffer.slice(0),
-                                                                             key: predicates[predicate].next_key,
+            predicates[predicateJS].clauses[predicates[predicateJS].next_key] = {code:compile_buffer.slice(0),
+                                                                             key: predicates[predicateJS].next_key,
                                                                              head:record_term(head), 
                                                                              body:record_term(body)};
-            predicates[predicate].clause_keys.unshift(predicates[predicate].next_key);
-            predicates[predicate].next_key++;            
+            predicates[predicateJS].clause_keys.unshift(predicates[predicateJS].next_key);
+            predicates[predicateJS].next_key++;
         }
         else
             abort("Garbage clauses in prepend: " + first_clause.code[0]);
@@ -964,7 +967,7 @@ function check_compile_buffer(head, body)
     // Paranoia
     for (var z = 0; z < compile_buffer.length; z++)
     {
-        if (compile_buffer[z] == null)
+        if (compile_buffer[z] === null)
         {
             debug(term_to_string(head) + ":- " + term_to_string(body));
             debug(JSON.stringify(compile_buffer));
@@ -972,9 +975,9 @@ function check_compile_buffer(head, body)
         }
     }
 }
-function add_clause_to_predicate(predicate, head, body)
+function add_clause_to_predicate(predicateP, head, body)
 {
-    var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicate)+1]))], VAL(deref(memory[VAL(predicate)+2]))));
+    var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
     if (predicates[predicate] === undefined)
     {
         // Easy case. New predicate. Add it to the table then set up the <NOP,0> header
@@ -994,7 +997,7 @@ function add_clause_to_predicate(predicate, head, body)
     {
         var last_key = predicates[predicate].clause_keys[predicates[predicate].clause_keys.length-1];
         var last_clause = predicates[predicate].clauses[last_key];
-        if (last_clause.code[0] == 254)
+        if (last_clause.code[0] === 254)
         {
             // Last clause was NOP - ie only clause. Make it try_me_else, and the new clause is trust_me
             last_clause.code[0] = 28;
@@ -1010,7 +1013,7 @@ function add_clause_to_predicate(predicate, head, body)
             predicates[predicate].next_key++;
             
         }
-        else if (last_clause.code[0] == 30)
+        else if (last_clause.code[0] === 30)
         {
             // last clause was trust_me, so there is already a try_me_else. Make it retry_me_else and add new clause as trust_me
             last_clause.code[0] = 29;
@@ -1036,7 +1039,7 @@ function add_clause_to_predicate(predicate, head, body)
 function add_clause_to_aux(label, n, l, lt)
 {
     debug_msg("Adding clause to aux: " + term_to_string(label) + " at " + VAL(n));
-    if (TAG(label) == TAG_STR && memory[VAL(label)] == lookup_functor("defined", 1))
+    if (TAG(label) === TAG_STR && memory[VAL(label)] === lookup_functor("defined", 1))
     {
         debug_msg("Aux code is at " + VAL(n));
         debug_msg("This is " + (VAL(n) ^ 0x80000000) & 0x7fffffff);
@@ -1054,6 +1057,7 @@ function add_clause_to_aux(label, n, l, lt)
         unify(label, ptr ^ (TAG_STR << WORD_BITS));
 
         var ptr2 = state.H;
+        // noinspection UnnecessaryLocalVariableJS
         var ftor = lookup_functor("label", 2);
         memory[state.H++] = ftor;
         memory[state.H++] = label;
@@ -1088,7 +1092,7 @@ function add_clause_to_existing(address, offset)
             return;
         case 30:
             // Change <trust_me,0> -> <retry_me_else, N>
-            compile_buffer[address] = 29
+            compile_buffer[address] = 29;
             compile_buffer[address+1] = offset;
             // Add <trust_me,0> for new clause
             compile_buffer[offset ^ 0x80000000] = 30;
@@ -1108,8 +1112,8 @@ function add_clause_to_existing(address, offset)
 function create_choicepoint()
 {
     // Create a choicepoint
-    if (state.E > state.B)
-    {
+    var newB;
+    if (state.E > state.B) {
         newB = state.E + state.CP.code[state.CP.offset - 1] + 2;
         debug_msg("top frame is an environment at " + state.E + " state.CP.code[state.CP.offset-1] = " + state.CP.code[state.CP.offset-1]);
     } 
@@ -1126,7 +1130,7 @@ function create_choicepoint()
     memory[newB + 2] = {code: code,
                         offset: state.P};
     debug_msg("Saving " + n + " args including the two specials");
-    for (i = 0; i < state.num_of_args; i++)
+    for (var i = 0; i < state.num_of_args; i++)
     {
         debug_msg("Saving register " + i + "(" + hex(register[i]) + ") to " + (newB + 3 + i));
         memory[newB + 3 + i] = register[i];
@@ -1157,7 +1161,7 @@ function update_choicepoint_data(value)
 function destroy_choicepoint()
 {
     debug_msg("Destroying choicepoint at " + state.B);
-    n = memory[state.B];
+    var n = memory[state.B];
     unwind_trail(memory[state.B + n + 5], state.TR);
     state.B = memory[state.B + n + 3];
     state.HB = memory[state.B+ memory[state.B] + 6];
@@ -1177,9 +1181,9 @@ function member(element, list)
         debug_msg("Not a retry");
         create_choicepoint();
     }    
-    while(TAG(list) == TAG_LST)
+    while(TAG(list) === TAG_LST)
     {
-        head = memory[VAL(list)];
+        var head = memory[VAL(list)];
         if (unify(head, element))
         {
             debug_msg("Unification succeeded. Setting choicepoint value @" +(state.B+1) + " to " + hex(memory[VAL(list)+1]));
@@ -1217,12 +1221,12 @@ function predicate_jmp(vars)
 function mark_top_choicepoint(vars_list, markpoint)
 {
     var vars = [];
-    while(TAG(vars_list) == TAG_LST)
+    while(TAG(vars_list) === TAG_LST)
     {        
         vars.push(memory[VAL(vars_list)]);        
         vars_list = memory[VAL(vars_list) + 1];
     }
-    if (vars_list != NIL)
+    if (vars_list !== NIL)
         abort("Invalid list in mark_top_choicepoint");
 
     debug_msg("Marking choicepoint " + state.B+ " with cleanup at " + (state.P+3) + " and code = " + code);
@@ -1239,6 +1243,7 @@ function mark_top_choicepoint(vars_list, markpoint)
 // FIXME: Not implemented: [c, d, D, e, E, I, N, p, s, @, t, |, +]
 function predicate_format(stream, fmt, args)
 {
+    var result;
     var s = {};
     if (!get_stream(stream, s))
         return false;
@@ -1247,17 +1252,17 @@ function predicate_format(stream, fmt, args)
     fmt = atable[VAL(fmt)];
     var arg = args;
     var numarg = undefined;
-    for (i = 0; i < fmt.length; i++)
+    for (var i = 0; i < fmt.length; i++)
     {
-        c = fmt.charAt(i);
-        if (c == '~')
+        var c = fmt.charAt(i);
+        if (c === '~')
         {
             while (true)
             {
                 switch (fmt.charAt(i+1))
                 {
                 case 'a':
-                    if (TAG(memory[VAL(arg)]) != TAG_ATM)
+                    if (TAG(memory[VAL(arg)]) !== TAG_ATM)
                         return type_error("atom", arg);
                     // fall-through
                 case 'w':
@@ -1291,12 +1296,12 @@ function predicate_format(stream, fmt, args)
                     break;
                 case 'r':
                 case 'R':
-                    if (numarg == undefined)
+                    if (numarg === undefined)
                         return format_error("r,R requires radix specifier");
                     var e = {};
                     if (!evaluate_expression(memory[VAL(arg)], e))
                         return false;
-                    if (fmt.charAt(i+1) == 'R')
+                    if (fmt.charAt(i+1) === 'R')
                         result += e.value.toString(numarg).toUpperCase();
                     else
                         result += e.value.toString(numarg);
@@ -1327,7 +1332,7 @@ function predicate_format(stream, fmt, args)
                 break; // Really this is just a goto for the numarg reading
             }
         }
-        else if (c == '\\')
+        else if (c === '\\')
         {
             switch(fmt.charAt(i+1))
             {
@@ -1355,7 +1360,7 @@ function unmark_choicepoint(mark)
     mark = VAL(mark);    
     for (var i = 0; i < cleanups.length; i++)
     {
-        if (cleanups[i].B == mark)
+        if (cleanups[i].B === mark)
         {
             cleanups.splice(i, 1);
             // Additionally, we have to actually cut this choicepoint as well. This deserves an explanation!
@@ -1392,8 +1397,8 @@ function predicate_copy_term(t1, t2)
 function predicate_repeat()
 {
     // Create a choicepoint that points to itself
-    if (state.E > state.B)
-    {
+    var newB;
+    if (state.E > state.B) {
         newB = state.E + state.CP.code[state.CP.offset - 1] + 2;
     } 
     else
@@ -1408,7 +1413,7 @@ function predicate_repeat()
     memory[newB + 2] = {code: code,
                         offset: state.P};
     debug_msg("Saving " + n + " args including the two specials");
-    for (i = 0; i < state.num_of_args; i++)
+    for (var i = 0; i < state.num_of_args; i++)
     {
         debug_msg("Saving register " + i + "(" + hex(register[i]) + ") to " + (newB + 3 + i));
         memory[newB + 3 + i] = register[i];
@@ -1432,14 +1437,14 @@ var flags = [];
 
 function predicate_flag(key, old_value, new_value)
 {
-    if (TAG(key) == TAG_REF)
+    if (TAG(key) === TAG_REF)
         return instantiation_error(key);
-    if (TAG(key) != TAG_ATM)
+    if (TAG(key) !== TAG_ATM)
         return type_error("atom", key);
     key = atable[VAL(key)];
     var o = (TAG_INT << WORD_BITS);
     if (flags[key] !== undefined)
-        o = flags[key] ^ (TAG_INT << WORD_BITS)
+        o = flags[key] ^ (TAG_INT << WORD_BITS);
     if (!unify(o, old_value))
         return false;
     var n = {};
@@ -1452,9 +1457,9 @@ function predicate_flag(key, old_value, new_value)
 
 function predicate_atom_length(atom, length)
 {
-    if (TAG(atom) == TAG_REF)
+    if (TAG(atom) === TAG_REF)
         return instantiation_error(atom);
-    if (TAG(atom) != TAG_ATM)
+    if (TAG(atom) !== TAG_ATM)
         return type_error("atom", atom);
     return unify(atable[VAL(atom)].length ^ (TAG_INT << WORD_BITS), length);    
 }
@@ -1465,15 +1470,15 @@ function predicate_atom_concat(atom1, atom2, atom12)
     if (!state.foreign_retry)
     {        
         // First call, or deterministic
-        if (TAG(atom1) == TAG_REF && TAG(atom12) == TAG_REF)
+        if (TAG(atom1) === TAG_REF && TAG(atom12) === TAG_REF)
             return instantiation_error(atom1);
-        if (TAG(atom1) != TAG_REF && TAG(atom1) != TAG_ATM)
+        if (TAG(atom1) !== TAG_REF && TAG(atom1) !== TAG_ATM)
             return type_error("atom", atom1);
-        if (TAG(atom2) != TAG_REF && TAG(atom2) != TAG_ATM)
+        if (TAG(atom2) !== TAG_REF && TAG(atom2) !== TAG_ATM)
             return type_error("atom", atom2);
-        if (TAG(atom12) != TAG_REF && TAG(atom12) != TAG_ATM)
+        if (TAG(atom12) !== TAG_REF && TAG(atom12) !== TAG_ATM)
             return type_error("atom", atom12);
-        if (TAG(atom1) == TAG_ATM && TAG(atom2) == TAG_ATM)
+        if (TAG(atom1) === TAG_ATM && TAG(atom2) === TAG_ATM)
         {
             // Deterministic case
             return unify(atom12, lookup_atom(atable[VAL(atom1)] + atable[VAL(atom2)]));
@@ -1491,28 +1496,27 @@ function predicate_atom_concat(atom1, atom2, atom12)
     }
     update_choicepoint_data(index);
     // Drop through to general nondeterministic case
-    if (index == atable[VAL(atom12)].length+1)
+    if (index === atable[VAL(atom12)].length+1)
     {
         destroy_choicepoint();
         return false;
     }
-    if (unify(atom1, lookup_atom(atable[VAL(atom12)].substring(0, index))) && unify(atom2, lookup_atom(atable[VAL(atom12)].substring(index))))
-        return true;
-    return false;
+    return !!(unify(atom1, lookup_atom(atable[VAL(atom12)].substring(0, index))) && unify(atom2, lookup_atom(atable[VAL(atom12)].substring(index))));
+
 }
 
 function predicate_char_code(atom, code)
 {
-    if (TAG(atom) == TAG_REF && TAG(code) == TAG_REF)
+    if (TAG(atom) === TAG_REF && TAG(code) === TAG_REF)
         return instantiation_error(atom);
-    if (TAG(atom) == TAG_ATOM)
+    if (TAG(atom) === TAG_ATM)
     {
-        a = atable[VAL(atom)];
-        if (a.length != 1)
+        var a = atable[VAL(atom)];
+        if (a.length !== 1)
             return type_error("character", atom);
         return unify(code, a.charCodeAt(0) ^ (TAG_INT << WORD_BITS));
     }
-    else if (TAG(code) == TAG_INT)
+    else if (TAG(code) === TAG_INT)
     {
         if (VAL(code) < 0)
             return representation_error("character_code", code);
@@ -1522,16 +1526,18 @@ function predicate_char_code(atom, code)
 
 function predicate_atom_chars(atom, chars)
 {
-    if (TAG(chars) == TAG_REF)
+    var charsJS;
+
+    if (TAG(chars) === TAG_REF)
     {
         // Atom -> chars
-        if (TAG(atom) != TAG_ATM)
+        if (TAG(atom) !== TAG_ATM)
             return type_error("atom", atom);
-        var a = atable[VAL(atom)].split('');
+        charsJS = atable[VAL(atom)].split('');
         var tmp = state.H;
-        for (i = 0; i < a.length; i++)
+        for (var i = 0; i < charsJS.length; i++)
         {
-            memory[state.H] = lookup_atom(a[i]);
+            memory[state.H] = lookup_atom(charsJS[i]);
             memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
             state.H += 2;
         }
@@ -1541,30 +1547,32 @@ function predicate_atom_chars(atom, chars)
     else
     {
         // Chars -> Atom
-        var a = [];
-        while (TAG(chars) == TAG_LST)
+        charsJS = [];
+        while (TAG(chars) === TAG_LST)
         {
-            a.push(atable[VAL(memory[VAL(chars)])]);
+            charsJS.push(atable[VAL(memory[VAL(chars)])]);
             chars = memory[VAL(chars)+1];
         }
-        if (chars != NIL)
+        if (chars !== NIL)
             return type_error("list", chars);
-        return unify(atom, lookup_atom(a.join('')));            
+        return unify(atom, lookup_atom(charsJS.join('')));
     }
 }
 
 function predicate_atom_codes(atom, codes)
 {
-    if (TAG(codes) == TAG_REF)
+    var codesJS;
+
+    if (TAG(codes) === TAG_REF)
     {
         // Atom -> codes
-        if (TAG(atom) != TAG_ATM)
+        if (TAG(atom) !== TAG_ATM)
             return type_error("atom", atom);
-        var a = atable[VAL(atom)];
+        codesJS = atable[VAL(atom)];
         var tmp = state.H ^ (TAG_LST << WORD_BITS);
-        for (i = 0; i < a.length; i++)
+        for (var i = 0; i < codesJS.length; i++)
         {
-            memory[state.H] = a.charCodeAt(i) ^ (TAG_INT << WORD_BITS);
+            memory[state.H] = codesJS.charCodeAt(i) ^ (TAG_INT << WORD_BITS);
             // If there are no more items we will overwrite the last entry with [] when we exit the loop
             memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
             state.H += 2;
@@ -1575,19 +1583,19 @@ function predicate_atom_codes(atom, codes)
     else
     {
         // Codes -> Atom
-        var a = [];
-        while (TAG(codes) == TAG_LST)
+        codesJS = [];
+        while (TAG(codes) === TAG_LST)
         {
-            a.push(String.fromCharCode(memory[VAL(codes)]));
+            codesJS.push(String.fromCharCode(memory[VAL(codes)]));
             codes = memory[VAL(codes)+1];
         }
-        if (codes != NIL)
+        if (codes !== NIL)
             return type_error("list", codes);
-        return unify(atom, lookup_atom(a.join('')));            
+        return unify(atom, lookup_atom(codesJS.join('')));
     }
 }
 // return -1 if a < b
-// return 0 if a == b
+// return 0 if a === b
 // return 1 if a > b
 //
 function compare_terms(a, b)
@@ -1595,42 +1603,42 @@ function compare_terms(a, b)
     switch(TAG(a))
     {
     case TAG_REF:
-        if (TAG(b) == TAG_REF)
+        if (TAG(b) === TAG_REF)
         {
-            if (a == b)
+            if (a === b)
                 return 0;
             else if (a > b)
                 return 1;
         }
         return -1;
     case TAG_FLT:
-        if (TAG(b) == TAG_REF)
+        if (TAG(b) === TAG_REF)
             return 1;
-        if (TAG(b) == TAG_FLT)
+        if (TAG(b) === TAG_FLT)
         {
-            if (floats[VAL(a)] == floats[VAL(b)])
+            if (floats[VAL(a)] === floats[VAL(b)])
                 return 0;
             else if (floats[VAL(a)] > floats[VAL(b)])
                 return 1;
         }
         return -1;
     case TAG_INT:
-        if (TAG(b) == TAG_REF || TAG(b) == TAG_FLT)
+        if (TAG(b) === TAG_REF || TAG(b) === TAG_FLT)
             return 1;
-        if (TAG(b) == TAG_INT)
+        if (TAG(b) === TAG_INT)
         {
-            if (VAL(a) == VAL(b))
+            if (VAL(a) === VAL(b))
                 return 0;
             else if (VAL(a) > VAL(b))
                 return 1;
         }
         return -1;
     case TAG_ATM:
-        if (TAG(b) == TAG_REF || TAG(b) == TAG_FLT || TAG(b) == TAG_INT)
+        if (TAG(b) === TAG_REF || TAG(b) === TAG_FLT || TAG(b) === TAG_INT)
             return 1;
-        if (TAG(b) == TAG_ATM)
+        if (TAG(b) === TAG_ATM)
         {
-            if (atable[VAL(a)] == atable[VAL(b)])
+            if (atable[VAL(a)] === atable[VAL(b)])
                 return 0;
             else if (atable[VAL(a)] > atable[VAL(b)])
                 return 1;
@@ -1638,15 +1646,15 @@ function compare_terms(a, b)
         return -1;
     case TAG_STR:
     case TAG_LST:
-        if (TAG(b) == TAG_REF || TAG(b) == TAG_FLT || TAG(b) == TAG_INT || TAG(b) == TAG_ATM)
+        if (TAG(b) === TAG_REF || TAG(b) === TAG_FLT || TAG(b) === TAG_INT || TAG(b) === TAG_ATM)
             return 1;
         var aftor;
         var bftor;
-        if (TAG(a) == TAG_LST)
+        if (TAG(a) === TAG_LST)
             aftor = lookup_functor(".", 2);
         else
             aftor = memory[VAL(a)];
-        if (TAG(b) == TAG_LST)
+        if (TAG(b) === TAG_LST)
             bftor = lookup_functor(".", 2);
         else
             bftor = memory[VAL(b)];
@@ -1657,13 +1665,13 @@ function compare_terms(a, b)
         // At this point the arity is equal and we must compare the functor names
         if (atable[ftable[VAL(aftor)][0]] > atable[ftable[VAL(bftor)][0]])
             return 1;
-        else (atable[ftable[VAL(aftor)][0]] < atable[ftable[VAL(bftor)][0]])
+        else if(atable[ftable[VAL(aftor)][0]] < atable[ftable[VAL(bftor)][0]])
             return -1;
         // So the functors are the same and we must compare the arguments.
-        for (i = 0; i < ftable[VAL(aftor)][1]; i++)
+        for (var i = 0; i < ftable[VAL(aftor)][1]; i++)
         {
             var result = compare_terms(memory[VAL(a)+1+i], memory[VAL(b)+1+i]);
-            if (result != 0)
+            if (result !== 0)
                 return result;
         }
     }
@@ -1683,22 +1691,22 @@ function predicate_compare(x, a, b)
 
 function predicate_term_lt(a, b)
 {
-    return compare_terms(a,b) == -1;
+    return compare_terms(a,b) === -1;
 }
 
 function predicate_term_elt(a, b)
 {
-    return compare_terms(a,b) != 1;
+    return compare_terms(a,b) !== 1;
 }
 
 function predicate_term_gt(a, b)
 {
-    return compare_terms(a,b) == 1;
+    return compare_terms(a,b) === 1;
 }
 
 function predicate_term_egt(a, b)
 {
-    return compare_terms(a,b) != -1;
+    return compare_terms(a,b) !== -1;
 }
 
 
@@ -1706,7 +1714,7 @@ function predicate_acyclic_term(t)
 {
     var visited_cells = [];
     var stack = [t];
-    while (stack.length != 0)
+    while (stack.length !== 0)
     {        
         var arg = stack.pop();
         switch (TAG(arg))
@@ -1717,9 +1725,9 @@ function predicate_acyclic_term(t)
             continue;
         case TAG_REF:
             var needle = deref(arg);
-            for (var i = 0; i < visited_cells.length; i++)
+            for (var cellOfst = 0; cellOfst < visited_cells.length; cellOfst++)
             {
-                if (visited_cells[i] == needle)
+                if (visited_cells[cellOfst] === needle)
                 {
                     return false;
                 }
@@ -1733,9 +1741,9 @@ function predicate_acyclic_term(t)
         case TAG_STR:
             visited_cells.push(arg);
             var arity = ftable[VAL(memory[VAL(arg)])][1];
-            for (var i = 0; i < arity; i++)
-                stack.push(memory[VAL(arg)+1+i]);
-            continue;
+            for (var argOfst = 0; argOfst < arity; argOfst++)
+                stack.push(memory[VAL(arg)+1+argOfst]);
+
         }
     }
     return true;
@@ -1743,20 +1751,20 @@ function predicate_acyclic_term(t)
 
 function predicate_number_chars(n, chars)
 {
-    if (TAG(chars) == TAG_REF)
+    var charsJS;
+    if (TAG(chars) === TAG_REF)
     {
         // Atom -> chars
-        var a;
-        if (TAG(n) == TAG_INT)
-            a = (VAL(n) + "").split('');
-        else if (TAG(n) == TAG_FLT)
-            a = (floats[VAL(n)] + "").split('');
+        if (TAG(n) === TAG_INT)
+            charsJS = (VAL(n) + "").split('');
+        else if (TAG(n) === TAG_FLT)
+            charsJS = (floats[VAL(n)] + "").split('');
         else
             return type_error("number", n);
         var tmp = state.H;
-        for (i = 0; i < a.length; i++)
+        for (var i = 0; i < charsJS.length; i++)
         {
-            memory[state.H] = lookup_atom(a[i]);
+            memory[state.H] = lookup_atom(charsJS[i]);
             memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
             state.H += 2;
         }
@@ -1766,17 +1774,17 @@ function predicate_number_chars(n, chars)
     else
     {
         // Chars -> Atom
-        var a = [];
-        while (TAG(chars) == TAG_LST)
+        charsJS = [];
+        while (TAG(chars) === TAG_LST)
         {
-            a.push(atable[VAL(memory[VAL(chars)])]);
+            charsJS.push(atable[VAL(memory[VAL(chars)])]);
             chars = memory[VAL(chars)+1];
         }
-        if (chars != NIL)
+        if (chars !== NIL)
             return type_error("list", chars);
-        var f = parseFloat(a.join(''));
+        var f = parseFloat(charsJS.join(''));
         // FIXME: Overflows
-        if (~~f == f)
+        if (~~f === f)
             return unify(n, f ^ (TAG_INT << WORD_BITS));
         else
         {            
@@ -1789,7 +1797,7 @@ function lookup_float(f)
 {
     for (var i = 0; i < floats.length+1; i++)
     {
-        if (floats[i] == f)
+        if (floats[i] === f)
         {
             return i ^ (TAG_FLT << WORD_BITS);
         }
@@ -1804,25 +1812,25 @@ function lookup_float(f)
 
 function predicate_number_codes(n, codes)
 {
-    if (TAG(codes) == TAG_REF)
+    var codesJS;
+    if (TAG(codes) === TAG_REF)
     {
         // Atom -> codes
-        var a;
-        if (TAG(n) == TAG_INT)
+        if (TAG(n) === TAG_INT)
         {
-            a = VAL(n) + "";
+            codesJS = VAL(n) + "";
         }
-        else if (TAG(n) == TAG_FLT)
+        else if (TAG(n) === TAG_FLT)
         {
-            a = floats[VAL(n)] + "";
+            codesJS = floats[VAL(n)] + "";
         }
         else
             return type_error("number", n);
-        var a = (VAL(n) + "");
+
         var tmp = state.H;
-        for (i = 0; i < a.length; i++)
+        for (var i = 0; i < codesJS.length; i++)
         {
-            memory[state.H] = a.charCodeAt(i) ^ (TAG_INT << WORD_BITS);
+            memory[state.H] = codesJS.charCodeAt(i) ^ (TAG_INT << WORD_BITS);
             memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
             state.H += 2;
         }
@@ -1832,17 +1840,17 @@ function predicate_number_codes(n, codes)
     else
     {
         // Codes -> Atom
-        var a = [];
-        while (TAG(codes) == TAG_LST)
+        codesJS = [];
+        while (TAG(codes) === TAG_LST)
         {
-            a.push(String.fromCharCode(memory[VAL(codes)]));
+            codesJS.push(String.fromCharCode(memory[VAL(codes)]));
             codes = memory[VAL(codes)+1];
         }
-        if (codes != NIL)
+        if (codes !== NIL)
             return type_error("list", codes);
-        var f = parseFloat(a.join(''));
+        var f = parseFloat(codesJS.join(''));
         // FIXME: Overflows
-        if (~~f == f)
+        if (~~f === f)
             return unify(n, f ^ (TAG_INT << WORD_BITS));
         else
             return unify(n, lookup_float(f));
@@ -1874,15 +1882,15 @@ function predicate_subsumes_term(a, b)
     state.current_predicate = oldPred;
 
     destroy_choicepoint();
-    return (after.length == before.length);
+    return (after.length === before.length);
 }
 
 
 function predicate_current_op(precedence, fixity, name)
 {
-    if (state.foreign_retry)
-    {
-        index = state.foreign_value + 1;         
+    var index;
+    if (state.foreign_retry) {
+        index = state.foreign_value + 1;
     }
     else
     {
@@ -1893,6 +1901,9 @@ function predicate_current_op(precedence, fixity, name)
     // This is horrific
     var infix_count = Object.keys(infix_operators).length;
     var prefix_count = Object.keys(prefix_operators).length;
+    var try_name;
+    var try_fixity;
+    var try_precedence;
     if (index >= infix_count + prefix_count)
     {
         destroy_choicepoint();
@@ -1956,9 +1967,9 @@ function flag_char_conversion(set, value)
 {
     if (set) 
     {
-        if (TAG(value) == TAG_ATM && atable[VAL(value)] == "on")
+        if (TAG(value) === TAG_ATM && atable[VAL(value)] === "on")
             prolog_flag_values.char_conversion = true;
-        else if (TAG(value) == TAG_ATM && atable[VAL(value)] == "off")
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "off")
             prolog_flag_values.char_conversion = false;
         else
             return type_error("flag_value", value);
@@ -1971,9 +1982,9 @@ function flag_debug(set, value)
 {
     if (set) 
     {
-        if (TAG(value) == TAG_ATM && atable[VAL(value)] == "on")
+        if (TAG(value) === TAG_ATM && atable[VAL(value)] === "on")
             prolog_flag_values.debug = true;
-        else if (TAG(value) == TAG_ATM && atable[VAL(value)] == "off")
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "off")
             prolog_flag_values.debug = false;
         else
         {
@@ -1994,11 +2005,11 @@ function flag_unknown(set, value)
 {
     if (set) 
     {
-        if (TAG(value) == TAG_ATM && atable[VAL(value)] == "error")
+        if (TAG(value) === TAG_ATM && atable[VAL(value)] === "error")
             prolog_flag_values.unknown = "error";
-        else if (TAG(value) == TAG_ATM && atable[VAL(value)] == "fail")
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "fail")
             prolog_flag_values.unknown = "fail";
-        else if (TAG(value) == TAG_ATM && atable[VAL(value)] == "warning")
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "warning")
             prolog_flag_values.unknown = "warning";
         else
             return type_error("flag_value", value);
@@ -2011,11 +2022,11 @@ function flag_double_quotes(set, value)
 {
     if (set) 
     {
-        if (TAG(value) == TAG_ATM && atable[VAL(value)] == "chars")
+        if (TAG(value) === TAG_ATM && atable[VAL(value)] === "chars")
             prolog_flag_values.double_quotes = "chars";
-        else if (TAG(value) == TAG_ATM && atable[VAL(value)] == "codes")
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "codes")
             prolog_flag_values.double_quotes = "codes";
-        else if (TAG(value) == TAG_ATM && atable[VAL(value)] == "atom")
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "atom")
             prolog_flag_values.double_quotes = "atom";
         else
             return type_error("flag_value", value);
@@ -2026,13 +2037,13 @@ function flag_double_quotes(set, value)
 
 function predicate_set_prolog_flag(key, value)
 {
-    if (TAG(key) != TAG_ATM)
+    if (TAG(key) !== TAG_ATM)
         return type_error("atom", key);
-    keyname = atable[VAL(key)];    
+    var keyname = atable[VAL(key)];
     
     for (var i = 0; i < prolog_flags.length; i++)
     {
-        if (prolog_flags[i].name == keyname)
+        if (prolog_flags[i].name === keyname)
         {
             return prolog_flags[i].fn(true, value);
         }
@@ -2043,7 +2054,7 @@ function predicate_set_prolog_flag(key, value)
 
 function predicate_current_prolog_flag(key, value)
 {
-    if (TAG(key) == TAG_REF)
+    if (TAG(key) === TAG_REF)
     {
         if (state.foreign_retry)
         {
@@ -2063,13 +2074,13 @@ function predicate_current_prolog_flag(key, value)
         unify(key, lookup_atom(prolog_flags[index].name));
         return prolog_flags[index].fn(false, value);        
     }
-    else if (TAG(key) == TAG_ATM)
+    else if (TAG(key) === TAG_ATM)
     {
-        keyname = atable[VAL(key)];    
+        var keyname = atable[VAL(key)];
         var index = 0;
         for (var i = 0; i < prolog_flags.length; i++)
         {
-            if (prolog_flags[index].name == keyname)
+            if (prolog_flags[index].name === keyname)
                 return prolog_flags[index].fn(false, value);
         }
         return false;
@@ -2082,19 +2093,19 @@ function predicate_clause(head, body)
 {
     var ftor;
     var index;
-    if (TAG(head) == TAG_REF)
+    if (TAG(head) === TAG_REF)
         return instantiation_error(head);
-    else if (TAG(head) == TAG_ATM)
+    else if (TAG(head) === TAG_ATM)
     {
         ftor = VAL(lookup_functor(atable[VAL(head)], 0));
     }
-    else if (TAG(head) == TAG_STR)
+    else if (TAG(head) === TAG_STR)
     {
         ftor = VAL(memory[VAL(head)]);
     }
     else
         return type_error("callable", head);
-    if (predicates[ftor].is_public != true)
+    if (predicates[ftor].is_public !== true)
         return permission_error("access", "private_procedure", head);
     if (!state.foreign_retry)
     {
@@ -2116,12 +2127,7 @@ function predicate_clause(head, body)
     var head_ref = recall_term(predicates[ftor].clauses[key].head, varmap);
     if (unify(head_ref, head))
     {
-        if (unify(recall_term(predicates[ftor].clauses[key].body, varmap), body))
-        {
-            return true;
-        }
-        return false;
-            
+        return !!unify(recall_term(predicates[ftor].clauses[key].body, varmap), body);
     }
     else
     {
@@ -2133,20 +2139,21 @@ function predicate_clause(head, body)
 function predicate_current_predicate(indicator)
 {
     var slash2 = lookup_functor("/", 2);
+    var index;
     if (!state.foreign_retry)
     {
-        if (TAG(indicator) == TAG_STR)
+        if (TAG(indicator) === TAG_STR)
         {
-            if (memory[VAL(indicator)] == slash2)
+            if (memory[VAL(indicator)] === slash2)
             {
                 var name = memory[VAL(indicator) + 1];
                 var arity = memory[VAL(indicator) + 2];
-                if (TAG(arity) != TAG_INT && TAG(arity) != TAG_REF)
+                if (TAG(arity) !== TAG_INT && TAG(arity) !== TAG_REF)
                     return type_error("integer", arity);
-                if (TAG(name) != TAG_ATM && TAG(name) != TAG_REF)
+                if (TAG(name) !== TAG_ATM && TAG(name) !== TAG_REF)
                     return type_error("atom", name);
                 
-                if (TAG(name) == TAG_ATM && TAG(arity) == TAG_INT)
+                if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT)
                 {
                     // Deterministic
                     var ftor = VAL(lookup_functor(atable[VAL(name)], VAL(arity)));
@@ -2178,18 +2185,18 @@ function predicate_current_predicate(indicator)
     var result = state.H ^ (TAG_STR << WORD_BITS);
     memory[state.H++] = slash2;
     memory[state.H++] = ftable[key][0] ^ (TAG_ATM << WORD_BITS);
-    memory[state.H++] = ftable[key][1] ^ (TAG_INT << WORD_BITS);;
+    memory[state.H++] = ftable[key][1] ^ (TAG_INT << WORD_BITS);
     return unify(result, indicator);
 }
 
 function predicate_abolish(indicator)
 {
     var slash2 = lookup_functor("/", 2);
-    if (TAG(indicator) == TAG_STR && memory[VAL(indicator)] == slash2)
+    if (TAG(indicator) === TAG_STR && memory[VAL(indicator)] === slash2)
     {
         var name = deref(memory[VAL(indicator) + 1]);
         var arity = deref(memory[VAL(indicator) + 2]);
-        if (TAG(name) == TAG_ATM && TAG(arity) == TAG_INT)
+        if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT)
         {
             if (VAL(arity) < 0)
                 return domain_error("not_less_than_zero", arity);
@@ -2199,16 +2206,16 @@ function predicate_abolish(indicator)
             predicates[ftor] = undefined;
             return true;
         }
-        else if (TAG(name) == TAG_REF)
+        else if (TAG(name) === TAG_REF)
             return instantiation_error(name);
-        else if (TAG(name) != TAG_ATM)
+        else if (TAG(name) !== TAG_ATM)
             return type_error("atom", name);
-        else if (TAG(arity) == TAG_REF)
+        else if (TAG(arity) === TAG_REF)
             return instantiation_error(arity);
-        else if (TAG(arity) != TAG_INT)
+        else if (TAG(arity) !== TAG_INT)
             return type_error("integer", arity);
     }
-    else if (TAG(indicator) == TAG_REF)
+    else if (TAG(indicator) === TAG_REF)
         return instantiation_error(indicator);
     else
         return type_error("predicate_indicator", indicator);
@@ -2218,19 +2225,19 @@ function predicate_retract_clause(head, body)
 {
     var ftor;
     var index;
-    if (TAG(head) == TAG_REF)
+    if (TAG(head) === TAG_REF)
         return instantiation_error(head);
-    else if (TAG(head) == TAG_ATM)
+    else if (TAG(head) === TAG_ATM)
     {
         ftor = VAL(lookup_functor(atable[VAL(head)], 0));
     }
-    else if (TAG(head) == TAG_STR)
+    else if (TAG(head) === TAG_STR)
     {
         ftor = VAL(memory[VAL(head)]);
     }
     else
         return type_error("callable", head);
-    if (predicates[ftor].is_public != true)
+    if (predicates[ftor].is_public !== true)
         return permission_error("access", "static_procedure", head);
     if (!state.foreign_retry)
     {
@@ -2258,20 +2265,20 @@ function predicate_retract_clause(head, body)
             // Delete this clause. This is not a trivial operation!
             var p = predicates[ftor];
             // First case: This is the only predicate
-            if (p.clause_keys.length == 1)
+            if (p.clause_keys.length === 1)
             {
                 predicates[ftor] = undefined;
                 destroy_choicepoint();
                 return true;
             }
-            else if (index == 0)
+            else if (index === 0)
             {
                 // Delete the first clause. Update the second clause from either:
                 // 1) trust_me -> NOP
                 // 2) retry_me_else -> try_me_else
-                if (p.clauses[p.clause_keys[1]].code[0] == 30)
+                if (p.clauses[p.clause_keys[1]].code[0] === 30)
                     p.clauses[p.clause_keys[1]].code[0] = 254;
-                else if (p.clauses[p.clause_keys[1]].code[0] == 29)
+                else if (p.clauses[p.clause_keys[1]].code[0] === 29)
                     p.clauses[p.clause_keys[1]].code[0] = 28;
                 else
                     abort("Garbage clauses in retract: " + p.clauses[p.clause_keys[1]].code[0]);
@@ -2282,14 +2289,14 @@ function predicate_retract_clause(head, body)
                 update_choicepoint_data(index-1);
                 return true;
             }
-            else if (index == p.clause_keys.length-1)
+            else if (index === p.clause_keys.length-1)
             {
                 // Remove the last clause. Update the second-to-last clause from either:
                 // 1) try_me_else -> NOP
                 // 2) retry_me_else -> trust_me
-                if (p.clauses[p.clause_keys[p.clause_keys.length-2]].code[0] == 28)
+                if (p.clauses[p.clause_keys[p.clause_keys.length-2]].code[0] === 28)
                     p.clauses[p.clause_keys[p.clause_keys.length-2]].code[0] = 254;
-                else if (p.clauses[p.clause_keys[p.clause_keys.length-2]].code[0] == 29)
+                else if (p.clauses[p.clause_keys[p.clause_keys.length-2]].code[0] === 29)
                     p.clauses[p.clause_keys[p.clause_keys.length-2]].code[0] = 30;
                 else
                     abort("Garbage clauses in retract: " + p.clauses[p.clause_keys[p.clause_keys.length-2]].code[0]);            
@@ -2309,7 +2316,7 @@ function predicate_retract_clause(head, body)
                 p.clauses[key] = undefined;
                 for (var i = 0; i < p.clause_keys.length; i++)
                 {
-                    if (p.clause_keys[i] == key)
+                    if (p.clause_keys[i] === key)
                     {
                         p.clause_keys.splice(i, 1);
                         update_choicepoint_data(index-1);
@@ -2326,27 +2333,27 @@ function predicate_retract_clause(head, body)
 function predicate_sub_atom(source, start, length, remaining, subatom)
 {
     var index;
-    if (TAG(source) == TAG_REF)
+    if (TAG(source) === TAG_REF)
         return instantiation_error(source);
-    else if (TAG(source) != TAG_ATM)
+    else if (TAG(source) !== TAG_ATM)
         return type_error("atom", source);
-    if (TAG(subatom) != TAG_ATM && TAG(subatom) != TAG_REF)
+    if (TAG(subatom) !== TAG_ATM && TAG(subatom) !== TAG_REF)
         return type_error("atom", subatom);
     var input = atable[VAL(source)];
     if (!state.foreign_retry)
     {
         index = {start:0, fixed_start:false, length:0, fixed_length:false, remaining:input.length, fixed_remaining:false};
-        if (TAG(start) == TAG_INT)
+        if (TAG(start) === TAG_INT)
         {
             index.fixed_start = true;
             index.start = VAL(start);
         }
-        if (TAG(length) == TAG_INT)
+        if (TAG(length) === TAG_INT)
         {
             index.fixed_length = true;
             index.length = VAL(length);
         }
-        if (TAG(remaining) == TAG_INT)
+        if (TAG(remaining) === TAG_INT)
         {
             index.fixed_remaining = true;
             index.remaining = VAL(remaining);
@@ -2503,6 +2510,15 @@ function syntax_error(message)
 function io_error(message)
 {
     var ftor = lookup_functor('io_error', 1);
+    var ref = state.H ^ (TAG_STR << WORD_BITS);
+    memory[state.H++] = ftor;
+    memory[state.H++] = lookup_atom(message);
+    return predicate_throw(ref);
+}
+
+function evaluation_error(message)
+{
+    var ftor = lookup_functor('evaluation_error', 1);
     var ref = state.H ^ (TAG_STR << WORD_BITS);
     memory[state.H++] = ftor;
     memory[state.H++] = lookup_atom(message);

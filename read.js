@@ -30,26 +30,34 @@ function parse_postfix(s, lhs)
             args: [lhs]};
 }
 
-// A reminder: yfx means an infix operator f, with precedence p, where the lhs has a precendece <= p and the rhs has a precedence < p.
+// A reminder: yfx means an infix operator f, with precedence p, where the lhs has a precedence <= p and the rhs has a precedence < p.
 
-var prefix_operators = {":-": {precedence: 1200, fixity: "fx"},
-                        "?-": {precedence: 1200, fixity: "fx"},
-                        "dynamic": {precedence: 1150, fixity: "fx"},
-                        "discontiguous": {precedence: 1150, fixity: "fx"},
-                        "initialization": {precedence: 1150, fixity: "fx"},
-                        "meta_predicate": {precedence: 1150, fixity: "fx"},
-                        "module_transparent": {precedence: 1150, fixity: "fx"},
-                        "multifile": {precedence: 1150, fixity: "fx"},
-                        "thread_local": {precedence: 1150, fixity: "fx"},
-                        "volatile": {precedence: 1150, fixity: "fx"},
-                        "\+": {precedence: 900, fixity: "fy"},
-                        "~": {precedence: 900, fixity: "fx"},
-                        "?": {precedence: 500, fixity: "fx"},
-                        "+": {precedence: 200, fixity: "fy"},
-                        "-": {precedence: 200, fixity: "fy"},
-                        "\\": {precedence: 200, fixity: "fy"}};
+// noinspection Annotator
+// noinspection JSDuplicatedDeclaration
+var prefix_operators = {
+    ":-": {precedence: 1200, fixity: "fx"},
+    "?-": {precedence: 1200, fixity: "fx"},
+    "dynamic": {precedence: 1150, fixity: "fx"},
+    "discontiguous": {precedence: 1150, fixity: "fx"},
+    "initialization": {precedence: 1150, fixity: "fx"},
+    "meta_predicate": {precedence: 1150, fixity: "fx"},
+    "module_transparent": {precedence: 1150, fixity: "fx"},
+    "multifile": {precedence: 1150, fixity: "fx"},
+    "thread_local": {precedence: 1150, fixity: "fx"},
+    "volatile": {precedence: 1150, fixity: "fx"},
+    "\+": {precedence: 900, fixity: "fy"},
+    "~": {precedence: 900, fixity: "fx"},
+    "?": {precedence: 500, fixity: "fx"},
+    "+": {precedence: 200, fixity: "fy"},
+    "-": {precedence: 200, fixity: "fy"},
+    "\\": {precedence: 200, fixity: "fy"}
+};
 
+// noinspection Annotator
+var postfix_operators = {};
 
+// noinspection Annotator
+// noinspection JSDuplicatedDeclaration
 var infix_operators = {":-": {precedence: 1200, fixity: "xfx"},
                        "-->": {precedence: 1200, fixity: "xfx"},
                        ";": {precedence: 1100, fixity: "xfy"},
@@ -110,61 +118,65 @@ function read_expression(s, precedence, isarg, islist, expression)
         return true;
     }
     var lhs;
+    var args;
+    var arg;
+    var t;
+    var next;
     // Either the token is an operator, or it must be an atom (or the start of a list or curly-list)
     var op = prefix_operators[token];
     if (op === undefined)
     {
-        if (token == "\"")
+        if (token === "\"")
         {
             // We have to just read chars until we get a close " (taking care with \" in the middle)
-            var args = [];
-            var t = 0;
+            args = [];
+
             var mode = 0;
-            if (prolog_flag_values['double_quotes'] == "chars")
+            if (prolog_flag_values['double_quotes'] === "chars")
                 mode = 0;
-            else if (prolog_flag_values['double_quotes'] == "codes")
+            else if (prolog_flag_values['double_quotes'] === "codes")
                 mode = 1;
-            else if (prolog_flag_values['double_quotes'] == "atom")
+            else if (prolog_flag_values['double_quotes'] === "atom")
                 mode = 2;
             while (true)
             {
                 t = get_raw_char_with_conversion(s.stream);
-                if (t == '"')
+                if (t === '"')
                     break;
-                if (t == "\\")
+                if (t === "\\")
                 {
-                    if (peek_raw_char_with_conversion(s.stream) == '"')
+                    if (peek_raw_char_with_conversion(s.stream) === '"')
                     {
                         get_raw_char_with_conversion(s.stream);
-                        if (mode == 1)
+                        if (mode === 1)
                             args.push('"'.charCodeAt(0));
                         else
                             args.push('"');
                         continue;
                     }
                 }
-                if (mode == 1)
+                if (mode === 1)
                     args.push(t.charCodeAt(0));                
                 else
                     args.push(t);
             }
-            if (mode == 2)
+            if (mode === 2)
                 lhs = args.join('');
             else
                 lhs = {list: args, tail: "[]"};
         }
-        else if (token == "[" || token == "{")
+        else if (token === "[" || token === "{")
         {
             // The principle for both of these is very similar
-            var args = [];
-            var next = {};
+            args = [];
+
             while(true)
             {
-                var t = {};
+                t = {};
                 if (!read_expression(s, Infinity, true, true, t))
                     return false;
                 t = t.value;
-                if (t == "]")
+                if (t === "]")
                 {
                     lhs = "[]";
                     break;
@@ -175,43 +187,39 @@ function read_expression(s, precedence, isarg, islist, expression)
                 if (!read_token(s, next))
                     return false;               
                 next = next.value;
-                if (next == ',')
-                    continue;
-                else if (next == "]" && token == "[")
-                {
-                    lhs = {list: args, tail: "[]"};
-                    break;
-                }
-                else if (next == "}" && token == "{")
-                {
-                    lhs = {functor: "{}", args:args};
-                    break;
-                }
-                else if (next == "|" && token == "[")
-                {
-                    var tail = {};
-                    if (!read_expression(s, Infinity, true, true, tail))
-                        return false;
-                    lhs = {list: args, tail: tail.value},
-                    next = {};
-                    if (!read_token(s, next))
-                        return false;
-                    next = next.value;
-                    if (next == "]")
+                if (next !== ',') {
+                    if (next === "]" && token === "[") {
+                        lhs = {list: args, tail: "[]"};
                         break;
-                    else
-                        return syntax_error("missing ]");
-                }
-                else
-                {
-                    return syntax_error("mismatched " + token + " at " + next);
+                    }
+                    else if (next === "}" && token === "{") {
+                        lhs = {functor: "{}", args: args};
+                        break;
+                    }
+                    else if (next === "|" && token === "[") {
+                        var tail = {};
+                        if (!read_expression(s, Infinity, true, true, tail))
+                            return false;
+                        lhs = {list: args, tail: tail.value};
+                        next = {};
+                        if (!read_token(s, next))
+                            return false;
+                        next = next.value;
+                        if (next === "]")
+                            break;
+                        else
+                            return syntax_error("missing ]");
+                    }
+                    else {
+                        return syntax_error("mismatched " + token + " at " + next);
+                    }
                 }
             }
         }
-        else if (token == "(")
+        else if (token === "(")
         {
             // Is this right? () just increases the precedence to infinity and reads another term?
-            var lhs = {};
+            lhs = {};
             if (!read_expression(s, Infinity, false, false, lhs))
                 return false;
             lhs = lhs.value;
@@ -219,10 +227,10 @@ function read_expression(s, precedence, isarg, islist, expression)
             if (!read_token(s, next))
                 return false;
             next = next.value;
-            if (next != ")")
+            if (next !== ")")
                 return syntax_error("mismatched ( at " + next);
         }
-        else if (token == "]")
+        else if (token === "]")
         {
             expression.value = token;
             return true;
@@ -233,16 +241,16 @@ function read_expression(s, precedence, isarg, islist, expression)
             lhs = token;
         }
     }
-    else if (op.fixity == "fx")
+    else if (op.fixity === "fx")
     {
-        var arg = {};
+        arg = {};
         if (!read_expression(s, op.precedence, isarg, islist, arg))
             return false;
         lhs = {functor: token, args:[arg.value]};
     }
-    else if (op.fixity == "fy")
+    else if (op.fixity === "fy")
     {
-        var arg = {};
+        arg = {};
         if (!read_expression(s, op.precedence+0.5, isarg, islist, arg))
             return false;
         lhs = {functor: token, args:[arg.value]};
@@ -255,7 +263,7 @@ function read_expression(s, precedence, isarg, islist, expression)
         if (!peek_token(s, infix_operator))
             return false;
         infix_operator = infix_operator.value;
-        if (typeof(infix_operator) == "number" && infix_operator <= 0)
+        if (typeof(infix_operator) === "number" && infix_operator <= 0)
         {
             // Yuck. This is when we read something like X is A-1. Really the - is -/2 in this case
             read_token(s, {});
@@ -263,17 +271,17 @@ function read_expression(s, precedence, isarg, islist, expression)
             unread_token(s, "-");
             infix_operator = "-";
         }
-        if (infix_operator == '(')
+        if (infix_operator === '(')
         {
             // We are reading a term. Keep reading expressions: After each one we should
             // either get , or )
             // First though, consume the (
             read_token(s, {});
-            var args = [];
-            var next = {};
+            args = [];
+            next = {};
             while (true)
             {
-                var arg = {};
+                arg = {};
                 if (!read_expression(s, Infinity, true, false, arg))
                     return false;
                 args.push(arg.value);
@@ -281,11 +289,9 @@ function read_expression(s, precedence, isarg, islist, expression)
                 if (!read_token(s, next))
                     return false;
                 next = next.value;
-                if (next == ')')
+                if (next === ')')
                     break;
-                else if (next == ',')
-                    continue;
-                else
+                else if (next !== ',')
                 {
                     if (next == null)
                         return syntax_error("end_of_file");
@@ -294,7 +300,7 @@ function read_expression(s, precedence, isarg, islist, expression)
                 }
             }
             // ./2 is a list
-            if (lhs == "." && args.length == 2)
+            if (lhs === "." && args.length === 2)
             {
                 lhs = {list: args[0],
                        tail: args[1]};
@@ -311,17 +317,17 @@ function read_expression(s, precedence, isarg, islist, expression)
             infix_operator = infix_operator.value;
         }
         // Pretend that . is an operator with infinite precedence
-        if (infix_operator == ".")
+        if (infix_operator === ".")
         {
             expression.value = lhs;
             return true;
         }
-        if (infix_operator == "," && isarg)
+        if (infix_operator === "," && isarg)
         {
             expression.value = lhs;
             return true;
         }
-        if (infix_operator == "|" && islist)
+        if (infix_operator === "|" && islist)
         {
             expression.value = lhs;
             return true;
@@ -330,39 +336,28 @@ function read_expression(s, precedence, isarg, islist, expression)
         {
             expression.value = lhs;
             return true;
-        }            
+        }
+
         op = infix_operators[infix_operator];
         if (op !== undefined)
         {
-            if (op.fixity == "xfx" && precedence > op.precedence)
+            if (op.fixity === "xfx" && precedence > op.precedence)
             {
                 lhs = parse_infix(s, lhs, op.precedence);
-                if (lhs == false)
+                if (lhs === false)
                     return false;
             }
-            else if (op.fixity == "xfy" && precedence > op.precedence)
+            else if (op.fixity === "xfy" && precedence > op.precedence)
             {
                 // Is this 0.5 thing right? Will it eventually drive up precedence to the wrong place? We never want to reach the next integer...
                 lhs = parse_infix(s, lhs, op.precedence+0.5); 
-                if (lhs == false)
+                if (lhs === false)
                     return false;
             }
-            else if (op.fixity == "yfx" && precedence >= op.precedence)
+            else if (op.fixity === "yfx" && precedence >= op.precedence)
             {
                 lhs = parse_infix(s, lhs, op.precedence);
-                if (lhs == false)
-                    return false;
-            }
-            else if (op.fixity == "xf" && precedence > op.precedence)
-            {
-                lhs = parse_postfix(s, lhs, op.precedence);
-                if (lhs == false)
-                    return false;
-            }
-            else if (op.fixity == "yf" && precedence >= op.precedence)
-            {
-                lhs = parse_postfix(s, lhs, op.precedence);
-                if (lhs == false)
+                if (lhs === false)
                     return false;
             }
             else
@@ -370,11 +365,29 @@ function read_expression(s, precedence, isarg, islist, expression)
                 expression.value = lhs;
                 return true;
             }
-        }
-        else
-        {
-            expression.value = lhs;
-            return true;
+        } else {
+
+            op = postfix_operators[infix_operator];
+            if (op !== undefined) {
+                if (op.fixity === "xf" && precedence > op.precedence) {
+                    lhs = parse_postfix(s, lhs, op.precedence);
+                    if (lhs === false)
+                        return false;
+                }
+                else if (op.fixity === "yf" && precedence >= op.precedence) {
+                    lhs = parse_postfix(s, lhs, op.precedence);
+                    if (lhs === false)
+                        return false;
+                }
+                else {
+                    expression.value = lhs;
+                    return true;
+                }
+            }
+            else {
+                expression.value = lhs;
+                return true;
+            }
         }
     }
 }
@@ -383,41 +396,41 @@ function parse_term_options(options)
 {
     var result = {};
     var yes = lookup_atom("true");
-    while (options != NIL)
+    while (options !== NIL)
     {
-        if (TAG(options) != TAG_LST)
+        if (TAG(options) !== TAG_LST)
             return type_error("list", options);
         var head = memory[VAL(options)];
-        if (TAG(head) != TAG_STR)
+        if (TAG(head) !== TAG_STR)
             return type_error("option", head);
         var ftor = memory[VAL(head)];
-        if (ftor == lookup_functor("quoted",1))
+        if (ftor === lookup_functor("quoted",1))
         {
-            result.quoted = (memory[VAL(head)+1] == yes)
+            result.quoted = (memory[VAL(head)+1] === yes)
         } 
-        else if (ftor == lookup_functor("ignore_ops",1))
+        else if (ftor === lookup_functor("ignore_ops",1))
         {
-            result.ignore_ops = (memory[VAL(head)+1] == yes)
+            result.ignore_ops = (memory[VAL(head)+1] === yes)
         }
-        else if (ftor == lookup_functor("numbervars",1))
+        else if (ftor === lookup_functor("numbervars",1))
         {
-            result.numbervars = (memory[VAL(head)+1] == yes)
+            result.numbervars = (memory[VAL(head)+1] === yes)
         }
-        else if (ftor == lookup_functor("variables",1))
+        else if (ftor === lookup_functor("variables",1))
         {
             result.variables = memory[VAL(head)+1];
         }
-        else if (ftor == lookup_functor("variable_names",1))
+        else if (ftor === lookup_functor("variable_names",1))
         {
             result.variable_names = memory[VAL(head)+1];
         }
-        else if (ftor == lookup_functor("singletons",1))
+        else if (ftor === lookup_functor("singletons",1))
         {
             result.singletons = memory[VAL(head)+1];
         }
         else
         {
-            return type_error(option, head);
+            return type_error(options, head);
         }
         options =  memory[VAL(options)+1];
     }
@@ -440,12 +453,12 @@ function read_term(stream, term, options)
     // (Of course, if the file contains end_of_file. then we will return end_of_file AND read the .
     // Luckily we can distinguish the two cases
     // There will also not be one if we are in atom_to_term mode, which is not yet implemented    
-    if (expression.end_of_file === undefined)
+    if (typeof expression.end_of_file === "undefined")
     {
         var period = {};
         if (!read_token(context, period))
             return false;
-        if (period.value != ".") // Missing period === eof
+        if (period.value !== ".") // Missing period === eof
             return syntax_error("end_of_file");
     }
     else
@@ -454,15 +467,15 @@ function read_term(stream, term, options)
     
     var varmap = {};
     var singletons = {};
-    t1 = expression_to_term(expression, varmap, singletons);
-    var rc = 1;
+    var t1 = expression_to_term(expression, varmap, singletons);
+    var keys;
     if (options.variables !== undefined || options.singletons !== undefined)
     {
         var equals2 = lookup_functor("=", 2);
-        var keys = Object.keys(varmap);
-        for (var i = 0; i < keys.length; i++)
+        keys = Object.keys(varmap);
+        for (var keyOfst = 0; keyOfst < keys.length; keyOfst++)
         {
-            var varname = keys[i];
+            var varname = keys[keyOfst];
             if (options.variables !== undefined)
             {                
                 if (!unify(state.H ^ (TAG_LST << WORD_BITS), options.variables))
@@ -497,11 +510,11 @@ function read_term(stream, term, options)
     }
     if (options.singletons !== undefined)
     {
-        var keys = Object.keys(singletons);
+        keys = Object.keys(singletons);
         for (var i = 0; i < keys.length; i++)
         {
-            var varname = keys[i];
-            if (singletons[varname] == 1)
+            var varname2 = keys[i];
+            if (singletons[varname2] === 1)
             {
                 if (!unify(state.H ^ (TAG_LST << WORD_BITS), options.singletons))
                     return false;
@@ -509,8 +522,8 @@ function read_term(stream, term, options)
                 memory[state.H+1] = (state.H+1) ^ (TAG_REF << WORD_BITS);
                 options.singletons = memory[state.H+1];
                 memory[state.H+2] = equals2;
-                memory[state.H+3] = lookup_atom(varname);
-                memory[state.H+4] = varmap[varname];
+                memory[state.H+3] = lookup_atom(varname2);
+                memory[state.H+4] = varmap[varname2];
                 state.H+=5;
             }
         }
@@ -539,11 +552,11 @@ function predicate_write_term(stream, term, options)
 
 function escape_atom(a)
 {
-    chars = a.split('');
+    var chars = a.split('');
     var result = "";
     for (var i = 0; i < chars.length; i++)
     {
-        if (chars[i] == "'")
+        if (chars[i] === "'")
             result += "\\'";
         else
             result += chars[i];       
@@ -555,7 +568,7 @@ function quote_atom(a)
 {
     if (a.charAt(0) >= "A" && a.charAt(0) <= "Z")
         return "'" + escape_atom(a) + "'";
-    chars = a.split('');
+    var chars = a.split('');
     if (is_punctuation(chars[0]))
     {
         for (var i = 0; i < chars.length; i++)
@@ -566,9 +579,9 @@ function quote_atom(a)
     }
     else
     {
-        for (var i = 0; i < chars.length; i++)
+        for (var j = 0; j < chars.length; j++)
         {
-            if (is_punctuation(chars[i]) || chars[i] == ' ')
+            if (is_punctuation(chars[j]) || chars[j] === ' ')
                 return "'" + escape_atom(a) + "'";
         }
     }
@@ -578,19 +591,21 @@ function quote_atom(a)
 function is_operator(ftor)
 {
     ftor = VAL(ftor);
-    if (ftable[ftor][1] == 2 && infix_operators[atable[ftable[ftor][0]]] != undefined)
+    if (ftable[ftor][1] === 2 && infix_operators[atable[ftable[ftor][0]]] !== undefined)
         return true;
-    if (ftable[ftor][1] == 1 && prefix_operators[atable[ftable[ftor][0]]] != undefined)
-        return true;
-    return false;
+    return ftable[ftor][1] === 1 && prefix_operators[atable[ftable[ftor][0]]] !== undefined;
+
 }
 
 
 function format_term(value, options)
 {
-    if (value == undefined)
+    var result;
+
+    if (value === undefined)
         abort("Illegal memory access in format_term: " + hex(value) + ". Dumping...");
     value = deref(value);
+    var lTop;
     switch(TAG(value))
     {
     case TAG_REF:
@@ -605,14 +620,14 @@ function format_term(value, options)
         else
             return "_G" + VAL(value);
     case TAG_ATM:
-        atom = atable[VAL(value)];
-        if (atom == undefined)
+        var atom = atable[VAL(value)];
+        if (atom === undefined)
             abort("No such atom: " + VAL(value));
         if (options.quoted === true)
             return quote_atom(atom);
         return atom;
     case TAG_INT:
-        if ((VAL(value) & (1 << (WORD_BITS-1))) == (1 << (WORD_BITS-1)))
+        if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
             return (VAL(value) - (1 << WORD_BITS)) + "";
         else
             return VAL(value) + "";
@@ -621,10 +636,10 @@ function format_term(value, options)
         return floats[VAL(value)] + "";
     case TAG_STR:
         var ftor = VAL(memory[VAL(value)]);
-        if (options.numbervars === true && ftor == lookup_functor('$VAR', 1) && TAG(memory[VAL(value)+1]) == TAG_INT)
+        if (options.numbervars === true && ftor === lookup_functor('$VAR', 1) && TAG(memory[VAL(value)+1]) === TAG_INT)
         {
             var index = VAL(memory[VAL(value)+1]);
-            var result = String.fromCharCode(65 + (index % 26));
+            result = String.fromCharCode(65 + (index % 26));
             if (index >= 26)
                 result = result + Math.floor(index / 26);
             return result;
@@ -632,7 +647,7 @@ function format_term(value, options)
         if (!is_operator(ftor) || options.ignore_ops === true)
         {
             // Print in canonical form functor(arg1, arg2, ...)
-            var result = format_term(ftable[ftor][0] ^ (TAG_ATM << WORD_BITS), options) + "(";
+            result = format_term(ftable[ftor][0] ^ (TAG_ATM << WORD_BITS), options) + "(";
             for (var i = 0; i < ftable[ftor][1]; i++)
             {
                 result += format_term(memory[VAL(value)+1+i], options);
@@ -645,7 +660,7 @@ function format_term(value, options)
         {
             // Print as an operator
             var fname = atable[ftable[ftor][0]];
-            if (ftable[ftor][1] == 2 && infix_operators[fname] != undefined)
+            if (ftable[ftor][1] === 2 && infix_operators[fname] !== undefined)
             {
                 // Infix operator
                 var lhs = format_term(memory[VAL(value)+1], options);
@@ -657,40 +672,42 @@ function format_term(value, options)
                 {
                     result = lhs + " " + fname;
                 }
-                var rhs = format_term(memory[VAL(value)+2], options);
-                if (is_punctuation(rhs.charAt(0)) && !is_punctuation(fname.charAt(fname.length-1)))
-                    return result + rhs;
-                else if (!is_punctuation(rhs.charAt(0)) && is_punctuation(fname.charAt(fname.length-1)))
-                    return result + rhs;
+                var rhs1 = format_term(memory[VAL(value)+2], options);
+                if (is_punctuation(rhs1.charAt(0)) && !is_punctuation(fname.charAt(fname.length-1)))
+                    return result + rhs1;
+                else if (!is_punctuation(rhs1.charAt(0)) && is_punctuation(fname.charAt(fname.length-1)))
+                    return result + rhs1;
                 else
-                    return result + " " + rhs;
+                    return result + " " + rhs1;
             }
-            else if (ftable[ftor][1] == 1 && prefix_operators[fname] != undefined)
+            else if (ftable[ftor][1] === 1 && prefix_operators[fname] !== undefined)
             {
                 // Prefix operator
-                var rhs = format_term(memory[VAL(value)+1], options);
-                if (is_punctuation(rhs.charAt(0)) && !is_punctuation(fname.charAt(fname.length-1)))
-                    return fname + rhs;
-                else if (!is_punctuation(rhs.charAt(0)) && is_punctuation(fname.charAt(fname.length-1)))
-                    return fname + rhs;
+                var rhs2 = format_term(memory[VAL(value)+1], options);
+                if (is_punctuation(rhs2.charAt(0)) && !is_punctuation(fname.charAt(fname.length-1)))
+                    return fname + rhs2;
+                else if (!is_punctuation(rhs2.charAt(0)) && is_punctuation(fname.charAt(fname.length-1)))
+                    return fname + rhs2;
                 else
-                    return fname + " " + rhs;
+                    return fname + " " + rhs2;
 
+            } else {
+                return
             }
         }
     case TAG_LST:
         if (options.ignore_ops)
             return "'.'(" + format_term(memory[VAL(value)], options) + "," + format_term(memory[VAL(value)+1], options) + ")";
         // Otherwise we need to print the list in list-form
-        var result = "[";
+        result = "[";
         var head = memory[VAL(value)];
         var tail = memory[VAL(value)+1];
         while (true)
         {
             result += format_term(head, options);
-            if (tail == NIL)
+            if (tail === NIL)
                 return result + "]";
-            else if (TAG(tail) == TAG_LST)
+            else if (TAG(tail) === TAG_LST)
             {
                 head = memory[VAL(tail)];
                 tail = memory[VAL(tail)+1];
@@ -705,11 +722,11 @@ function format_term(value, options)
 
 function expression_to_term(s, varmap, singletons)
 {
-    if (typeof(s) == "string")
+    if (typeof(s) === "string")
         return lookup_atom(s);
-    else if (typeof(s) == "number")
+    else if (typeof(s) === "number")
     {
-        if (s == ~~s)
+        if (s === ~~s)
         {
             return (s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
         }
@@ -740,7 +757,7 @@ function expression_to_term(s, varmap, singletons)
     else if (s.list !== undefined)
     {   
         // Special case for [], as usual, since we do not actually allocate any lists!
-        if (s.list.length == 0)
+        if (s.list.length === 0)
             return NIL;
 
         var result = alloc_var();
@@ -762,12 +779,12 @@ function expression_to_term(s, varmap, singletons)
         memory[state.H++] = lookup_functor(s.functor, s.args.length);
         // Reserve space for the args
         var var_args = [];
-        for (var i = 0; i < s.args.length; i++)
-            var_args[i] = alloc_var();
-        for (var i = 0; i < s.args.length; i++)
+        for (var j = 0; j < s.args.length; j++)
+            var_args[j] = alloc_var();
+        for (var k = 0; k < s.args.length; k++)
         {
-            z = expression_to_term(s.args[i], varmap, singletons);
-            unify(z, var_args[i]);
+            var z = expression_to_term(s.args[k], varmap, singletons);
+            unify(z, var_args[k]);
         }
         return t;
     }
@@ -777,7 +794,7 @@ function expression_to_term(s, varmap, singletons)
 
 function peek_token(s, t)
 {
-    if (s.peek_tokens === undefined || s.peeked_tokens.length == 0 )
+    if (s.peeked_tokens === undefined || s.peeked_tokens.length === 0 )
     {
         var tt = {};
         if (!read_token(s, tt))
@@ -798,14 +815,13 @@ function unread_token(s, t)
 
 function read_token(s, t)
 {
-    if (s.peeked_tokens !== undefined && s.peeked_tokens.length != 0)
+    if (s.peeked_tokens !== undefined && s.peeked_tokens.length !== 0)
     {
         t.value = s.peeked_tokens.pop();
         return true;
     }
-    if (!lex(s.stream, t))
-        return false;
-    return true;
+    return lex(s.stream, t);
+
 }
 
 function is_char(c)
@@ -813,14 +829,14 @@ function is_char(c)
     return ((c >= 'a' && c <= 'z') ||
             (c >= 'A' && c <= 'Z') ||
             (c >= '0' && c <= '9') ||
-            c == '_');
+            c === '_');
 }
 
 var punctuation_array = ['`', '~', '@', '#', '$', '^', '&', '*', '-', '+', '=', '<', '>', '/', '?', ':', ',', '\\', '.'];
 
 function is_punctuation(c)
 {
-    return punctuation_array.indexOf(c) != -1;
+    return punctuation_array.indexOf(c) !== -1;
 }
 
 // lex(stream, t) returns a single token in t.value and fails if an exception is raised
@@ -830,40 +846,41 @@ function lex(s, t)
     while(true)
     {
         var c = get_raw_char_with_conversion(s);
-        if (c == -1)
+        if (c === -1)
         {
             t.value = null;
             return true;
         }
+        var d;
         // Consume any whitespace
-        if (c == ' ' || c == '\n' || c == '\t')
+        if (c === ' ' || c === '\n' || c === '\t')
             continue;        
-        else if (c == '%')
+        else if (c === '%')
         {
             do
             {
                 d = get_raw_char_with_conversion(s);
-                if (d == -1)
+                if (d === -1)
                 {
                     t.value = null;
                     return true;
                 }
-            } while(d != '\n');
+            } while(d !== '\n');
             continue;
         }
-        else if (c == '/')
+        else if (c === '/')
         {
             d = peek_raw_char_with_conversion(s);
-            if (d == '*')
+            if (d === '*')
             {
                 // Block comment
                 get_raw_char_with_conversion(s);
                 while(true)
                 {
                     d = get_raw_char_with_conversion(s);
-                    if (d == -1)
+                    if (d === -1)
                         return syntax_error("end of file in block comment");
-                    if (d == '*' && get_raw_char_with_conversion(s) == '/')
+                    if (d === '*' && get_raw_char_with_conversion(s) === '/')
                         break;
                 }
                 continue;
@@ -876,7 +893,7 @@ function lex(s, t)
         }
         break;
     }    
-    if ((c >= 'A' && c <= 'Z') || c == '_')
+    if ((c >= 'A' && c <= 'Z') || c === '_')
     {
         token = {variable_name: "" + c};
         // Variable. May contain a-zA-Z0-9_
@@ -894,11 +911,11 @@ function lex(s, t)
             }
         } 
     }
-    else if ((c >= '0' && c <= '9') || (c == '-' && peek_raw_char_with_conversion(s) >= '0' && peek_raw_char_with_conversion(s) <= '9'))
+    else if ((c >= '0' && c <= '9') || (c === '-' && peek_raw_char_with_conversion(s) >= '0' && peek_raw_char_with_conversion(s) <= '9'))
     {
         // Integer. May contain 0-9 only. Floats complicate this a bit
         var negate = false;
-        if (c == '-')
+        if (c === '-')
         {
             token = '';
             negate = true;
@@ -916,12 +933,11 @@ function lex(s, t)
             {
                 token = token * 10 + (get_raw_char_with_conversion(s) - '0');
             }
-            else if (c == '.' && !seen_decimal)
+            else if (c === '.' && !seen_decimal)
             {
                 // Fixme: Also must check that the next char is actually a number. Otherwise 'X = 3.' will confuse things somewhat.
                 seen_decimal = true;
                 get_raw_char_with_conversion(s);
-                continue;
             }
             else if (is_char(c))
                 return syntax_error("illegal number" + token + ": " + c);
@@ -946,17 +962,17 @@ function lex(s, t)
         // In all cases, first we have to read an atom
         var buffer = "";
         var state = 0;
-        if (c == '\'')
+        if (c === '\'')
         {
             // Easy. The atom is quoted!
             while(true)
             {
                 c = get_raw_char_with_conversion(s);
-                if (c == '\\')
+                if (c === '\\')
                     state = (state + 1) % 2;
-                if (c == -1)
+                if (c === -1)
                     return syntax_error("end of file in atom");
-                if (c == '\'' && state == 0)
+                if (c === '\'' && state === 0)
                     break;
                 buffer += c;
             }
@@ -966,12 +982,12 @@ function lex(s, t)
         {
             buffer += c;
             // An unquoted atom may contain either all punctuation or all A-Za-z0-9_. There are probably more complicated rules, but this will do
-            char_atom = is_char(c);
-            punctuation_atom = is_punctuation(c);
+            var char_atom = is_char(c);
+            var punctuation_atom = is_punctuation(c);
             while (true)
             {                
                 c = peek_raw_char_with_conversion(s);                
-                if (c == -1)
+                if (c === -1)
                     break;
                 if (char_atom && is_char(c))
                     buffer += get_raw_char_with_conversion(s);
@@ -990,9 +1006,9 @@ function lex(s, t)
 var char_conversion_override = {};
 function predicate_char_conversion(a, b)
 {
-    if (TAG(a) != TAG_ATM)
+    if (TAG(a) !== TAG_ATM)
         return type_error("atom", a);
-    if (TAG(b) != TAG_ATM)
+    if (TAG(b) !== TAG_ATM)
         return type_error("atom", b);
     char_conversion_override[atable[VAL(a)]] = atable[VAL(b)];
     return true;
@@ -1000,7 +1016,8 @@ function predicate_char_conversion(a, b)
 
 function predicate_current_char_conversion(a, b)
 {
-    if (TAG(a) == TAG_ATM)
+    var index;
+    if (TAG(a) === TAG_ATM)
     {
         var aname = atable[VAL(a)];
         if (char_conversion_override[aname] === undefined)
@@ -1008,18 +1025,18 @@ function predicate_current_char_conversion(a, b)
         else
             return unify(lookup_atom(char_conversion_override[aname]), b);
     }
-    else if (TAG(b) == TAG_ATM)
+    else if (TAG(b) === TAG_ATM)
     {
-        var bname = btable[VAL(b)];
+        var bname = atable[VAL(b)];
         var keys = Object.keys(char_conversion_override);
         for (var i = 0; i < keys.length; i++)
         {
-            if (char_conversion_override[keys[i]] == bname)
+            if (char_conversion_override[keys[i]] === bname)
                 return unify(lookup_atom(keys[i]), a);
         }
         return unify(a,b);
     }
-    if (TAG(a) == TAG_REF && TAG(b) == TAG_REF)
+    if (TAG(a) === TAG_REF && TAG(b) === TAG_REF)
     {
         if (state.foreign_retry)
         {
@@ -1079,6 +1096,7 @@ function parser_test_read(stream, size, count, buffer)
 {
     var bytes_read = 0;
     var records_read;
+    var t;
     for (records_read = 0; records_read < count; records_read++)
     {
         for (var b = 0; b < size; b++)
@@ -1096,7 +1114,7 @@ function parser_test_read(stream, size, count, buffer)
 
 function do_parser_test(input_string)
 {
-    s = {peeked_token: undefined,
+    var s = {peeked_token: undefined,
          stream: new_stream(parser_test_read,
                             null,
                             null,
@@ -1113,7 +1131,7 @@ function do_parser_test(input_string)
             return false;
         }
         e = e.value;
-        if (e.end_of_file == true)
+        if (e.end_of_file === true)
             break;
         debug("Read expression: " + expression_to_string(e));
         
@@ -1124,7 +1142,7 @@ function do_parser_test(input_string)
             return false;
         }
         p = p.value;
-        if (p == ".")
+        if (p === ".")
         {
             debug_msg("Expression terminated with fullstop")
         }
@@ -1140,9 +1158,11 @@ function do_parser_test(input_string)
 
 function expression_to_string(s)
 {
-    if (typeof(s) == "string")
+    var t;
+
+    if (typeof(s) === "string")
         return s;
-    if (typeof(s) == "number")
+    if (typeof(s) === "number")
         return s;
     if (s.variable_name !== undefined)
         return "_" + s.variable_name;
@@ -1155,8 +1175,8 @@ function expression_to_string(s)
                 t += expression_to_string(s.list[i]) + ", ";
             else
             {
-                t += expression_to_string(s.list[i]) 
-                if (s.tail == "[]")
+                t += expression_to_string(s.list[i]);
+                if (s.tail === "[]")
                     t += "]";
                 else
                     t += "|" + expression_to_string(s.tail) + "]";
@@ -1167,14 +1187,14 @@ function expression_to_string(s)
     if (s.functor !== undefined)
     {
         t = "" + s.functor + "(";
-        for (var i = 0; i < s.args.length; i++)
+        for (var j = 0; j < s.args.length; j++)
         {
-            if (i+1 < s.args.length)
+            if (j+1 < s.args.length)
             {
-                t += expression_to_string(s.args[i]) + ", ";
+                t += expression_to_string(s.args[j]) + ", ";
             }
             else
-                t += expression_to_string(s.args[i]) + ")";
+                t += expression_to_string(s.args[j]) + ")";
         }
         return t;
     }
@@ -1189,13 +1209,13 @@ function atom_to_term(atom, term, bindings)
     if (!read_expression(context, Infinity, false, false, expression))
         return false;
     expression = expression.value;
-    b = {};
-    t1 = expression_to_term(expression, b, {});
-    arglist = [];
-    keys = Object.keys(b);
+    var b = {};
+    var t1 = expression_to_term(expression, b, {});
+    var arglist = [];
+    var keys = Object.keys(b);
     for (var i = 0 ; i < keys.length; i++)
         arglist.push({functor:"=", args:[keys[i], {variable_name:keys[i]}]});
-    t2 = expression_to_term({list:arglist, tail:{list: []}}, b, {});
+    var t2 = expression_to_term({list:arglist, tail:{list: []}}, b, {});
     debug_msg("Expression: " + expression_to_string({list:arglist, tail:[]}));
     debug_msg("Bindings have been created ( " + VAL(t2) + " ). Reading it back from the heap gives: " + term_to_string(t2));
     return unify(term, t1) && unify(bindings, t2);
@@ -1210,7 +1230,7 @@ function read_atom(stream, size, count, buffer)
     {
         for (var b = 0; b < size; b++)
         {
-            t = info.data[info.ptr++];            
+            var t = info.data[info.ptr++];
             if (t === undefined)
                 return records_read;
             buffer[bytes_read++] = t;

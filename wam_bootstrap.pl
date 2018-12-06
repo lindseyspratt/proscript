@@ -347,6 +347,22 @@ reset:-
         % GC
         reserve_predicate(gc/0, predicate_gc),
         reserve_predicate(statistics/0, predicate_statistics),
+
+        % DOM
+        reserve_predicate(remove_dom_element_class/2, predicate_remove_dom_element_class),
+        reserve_predicate(replace_dom_element_class/3, predicate_replace_dom_element_class),
+        reserve_predicate(toggle_dom_element_class/3, predicate_toggle_dom_element_class),
+        reserve_predicate(set_dom_element_attribute_value/3, predicate_set_dom_element_attribute_value),
+        reserve_predicate(dom_element_attribute_value/3, predicate_dom_element_attribute_value),
+        reserve_predicate(dom_element_tag/2, predicate_dom_element_tag),
+        reserve_predicate(dom_element_inner_html/2, predicate_dom_element_inner_html),
+        reserve_predicate(set_dom_element_inner_html/2, predicate_set_dom_element_inner_html),
+        reserve_predicate(create_dom_element/2, predicate_create_dom_element),
+        reserve_predicate(create_dom_text_node/2, predicate_create_dom_text_node),
+        reserve_predicate(append_dom_node_child/2, predicate_append_dom_node_child),
+        reserve_predicate(insert_before_dom_node/3, predicate_insert_before_dom_node),
+        reserve_predicate(dom_select_element/2, predicate_dom_select_element),
+        reserve_predicate(dom_select_all_elements/2, predicate_dom_select_all_elements),
         true.
 
 
