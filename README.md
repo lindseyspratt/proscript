@@ -4,6 +4,10 @@ A Javascript implementation of Prolog
 This is currently just a dump of what I was last doing since I got permission from the other copyright owners to publish it
 It needs a lot of tidying and organisation!
 
+LLS: I extended the implementation with predicates to manipulate HTML and
+added a javascript function proscript("goal") that can be 
+called in onload to run a prolog query.
+
 ## Organisation
 ### The WAM implementation
 This is implemented primarily in wam.js. Extra stuff is also present in:
@@ -39,3 +43,4 @@ You must include both of these if you want a working system. See test.html for a
 ## Trying it out
 test.html provides an execution environment for you to try out the final state
 
+simple_test.html uses simple_test.pl to write "Hello World".
