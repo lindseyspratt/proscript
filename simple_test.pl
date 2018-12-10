@@ -1,6 +1,9 @@
 simple_test :-
     dom_element_attribute_value(E, id, simpletest),
-    set_dom_element_inner_html(E, "Hello World").
+    dom_element_property(E, clientHeight, H),
+    number_codes(H, Hs),
+    append("Hello World: ", Hs, Greeting),
+    set_dom_element_property(E, inner, Greeting).
 
 add_element_test :-
   % create a new div element

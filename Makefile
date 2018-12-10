@@ -10,8 +10,8 @@ clean:
 bootstrap.js:	wam_compiler.pl testing.pl wam_bootstrap.pl bootstrap_js.pl demo.pl tests.pl simple_test.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['wam_compiler.pl', 'bootstrap_js.pl', 'demo.pl', 'simple_test.pl'], foo), halt"
 
-wam-pp.js:	foreign.js wam.js read.js record.js fli.js stream.js gc.js dom.js
-		$(SWIPL) -q -f js_preprocess.pl -g "preprocess(['foreign.js', 'wam.js', 'read.js', 'record.js', 'fli.js', 'stream.js', 'gc.js', 'dom.js'], 'wam-pp.js', [debug=$(DEBUG)]), halt"
+wam-pp.js:	foreign.js wam.js read.js record.js fli.js stream.js gc.js dom.js dom_element_property.js
+		$(SWIPL) -q -f js_preprocess.pl -g "preprocess(['foreign.js', 'wam.js', 'read.js', 'record.js', 'fli.js', 'stream.js', 'gc.js', 'dom.js', 'dom_element_property.js'], 'wam-pp.js', [debug=$(DEBUG)]), halt"
 
 test:		wam-pp.js bootstrap.js standalone.js wam_compiler.pl tests.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "bootstrap('tests.pl', run_unit_tests), halt" 

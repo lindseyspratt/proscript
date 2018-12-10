@@ -1,0 +1,66 @@
+<html lang="en">
+<head>
+    <title>A simple JavaScript calculator</title>
+
+</head>
+<body bgcolor="#F0F0FF">
+
+        <hr>
+        <div align="center">
+        <FORM name="Calculator">
+            <table width="45%" border="4" bgcolor="#9999CC"><tr>      <!--OUTER MARGIN OF CALCULATOR-->
+                <td colspan="2" align="center">
+
+                    <b><font face="Verdana, Arial, Helvetica" color="#000080" size="3">
+                        A Simple JavaScript Calculator<br></font>
+                        <font face="Courier" size="5">
+                            <input type="text" maxlength="40" size="25" name="Display" onChange="FixCurrent()">
+                        </font></b>
+
+                </td></tr>
+                <tr><td width="65%" align="center">                   <!--left panel------>
+
+                    <table><tr>
+                        <td><input type="button" name="seven" value="   7    " OnClick="AddDigit('7')"></td>
+                        <td><input type="button" name="eight" value="   8    " OnClick="AddDigit('8')"></td>
+                        <td><input type="button" name="nine" value="   9    " OnClick="AddDigit('9')"></td>
+                    </tr><tr>
+                        <td><input type="button" name="four" value="   4    " OnClick="AddDigit('4')"></td>
+                        <td><input type="button" name="five" value="   5    " OnClick="AddDigit('5')"></td>
+                        <td><input type="button" name="six" value="   6    " OnClick="AddDigit('6')"></td>
+                    </tr><tr>
+                        <td><input type="button" name="one" value="   1    " OnClick="AddDigit('1')"></td>
+                        <td><input type="button" name="two" value="   2    " OnClick="AddDigit('2')"></td>
+                        <td><input type="button" name="three" value="   3    " OnClick="AddDigit('3')"></td>
+                    </tr><tr>
+                        <td><input type="button" name="plusmin" value="  +/-  " OnClick="PlusMinus()"></td>
+                        <td><input type="button" name="one" value="   0    " OnClick="AddDigit('0')"></td>
+                        <td><input type="button" name="two" value="    .    " OnClick="Dot()"></td>
+                    </tr>
+                    </table>
+
+
+                </td>                                   <!--end left panel-->
+                    <td width="35%" align="center">                     <!--right panel----->
+
+                        <table><tr>
+                            <td><input type="button" name="clear" value="    C     " OnClick="Clear()"></td>
+                            <td><input type="button" name="AC" value="   AC    " OnClick="AllClear()"></td>
+                        </tr><tr>
+                            <td><input type="button" name="mul" value="     *     " OnClick="Operate('*')"></td>
+                            <td><input type="button" name="div" value="     /      " OnClick="Operate('/')"></td>
+                        </tr><tr>
+                            <td><input type="button" name="add" value="    +     " OnClick="Operate('+')"></td>
+                            <td><input type="button" name="sub" value="     -      " OnClick="Operate('-')"></td>
+                        </tr><tr>
+                            <td><input type="button" name="result" value="     =    " OnClick="Calculate()"></td>
+                            <td align="right"><input type="button" name="exp" value="  EXP  " OnClick="DoExponent()"></td>
+                        </tr></table>
+
+
+                    </td>                                   <!--end right panel-->
+                </tr></table>                          <!--END OUTER MARGIN CALC------->
+        </FORM>
+    </div>
+</body>
+</html>

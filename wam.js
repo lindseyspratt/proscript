@@ -112,7 +112,6 @@ function initialize()
              running: true,
              foreign_retry: false,
              num_of_args: 0,
-             S: 0,
              current_predicate: null};
     code = bootstrap_code;
 }
@@ -125,7 +124,7 @@ function abort(why)
 
 function bind(a, b)
 {
-    if (TAG(a) == TAG_REF && (TAG(b) != TAG_REF || VAL(b) < VAL(a)))
+    if (TAG(a) === TAG_REF && (TAG(b) !== TAG_REF || VAL(b) < VAL(a)))
     {
         memory[VAL(a)] = b;
         trail(a);
@@ -185,18 +184,18 @@ function unify(a, b)
     PDL.push(a);
     PDL.push(b);
     var failed = false;
-    while (PDL.length != 0 && !failed)
+    while (PDL.length !== 0 && !failed)
     {
         var d1 = deref(PDL.pop());
         var d2 = deref(PDL.pop());
         // if d1 == d2 then just proceed with the rest of the PDL. Otherwise we need to try and unify them, or fail
-        if (d1 != d2)
+        if (d1 !== d2)
         {
             type1 = TAG(d1);
             val1 = VAL(d1);
             type2 = TAG(d2);
             val2 = VAL(d2);          
-            if (type1 == TAG_REF)
+            if (type1 === TAG_REF)
             {
                 bind(d1, d2);
             }
@@ -212,14 +211,14 @@ function unify(a, b)
                     failed = true;
                     break;
                 case TAG_FLT:
-                    if (type1 == TAG_FLT) 
+                    if (type1 === TAG_FLT)
                     {
                         debug(floats[val1] + " vs " + floats[val2]);
                     }
                     failed = true;
                     break;
                 case TAG_LST:
-                    if (type1 == TAG_LST)
+                    if (type1 === TAG_LST)
                     {                        
                         PDL.push(memory[val1]); // unify heads
                         PDL.push(memory[val2]);
@@ -230,11 +229,11 @@ function unify(a, b)
                         failed = true; // list and non-list
                     break;
                 case TAG_STR:
-                    if (type1 == TAG_STR)
+                    if (type1 === TAG_STR)
                     {
                         f1 = VAL(memory[val1]);
                         f2 = VAL(memory[val2]);
-                        if (f1 == f2)
+                        if (f1 === f2)
                         {
                             for (var i = 0; i < ftable[f1][1]; i++)
                             {
@@ -256,7 +255,7 @@ function unify(a, b)
 
 function deref(p)
 {
-    while(TAG(p) == TAG_REF && VAL(p) != memory[VAL(p)])
+    while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
     {
         q = memory[VAL(p)];
         if (q === undefined) // FIXME: Check that q =< p?
@@ -272,7 +271,7 @@ function deref(p)
 
 function explicit_deref(p)
 {
-    while(TAG(p) == TAG_REF && VAL(p) != memory[VAL(p)])
+    while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
     {
         q = memory[VAL(p)];
         debug_msg("Dereferencing " + hex(p) + " -> " + hex(q));
@@ -288,6 +287,9 @@ function explicit_deref(p)
 
 
 // This should be a macro
+/**
+ * @return {number}
+ */
 function TAG(p)
 {
     // >>> is unsigned-right-shift. Nice.
@@ -295,6 +297,9 @@ function TAG(p)
 }
 
 // This should be a macro
+/**
+ * @return {number}
+ */
 function VAL(p)
 {
     return p & ((1 << WORD_BITS)-1);
@@ -347,6 +352,13 @@ function alloc_list()
 
 function wam()
 {
+    var predicate;
+    var fargs;
+    var source;
+    var sym;
+    var arg;
+    var offset;
+
     state.running = true;
     while (state.running)
     {
@@ -376,7 +388,7 @@ function wam()
             debug_msg("Allocating an environment at " + tmpE + " Y0 is at " + (tmpE + 2) + " state.B is " + state.B);
             // Save old environment and continuation
             memory[tmpE] = state.E;
-            memory[tmpE + 1] = state.CP
+            memory[tmpE + 1] = state.CP;
             state.E = tmpE;
             state.P += 1;
             continue;
@@ -395,7 +407,7 @@ function wam()
             continue;
 
         case 3: // call
-            var predicate = predicates[code[state.P+1]];
+            predicate = predicates[code[state.P+1]];
             if (predicate !== undefined)
             {
                 // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
@@ -412,7 +424,7 @@ function wam()
             else if (foreign_predicates[code[state.P+1]] !== undefined)
             {
                 state.num_of_args = ftable[code[state.P+1]][1];
-                var fargs = new Array(state.num_of_args);
+                fargs = new Array(state.num_of_args);
                 for (i = 0; i < state.num_of_args; i++)
                 {
                     fargs[i] = deref(register[i]);
@@ -442,7 +454,7 @@ function wam()
             continue;
 
         case 4: // execute
-            var predicate = predicates[code[state.P+1]];
+            predicate = predicates[code[state.P+1]];
             if (predicate !== undefined)
             {
                 // No need to save continuation for execute
@@ -457,7 +469,7 @@ function wam()
             {
                 state.num_of_args = ftable[code[state.P+1]][1];
                 debug_msg("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1]);
-                var fargs = new Array(state.num_of_args);
+                fargs = new Array(state.num_of_args);
                 for (i = 0; i < state.num_of_args; i++)
                     fargs[i] = deref(register[i]);
                 result = foreign_predicates[code[state.P+1]].apply(null, fargs);
@@ -504,8 +516,7 @@ function wam()
             continue;
 
         case 8: // put_value
-            var source;
-            if (code[state.P+1] == 0) // Y-register
+            if (code[state.P+1] === 0) // Y-register
             {
                 register_location = state.E + code[state.P+2] + 2;
                 if (memory[register_location] === undefined)
@@ -576,7 +587,7 @@ function wam()
             continue;           
 
         case 15: // get_variable
-            if (code[state.P+1] == 0) // Y-register
+            if (code[state.P+1] === 0) // Y-register
             {
                 register_location = state.E + code[state.P+2] + 2;
                 debug_msg("Y" + code[state.P+2] + " <- " + hex(register[code[state.P+3]]));
@@ -591,10 +602,9 @@ function wam()
             continue;
             
         case 16: // get_value
-            var source;
             var target = register[code[state.P+3]];
             gc_check(target);
-            if (code[state.P+1] == 0) // Y-register
+            if (code[state.P+1] === 0) // Y-register
             {
                 register_location = state.E + code[state.P+2] + 2;
                 source = memory[register_location];
@@ -612,16 +622,16 @@ function wam()
 
         case 17: // get_constant C from Ai            
             // First, get what is in Ai into sym
-            var sym = deref(register[code[state.P+2]]);
+            sym = deref(register[code[state.P+2]]);
             // Then get arg. This is an atom index, not a <CON, i> cell. It needs to be made into the latter!
-            var arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+            arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
             state.P += 3;
-            if (TAG(sym) == TAG_REF)
+            if (TAG(sym) === TAG_REF)
             {
                 // If Ai is variable, then we need to bind. This is when foo(bar) is called like foo(X).
                 bind(sym, arg);
             }
-            else if (sym != arg)
+            else if (sym !== arg)
             {
                 debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
                 if (!backtrack())
@@ -630,11 +640,11 @@ function wam()
             continue;
 
         case 18: // get_nil
-            var sym = deref(register[code[state.P+1]]);
+            sym = deref(register[code[state.P+1]]);
             state.P += 1;
-            if (TAG(sym) == TAG_REF)
+            if (TAG(sym) === TAG_REF)
                 bind(sym, NIL);
-            else if (sym != NIL)
+            else if (sym !== NIL)
                 if (!backtrack())
                     return false;
             continue;
@@ -642,16 +652,16 @@ function wam()
 
         case 19: // get_structure
             var ftor = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
-            var addr = deref(register[code[state.P+2]]);
+            addr = deref(register[code[state.P+2]]);
             state.P += 3;
-            if (TAG(addr) == TAG_REF)
+            if (TAG(addr) === TAG_REF)
             {
                 debug_msg("Arg passed is unbound. Proceeding in WRITE mode");
                 state.mode = WRITE;
                 a = alloc_structure(ftor);
                 bind(memory[addr], a);
             }
-            else if (TAG(addr) == TAG_STR && memory[VAL(addr)] == ftor)
+            else if (TAG(addr) === TAG_STR && memory[VAL(addr)] === ftor)
             {
                 debug_msg("Arg passed is bound to the right functor. Proceeding in READ mode from " + (VAL(addr)+1));
                 state.mode = READ;
@@ -665,9 +675,9 @@ function wam()
             continue;
 
         case 20: // get_list from Ai
-            var addr = deref(register[code[state.P+1]]);
+            addr = deref(register[code[state.P+1]]);
             state.P += 2;
-            if (TAG(addr) == TAG_REF)
+            if (TAG(addr) === TAG_REF)
             {
                 // predicate called with var and we are expecting a list
                 var l = state.H ^ (TAG_LST << WORD_BITS);
@@ -675,7 +685,7 @@ function wam()
                 debug_msg("Bound memory[" + addr + "] ( " + memory[addr] + ") to <LST," + state.H + ">");
                 state.mode = WRITE;
             }
-            else if (TAG(addr) == TAG_LST)
+            else if (TAG(addr) === TAG_LST)
             {   
                 debug_msg("get_list will proceed in read mode from " + VAL(addr));
                 state.S = VAL(addr);
@@ -688,16 +698,16 @@ function wam()
 
         case 21: // get_integer I from Ai            
             // First, get what is in Ai into sym
-            var sym = deref(register[code[state.P+2]]);
+            sym = deref(register[code[state.P+2]]);
             // Then get arg. This is the actual integer, not a <INT, i> cell. It needs to be made into the latter!
-            var arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+            arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
             state.P += 3;
-            if (TAG(sym) == TAG_REF)
+            if (TAG(sym) === TAG_REF)
             {
                 // If Ai is variable, then we need to bind. This is when foo(7) is called like foo(X).
                 bind(sym, arg);
             }
-            else if (sym != arg)
+            else if (sym !== arg)
             {
                 debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
                 if (!backtrack())
@@ -706,7 +716,7 @@ function wam()
             continue;
 
         case 22: // unify_void
-            if (state.mode == READ)
+            if (state.mode === READ)
                 state.S += code[state.P+1];
             else
                 for (i = 0; i < code[state.P+1]; i++)
@@ -715,8 +725,7 @@ function wam()
             continue;
 
         case 23: //unify_variable
-            var source;
-            if (state.mode == READ) // If reading, consume the next symbol
+            if (state.mode === READ) // If reading, consume the next symbol
             {                
                 source = memory[state.S++]; 
                 debug_msg("Unifying existing variable: " + hex(source) + " at " + (state.S-1));
@@ -727,7 +736,7 @@ function wam()
                 source = alloc_var(); // If writing, create a new var
                 debug_msg("Allocated new variable: " + source);
             }
-            if (code[state.P+1] == 0) // Y-register
+            if (code[state.P+1] === 0) // Y-register
             {
                 debug_msg("... for register Y" + code[state.P+2]);
                 register_location = state.E + code[state.P+2] + 2;
@@ -742,11 +751,11 @@ function wam()
             continue;
 
         case 24: // unify_value
-            var did_fail = false;
-            if (state.mode == READ)
+            did_fail = false;
+            if (state.mode === READ)
             {
                 source = memory[state.S++];
-                if (code[state.P+1] == 0) // Y-register
+                if (code[state.P+1] === 0) // Y-register
                 {
                     register_location = state.E + code[state.P+2] + 2;
                     did_fail = !unify(memory[register_location], source);
@@ -758,7 +767,7 @@ function wam()
             }
             else
             {
-                if (code[state.P+1] == 0) // Y-register
+                if (code[state.P+1] === 0) // Y-register
                 {
                     register_location = state.E + code[state.P+2] + 2;
                     memory[state.H++] = memory[register_location];
@@ -775,10 +784,10 @@ function wam()
             continue;
         case 25: // unify_local_value
             var did_fail = false;
-            if (state.mode == READ)
+            if (state.mode === READ)
             {
                 source = memory[state.S++];
-                if (code[state.P+1] == 0) // Y-register
+                if (code[state.P+1] === 0) // Y-register
                 {
                     register_location = state.E + code[state.P+2] + 2;
                     did_fail = !unify(memory[register_location], source);
@@ -791,7 +800,7 @@ function wam()
             else
             {
                 var addr;
-                if (code[state.P+1] == 0) // Y-register;
+                if (code[state.P+1] === 0) // Y-register;
                 {
                     register_location = state.E + code[state.P+2] + 2;
                     addr = memory[register_location];
@@ -816,7 +825,7 @@ function wam()
                     memory[state.H++] = fresh;
                     debug_msg("Binding fresh variable " + fresh + " to " + addr);
                     bind(fresh, addr);
-                    if (code[state.P+1] == 1)
+                    if (code[state.P+1] === 1)
                         register[code[state.P+2]] = fresh; // also set X(i) if X-register
                 }
             }
@@ -826,18 +835,18 @@ function wam()
                     return false;
             continue;
         case 26: // unify_constant
-            if (state.mode == READ)
+            if (state.mode === READ)
             {
-                var sym = deref(memory[state.S++]);
-                var arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+                sym = deref(memory[state.S++]);
+                arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
                 state.P += 2;
                 debug_msg("sym: " + hex(sym) + ", arg: " + hex(arg));
-                if (TAG(sym) == TAG_REF)
+                if (TAG(sym) === TAG_REF)
                 {
                     debug_msg("Binding " + sym + " and " + arg);
                     bind(sym, arg);
                 }
-                else if (sym != arg)
+                else if (sym !== arg)
                     if (!backtrack())
                         return false;
             }
@@ -848,17 +857,17 @@ function wam()
             }
             continue;
         case 27: // unify_integer
-            if (state.mode == READ)
+            if (state.mode === READ)
             {
-                var sym = deref(memory[state.S++]);
-                var arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS)
+                sym = deref(memory[state.S++]);
+                arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
                 state.P += 2;
-                if (TAG(sym) == TAG_REF)
+                if (TAG(sym) === TAG_REF)
                 {
                     debug_msg("Binding " + sym + " and " + arg);
                     bind(sym, arg);
                 }
-                else if (sym != arg)
+                else if (sym !== arg)
                     if (!backtrack())
                         return false;
             }
@@ -914,8 +923,8 @@ function wam()
             memory[newB+n+1] = state.E;
             memory[newB+n+2] = state.CP;
             memory[newB+n+3] = state.B;
-            var next = code[state.P+1];
-            if ((next & 0x80000000) == 0)
+            next = code[state.P+1];
+            if ((next & 0x80000000) === 0)
             {
                 // next is a clause index in the current predicate
                 memory[newB+n+4] = {code: state.current_predicate.clauses[next].code, 
@@ -959,7 +968,7 @@ function wam()
             debug_msg("Retry me else: Set CP to " + state.CP);
             // set up the 'else' part of retry_me_else by adjusting the saved value of B            
 //            memory[state.B + arity + 4] = {code: state.current_predicate.clauses[state.current_predicate.clause_keys[code[state.P+1]]].code, predicate:state.current_predicate, offset:0};
-            if ((next & 0x80000000) == 0)                
+            if ((next & 0x80000000) === 0)
             {
                 // next is a clause index in the current predicate
                 memory[state.B+arity+4] = {code: state.current_predicate.clauses[next].code, 
@@ -978,15 +987,15 @@ function wam()
             state.TR = memory[state.B + arity + 5];
             state.H = memory[state.B + arity + 6];
             debug_msg("case 29: state.HB <- " + state.HB);
-            state.HB = state.H
+            state.HB = state.H;
             state.P += 2;
             continue;
             
         case 30: // trust_me
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
-            var n = memory[state.B];
+            n = memory[state.B];
             debug_msg("trusting last clause: " + state.B + " with arity " + memory[state.B] + " and HB was " + state.HB + ". Choicepoint has " + n + " args");
-            for (var i = 0; i < n; i++)
+            for (i = 0; i < n; i++)
             {
                 debug_msg("Restoring register " + i + " to " + hex(memory[state.B + i + 1]));
                 register[i] = memory[state.B + i + 1];
@@ -1011,7 +1020,7 @@ function wam()
 
         case 31: // neck_cut
             // Move B back to B0 and tidy the trail. If B == B0 then do nothing (ie if there is a useless cut in the only clause of a predicate)
-            var result = true;
+            result = true;
             if (state.B > state.B0)
             {
                 while (cleanups[0] !== undefined && cleanups[0].B > state.B0 && cleanups[0].B < state.B)
@@ -1065,20 +1074,20 @@ function wam()
             continue;
 
         case 40: // call_aux
-            var offset = code[state.P+1];
+            offset = code[state.P+1];
             state.CP = {code:code,
                         predicate: state.current_predicate,
                         offset:state.P + 4};
             debug_msg("Call_aux: Set CP to " + state.CP);
             debug_msg("Aux offset is " + offset);
-            debug_msg("env space still required: " + code[state.P+3])
+            debug_msg("env space still required: " + code[state.P+3]);
             state.num_of_args = code[state.P+2];
             state.P = offset;
             state.B0 = state.B;
             continue;
 
         case 41: // execute_aux
-            var offset = code[state.P+1];
+            offset = code[state.P+1];
             state.num_of_args = code[state.P+2];
             state.P = offset;
             state.B0 = state.B;            
@@ -1090,7 +1099,7 @@ function wam()
             state.P = memory[state.B+2].offset;
             code = memory[state.B+2].code;
             state.current_predicate = memory[state.B+2].current_predicate;
-            var n = memory[state.B];
+            n = memory[state.B];
             debug_msg("State has " + n + " saved args including the two special");
             state.foreign_retry = true;
             for ( i = 0; i < n-2; i++)
@@ -1106,9 +1115,9 @@ function wam()
             state.HB = state.H
             continue;
         case 43: // get_choicepoint
-            var i = code[state.P+1];
+            i = code[state.P+1];
             var choice = state.B;
-            while (i != 0)
+            while (i !== 0)
             {
                 choice = memory[choice + memory[choice] + 3];
                 i--;
@@ -1121,15 +1130,15 @@ function wam()
             
          // All the floating point operations are here because I added them as an afterthought!
         case 50: // get_float I from Ai            
-            var sym = deref(register[code[state.P+2]]);
-            var arg = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
+            sym = deref(register[code[state.P+2]]);
+            arg = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
             state.P += 3;
-            if (TAG(sym) == TAG_REF)
+            if (TAG(sym) === TAG_REF)
             {
                 // If Ai is variable, then we need to bind. This is when foo(7) is called like foo(X).
                 bind(sym, arg);
             }
-            else if (sym != arg)
+            else if (sym !== arg)
             {
                 debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
                 if (!backtrack())
@@ -1141,16 +1150,16 @@ function wam()
             state.P += 3;
             continue;           
         case 52: // unify_float
-            if (state.mode == READ)
+            if (state.mode === READ)
             {
                 var sym = deref(memory[state.S++]);
                 var arg = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
                 state.P += 2;
-                if (TAG(sym) == TAG_REF)
+                if (TAG(sym) === TAG_REF)
                 {
                     bind(sym, arg);
                 }
-                else if (sym != arg)
+                else if (sym !== arg)
                     if (!backtrack())
                         return false;
             }
@@ -1190,7 +1199,7 @@ function wam()
 
 function hex(number)
 {
-    if (number == undefined)
+    if (number === undefined)
         return "undefined";
     if (number < 0)
     {
@@ -1302,7 +1311,7 @@ function reset_block(x)
 function clean_up_block(nb)
 {
     // If alternative to B is nb, then select it now
-    if (memory[state.B+memory[state.B]+4] == VAL(nb))
+    if (memory[state.B+memory[state.B]+4] === VAL(nb))
         state.B = VAL(memory[VAL(nb)+memory[VAL(nb)]+4]);
     return true;
 
@@ -1327,7 +1336,7 @@ function clear_exception()
 
 function undefined_predicate(ftor)
 {
-    if (prolog_flag_values.unknown == "error")
+    if (prolog_flag_values.unknown === "error")
     {
         var indicator = state.H ^ (TAG_STR << WORD_BITS);
         memory[state.H++] = lookup_functor("/", 2);
@@ -1335,7 +1344,7 @@ function undefined_predicate(ftor)
         memory[state.H++] = ftable[ftor][1] ^ (TAG_INT << WORD_BITS);
         existence_error("procedure", indicator);
     }
-    else if (prolog_flag_values.unknown == "warning")
+    else if (prolog_flag_values.unknown === "warning")
     {
         stdout("Undefined predicate " + atable[ftable[ftor][0]] + "/" + ftable[ftor][1] + "\n");
     }

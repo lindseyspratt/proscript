@@ -302,7 +302,7 @@ clear_all :-
 	oldNum set_prop '',
 	theNum set_prop ''.
 
-tokens = 53
+% tokens = 53
 
   /* The click events */
 setup_click_events :-

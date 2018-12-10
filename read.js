@@ -566,6 +566,10 @@ function escape_atom(a)
 
 function quote_atom(a)
 {
+    if (! a.charAt) {
+        return a;
+    }
+
     if (a.charAt(0) >= "A" && a.charAt(0) <= "Z")
         return "'" + escape_atom(a) + "'";
     var chars = a.split('');
