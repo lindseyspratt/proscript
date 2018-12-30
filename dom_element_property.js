@@ -129,6 +129,8 @@ function setupPropertyValues(element, property, value) {
 function propertyValueToJS(type, value) {
     if(type === 'atom') {
         return getAtomPropertyValue(value);
+    } else if(type === 'boolean') {
+        return getBooleanPropertyValue(value);
     } else if(type === 'number') {
         return getNumberPropertyValue(value);
     } else if(type === 'string') {
@@ -142,6 +144,43 @@ function propertyValueToJS(type, value) {
 
 function getAtomPropertyValue(value) {
     return atable[VAL(value)];
+}
+
+function getBooleanPropertyValue(value) {
+    var valueJS = atable[VAL(value)];
+    return valueJS === 'true';
+}
+
+/**
+ * Convert a prolog list of atoms to a space separated string of tokens.
+ * @param value
+ * @returns {string}
+ */
+function getClassListPropertyValue(value) {
+    if(TAG(value) !== TAG_LST) {
+        instantiation_error(value);
+    }
+
+    var string = '';
+    var list = value;
+    while(list !== NIL) {
+        if(TAG(list) !== TAG_LST) {
+            instantiation_error(list);
+        }
+
+        var atomPL = memory[VAL(list)];
+        if(TAG(atomPL) !== TAG_ATM) {
+            instantiation_error(atomPL);
+        } else {
+            if(string !== '') {
+                string += ' ';
+            }
+            string += atable[VAL(value)];
+            list = memory[VAL(list) + 1];
+        }
+    }
+
+    return string;
 }
 
 function getNumberPropertyValue(value) {
@@ -249,6 +288,7 @@ function predicate_set_dom_element_property(element, property, value) {
     } else {
         domain_error(property);
     }
+    return true;
 }
 
 function TagProperty() {
@@ -308,7 +348,65 @@ function ChildProperty() {
     return that;
 }
 
-function SimpleProperty(type, propertyName) {
+function SimpleChildProperty(propertyName) {
+    var that = {};
+    that.name = "firstChild";
+    that.type = 'element';
+    that.elements = function(valueJS) {
+        var elements = [];
+        elements.push(valueJS.parentElement);
+        return elements;
+    };
+    that.elementValuesFunction = function(elementJS) {
+        var elements = [];
+        /** @namespace elementJS.firstChild */
+        elements.push(elementJS[propertyName]);
+        return elements;
+    };
+    that.setValue = function(property, elementJS, value) {
+        domain_error(property);
+    };
+    return that;
+}
+
+/**
+ * This prolog 'class' property uses the classList and className HTML Element properties.
+ */
+
+function ClassProperty() {
+    var that = {};
+    that.name = "class";
+    that.type = 'atom';
+    that.elements = function(valueJS) {
+        return document.getElementsByClassName(valueJS);
+    };
+    that.elementValuesFunction = function(elementJS) {
+        /** @namespace elementJS.classList */
+        return elementJS.classList;
+    };
+
+    /**
+     * Set the 'className' property to the given class or classes.
+     * If the 'value' is a single atom then set the className to the string for that atom.
+     * If the 'value' is a list of atoms then set the className to the
+     * string that is the strings for those atoms separated by spaces.
+     * @param property
+     * @param elementJS
+     * @param value
+     */
+    that.setValue = function(property, elementJS, value) {
+        var valueJS;
+        if (TAG(element) === TAG_ATM) {
+            valueJS = getAtomPropertyValue(value);
+        } else if (TAG(element) === TAG_LST) {
+            valueJS = getClassListPropertyValue(value);
+        }
+        elementJS.className = valueJS;
+    };
+    return that;
+}
+
+function SimpleProperty(type, propertyName, settable) {
     var that = {};
     that.name = propertyName;
     that.type = type;
@@ -321,15 +419,57 @@ function SimpleProperty(type, propertyName) {
         return values;
     };
     that.setValue = function(property, elementJS, value) {
-        domain_error(property);
+        if(settable) {
+            elementJS[propertyName] = propertyValueToJS(type, value);
+        } else {
+            domain_error(property);
+        }
     };
     return that;
 }
 
 var propertyMap = new Map([
     ['tag', TagProperty()],
-    ['inner', InnerHTMLProperty()],
     ['child', ChildProperty()],
     ['childElementCount', SimpleProperty('number','childElementCount')],
-    ['clientHeight', SimpleProperty('number','clientHeight')]
+    ['class', ClassProperty()],
+    ['accesskey', SimpleProperty('atom','accesskey', true)],
+    ['clientHeight', SimpleProperty('number','clientHeight')],
+    ['clientLeft', SimpleProperty('number','clientLeft')],
+    ['clientTop', SimpleProperty('number','clientTop')],
+    ['clientWidth', SimpleProperty('number','clientWidth')],
+    ['contentEditable', SimpleProperty('boolean','contentEditable', true)],
+    ['dir', SimpleProperty('atom','dir', true)], // rtl, ltr, auto
+    ['firstChild', SimpleChildProperty('firstChild')],
+    ['firstElementChild', SimpleChildProperty('firstElementChild')],
+    ['id', SimpleProperty('atom','id', true)],
+    ['innerHTML', SimpleProperty('string', 'innerHTML', true)],
+    ['innerText', SimpleProperty('string', 'innerText', true)],
+    ['lang', SimpleProperty('atom','lang', true)], // ISO 639-1 Language Codes: en, de, ja, ...
+    ['lastChild', SimpleChildProperty('lastChild')],
+    ['lastElementChild', SimpleChildProperty('lastElementChild')],
+    ['namespaceURI', SimpleProperty('string', 'namespaceURI')],
+    ['nextSibling', SimpleChildProperty('nextSibling')],
+    ['nextElementSibling', SimpleChildProperty('nextElementSibling')],
+    ['nodeName', SimpleProperty('atom','nodeName')],
+    ['nodeType', SimpleProperty('atom','nodeType')],
+    ['nodeValue', SimpleProperty('string','nodeValue', true)],
+    ['offsetHeight', SimpleProperty('number','offsetHeight')],
+    ['offsetLeft', SimpleProperty('number','offsetLeft')],
+    ['offsetParent', SimpleProperty('number','offsetParent')],
+    ['offsetTop', SimpleProperty('number','offsetTop')],
+    ['offsetWidth', SimpleProperty('number','offsetWidth')],
+    ['ownerDocument', SimpleChildProperty('ownerDocument')],
+    ['parentNode', SimpleChildProperty('parentNode')],
+    ['parentElement', SimpleChildProperty('parentElement')],
+    ['previousSibling', SimpleChildProperty('previousSibling')],
+    ['previousElementSibling', SimpleChildProperty('previousElementSibling')],
+    ['scrollHeight', SimpleProperty('number','scrollHeight')],
+    ['scrollLeft', SimpleProperty('number','scrollLeft')],
+    ['scrollTop', SimpleProperty('number','scrollTop')],
+    ['scrollWidth', SimpleProperty('number','scrollWidth')],
+    ['style', SimpleProperty('string', 'style', true)],
+    ['tabIndex', SimpleProperty('number','tabIndex')],
+    ['textContent', SimpleProperty('string', 'textContent', true)],
+    ['title', SimpleProperty('string', 'title', true)]
 ]);

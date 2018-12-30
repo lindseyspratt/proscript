@@ -12,7 +12,11 @@ function stdout(msg)
 
 function predicate_flush_stdout()
 {
-    if (stdout_buffer != "")
+    if (stdout_buffer !== "")
         stdout("\n");
     return true;
+}
+
+function alert(msg) {
+    print(msg);
 }

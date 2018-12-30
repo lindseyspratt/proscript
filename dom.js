@@ -475,6 +475,12 @@ function codes_to_string(codes) {
     return string;
 }
 
+function predicate_alert(term) {
+    var termJS = format_term(term, {});
+    alert(termJS);
+    return true;
+}
+
 function predicate_create_dom_element(tag, element) {
     if(TAG(tag) !== TAG_ATM) {
         instantiation_error(tag);

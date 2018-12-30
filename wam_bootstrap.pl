@@ -365,6 +365,7 @@ reset:-
         reserve_predicate(dom_select_all_elements/2, predicate_dom_select_all_elements),
         reserve_predicate(dom_element_property/3, predicate_dom_element_property),
         reserve_predicate(set_dom_element_property/3, predicate_set_dom_element_property),
+        reserve_predicate(alert/1, predicate_alert),
         true.
 
 

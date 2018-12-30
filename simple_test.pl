@@ -3,7 +3,7 @@ simple_test :-
     dom_element_property(E, clientHeight, H),
     number_codes(H, Hs),
     append("Hello World: ", Hs, Greeting),
-    set_dom_element_property(E, inner, Greeting).
+    set_dom_element_property(E, innerHTML, Greeting).
 
 add_element_test :-
   % create a new div element
@@ -15,5 +15,5 @@ add_element_test :-
 
   % add the newly created element and its content into the DOM
   dom_element_attribute_value(CurrentDiv, id, simpletest),
-  dom_element_tag(Body, body),
+  dom_element_property(Body, tag, body),
   insert_before_dom_node(Body, CurrentDiv, NewDiv).
