@@ -8,10 +8,6 @@ var idsToElements = new Map();
 var elementsToIDs = new Map();
 var deavCursors = new Map();
 var deavCursorCounter = 0;
-var detCursors = new Map();
-var detCursorCounter = 0;
-var deihCursors = new Map();
-var deihCursorCounter = 0;
 var desaCursors = new Map();
 var desaCursorCounter = 0;
 

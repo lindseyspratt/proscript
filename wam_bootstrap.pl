@@ -354,9 +354,6 @@ reset:-
         reserve_predicate(toggle_dom_element_class/3, predicate_toggle_dom_element_class),
         reserve_predicate(set_dom_element_attribute_value/3, predicate_set_dom_element_attribute_value),
         reserve_predicate(dom_element_attribute_value/3, predicate_dom_element_attribute_value),
-       % reserve_predicate(dom_element_tag/2, predicate_dom_element_tag),
-       % reserve_predicate(dom_element_inner_html/2, predicate_dom_element_inner_html),
-       % reserve_predicate(set_dom_element_inner_html/2, predicate_set_dom_element_inner_html),
         reserve_predicate(create_dom_element/2, predicate_create_dom_element),
         reserve_predicate(create_dom_text_node/2, predicate_create_dom_text_node),
         reserve_predicate(append_dom_node_child/2, predicate_append_dom_node_child),
@@ -366,6 +363,24 @@ reset:-
         reserve_predicate(dom_element_property/3, predicate_dom_element_property),
         reserve_predicate(set_dom_element_property/3, predicate_set_dom_element_property),
         reserve_predicate(alert/1, predicate_alert),
+
+        % DOM Element/Node Methods
+        reserve_predicate(dom_element_add_event_listener/2, predicate_dom_element_add_event_listener),
+        reserve_predicate(dom_element_blur/1, predicate_dom_element_blur),
+        reserve_predicate(dom_element_focus/1, predicate_dom_element_focus),
+        reserve_predicate(dom_element_bounding_client_rect/1, predicate_dom_element_bounding_client_rect),
+        reserve_predicate(dom_element_click/1, predicate_dom_element_click),
+        reserve_predicate(dom_element_clone_node/3, predicate_dom_element_clone_node),
+        reserve_predicate(dom_element_compare_document_position/3, predicate_dom_element_compare_document_position),
+        reserve_predicate(dom_element_contains/2, predicate_dom_element_contains),
+        reserve_predicate(dom_element_focus/1, predicate_dom_element_focus),
+        reserve_predicate(dom_element_insert_adjacent_element/3, predicate_dom_element_insert_adjacent_element),
+        reserve_predicate(dom_element_insert_adjacent_html/3, predicate_dom_element_insert_adjacent_html),
+        reserve_predicate(dom_element_insert_adjacent_text/3, predicate_dom_element_insert_adjacent_text),
+        reserve_predicate(dom_element_is_equal_node/2, predicate_dom_element_is_equal_node),
+        reserve_predicate(dom_element_normalize/1, predicate_dom_element_normalize),
+        reserve_predicate(dom_element_scroll_into_view/2, predicate_dom_element_scroll_into_view),
+
         true.
 
 

@@ -1,8 +1,9 @@
 var depCursors = new Map();
 var depCursorCounter = 0;
 
-// dom_element_property(E, tag, T) binds T to all tags of E.
-// property must be a bound value (i.e. not TAG(property) === TAG_REF)
+// dom_element_property(E, P, T) binds T to all values of property P of element E.
+// Property must be a ground value (i.e. not TAG(property) === TAG_REF)
+// At least one of E or T must be ground.
 function predicate_dom_element_property(element, property, value) {
     var cursor;
     var cursorIDPL;
@@ -306,25 +307,6 @@ function TagProperty() {
     // noinspection JSUnusedLocalSymbols
     that.setValue = function(property, elementJS, value) {
         domain_error(property);
-    };
-    return that;
-}
-
-function InnerHTMLProperty() {
-    var that = {};
-    that.name = "inner";
-    that.type = 'string'; // list of integer character codes
-    that.elements = function(valueJS) {
-        return Array.from(document.querySelectorAll('*')); // return all elements for later filtering by unification
-    };
-    that.elementValuesFunction = function(elementJS) {
-        var values = [];
-        values.push(elementJS.innerHTML);
-        return values;
-    };
-    that.setValue = function(property, elementJS, value) {
-        /** @namespace elementJS.innerHTML */
-        elementJS.innerHTML = codes_to_string(value);
     };
     return that;
 }
