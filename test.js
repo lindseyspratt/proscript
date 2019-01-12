@@ -10,7 +10,7 @@ var can_backtrack = false;
 
 function preventBackspace(e)
 {
-    if (e.keyCode == 8 && e.target == output_console)
+    if (e.keyCode === 8 && e.target === output_console)
     {
         e.preventDefault();
         e.stopPropagation();
@@ -24,7 +24,7 @@ var stdout_buffer;
 
 function predicate_flush_stdout()
 {
-    if (stdout_buffer.innerHTML != "")
+    if (stdout_buffer.innerHTML !== "")
         stdout("\n");
     return true;
 }
@@ -42,13 +42,15 @@ function stdout(msg)
 
 }
 
-function onload()
+function onload(initialConsult)
 {
     output_console = document.getElementById('stdout');    
     stdout_buffer = document.createElement('div');
     stdout_buffer.innerHTML = "";
-    output_console.appendChild(stdout_buffer);     
-    consult();
+    output_console.appendChild(stdout_buffer);
+    if(initialConsult) {
+        consult();
+    }
 
     query_node = document.createElement('div');
     query_node.className = "query";
@@ -103,7 +105,7 @@ function backspace()
 
 function keydown(e)
 {
-    if (e.keyCode == 38 && !can_backtrack)
+    if (e.keyCode === 38 && !can_backtrack)
     {
         e.preventDefault();
         e.stopPropagation();
@@ -118,7 +120,7 @@ function keydown(e)
         output_console.appendChild(query_node);
         scroll_to_bottom();
     }
-    else if (e.keyCode == 40 && !can_backtrack)
+    else if (e.keyCode === 40 && !can_backtrack)
     {
         e.preventDefault();
         e.stopPropagation();
@@ -139,17 +141,19 @@ function keydown(e)
 
 function keypress(e)
 {
+    var old_query;
+
     if (e.altKey || e.ctrlKey || e.metaKey)
         return;
     e.preventDefault();
     e.stopPropagation();
-    if (e.keyCode == 8)
+    if (e.keyCode === 8)
     {
         backspace();
     }
-    else if (e.keyCode == 59 && can_backtrack)
+    else if (e.keyCode === 59 && can_backtrack)
     {
-        var old_query = document.createElement('div');
+        old_query = document.createElement('div');
         old_query.innerHTML = ";";
         old_query.className = "old_query";
         output_console.appendChild(old_query);
@@ -170,7 +174,7 @@ function keypress(e)
             scroll_to_bottom();
         }
     }
-    else if (e.keyCode == 13 && can_backtrack)
+    else if (e.keyCode === 13 && can_backtrack)
     {
         // Cut choicepoints (?)
         state.B = 0;
@@ -182,7 +186,7 @@ function keypress(e)
         output_console.appendChild(query_node);  
         scroll_to_bottom();
     }
-    else if (e.keyCode == 13)
+    else if (e.keyCode === 13)
     {
         // call the toplevel handler
         // ARGH. MUST reset registers for new query, especially after failure!
@@ -197,7 +201,7 @@ function keypress(e)
         register[0] = lookup_atom(query);
         // Make the query a permanent part of the output        
         output_console.removeChild(query_node);
-        var old_query = document.createElement('div');
+        old_query = document.createElement('div');
         old_query.innerHTML = "?-" + query;
         old_query.className = "old_query";
         output_console.appendChild(old_query);
@@ -229,7 +233,7 @@ function try_running()
         console.log(anything);
         debug("Error. See javascript console");
     }
-    if (state.B != 0)
+    if (state.B !== 0)
     {
         debug_msg("Can backtrack");
         can_backtrack = true;

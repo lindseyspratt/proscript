@@ -2427,6 +2427,22 @@ function predicate_sub_atom(source, start, length, remaining, subatom)
         unify(subatom, lookup_atom(input.substring(index.start, index.start+index.length)));
 }
 
+function predicate_eval_javascript(expression, result)
+{
+    var expressionJS;
+    if (TAG(expression) === TAG_ATM) {
+        expressionJS = PL_atom_chars(expression);
+    } else if (TAG(expression) === TAG_LST) {
+        expressionJS = codes_to_string(expression);
+    } else {
+        instantiation_error(expression);
+    }
+
+    var resultJS = eval(expressionJS);
+    var resultPL = resultJS ? string_to_codes(resultJS) : string_to_codes('undefined');
+    return unify(result, resultPL);
+}
+
 /* errors */
 function type_error(expected, got)
 {

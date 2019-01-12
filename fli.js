@@ -9,8 +9,10 @@
    PL_reset_term_refs
 */
 
-function PL_new_term_ref()
-{
+/**
+ * @return {number}
+ */
+function PL_new_term_ref() {
     // FIXME: Should this go on the heap or the stack?
     return alloc_var();
 }
@@ -23,11 +25,17 @@ function PL_new_term_refs(n)
         
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_succeed()
 {
     return true;
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_fail()
 {
     return true;
@@ -38,6 +46,9 @@ function PL_new_atom(chars)
     return lookup_atom(chars);
 }
 
+/**
+ * @return {string}
+ */
 function PL_atom_chars(atom)
 {
     return atable[VAL(atom)];
@@ -58,75 +69,108 @@ function PL_functor_arity(ftor)
     return ftable[VAL(ftor)][1];
 }
 
+/**
+ * @return {number}
+ */
 function PL_term_type(term)
 {
     return TAG(term);
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_is_variable(term)
 {
-    return TAG(term) == TAG_REF;
+    return TAG(term) === TAG_REF;
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_is_atom(term)
 {
-    return TAG(term) == TAG_ATM;
+    return TAG(term) === TAG_ATM;
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_is_integer(term)
 {
-    return TAG(term) == TAG_INT;
+    return TAG(term) === TAG_INT;
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_is_compound(term)
 {
-    return TAG(term) == TAG_STR;
+    return TAG(term) === TAG_STR;
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_is_functor(term, ftor)
 {
-    return TAG(term) == TAG_STR && memory[VAL(term)] == ftor;
+    return TAG(term) === TAG_STR && memory[VAL(term)] === ftor;
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_is_list(term)
 {
-    return TAG(term) == TAG_LST;
+    return TAG(term) === TAG_LST;
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_is_atomic(term)
 {
-    return TAG(term) != TAG_STR && TAG(term) != TAG_REF;
+    return TAG(term) !== TAG_STR && TAG(term) !== TAG_REF;
 }
 
+/**
+ * @return {boolean}
+ */
 function PL_is_number(term)
 {
-    return TAG(term) == TAG_INT; // At the moment
+    return TAG(term) === TAG_INT; // At the moment
 }
 
 function PL_get_atom(term)
 {
-    if (TAG(term) == TAG_ATM)
+    if (TAG(term) === TAG_ATM)
         return atom;
     throw("type_error: atom");
 }
 
+/**
+ * @return {string}
+ */
 function PL_get_atom_chars(term)
 {
-    if (TAG(term) == TAG_ATOM)
+    if (TAG(term) === TAG_ATM)
         return atable[VAL(term)];
     throw("type_error: atom");
 }
 
+/**
+ * @return {number}
+ */
 function PL_get_integer(term)
 {
-    if (TAG(term) == TAG_INT)
+    if (TAG(term) === TAG_INT)
         return VAL(term);
     throw("type_error: integer");
 }
 
 function PL_get_functor(term)
 {
-    if (TAG(term) == TAG_STR)
+    if (TAG(term) === TAG_STR)
         return memory[VAL(term)];
     throw("type_error: term");
 }
@@ -135,7 +179,7 @@ function PL_get_arg(index, term)
 {
     if (index < 1)
         throw("domain_error: term arity");
-    if (TAG(term) == TAG_STR)
+    if (TAG(term) === TAG_STR)
     {
         if (index > ftable[VAL(memory[VAL(term)])][1])  // Check arity is OK
             throw("type_error: term arity");
@@ -147,7 +191,7 @@ function PL_get_arg(index, term)
 // Returns an object with head and tail keys
 function PL_get_list(list)
 {
-    if (TAG(list) == TAG_LST)
+    if (TAG(list) === TAG_LST)
         return {head: memory[VAL(list)],
                 tail: memory[VAL(list)+1]};
     return null;
@@ -155,14 +199,14 @@ function PL_get_list(list)
 
 function PL_get_head(list)
 {
-    if (TAG(list) == TAG_LST)
+    if (TAG(list) === TAG_LST)
         return memory[VAL(list)];
     return null;
 }
 
 function PL_get_tail(list)
 {
-    if (TAG(list) == TAG_LST)
+    if (TAG(list) === TAG_LST)
         return memory[VAL(list)+1];
     return null;
 }
@@ -263,7 +307,7 @@ function PL_unify_arg(index, term, arg)
 
 function PL_unify_list(list, head, tail)
 {
-    return (TAG(list) == TAG_LST) && unify(memory[VAL(list)], head) && unify(memory[VAL(list) + 1], tail);            
+    return (TAG(list) === TAG_LST) && unify(memory[VAL(list)], head) && unify(memory[VAL(list) + 1], tail);
 }
 
 function PL_pred(ftor, module)

@@ -1,6 +1,10 @@
-function predicate_dom_element_add_event_listener(element, goal) {
+function predicate_dom_element_add_event_listener(element, event, goal) {
     if (TAG(element) !== TAG_STR) {
         instantiation_error(element);
+    }
+
+    if (TAG(event) !== TAG_ATM) {
+        instantiation_error(event);
     }
 
     if (TAG(goal) !== TAG_STR && TAG(goal) !== TAG_ATM) {
@@ -13,13 +17,15 @@ function predicate_dom_element_add_event_listener(element, goal) {
     }
     var elementJS = elementObject.value;
 
-    var goalJS = format_term(goal, {});
+    var eventJS = PL_atom_chars(event);
+
+    var goalJS = format_term(goal, {quoted:true});
 
     function handlerFunction () {
         proscript(goalJS)
     }
 
-    elementJS.addEventListener(handlerFunction);
+    elementJS.addEventListener(eventJS, handlerFunction);
 
     return true;
 }

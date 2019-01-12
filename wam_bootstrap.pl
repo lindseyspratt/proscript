@@ -348,6 +348,10 @@ reset:-
         reserve_predicate(gc/0, predicate_gc),
         reserve_predicate(statistics/0, predicate_statistics),
 
+        % Javascript
+        reserve_predicate(eval_javascript/1, predicate_eval_javascript),
+        reserve_predicate(eval_javascript/2, predicate_eval_javascript),
+
         % DOM
         reserve_predicate(remove_dom_element_class/2, predicate_remove_dom_element_class),
         reserve_predicate(replace_dom_element_class/3, predicate_replace_dom_element_class),
@@ -365,7 +369,7 @@ reset:-
         reserve_predicate(alert/1, predicate_alert),
 
         % DOM Element/Node Methods
-        reserve_predicate(dom_element_add_event_listener/2, predicate_dom_element_add_event_listener),
+        reserve_predicate(dom_element_add_event_listener/3, predicate_dom_element_add_event_listener),
         reserve_predicate(dom_element_blur/1, predicate_dom_element_blur),
         reserve_predicate(dom_element_focus/1, predicate_dom_element_focus),
         reserve_predicate(dom_element_bounding_client_rect/1, predicate_dom_element_bounding_client_rect),
