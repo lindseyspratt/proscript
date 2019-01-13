@@ -33,8 +33,3 @@ add_element_test :-
   dom_element_attribute_value(CurrentDiv, id, simpletest),
   dom_element_property(Body, tag, body),
   insert_before_dom_node(Body, CurrentDiv, NewDiv).
-
-setup_console :-
-  dom_element_property(Body, tag, body),
-  dom_element_add_event_listener(Body, keydown, eval_javascript("return preventBackspace(event);")),
-  eval_javascript("onload();").

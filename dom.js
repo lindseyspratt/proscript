@@ -340,9 +340,11 @@ function setupElements(element, attribute, value) {
         if (!get_element_object(element, elementObject)) {
             return undefined;
         }
-        var elementJS = elementObject.value;
         var elements = [];
-        elements.push(elementJS);
+        var elementJS = elementObject.value;
+        if(elementJS) {
+            elements.push(elementJS);
+        }
         return elements;
     } else if (TAG(attribute) !== TAG_REF && TAG(value) !== TAG_REF) {
         if (TAG(attribute) !== TAG_ATM) {
@@ -358,7 +360,10 @@ function setupElements(element, attribute, value) {
 
         if (attributeJS === 'id') {
             elements = [];
-            elements.push(document.getElementById(valueJS));
+            var idElementJS = document.getElementById(valueJS);
+            if(idElementJS) {
+                elements.push(idElementJS);
+            }
         } else if (attributeJS === 'name') {
             elements = Array.from(document.getElementsByName(valueJS));
         } else if (attributeJS === 'class') {

@@ -207,9 +207,9 @@ function propertyValueToPL(property, valueJS) {
             return getAtomPLPropertyValue(valueJS);
         } else if (propertySpec.type === 'number') {
             return getNumberPLPropertyValue(valueJS);
-        } else if (type === 'string') {
+        } else if (propertySpec.type === 'string') {
             return getStringPLPropertyValue(valueJS);
-        } else if (type === 'element') {
+        } else if (propertySpec.type === 'element') {
             return getElementPLPropertyValue(valueJS);
         } else {
             domain_error(type);

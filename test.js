@@ -24,22 +24,24 @@ var stdout_buffer;
 
 function predicate_flush_stdout()
 {
-    if (stdout_buffer.innerHTML !== "")
+    if (stdout_buffer && stdout_buffer.innerHTML !== "")
         stdout("\n");
     return true;
 }
 
 function stdout(msg)
 {
-    output_console.removeChild(stdout_buffer);
-    var lines = (stdout_buffer.innerHTML + msg).split('\n');
-    for (var i = 0; i < lines.length-1; i++)
-    {
-        debug(lines[i]);
+    if(output_console) {
+        output_console.removeChild(stdout_buffer);
+        var lines = (stdout_buffer.innerHTML + msg).split('\n');
+        for (var i = 0; i < lines.length - 1; i++) {
+            debug(lines[i]);
+        }
+        stdout_buffer.innerHTML = lines[lines.length - 1];
+        output_console.appendChild(stdout_buffer);
+    } else {
+        alert(msg);
     }
-    stdout_buffer.innerHTML = lines[lines.length-1];
-    output_console.appendChild(stdout_buffer);     
-
 }
 
 function onload(initialConsult)

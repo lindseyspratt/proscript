@@ -2440,7 +2440,11 @@ function predicate_eval_javascript(expression, result)
 
     var resultJS = eval(expressionJS);
     var resultPL = resultJS ? string_to_codes(resultJS) : string_to_codes('undefined');
-    return unify(result, resultPL);
+    if(result) {
+        return unify(result, resultPL);
+    } else {
+        return true;
+    }
 }
 
 /* errors */
