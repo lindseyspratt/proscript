@@ -35,8 +35,10 @@ setup_console_div :-
   create_dom_element('DIV', Div),
   set_dom_element_attribute_value(Div, style, 'border: 1px solid black; height: 50%; width: 100%; overflow: scroll;'),
   set_dom_element_attribute_value(Div, id, stdout),
-  dom_element_add_event_listener(Div, keypress, eval_javascript("keypress(event)")),
-  dom_element_add_event_listener(Div, keydown, eval_javascript("keydown(event)")),
+  set_dom_element_attribute_value(Div, onkeypress, 'keypress(event)'),
+  set_dom_element_attribute_value(Div, onkeydown, 'keydown(event)'),
+%  dom_element_add_event_listener(Div, keypress, eval_javascript("keypress(event)")),
+%  dom_element_add_event_listener(Div, keydown, eval_javascript("keydown(event)")),
   set_dom_element_attribute_value(Div, tabindex, '0'),
   lookup_console_div(OuterDiv),
   append_dom_node_child(OuterDiv, Div),
@@ -56,5 +58,6 @@ remove_console_div :-
 
 setup_console :-
   dom_element_property(Body, tag, body),
-  dom_element_add_event_listener(Body, keydown, eval_javascript("preventBackspace(event);")),
+  set_dom_element_attribute_value(Body, onkeydown, 'return preventBackspace(event);'),
+%  dom_element_add_event_listener(Body, keydown, eval_javascript("preventBackspace(event);")),
   eval_javascript("onload();").

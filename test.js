@@ -63,10 +63,14 @@ function onload(initialConsult)
 
 function debug(e) 
 {
-    var newElement = document.createElement('div');
-    newElement.innerHTML = '<div>' + e + '</div>';
-    output_console.appendChild(newElement); 
-    scroll_to_bottom();
+    if(output_console) {
+        var newElement = document.createElement('div');
+        newElement.innerHTML = '<div>' + e + '</div>';
+        output_console.appendChild(newElement);
+        scroll_to_bottom();
+    } else {
+        alert(e);
+    }
 }
 
 function consult()
