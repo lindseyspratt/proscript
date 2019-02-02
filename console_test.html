@@ -1,13 +1,15 @@
 <html lang="en">
 <head>
     <title>Simple Console Test</title>
- </head>
-<body onload="proscript('setup_console');" >
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.js"></script>
+    <link href="https://unpkg.com/jquery.terminal/css/jquery.terminal.css" rel="stylesheet"/>
+</head>
+<body >
 <script type="text/javascript" src="wam-pp.js"></script>
 <script type="text/javascript" src="bootstrap.js"></script>
-<script type="text/javascript" src="test.js"></script>
+<script type="text/javascript" src="console_test.js"></script>
 <div id="simpletest">
 </div>
-<div style="border: 1px solid black; height: 50%; width: 100%; overflow: scroll;" id="stdout" onKeyPress="keypress(event)" onKeyDown="keydown(event)" tabindex="0"></div>
 </body>
 </html>
