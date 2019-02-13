@@ -30,6 +30,14 @@ Choicepoint frame where we have tried something but can try 'Next' if it fails l
 
 */
 
+const CP_E = 1;
+const CP_CP = 2;
+const CP_B = 3;
+const CP_Next = 4;
+const CP_TR = 5;
+const CP_H = 6;
+const CP_B0 = 7;
+const CP_SIZE = 8;
 
 
 var ftable = [];
@@ -149,7 +157,7 @@ function bind(a, b)
 
 function tidy_trail()
 {
-    var t = memory[state.B + memory[state.B] + 5];
+    var t = memory[state.B + memory[state.B] + CP_TR];
     if (t < HEAP_SIZE + STACK_SIZE)
         abort("Backtrack pointer " + state.B + " has garbage for TR: " + hex(t));
     while (t < state.TR)
@@ -326,10 +334,10 @@ function backtrack()
         return false;
     }
     debug_msg("Choicepoint has " + memory[state.B] + " saved args");
-    state.B0 = memory[state.B + memory[state.B] + 7];
+    state.B0 = memory[state.B + memory[state.B] + CP_B0];
     // Also unwind any trailed bindings
-    unwind_trail(memory[state.B + memory[state.B] + 5], state.TR);
-    var next = memory[state.B + memory[state.B] + 4];
+    unwind_trail(memory[state.B + memory[state.B] + CP_TR], state.TR);
+    var next = memory[state.B + memory[state.B] + CP_Next];
     state.P = next.offset;
     code = next.code;
     state.current_predicate = next.predicate;
@@ -389,7 +397,7 @@ function wam()
             else
             {
                 debug_msg("Top frame is a choicepoint, at " + state.B);
-                tmpE = state.B + memory[state.B] + 8;
+                tmpE = state.B + memory[state.B] + CP_SIZE;
             }
             debug_msg("Environment size is: " + state.CP.code[state.CP.offset-1]);
             if (tmpE === undefined || isNaN(tmpE))
@@ -964,7 +972,7 @@ function wam()
                 // and add 9 to it to get the top of the stack.
                 debug_msg("Top frame is a choicepoint: " + state.B);
                 debug_msg("Top environment is " + state.E);
-                newB = state.B + memory[state.B] + 8;                
+                newB = state.B + memory[state.B] + CP_SIZE;
             }
             debug_msg("Creating new choicepoint on the stack at " + newB);
             memory[newB] = state.num_of_args;
@@ -1012,35 +1020,35 @@ function wam()
             for (var i = 0; i < arity; i++)
                 register[i] = memory[state.B + i + 1];
             // Now restore all the special-purpose registers
-            if (memory[state.B + arity + 1] < HEAP_SIZE)
+            if (memory[state.B + arity + CP_E] < HEAP_SIZE)
                 abort("Top of frame contains E which is in the heap");
-            if (memory[state.B + arity + 1] > HEAP_SIZE + STACK_SIZE)
+            if (memory[state.B + arity + CP_E] > HEAP_SIZE + STACK_SIZE)
                 abort("Top of frame contains E which exceeds the stack");
             debug_msg("top of frame at " + state.B + " is OK");
-            state.E = memory[state.B + arity + 1];       
-            state.CP = memory[state.B + arity + 2];      
+            state.E = memory[state.B + arity + CP_E];
+            state.CP = memory[state.B + arity + CP_CP];
             var next = code[state.P+1];
             debug_msg("Retry me else: Set CP to " + state.CP);
             // set up the 'else' part of retry_me_else by adjusting the saved value of B            
-//            memory[state.B + arity + 4] = {code: state.current_predicate.clauses[state.current_predicate.clause_keys[code[state.P+1]]].code, predicate:state.current_predicate, offset:0};
+//            memory[state.B + arity + CP_Next] = {code: state.current_predicate.clauses[state.current_predicate.clause_keys[code[state.P+1]]].code, predicate:state.current_predicate, offset:0};
             if ((next & 0x80000000) === 0)
             {
                 // next is a clause index in the current predicate
-                memory[state.B+arity+4] = {code: state.current_predicate.clauses[next].code, 
+                memory[state.B+arity+CP_Next] = {code: state.current_predicate.clauses[next].code,
                                            predicate:state.current_predicate, 
                                            offset:0};
             }
             else
             {
                 // next is an absolute address in the current clause: Used for auxiliary clauses only
-                memory[state.B+arity+4] = {code: code, 
+                memory[state.B+arity+CP_Next] = {code: code,
                                            predicate: state.current_predicate,
                                            offset:next ^ 0x80000000};
             }
-            unwind_trail(memory[state.B + arity + 5], state.TR);
+            unwind_trail(memory[state.B + arity + CP_TR], state.TR);
 
-            state.TR = memory[state.B + arity + 5];
-            state.H = memory[state.B + arity + 6];
+            state.TR = memory[state.B + arity + CP_TR];
+            state.H = memory[state.B + arity + CP_H];
             debug_msg("case 29: state.HB <- " + state.HB);
             state.HB = state.H;
             state.P += 2;
@@ -1056,16 +1064,16 @@ function wam()
                 register[i] = memory[state.B + i + 1];
             }
             // Now restore all the special-purpose registers
-            if (memory[state.B + n + 1] < HEAP_SIZE || memory[state.B + n + 1] > HEAP_SIZE + STACK_SIZE)
-                abort("Top of frame exceeds bounds in trust. Read from memory[" + (state.B+n+1) + "]. State.B is " + state.B);
-            state.E = memory[state.B + n + 1];            
-            state.CP = memory[state.B + n + 2];            
+            if (memory[state.B + n + CP_E] < HEAP_SIZE || memory[state.B + n + CP_E] > HEAP_SIZE + STACK_SIZE)
+                abort("Top of frame exceeds bounds in trust. Read from memory[" + (state.B+n+CP_E) + "]. State.B is " + state.B);
+            state.E = memory[state.B + n + CP_E];
+            state.CP = memory[state.B + n + CP_CP];
             debug_msg("trust_me: Set CP to " + state.CP);
-            unwind_trail(memory[state.B + n + 5], state.TR);
-            state.TR = memory[state.B + n + 5];
-            state.H = memory[state.B + n + 6];
-            state.B = memory[state.B + n + 3];
-            state.HB = memory[state.B+ memory[state.B] + 6];
+            unwind_trail(memory[state.B + n + CP_TR], state.TR);
+            state.TR = memory[state.B + n + CP_TR];
+            state.H = memory[state.B + n + CP_H];
+            state.B = memory[state.B + n + CP_B];
+            state.HB = memory[state.B+ memory[state.B] + CP_H];
             debug_msg("state.B is now set back to " + state.B + " and state.HB is set back to " + state.HB);
             debug_msg("state.E is now set back to " + state.E);
             //state.HB = memory[state.B + n + 6];
@@ -1161,11 +1169,11 @@ function wam()
                 debug_msg("Restoring register " + i + " from memory[" + (state.B+3+i) + "] = " + hex(memory[state.B+3+i]) + " which is " +term_to_string(memory[state.B+3+i]));
                 register[i] = memory[state.B+3+i];
             }
-            state.E = memory[state.B + n + 1];
-            state.CP = memory[state.B + n + 2];      
-            unwind_trail(memory[state.B + n + 5], state.TR);
-            state.TR = memory[state.B + n + 5];
-            state.H = memory[state.B + n + 6];
+            state.E = memory[state.B + n + CP_E];
+            state.CP = memory[state.B + n + CP_CP];
+            unwind_trail(memory[state.B + n + CP_TR], state.TR);
+            state.TR = memory[state.B + n + CP_TR];
+            state.H = memory[state.B + n + CP_H];
             state.HB = state.H;
             continue;
         case 43: // get_choicepoint
@@ -1372,8 +1380,8 @@ function reset_block(x)
 function clean_up_block(nb)
 {
     // If alternative to B is nb, then select it now
-    if (memory[state.B+memory[state.B]+4] === VAL(nb))
-        state.B = VAL(memory[VAL(nb)+memory[VAL(nb)]+4]);
+    if (memory[state.B+memory[state.B]+CP_Next] === VAL(nb))
+        state.B = VAL(memory[VAL(nb)+memory[VAL(nb)]+CP_Next]);
     return true;
 
 }
