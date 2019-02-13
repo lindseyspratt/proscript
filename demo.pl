@@ -3,7 +3,6 @@ foo:-
                                    subsumes_term(X, f(X)),
                                    _,
                                    true).
-
 /*
 foo:-
         setup_call_catcher_cleanup(true,

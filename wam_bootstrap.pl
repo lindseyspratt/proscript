@@ -319,6 +319,7 @@ reset:-
 
         % Debugging
         reserve_predicate(trace_unify/2, predicate_trace_unify),
+        reserve_predicate('$trace_set'/1, predicate_trace_set),
 
         % Testing
         reserve_predicate(member/2, member),
@@ -421,6 +422,7 @@ bootstrap(Source, Query):-
         % Ultimately we could use XmlHTTPRequest, but probably that is less useful anyway
         file_to_atom(Source, Atom),
         build_saved_state(['wam_compiler.pl',
+                           'debugger.pl',
                            'bootstrap_js.pl'],
                           ( writeln(toplevel),
                             compile_clause(bootstrap:-Query),

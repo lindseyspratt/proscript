@@ -21,7 +21,7 @@ jQuery(function($, undefined) {
         greetings: 'Proscript Interpreter',
         name: 'pl_interp',
         height: 200,
-        prompt: '?- '
+        prompt: '| ?- '
     });
 });
 
@@ -51,17 +51,39 @@ function backtrack_level(command, term) {
             try_backtrack();
         } else if (command === 'a') {
             try_backtrack_all();
-        } else {
+        } else if (command === 'h') {
             stdout("Action (; for next solution, a for all solutions, RET to stop)");
+        } else {
+            can_backtrack = false;
+            term.pop();
         }
     } else {
         term.pop();
     }
 }
 
+var buffer;
+
+function buffered_write(msg, term) {
+    var lines = msg.split('\n');
+    var line;
+    for (var ofst = 0; ofst < lines.length - 1; ofst++) {
+        if (ofst === 0 && buffer && buffer !== '') {
+            line = buffer + lines[ofst];
+            buffer = '';
+        } else {
+            line = lines[ofst];
+        }
+
+        term.echo(line);
+    }
+
+    buffer = lines[lines.length - 1];
+}
+
 function solve_query(query, term) {
     stdout = function(msg) {
-        term.echo(msg);
+        buffered_write(msg, term);
     };
 
     // call the toplevel handler
@@ -81,7 +103,7 @@ function solve_query(query, term) {
 }
 
 function debug(msg) {
-    stdout('debug: ' + msg);
+    stdout('debug: ' + msg + '\n');
 }
 
     function try_running()
@@ -95,8 +117,7 @@ function debug(msg) {
         }
         catch (anything)
         {
-            console.log(anything);
-            debug("Error. See javascript console");
+            stdout('wam error: ' + anything);
         }
         if (state.B !== 0)
         {
@@ -117,7 +138,7 @@ function try_backtrack() {
     }
     else
     {
-        stdout("false.\n");
+        stdout("no more solutions.\n");
         can_backtrack = false;
     }
 }

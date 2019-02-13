@@ -39,29 +39,29 @@ var predicates = {};
 var exception = null;
 
 /* Constants. Should be auto-generated */
-var HEAP_SIZE = 131070;
-var STACK_SIZE = 65535;
-var TRAIL_SIZE = 1000;
-var READ = 0;
-var WRITE = 1;
-var TAG_REF = 0; // 0x00000000
-var TAG_STR = 1; // 0x08000000
-var TAG_LST = 2; // 0x10000000
-var TAG_INT = 3; // 0x18000000
-var TAG_ATM = 4; // 0x20000000
-var TAG_FLT = 5; // 0x28000000
+const HEAP_SIZE = 131070;
+const STACK_SIZE = 65535;
+const TRAIL_SIZE = 1000;
+const READ = 0;
+const WRITE = 1;
+const TAG_REF = 0; // 0x00000000
+const TAG_STR = 1; // 0x08000000
+const TAG_LST = 2; // 0x10000000
+const TAG_INT = 3; // 0x18000000
+const TAG_ATM = 4; // 0x20000000
+const TAG_FLT = 5; // 0x28000000
 ///////////// 6 is currently unused
-var TAG_EXT = 7; // Reserved!
-var TAG_MASK = 7;
+//const TAG_EXT = 7; // Reserved!
+const TAG_MASK = 7;
 // 3 bits are used for the tag
 // 2 bits are used for GC
 // This leaves 27 for the actual value, since javascript does not have 64-bit integers
-var WORD_BITS = 27;
-var M_BIT = 1 << 30;
-var F_BIT = 1 << 31;
-var NV_MASK = M_BIT | F_BIT | (TAG_MASK << WORD_BITS);
+const WORD_BITS = 27;
+const M_BIT = 1 << 30;
+const F_BIT = 1 << 31;
+const NV_MASK = M_BIT | F_BIT | (TAG_MASK << WORD_BITS);
 
-var NIL = (TAG_ATM << WORD_BITS); // atable[0] = '[]', so NIL is 0 xor TAG_ATM, which is just TAG_ATM.
+const NIL = (TAG_ATM << WORD_BITS); // atable[0] = '[]', so NIL is 0 xor TAG_ATM, which is just TAG_ATM.
 
 var memory = new Array(HEAP_SIZE + STACK_SIZE + TRAIL_SIZE);
 var code = [255];
@@ -97,6 +97,13 @@ function debug_msg(msg)
 
 function initialize()
 {
+    var trace_ftor = VAL(lookup_functor('$trace', 1));
+    var trace_predicate = predicates[trace_ftor];
+    var trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
+
+    var call_ftor = VAL(lookup_functor('call', 1));
+    var call_predicate = predicates[call_ftor];
+
     state = {H: 0,
              HB: 0,
              S: 0,
@@ -112,7 +119,11 @@ function initialize()
              running: true,
              foreign_retry: false,
              num_of_args: 0,
-             current_predicate: null};
+             current_predicate: null,
+             trace_call: 'no_trace',
+             trace_predicate: trace_predicate,
+             trace_code: trace_code,
+             call_predicate: call_predicate};
     code = bootstrap_code;
 }
 
@@ -138,7 +149,7 @@ function bind(a, b)
 
 function tidy_trail()
 {
-    t = memory[state.B + memory[state.B] + 5];
+    var t = memory[state.B + memory[state.B] + 5];
     if (t < HEAP_SIZE + STACK_SIZE)
         abort("Backtrack pointer " + state.B + " has garbage for TR: " + hex(t));
     while (t < state.TR)
@@ -191,10 +202,10 @@ function unify(a, b)
         // if d1 == d2 then just proceed with the rest of the PDL. Otherwise we need to try and unify them, or fail
         if (d1 !== d2)
         {
-            type1 = TAG(d1);
-            val1 = VAL(d1);
-            type2 = TAG(d2);
-            val2 = VAL(d2);          
+            var type1 = TAG(d1);
+            var val1 = VAL(d1);
+            var type2 = TAG(d2);
+            var val2 = VAL(d2);
             if (type1 === TAG_REF)
             {
                 bind(d1, d2);
@@ -231,8 +242,8 @@ function unify(a, b)
                 case TAG_STR:
                     if (type1 === TAG_STR)
                     {
-                        f1 = VAL(memory[val1]);
-                        f2 = VAL(memory[val2]);
+                        var f1 = VAL(memory[val1]);
+                        var f2 = VAL(memory[val2]);
                         if (f1 === f2)
                         {
                             for (var i = 0; i < ftable[f1][1]; i++)
@@ -257,7 +268,7 @@ function deref(p)
 {
     while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
     {
-        q = memory[VAL(p)];
+        var q = memory[VAL(p)];
         if (q === undefined) // FIXME: Check that q =< p?
         {
             debug_msg("Illegal memory access in deref: " + hex(p) + ". Dumping...");
@@ -269,11 +280,12 @@ function deref(p)
     return p;
 }
 
+// noinspection JSUnusedGlobalSymbols
 function explicit_deref(p)
 {
     while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
     {
-        q = memory[VAL(p)];
+        let q = memory[VAL(p)];
         debug_msg("Dereferencing " + hex(p) + " -> " + hex(q));
         if (q === undefined)
         {
@@ -410,16 +422,54 @@ function wam()
             predicate = predicates[code[state.P+1]];
             if (predicate !== undefined)
             {
-                // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
-                state.CP = {code: code,
-                            predicate: state.current_predicate,
-                            offset: state.P + 3};
-                debug_msg("Calling " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + " so setting CP to " + (state.P+3) + ", argument is " + code[state.P+2]);
-                state.num_of_args = ftable[code[state.P+1]][1];
-                state.B0 = state.B;
-                state.current_predicate = predicate;
-                code = predicate.clauses[predicate.clause_keys[0]].code;
-                state.P = 0;
+                if (state.trace_predicate && state.trace_call === 'trace') {
+                    // trace this call of X(...)
+                    // by setting trace_calls = false and calling '$debugger'(X(...))
+                    // Setting trace_calls = false prevents the trace mechanism from tracing itself.
+                    state.trace_call = 'no_trace';
+                    var target_ftor = code[state.P+1];
+
+                    // Create a 'traceArgStructure' for 'X(A0, ..., An-1)', copying
+                    // args A0 through An from register[0] to register[n-1]
+                    // where n = arity of predicate.
+
+                    var traceArgStructure = alloc_structure(target_ftor);
+                    var traceArgArity = ftable[target_ftor][1];
+                    for(var argOfst = 0;argOfst < traceArgArity;argOfst++) {
+                        memory[state.H++] = register[argOfst];
+                    }
+
+                    // Make the traceArgStructure the first (and only) argument
+                    // for the call of trace_predicate.
+
+                    register[0] = traceArgStructure;
+
+                    state.num_of_args = 1;
+                    state.B0 = state.B;
+                    state.current_predicate = state.trace_predicate;
+                    code = state.trace_code;
+                    state.P = 0;
+                } else {
+                    //  && state.call_predicate !== predicate
+                    if(state.trace_call === 'trace_next') {
+                        // 'trace_next' only occurs when call/1 is invoked by '$trace'.
+                        // Leave the trace_call value as 'trace_next' if the predicate being called is call/1.
+                        state.trace_call = 'trace';
+                    }
+                    // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
+                    state.CP = {
+                        code: code,
+                        predicate: state.current_predicate,
+                        offset: state.P + 3
+                    };
+                    //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
+                    debug_msg("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
+                    state.num_of_args = ftable[code[state.P + 1]][1];
+                    state.B0 = state.B;
+                    state.current_predicate = predicate;
+                    code = predicate.clauses[predicate.clause_keys[0]].code;
+                    state.P = 0;
+                }
             }
             else if (foreign_predicates[code[state.P+1]] !== undefined)
             {
@@ -438,6 +488,7 @@ function wam()
                 state.CP = {code: code,
                             predicate: state.current_predicate,
                             offset:state.P + 3};
+                //stdout("Calling (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
                 debug_msg("Calling (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + " and setting CP to " + (state.P + 3));
                 result = foreign_predicates[code[state.P+1]].apply(null, fargs);
                 state.foreign_retry = false;
@@ -460,6 +511,7 @@ function wam()
                 // No need to save continuation for execute
                 state.num_of_args = ftable[code[state.P+1]][1];
                 state.B0 = state.B;
+                //stdout("Executing " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
                 debug_msg("Executing " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1]);
                 state.current_predicate = predicate;
                 code = predicate.clauses[predicate.clause_keys[0]].code;
@@ -468,6 +520,7 @@ function wam()
             else if (foreign_predicates[code[state.P+1]] !== undefined)
             {
                 state.num_of_args = ftable[code[state.P+1]][1];
+                //stdout("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
                 debug_msg("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1]);
                 fargs = new Array(state.num_of_args);
                 for (i = 0; i < state.num_of_args; i++)
@@ -498,12 +551,15 @@ function wam()
             continue;
 
         case 6: // put_variable: Initialize a new variable in Yn, and also put it into Ai
-            register_location = state.E + code[state.P+1] + 2;
-            debug_msg("Putting new variable into Y" + code[state.P+1] + " at " + register_location);
+        {
+            let register_location = state.E + code[state.P + 1] + 2;
+            debug_msg("Putting new variable into Y" + code[state.P + 1] + " at " + register_location);
             memory[register_location] = register_location ^ (TAG_REF << WORD_BITS);
-            register[code[state.P+2]] = register_location ^ (TAG_REF << WORD_BITS);
+            register[code[state.P + 2]] = register_location ^ (TAG_REF << WORD_BITS);
             state.P += 3;
+            // noinspection UnnecessaryContinueJS
             continue;
+        }
 
         case 7: // put_variable: Put fresh var into registers Ai and Xn
             var freshvar = state.H ^ (TAG_REF << WORD_BITS);
@@ -518,7 +574,7 @@ function wam()
         case 8: // put_value
             if (code[state.P+1] === 0) // Y-register
             {
-                register_location = state.E + code[state.P+2] + 2;
+                let register_location = state.E + code[state.P+2] + 2;
                 if (memory[register_location] === undefined)
                     abort("Invalid memory access in put_value");
                 register[code[state.P+3]] = memory[register_location];
@@ -533,32 +589,31 @@ function wam()
             continue;
 
         case 9: // put_unsafe_value
-            register_location = state.E + code[state.P+1] + 2;
+        {
+            let register_location = state.E + code[state.P + 1] + 2;
             // This is the unsafe bit. If the value now in register[code[state.P+2]] is on the stack (that is, it is > E) then we have to push a new variables
             // onto the stack to avoid dangling references to things that are about to be cleaned up
-            if (memory[register_location] < state.E)
-            {
+            if (memory[register_location] < state.E) {
                 debug_msg("Value is safe");
                 // No, so we can just behave like put_value
-                register[code[state.P+2]] = deref(memory[register_location])
-            }
-            else
-            {
+                register[code[state.P + 2]] = deref(memory[register_location])
+            } else {
                 // Yes, so we need to push a new variable instead
                 debug_msg("x0 memory[" + state.E + "] = " + memory[state.E]);
-                debug_msg("Value is unsafe. Allocating a new unbound variable for it. It will go into Y" + code[state.P+1] + " @ " + register_location + ". E = " + state.E);
+                debug_msg("Value is unsafe. Allocating a new unbound variable for it. It will go into Y" + code[state.P + 1] + " @ " + register_location + ". E = " + state.E);
                 var v = alloc_var();
                 debug_msg("x1 memory[" + state.E + "] = " + memory[state.E]);
-                debug_msg("Binding " + hex(v) + " and Y" + code[state.P+1] + " = " + hex(memory[register_location]));
+                debug_msg("Binding " + hex(v) + " and Y" + code[state.P + 1] + " = " + hex(memory[register_location]));
                 bind(v, memory[register_location]);
                 debug_msg("x2 memory[" + state.E + "] = " + memory[state.E]);
-                register[code[state.P+2]] = v;
+                register[code[state.P + 2]] = v;
                 debug_msg("x3 memory[" + state.E + "] = " + memory[state.E]);
-                debug_msg("X" + code[state.P+2] + " <- " + v);
+                debug_msg("X" + code[state.P + 2] + " <- " + v);
             }
             state.P += 3;
+            // noinspection UnnecessaryContinueJS
             continue;
-
+        }
         case 10: // put_constant C into Ai            
             register[code[state.P+2]] = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
             state.P += 3;
@@ -589,7 +644,7 @@ function wam()
         case 15: // get_variable
             if (code[state.P+1] === 0) // Y-register
             {
-                register_location = state.E + code[state.P+2] + 2;
+                let register_location = state.E + code[state.P+2] + 2;
                 debug_msg("Y" + code[state.P+2] + " <- " + hex(register[code[state.P+3]]));
                 memory[register_location] = register[code[state.P+3]];
             }
@@ -606,7 +661,7 @@ function wam()
             gc_check(target);
             if (code[state.P+1] === 0) // Y-register
             {
-                register_location = state.E + code[state.P+2] + 2;
+                let register_location = state.E + code[state.P+2] + 2;
                 source = memory[register_location];
             }
             else
@@ -651,17 +706,17 @@ function wam()
             
 
         case 19: // get_structure
-            var ftor = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+            var structure_ftor = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
             addr = deref(register[code[state.P+2]]);
             state.P += 3;
             if (TAG(addr) === TAG_REF)
             {
                 debug_msg("Arg passed is unbound. Proceeding in WRITE mode");
                 state.mode = WRITE;
-                a = alloc_structure(ftor);
+                let a = alloc_structure(structure_ftor);
                 bind(memory[addr], a);
             }
-            else if (TAG(addr) === TAG_STR && memory[VAL(addr)] === ftor)
+            else if (TAG(addr) === TAG_STR && memory[VAL(addr)] === structure_ftor)
             {
                 debug_msg("Arg passed is bound to the right functor. Proceeding in READ mode from " + (VAL(addr)+1));
                 state.mode = READ;
@@ -739,7 +794,7 @@ function wam()
             if (code[state.P+1] === 0) // Y-register
             {
                 debug_msg("... for register Y" + code[state.P+2]);
-                register_location = state.E + code[state.P+2] + 2;
+                let register_location = state.E + code[state.P+2] + 2;
                 // GC: This needs to be trailed if state.B is not 0, apparently
                 bind(memory[register_location], source);
             }
@@ -757,7 +812,7 @@ function wam()
                 source = memory[state.S++];
                 if (code[state.P+1] === 0) // Y-register
                 {
-                    register_location = state.E + code[state.P+2] + 2;
+                    let register_location = state.E + code[state.P+2] + 2;
                     did_fail = !unify(memory[register_location], source);
                 }
                 else
@@ -769,7 +824,7 @@ function wam()
             {
                 if (code[state.P+1] === 0) // Y-register
                 {
-                    register_location = state.E + code[state.P+2] + 2;
+                    let register_location = state.E + code[state.P+2] + 2;
                     memory[state.H++] = memory[register_location];
                 }
                 else
@@ -789,7 +844,7 @@ function wam()
                 source = memory[state.S++];
                 if (code[state.P+1] === 0) // Y-register
                 {
-                    register_location = state.E + code[state.P+2] + 2;
+                    let register_location = state.E + code[state.P+2] + 2;
                     did_fail = !unify(memory[register_location], source);
                 }
                 else
@@ -802,7 +857,7 @@ function wam()
                 var addr;
                 if (code[state.P+1] === 0) // Y-register;
                 {
-                    register_location = state.E + code[state.P+2] + 2;
+                    let register_location = state.E + code[state.P+2] + 2;
                     addr = memory[register_location];
                 }
                 else
@@ -821,7 +876,7 @@ function wam()
                 {
                     debug_msg("Unify local: unsafe. Globalizing");
                     // Address is on the stack. Push a new variable onto the heap and bind to the value
-                    fresh = state.H ^ (TAG_REF << WORD_BITS);
+                    let fresh = state.H ^ (TAG_REF << WORD_BITS);
                     memory[state.H++] = fresh;
                     debug_msg("Binding fresh variable " + fresh + " to " + addr);
                     bind(fresh, addr);
@@ -837,8 +892,8 @@ function wam()
         case 26: // unify_constant
             if (state.mode === READ)
             {
-                sym = deref(memory[state.S++]);
-                arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+                let sym = deref(memory[state.S++]);
+                let arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
                 state.P += 2;
                 debug_msg("sym: " + hex(sym) + ", arg: " + hex(arg));
                 if (TAG(sym) === TAG_REF)
@@ -859,8 +914,8 @@ function wam()
         case 27: // unify_integer
             if (state.mode === READ)
             {
-                sym = deref(memory[state.S++]);
-                arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+                let sym = deref(memory[state.S++]);
+                let arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
                 state.P += 2;
                 if (TAG(sym) === TAG_REF)
                 {
@@ -1039,25 +1094,22 @@ function wam()
             continue;
 
         case 32: // cut(I)
-            y = VAL(memory[state.E + 2 + code[state.P+1]]);
-            debug_msg("cut(Y" + code[state.P+1] + "). B = " + state.B + " B0 = " + state.B0);
-            debug_msg("Cutting to memory[" + (state.E + 2 + code[state.P+1]) + "] = " + y);
+        {
+            let y = VAL(memory[state.E + 2 + code[state.P + 1]]);
+            debug_msg("cut(Y" + code[state.P + 1] + "). B = " + state.B + " B0 = " + state.B0);
+            debug_msg("Cutting to memory[" + (state.E + 2 + code[state.P + 1]) + "] = " + y);
             var result = true;
-            if (state.B > y)
-            {
-                while (cleanups[0] !== undefined && cleanups[0].B > y && cleanups[0].B < state.B0)
-                {
+            if (state.B > y) {
+                while (cleanups[0] !== undefined && cleanups[0].B > y && cleanups[0].B < state.B0) {
                     debug_msg("Cutting to " + y + ", and top cleanup is protecting " + cleanups[0].B + " so executing " + cleanups[0].P);
                     debug_msg("State is currently " + JSON.stringify(state));
                     result = run_cleanup(cleanups[0]) && result;
                     cleanups.shift();
-                }    
+                }
                 state.B = y;
                 if (state.B > 0)
                     tidy_trail();
-            }
-            else
-            {
+            } else {
                 debug_msg("... has no effect");
             }
             debug_msg("Cut complete. State is " + JSON.stringify(state));
@@ -1065,7 +1117,9 @@ function wam()
                 state.P += 2;
             else if (!backtrack())
                 return false;
+            // noinspection UnnecessaryContinueJS
             continue;
+        }
 
         case 33: // get_level(I)
             debug_msg("Setting memory[" + (state.E + 2 + code[state.P+1]) + "] to B0: " + state.B0 + " (state.B = " + state.B + ")");
@@ -1112,7 +1166,7 @@ function wam()
             unwind_trail(memory[state.B + n + 5], state.TR);
             state.TR = memory[state.B + n + 5];
             state.H = memory[state.B + n + 6];
-            state.HB = state.H
+            state.HB = state.H;
             continue;
         case 43: // get_choicepoint
             i = code[state.P+1];
@@ -1152,8 +1206,8 @@ function wam()
         case 52: // unify_float
             if (state.mode === READ)
             {
-                var sym = deref(memory[state.S++]);
-                var arg = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
+                sym = deref(memory[state.S++]);
+                arg = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
                 state.P += 2;
                 if (TAG(sym) === TAG_REF)
                 {
@@ -1171,14 +1225,16 @@ function wam()
             continue;
 
         case 60: // put_variable Yn
+        {
             // Note that this is different from put_variable(Yn, Ai) in that it ONLY puts a fresh variable into Yn
             // This is needed to make garbage collection safe
-            register_location = state.E + code[state.P+1] + 2;
-            debug_msg("Putting new variable into Y" + code[state.P+1] + " at " + register_location);
+            let register_location = state.E + code[state.P + 1] + 2;
+            debug_msg("Putting new variable into Y" + code[state.P + 1] + " at " + register_location);
             memory[register_location] = register_location ^ (TAG_REF << WORD_BITS);
             state.P += 2;
+            // noinspection UnnecessaryContinueJS
             continue;
-
+        }
             
 
         case 254: // Only clause: NOP
@@ -1194,6 +1250,10 @@ function wam()
     return true;
 }
 
+function predicate_trace_set(value) {
+    state.trace_call = atable[VAL(value)];
+    return true;
+}
 
 /* Testing */
 
@@ -1205,6 +1265,7 @@ function hex(number)
     {
     	number = 0xFFFFFFFF + number + 1;
     }
+    // noinspection JSCheckFunctionSignatures
     return "0x" + number.toString(16).toUpperCase();
 }
 
@@ -1359,6 +1420,7 @@ function undefined_predicate(ftor)
 // End exceptions code
 
 // /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc foreign.js wam.js bootstrap.js -e "demo()"
+// noinspection JSUnusedGlobalSymbols
 function demo(d)
 {
     debugging = d;
@@ -1384,6 +1446,7 @@ function demo(d)
 }
 
 
+// noinspection JSUnusedGlobalSymbols
 function unit_tests(d)
 {
     debugging = d;

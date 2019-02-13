@@ -33,3 +33,6 @@ add_element_test :-
   dom_element_attribute_value(CurrentDiv, id, simpletest),
   dom_element_property(Body, tag, body),
   insert_before_dom_node(Body, CurrentDiv, NewDiv).
+
+mem(X, [X|_]).
+mem(X, [_|T]) :- mem(X, T).

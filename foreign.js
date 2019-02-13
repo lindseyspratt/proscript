@@ -1,3 +1,5 @@
+var compile_buffer = [];
+
 // Round toward zero by default
 function round(a)
 {
@@ -1212,6 +1214,10 @@ function predicate_nodebug()
 
 function predicate_jmp(vars)
 {
+    if(state.trace_call === 'trace_next_jmp') {
+        state.trace_call = 'trace_next';
+    }
+
     state.P = -1; // PC will be incremented by 3 after this if we succeed to 2. This is where queries are compiled from, since the first two bytes are for try/retry/trust
     code = compile_buffer.slice(0);
     register[0] = vars;
