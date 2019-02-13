@@ -130,8 +130,7 @@ function initialize()
              current_predicate: null,
              trace_call: 'no_trace',
              trace_predicate: trace_predicate,
-             trace_code: trace_code,
-             call_predicate: call_predicate};
+             trace_code: trace_code};
     code = bootstrap_code;
 }
 
@@ -983,14 +982,14 @@ function wam()
                 memory[newB + i + 1] = register[i];
             }
             // Save the current context
-            memory[newB+n+1] = state.E;
-            memory[newB+n+2] = state.CP;
-            memory[newB+n+3] = state.B;
+            memory[newB+n+CP_E] = state.E;
+            memory[newB+n+CP_CP] = state.CP;
+            memory[newB+n+CP_B] = state.B;
             next = code[state.P+1];
             if ((next & 0x80000000) === 0)
             {
                 // next is a clause index in the current predicate
-                memory[newB+n+4] = {code: state.current_predicate.clauses[next].code, 
+                memory[newB+n+CP_Next] = {code: state.current_predicate.clauses[next].code,
                                     predicate:state.current_predicate, 
                                     offset:0};
             }
@@ -998,14 +997,14 @@ function wam()
             {
                 
                 // next is an absolute address in the current clause: Used for auxiliary clauses only
-                memory[newB+n+4] = {code: code, 
+                memory[newB+n+CP_Next] = {code: code,
                                     predicate: state.current_predicate,
                                     offset:next ^ 0x80000000};
             }
-            //memory[newB+n+4] = {code: code, offset:code[state.P+1]};
-            memory[newB+n+5] = state.TR;
-            memory[newB+n+6] = state.H;
-            memory[newB+n+7] = state.B0;
+            //memory[newB+n+CP_Next] = {code: code, offset:code[state.P+1]};
+            memory[newB+n+CP_TR] = state.TR;
+            memory[newB+n+CP_H] = state.H;
+            memory[newB+n+CP_B0] = state.B0;
             state.B = newB;
             debug_msg("case 28: Before we created the choicepoint, HB was " + state.HB);
             state.HB = state.H;
@@ -1305,7 +1304,10 @@ function copy_state(s)
             running: s.running,
             num_of_args: s.num_of_args,
             foreign_retry: s.foreign_retry,
-            current_predicate: s.current_predicate};
+            current_predicate: s.current_predicate,
+            trace_call: s.trace_call,
+            trace_predicate: s.trace_predicate,
+            trace_code: s.trace_code};
 }
 
 function copy_registers(r)
