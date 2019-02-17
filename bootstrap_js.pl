@@ -389,6 +389,14 @@ append([],Ys,Ys).
 append([X|Xs],Ys,[X|Zs]) :-
         append(Xs,Ys,Zs).
 
+length(L, N) :-
+        length(L, 0, N).
+
+length([], K, K) :- !.
+length([_|T], J, K) :-
+        N is J + 1,
+        length(T, N, K).
+
 call(A, B):-
         A =.. [Functor|Args],
         append(Args, [B], NewArgs),

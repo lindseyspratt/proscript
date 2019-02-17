@@ -3,15 +3,15 @@ initialize();
 var can_backtrack = false;
 var x_history = [];
 
-jQuery(function($, undefined) {
-    $('#simpletest').terminal(function(command, term) {
+jQuery(function ($, undefined) {
+    $('#simpletest').terminal(function (command, term) {
         if (command !== '') {
             try {
                 top_level(command, this);
                 // if (result !== undefined) {
                 //     this.echo(new String(result));
                 // }
-            } catch(e) {
+            } catch (e) {
                 this.error(String(e));
             }
         } else {
@@ -20,14 +20,14 @@ jQuery(function($, undefined) {
     }, {
         greetings: 'Proscript Interpreter',
         name: 'pl_interp',
-        height: 200,
+        height: 600,
         prompt: '| ?- '
     });
 });
 
 var stdout;
 
-function predicate_flush_stdout () {
+function predicate_flush_stdout() {
     // no op
     return true;
 }
@@ -35,18 +35,18 @@ function predicate_flush_stdout () {
 function top_level(query, term) {
     solve_query(query, term);
 
-    if(can_backtrack) {
-        term.push(function(command, term) {
+    if (can_backtrack) {
+        term.push(function (command, term) {
             backtrack_level(command, term);
-        },{
+        }, {
             name: 'backtrack',
             prompt: '  ? '
         });
-     }
+    }
 }
 
 function backtrack_level(command, term) {
-    if(can_backtrack) {
+    if (can_backtrack) {
         if (command === ';') {
             try_backtrack();
         } else if (command === 'a') {
@@ -65,9 +65,9 @@ function backtrack_level(command, term) {
 var buffer;
 
 function buffered_write(msg, term) {
-    var lines = msg.split('\n');
-    var line;
-    for (var ofst = 0; ofst < lines.length - 1; ofst++) {
+    let lines = msg.split('\n');
+    for (let ofst = 0; ofst < lines.length - 1; ofst++) {
+        let line;
         if (ofst === 0 && buffer && buffer !== '') {
             line = buffer + lines[ofst];
             buffer = '';
@@ -78,11 +78,11 @@ function buffered_write(msg, term) {
         term.echo(line);
     }
 
-    buffer = lines[lines.length - 1];
+    buffer = (buffer ? buffer : '') + lines[lines.length - 1];
 }
 
 function solve_query(query, term) {
-    stdout = function(msg) {
+    stdout = function (msg) {
         buffered_write(msg, term);
     };
 
@@ -106,46 +106,34 @@ function debug(msg) {
     stdout('debug: ' + msg + '\n');
 }
 
-    function try_running()
-    {
-        try
-        {
-            if (!wam())
-            {
-                stdout("false.\n");
-            }
+function try_running() {
+    try {
+        if (!wam()) {
+            stdout("false.\n");
         }
-        catch (anything)
-        {
-            stdout('wam error: ' + anything);
-        }
-        if (state.B !== 0)
-        {
-            debug_msg("Can backtrack");
-            can_backtrack = true;
-        }
-        else
-        {
-            debug_msg("No more solutions after this");
-            can_backtrack = false;
-        }
+    } catch (anything) {
+        stdout('wam error: ' + anything);
     }
+    if (state.B !== 0) {
+        debug_msg("Can backtrack");
+        can_backtrack = true;
+    } else {
+        debug_msg("No more solutions after this");
+        can_backtrack = false;
+    }
+}
 
 function try_backtrack() {
-    if (backtrack())
-    {
+    if (backtrack()) {
         try_running();
-    }
-    else
-    {
+    } else {
         stdout("no more solutions.\n");
         can_backtrack = false;
     }
 }
 
 function try_backtrack_all() {
-    while (backtrack())
-    {
+    while (backtrack()) {
         try_running();
     }
 
