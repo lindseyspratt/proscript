@@ -385,7 +385,7 @@ function alloc_list()
     return result;
 }
 
-function setup_trace_call(target_ftor) {
+function wam_setup_trace_call(target_ftor) {
     // Create a 'traceArgStructure' for 'X(A0, ..., An-1)', copying
     // args A0 through An from register[0] to register[n-1]
     // where n = arity of predicate.
@@ -408,6 +408,25 @@ function setup_trace_call(target_ftor) {
     }
     register[1] = state.trace_info;
     register[2] = PL_put_integer(state.trace_identifier);
+    return traceArgArity;
+}
+
+function wam_complete_call_or_execute(predicate) {
+    state.B0 = state.B;
+    state.num_of_args = ftable[code[state.P + 1]][1];
+    state.current_predicate = predicate;
+    code = predicate.clauses[predicate.clause_keys[0]].code;
+    state.P = 0;
+}
+
+function wam_setup_and_call_foreign() {
+    state.num_of_args = ftable[code[state.P+1]][1];
+    let fargs = new Array(state.num_of_args);
+    for (i = 0; i < state.num_of_args; i++)
+        fargs[i] = deref(register[i]);
+    let result = foreign_predicates[code[state.P+1]].apply(null, fargs);
+    state.foreign_retry = false;
+    return result;
 }
 
 function wam()
@@ -418,6 +437,7 @@ function wam()
     var sym;
     var arg;
     var offset;
+    var functor;
 
     state.running = true;
     while (state.running)
@@ -467,10 +487,13 @@ function wam()
             continue;
 
         case 3: // call
-            predicate = predicates[code[state.P+1]];
-            if (predicate !== undefined)
-            {
-                // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
+
+            functor = atable[ftable[code[state.P + 1]][0]];
+
+            if (! functor.startsWith('$trace') && functor !== 'true' && state.trace_predicate && state.trace_call === 'trace') {
+                // trace this call of X(...)
+                // by setting trace_call = no_trace and calling '$trace'(X(...))
+                // Setting trace_call = no_trace prevents the trace mechanism from tracing itself.
                 state.CP = {
                     code: code,
                     predicate: state.current_predicate,
@@ -478,133 +501,120 @@ function wam()
                 };
                 state.B0 = state.B;
 
-                if (state.trace_predicate && state.trace_call === 'trace') {
-                    // trace this call of X(...)
-                    // by setting trace_call = no_trace and calling '$trace'(X(...))
-                    // Setting trace_call = no_trace prevents the trace mechanism from tracing itself.
+                state.trace_call = 'no_trace';
+                debug_msg("Set state.trace_call to " + state.trace_call);
 
-                    state.trace_call = 'no_trace';
-                    debug_msg("Set state.trace_call to " + state.trace_call);
+                state.trace_identifier++;
 
-                    state.trace_identifier++;
+                let target_ftor = code[state.P+1];
+                let traceArgArity = wam_setup_trace_call(target_ftor);
 
-                    let target_ftor = code[state.P+1];
+                debug_msg("Calling trace " + atable[ftable[target_ftor][0]] + "/" + traceArgArity + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
 
-                    setup_trace_call(target_ftor);
+                state.num_of_args = 3;
+                state.current_predicate = state.trace_predicate;
+                code = state.trace_code;
+                state.P = 0;
+            } else {
+                if (state.trace_call === 'trace_next') {
+                    // 'trace_next' only occurs when call/1 is invoked by '$trace'.
+                    state.trace_call = 'trace';
+                    debug_msg("Set state.trace_call from to 'trace_next' to " + state.trace_call);
+                }
+                predicate = predicates[code[state.P + 1]];
+                if (predicate !== undefined) {
+                    // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
+                    state.CP = {
+                        code: code,
+                        predicate: state.current_predicate,
+                        offset: state.P + 3
+                    };
 
-                    debug_msg("Calling trace " + atable[ftable[target_ftor][0]] + "/" + traceArgArity + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
-
-                    state.num_of_args = 3;
-                    state.current_predicate = state.trace_predicate;
-                    code = state.trace_code;
-                    state.P = 0;
-                } else {
-                    if(state.trace_call === 'trace_next') {
-                        // 'trace_next' only occurs when call/1 is invoked by '$trace'.
-                        state.trace_call = 'trace';
-                        debug_msg("Set state.trace_call from to 'trace_next' to " + state.trace_call);
-                    }
-                     //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
+                    //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
                     debug_msg("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
-                    state.num_of_args = ftable[code[state.P + 1]][1];
-                    state.current_predicate = predicate;
-                    code = predicate.clauses[predicate.clause_keys[0]].code;
-                    state.P = 0;
+                    wam_complete_call_or_execute(predicate);
+                } else if (foreign_predicates[code[state.P + 1]] !== undefined) {
+                    // This is a bit counter-intuitive since it seems like we are never going to get a proceed to use the CP.
+                    // Remember that any time we might need CP to be saved, it will be. (If there is more than one goal, there will be an environment).
+                    // If there is only one goal (ie a chain rule) then we will be in exeucte already, not call.
+                    // This means it is never unsafe to set CP in a call port.
+                    // Further, rememebr that state.CP is used to create choicepoints (and environments), and since foreign frames may create these, we must set CP to
+                    // something sensible, even though we never expect to use it to actually continue execution from.
+                    state.CP = {
+                        code: code,
+                        predicate: state.current_predicate,
+                        offset: state.P + 3
+                    };
+                    //stdout("Calling (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
+                    debug_msg("Calling (foreign) " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " and setting CP to " + (state.P + 3));
+                    result = wam_setup_and_call_foreign();
+                    if (result)
+                        state.P = state.P + 3;
+                    else if (!backtrack())
+                        return false;
+                } else {
+                    if (!undefined_predicate(code[state.P + 1]))
+                        return false;
                 }
-            }
-            else if (foreign_predicates[code[state.P+1]] !== undefined)
-            {
-                state.num_of_args = ftable[code[state.P+1]][1];
-                fargs = new Array(state.num_of_args);
-                for (i = 0; i < state.num_of_args; i++)
-                {
-                    fargs[i] = deref(register[i]);
-                }
-                // This is a bit counter-intuitive since it seems like we are never going to get a proceed to use the CP.
-                // Remember that any time we might need CP to be saved, it will be. (If there is more than one goal, there will be an environment).
-                // If there is only one goal (ie a chain rule) then we will be in exeucte already, not call.
-                // This means it is never unsafe to set CP in a call port.
-                // Further, rememebr that state.CP is used to create choicepoints (and environments), and since foreign frames may create these, we must set CP to
-                // something sensible, even though we never expect to use it to actually continue execution from.
-                state.CP = {code: code,
-                            predicate: state.current_predicate,
-                            offset:state.P + 3};
-                //stdout("Calling (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
-                debug_msg("Calling (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + " and setting CP to " + (state.P + 3));
-                result = foreign_predicates[code[state.P+1]].apply(null, fargs);
-                state.foreign_retry = false;
-                if (result)
-                    state.P = state.P + 3;
-                else if (!backtrack())
-                    return false;
-            }
-            else
-            {
-                if (!undefined_predicate(code[state.P+1]))
-                    return false;
             }
             continue;
 
         case 4: // execute
-            predicate = predicates[code[state.P+1]];
-            if (predicate !== undefined)
-            {
+             functor = atable[ftable[code[state.P + 1]][0]];
+
+            if (! functor.startsWith('$trace') && functor !== 'true' && state.trace_predicate && state.trace_call === 'trace') {
+                // trace this execute of X(...)
+                // by setting trace_call = no_trace and calling '$trace'(X(...))
+                // Setting trace_calls = false prevents the trace mechanism from tracing itself.
+                state.trace_call = 'no_trace';
+                state.trace_identifier++;
+                debug_msg("Set state.trace_call to " + state.trace_call);
+                let target_ftor = code[state.P+1];
+                let traceArgArity = wam_setup_trace_call(target_ftor);
+
+                debug_msg("Executing trace " + atable[ftable[target_ftor][0]] + "/" + traceArgArity);
                 state.B0 = state.B;
-                if (state.trace_predicate && state.trace_call === 'trace') {
-                    // trace this execute of X(...)
-                    // by setting trace_call = no_trace and calling '$trace'(X(...))
-                    // Setting trace_calls = false prevents the trace mechanism from tracing itself.
-                    state.trace_call = 'no_trace';
-                    state.trace_identifier++;
-                    debug_msg("Set state.trace_call to " + state.trace_call);
-                    let target_ftor = code[state.P+1];
-                    setup_trace_call(target_ftor);
+                state.num_of_args = 3;
+                state.current_predicate = state.trace_predicate;
+                code = state.trace_code;
+                state.P = 0;
+            }
+            else {
+                predicate = predicates[code[state.P+1]];
+                if(state.trace_call === 'trace_next') {
+                    // 'trace_next' only occurs when call/1 is invoked by '$trace'.
+                    state.trace_call = 'trace';
+                    debug_msg("Set state.trace_call from to 'trace_next' to " + state.trace_call);
+                }
 
-                    state.num_of_args = 3;
-                    debug_msg("Executing trace " + atable[ftable[target_ftor][0]] + "/" + traceArgArity);
-                    state.current_predicate = state.trace_predicate;
-                    code = state.trace_code;
-                    state.P = 0;
-                } else {
-                    if(state.trace_call === 'trace_next') {
-                        // 'trace_next' only occurs when call/1 is invoked by '$trace'.
-                        state.trace_call = 'trace';
-                        debug_msg("Set state.trace_call from to 'trace_next' to " + state.trace_call);
-                    }
-                    // No need to save continuation for execute
+                if (predicate !== undefined)
+                {
+                     // No need to save continuation for execute
 
-                    state.num_of_args = ftable[code[state.P + 1]][1];
                     //stdout("Executing " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
                     debug_msg("Executing " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
-                    state.current_predicate = predicate;
-                    code = predicate.clauses[predicate.clause_keys[0]].code;
-                    state.P = 0;
-                }
-            }
-            else if (foreign_predicates[code[state.P+1]] !== undefined)
-            {
-                state.num_of_args = ftable[code[state.P+1]][1];
-                //stdout("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
-                debug_msg("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1]);
-                fargs = new Array(state.num_of_args);
-                for (i = 0; i < state.num_of_args; i++)
-                    fargs[i] = deref(register[i]);
-                result = foreign_predicates[code[state.P+1]].apply(null, fargs);
-                state.foreign_retry = false;
-                debug_msg("Foreign result: " + result + " and CP: " + state.CP);
-                if (result)
+                    wam_complete_call_or_execute(predicate);
+                 }
+                else if (foreign_predicates[code[state.P+1]] !== undefined)
                 {
-                    state.current_predicate = state.CP.predicate;
-                    code = state.CP.code;
-                    state.P = state.CP.offset;
+                    //stdout("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
+                    debug_msg("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1]);
+                    result = wam_setup_and_call_foreign();
+                    debug_msg("Foreign result: " + result + " and CP: " + state.CP);
+                    if (result)
+                    {
+                        state.current_predicate = state.CP.predicate;
+                        code = state.CP.code;
+                        state.P = state.CP.offset;
+                    }
+                    else if (!backtrack())
+                        return false;
                 }
-                else if (!backtrack())
-                    return false;
-            }
-            else
-            {
-                if (!undefined_predicate(code[state.P+1]))
-                    return false;
+                else
+                {
+                    if (!undefined_predicate(code[state.P+1]))
+                        return false;
+                }
             }
             continue;
 
