@@ -1,5 +1,5 @@
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
-DEBUG=false
+DEBUG=true
 SWIPL=/opt/local/bin/swipl
 
 
@@ -25,3 +25,6 @@ gc:		wam-pp.js bootstrap.js standalone.js
 
 dump-state: wam-pp.js bootstrap.js standalone.js dump.js
 		$(JSC) wam-pp.js bootstrap.js standalone.js dump.js  -e "dump()"
+
+test_proscript:		wam-pp.js bootstrap.js standalone.js
+		$(JSC) wam-pp.js bootstrap.js standalone.js  -e "proscript(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"

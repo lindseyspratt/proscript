@@ -385,6 +385,31 @@ function alloc_list()
     return result;
 }
 
+function setup_trace_call(target_ftor) {
+    // Create a 'traceArgStructure' for 'X(A0, ..., An-1)', copying
+    // args A0 through An from register[0] to register[n-1]
+    // where n = arity of predicate.
+
+    let traceArgArity = ftable[target_ftor][1];
+    if(traceArgArity === 0) {
+        register[0] = (ftable[target_ftor][0]) ^ (TAG_ATM << WORD_BITS);
+    } else {
+        let traceArgStructure = alloc_structure(target_ftor);
+        let argOfst = 0;
+        for (; argOfst < traceArgArity; argOfst++) {
+            memory[state.H++] = register[argOfst];
+        }
+
+        // Make the traceArgStructure the first argument.
+        // The info term is the second argument. It is set
+        // by '$trace' before evaluating call/.
+
+        register[0] = traceArgStructure;
+    }
+    register[1] = state.trace_info;
+    register[2] = PL_put_integer(state.trace_identifier);
+}
+
 function wam()
 {
     var predicate;
@@ -445,58 +470,43 @@ function wam()
             predicate = predicates[code[state.P+1]];
             if (predicate !== undefined)
             {
+                // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
+                state.CP = {
+                    code: code,
+                    predicate: state.current_predicate,
+                    offset: state.P + 3
+                };
+                state.B0 = state.B;
+
                 if (state.trace_predicate && state.trace_call === 'trace') {
                     // trace this call of X(...)
                     // by setting trace_call = no_trace and calling '$trace'(X(...))
                     // Setting trace_call = no_trace prevents the trace mechanism from tracing itself.
+
                     state.trace_call = 'no_trace';
+                    debug_msg("Set state.trace_call to " + state.trace_call);
+
                     state.trace_identifier++;
 
                     let target_ftor = code[state.P+1];
 
-                    // Create a 'traceArgStructure' for 'X(A0, ..., An-1)', copying
-                    // args A0 through An from register[0] to register[n-1]
-                    // where n = arity of predicate.
+                    setup_trace_call(target_ftor);
 
-                    let traceArgStructure = alloc_structure(target_ftor);
-                    let traceArgArity = ftable[target_ftor][1];
-                    let argOfst = 0;
-                    for(;argOfst < traceArgArity;argOfst++) {
-                        memory[state.H++] = register[argOfst];
-                    }
-
-                    // Make the traceArgStructure the first argument.
-                    // The info term is the second argument. It is set
-                    // by '$trace' before evaluating call/.
-
-                    register[0] = traceArgStructure;
-                    register[1] = state.trace_info;
-                    register[2] = PL_put_integer(state.trace_identifier);
-                    debug_msg("Set state.trace_call to " + state.trace_call);
-                    debug_msg("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
+                    debug_msg("Calling trace " + atable[ftable[target_ftor][0]] + "/" + traceArgArity + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
 
                     state.num_of_args = 3;
-                    state.B0 = state.B;
                     state.current_predicate = state.trace_predicate;
                     code = state.trace_code;
                     state.P = 0;
                 } else {
-                    //  && state.call_predicate !== predicate
                     if(state.trace_call === 'trace_next') {
                         // 'trace_next' only occurs when call/1 is invoked by '$trace'.
                         state.trace_call = 'trace';
                         debug_msg("Set state.trace_call from to 'trace_next' to " + state.trace_call);
                     }
-                    // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
-                    state.CP = {
-                        code: code,
-                        predicate: state.current_predicate,
-                        offset: state.P + 3
-                    };
-                    //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
+                     //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
                     debug_msg("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
                     state.num_of_args = ftable[code[state.P + 1]][1];
-                    state.B0 = state.B;
                     state.current_predicate = predicate;
                     code = predicate.clauses[predicate.clause_keys[0]].code;
                     state.P = 0;
@@ -539,6 +549,7 @@ function wam()
             predicate = predicates[code[state.P+1]];
             if (predicate !== undefined)
             {
+                state.B0 = state.B;
                 if (state.trace_predicate && state.trace_call === 'trace') {
                     // trace this execute of X(...)
                     // by setting trace_call = no_trace and calling '$trace'(X(...))
@@ -547,28 +558,10 @@ function wam()
                     state.trace_identifier++;
                     debug_msg("Set state.trace_call to " + state.trace_call);
                     let target_ftor = code[state.P+1];
-
-                    // Create a 'traceArgStructure' for 'X(A0, ..., An-1)', copying
-                    // args A0 through An from register[0] to register[n-1]
-                    // where n = arity of predicate.
-
-                    let traceArgStructure = alloc_structure(target_ftor);
-                    let traceArgArity = ftable[target_ftor][1];
-                    let argOfst = 0;
-                    for(;argOfst < traceArgArity;argOfst++) {
-                        memory[state.H++] = register[argOfst];
-                    }
-
-                    // Make the traceArgStructure the first argument.
-                    // The info term is the second argument. It is set
-                    // by '$trace' before evaluating call/.
-
-                    register[0] = traceArgStructure;
-                    register[1] = state.trace_info;
-                    register[2] = PL_put_integer(state.trace_identifier);
+                    setup_trace_call(target_ftor);
 
                     state.num_of_args = 3;
-                    state.B0 = state.B;
+                    debug_msg("Executing trace " + atable[ftable[target_ftor][0]] + "/" + traceArgArity);
                     state.current_predicate = state.trace_predicate;
                     code = state.trace_code;
                     state.P = 0;
@@ -581,7 +574,6 @@ function wam()
                     // No need to save continuation for execute
 
                     state.num_of_args = ftable[code[state.P + 1]][1];
-                    state.B0 = state.B;
                     //stdout("Executing " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
                     debug_msg("Executing " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
                     state.current_predicate = predicate;

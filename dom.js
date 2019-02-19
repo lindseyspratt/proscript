@@ -663,7 +663,9 @@ function proscript(queryJS) {
     }
     catch (anything)
     {
-        console.log(anything);
+        if(console && console.log) {
+            console.log(anything);
+        }
         debug("Error. " + anything);
     }
 }
