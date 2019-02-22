@@ -105,3 +105,91 @@ notrace :-
 '$trace_msg1'(Label, Goal, Ancestors, ID) :-
     write(ID), write(' '), length(Ancestors, K), write(K),
     write(' '), write(Label), write(' '), writeln(Goal).
+
+
+'$traceX'(notrace, _, _) :-
+    !,
+    '$trace_set'(no_trace).
+
+'$traceX'(Goal, Ancestors, ID) :-
+    % Ensure trace_call == no_trace to prevent unbounded recursion.
+    '$trace_set'(no_trace),
+
+    '$trace_retry',
+    '$trace_interact'(call, fail, Goal, Ancestors, ID),
+
+    call(Goal),
+
+    '$trace_set'(no_trace),
+    '$trace_set_info'(Ancestors),
+
+    '$trace_retry',
+    '$trace_interact'(exit, redo, Goal, Ancestors, ID).
+
+
+'$trace_retry'.
+
+'$trace_retry' :-
+    '$trace_retry_value'(true),
+    '$trace_set_retry'(false),
+    '$trace_retry'.
+
+'$trace_interact'(A, _B, G, Anc, ID) :- '$trace_interact'(A, G, Anc, ID).
+'$trace_interact'(_A, B, G, Anc, ID) :- '$trace_retry_value'(false), '$trace_interact'(B, G, Anc, ID), !, fail.
+
+'$trace_interact'(L, G, Anc, ID) :-
+    '$trace_msg1'(L, G, Anc, ID),
+    repeat,
+    read_char(X),
+    writeln(X),
+    (member(X, [c, s, f, r])
+    ;
+    writeln('Commands are: "c" (creep), "s" (skip), "f" (fail), or "r" (retry).'),
+    fail),
+    !, % this cut terminates the repeat/0.,
+    '$trace_cmd'(X, L, G, Anc, ID).
+
+
+'$trace_cmd'(c, call, G, Anc, _) :-
+    !,
+    '$trace_push_info'(G, Anc),
+
+    % Setting state.trace_call == 'trace_next_jmp' makes the $jmp predicate set state.trace_call == 'trace_next'.
+    % (The $jmp predicate is used in the implementation of the call/1 predicate to prepare for the invocation of the
+    % WAM call instruction.)
+    % The 'trace_next' state makes the WAM call instruction set state.trace_call == 'trace'
+    % so that the *next* evaluation of call instruction will invoke trace/1.
+
+    '$trace_set'(trace_next_jmp).
+
+'$trace_cmd'(c, exit, _, _, _) :- % _L \= call
+    !,
+    '$trace_set'(trace).
+
+'$trace_cmd'(c, _L, _, _, _) :- % _L \= call
+    !.
+
+'$trace_cmd'(s, call, _, _, _) :- % skip
+    !,
+    '$trace_set'(no_trace).
+
+'$trace_cmd'(s, _, _, _, _) :- % skip
+    !.
+
+'$trace_cmd'(f, _, _, _, _) :- % skip
+    !,
+    fail.
+
+'$trace_cmd'(r, _, _, _, _) :- % skip
+    !,
+    '$trace_set_retry'(true),
+    fail.
+
+
+read_char(X) :- get_terminal_char(X), !.
+read_char(X) :- '$suspend', get_terminal_char(X).
+
+
+'$suspend' :- '$suspend_set'(true), halt. % the evaluation is un-suspended using backtrack().
+'$suspend' :- '$suspend_set'(false).
+

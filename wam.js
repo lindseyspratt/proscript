@@ -116,7 +116,7 @@ function debug_msg(msg)
 
 function initialize()
 {
-    var trace_ftor = VAL(lookup_functor('$trace', 3));
+    var trace_ftor = VAL(lookup_functor('$traceX', 3));
     var trace_predicate = predicates[trace_ftor];
     var trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
 
@@ -143,7 +143,8 @@ function initialize()
              trace_call: 'no_trace',
              trace_identifier: 0,
              trace_predicate: trace_predicate,
-             trace_code: trace_code};
+             trace_code: trace_code,
+             suspended: false};
     code = bootstrap_code;
 }
 
@@ -1333,6 +1334,12 @@ function wam()
             abort("unexpected opcode at P=" + (((state.current_predicate == null)?("no predicate"):(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1])) + "@" + state.P + ": " + code[state.P]));
         }        
     }
+    return true;
+}
+
+function predicate_suspend_set(value) {
+    state.suspended = (atable[VAL(value)] === 'true');
+    debug_msg("predicate_suspend_set: state.suspended is now set to " + state.suspended );
     return true;
 }
 

@@ -321,6 +321,10 @@ reset:-
         reserve_predicate(trace_unify/2, predicate_trace_unify),
         reserve_predicate('$trace_set'/1, predicate_trace_set),
         reserve_predicate('$trace_set_info'/1, predicate_trace_set_info),
+        reserve_predicate('$suspend_set'/1, predicate_suspend_set),
+        reserve_predicate(get_terminal_char/1, predicate_get_terminal_char),
+        reserve_predicate('$trace_set_retry'/1, predicate_trace_set_retry),
+        reserve_predicate('$trace_retry_value'/1, predicate_trace_retry_value),
 
         % Testing
         reserve_predicate(member/2, member),
