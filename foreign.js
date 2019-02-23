@@ -1248,14 +1248,31 @@ function mark_top_choicepoint(vars_list, markpoint)
 }
 
 // FIXME: Not implemented: [c, d, D, e, E, I, N, p, s, @, t, |, +]
-function predicate_format(stream, fmt, args)
-{
-    var result;
+function predicate_format(stream, fmt, args) {
+
+    //look for atom(X)
+    if (TAG(stream) === TAG_STR) {
+        let ftor = VAL(memory[VAL(stream)]);
+        if (atable[ftable[ftor][0]] === "atom" && ftable[ftor][1] === 1) {
+            let arg = memory[VAL(stream)+1];
+            if(TAG(arg) === TAG_REF) {
+                let result = format_to_string(fmt, args);
+                return unify(arg, lookup_atom(result));
+            }
+        }
+    }
+
     var s = {};
     if (!get_stream(stream, s))
         return false;
     stream = s.value;
-    result = "";
+    var result = format_to_string(fmt, args);
+    var bytes = toByteArray(result);
+    return (stream.write(stream, 1, bytes.length, bytes) >= 0)
+}
+
+function format_to_string(fmt, args) {
+    var result = "";
     fmt = atable[VAL(fmt)];
     var arg = args;
     var numarg = undefined;
@@ -1357,8 +1374,7 @@ function predicate_format(stream, fmt, args)
         else
             result += c;
     }
-    var bytes = toByteArray(result);
-    return (stream.write(stream, 1, bytes.length, bytes) >= 0)
+    return result;
 }
 
 function unmark_choicepoint(mark)

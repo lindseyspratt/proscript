@@ -20,3 +20,8 @@ function predicate_trace_set_retry(value) {
 function predicate_trace_retry_value(value) {
     return unify(value, lookup_atom(trace_retry));
 }
+
+function predicate_trace_set_prompt(value) {
+    state.trace_prompt = atable[VAL(value)];
+    return true;
+}

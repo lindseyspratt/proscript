@@ -138,16 +138,24 @@ notrace :-
 '$trace_interact'(_A, B, G, Anc, ID) :- '$trace_retry_value'(false), '$trace_interact'(B, G, Anc, ID), !, fail.
 
 '$trace_interact'(L, G, Anc, ID) :-
-    '$trace_msg1'(L, G, Anc, ID),
+    '$trace_prompt'(L, G, Anc, ID), % set up a terminal prompt using state.trace_prompt
+    '$trace_read_and_cmd'(L, G, Anc, ID).
+
+ '$trace_read_and_cmd'(L, G, Anc, ID) :-
     repeat,
-    read_char(X),
-    writeln(X),
-    (member(X, [c, s, f, r])
+    read_char(X), % read a terminal command (using suspend)
+    (member(X, [c, s, f, r, a])
     ;
-    writeln('Commands are: "c" (creep), "s" (skip), "f" (fail), or "r" (retry).'),
+    writeln('Commands are: "c" (creep), "s" (skip), "f" (fail), "r" (retry), or "a" (ancestors).'),
     fail),
     !, % this cut terminates the repeat/0.,
     '$trace_cmd'(X, L, G, Anc, ID).
+
+
+'$trace_prompt'(Label, Goal, Ancestors, ID) :-
+    length(Ancestors, K),
+    concat_list([ID, ' ', K, ' ', Label, ' ', Goal], Prompt),
+    '$trace_set_prompt'(Prompt).
 
 
 '$trace_cmd'(c, call, G, Anc, _) :-
@@ -176,14 +184,20 @@ notrace :-
 '$trace_cmd'(s, _, _, _, _) :- % skip
     !.
 
-'$trace_cmd'(f, _, _, _, _) :- % skip
+'$trace_cmd'(f, _, _, _, _) :- % fail
     !,
     fail.
 
-'$trace_cmd'(r, _, _, _, _) :- % skip
+'$trace_cmd'(r, _, _, _, _) :- % retry
     !,
     '$trace_set_retry'(true),
     fail.
+
+'$trace_cmd'(a, P, G, Anc, ID) :- % ancestors
+    !,
+    write('Ancestors: '),
+    writeln(Anc),
+    '$trace_read_and_cmd'(P, G, Anc, ID).
 
 
 read_char(X) :- get_terminal_char(X), !.
@@ -193,3 +207,20 @@ read_char(X) :- '$suspend', get_terminal_char(X).
 '$suspend' :- '$suspend_set'(true), halt. % the evaluation is un-suspended using backtrack().
 '$suspend' :- '$suspend_set'(false).
 
+concat_list(L, A) :-
+    concat_list(L, '', A).
+
+concat_list([], A, A).
+concat_list([H|T], A, B) :-
+    (atom(H) ->
+      atom_concat(A, H, X)
+    ;
+    number(H) ->
+      number_codes(H, HC),
+      atom_codes(HA, HC),
+      atom_concat(A, HA, X)
+    ;
+    format(atom(HA), '~w', [H]),
+    atom_concat(A, HA, X)
+    ),
+    concat_list(T, X, B).

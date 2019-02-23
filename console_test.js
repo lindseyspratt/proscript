@@ -21,26 +21,9 @@ jQuery(function ($, undefined) {
         greetings: 'Proscript Interpreter',
         name: 'pl_interp',
         height: 600,
-        prompt: '| ?- ',
-        keypress: key_press_input
+        prompt: '| ?- '
     });
 });
-
-function test_keypress(e) {
-    // characters not handled by this keypress function include: newline, backspace/delete
-    // These characters may be being intercepted by an implicit keydown function.
-
-    // Keys in e:
-    // originalEvent, type, isDefaultPrevented, target, currentTarget, relatedTarget, timeStamp,
-    // jQuery331008416865328782674, delegateTarget, handleObj, data, constructor, isPropagationStopped,
-    // isImmediatePropagationStopped, isSimulated, preventDefault, stopPropagation, stopImmediatePropagation,
-    // altKey, bubbles, cancelable, changedTouches, ctrlKey, detail, eventPhase, metaKey, pageX, pageY,
-    // shiftKey, view, char, charCode, key, keyCode, button, buttons, clientX, clientY, offsetX, offsetY,
-    // pointerId, pointerType, screenX, screenY, targetTouches, toElement, touches, which
-
-    alert('Key: ' + e.key + '\n' + 'char: ' + e.char + ', charCode:' + e.charCode + ', keyCode: ' + e.keyCode );
-    // return false; // this 'false' prevents the key from being displayed.
-}
 
 var stdout;
 
@@ -55,20 +38,59 @@ function top_level(query, term) {
     top_level_after_solve_query(term);
  }
 
- function top_level_after_solve_query(term) {
-     if (state.suspended) {
-         debug_msg("Suspended");
-         setup_keypress_for_input(term);
-     } else if (can_backtrack) {
-         term.push(function (command, term) {
-             backtrack_level(command, term);
-         }, {
-             name: 'backtrack',
-             prompt: '  ? '
-         });
-     }
+function top_level_after_solve_query(term) {
+    if (state.suspended) {
+        debug_msg("Suspended");
+        setup_term_for_input(term);
+    } else if (can_backtrack) {
+        term.push(function (command, term) {
+            backtrack_level(command, term);
+        }, {
+            name: 'backtrack',
+            prompt: '  ? '
+        });
+    }
+}
 
- }
+function setup_term_for_input(term) {
+
+    term.push(function (command, term) {
+        trace_level(command, term);
+    }, {
+        name: 'trace',
+        prompt: state.trace_prompt + ' ? '
+    });
+}
+
+function trace_level(command, term) {
+    input_buffer.push(command);
+    if (backtrack()) {
+        try_running();
+    } else {
+        stdout('wam error: backtrack failed after getting new input command. Expected backtrack to be active in WAM suspended for input.');
+    }
+    trace_level_after_backtrack(term);
+}
+
+function trace_level_after_backtrack(term) {
+        if (state.suspended) {
+            term.set_prompt(state.trace_prompt + ' ? ');
+        } else {
+            term.pop();
+
+            if (can_backtrack) {
+                term.push(function (command, term) {
+                    backtrack_level(command, term);
+                }, {
+                    name: 'backtrack',
+                    prompt: '  ? '
+                });
+            }
+        }
+
+
+}
+
 function backtrack_level(command, term) {
     if (can_backtrack) {
         if (command === ';') {
@@ -103,32 +125,6 @@ function buffered_write(msg, term) {
     }
 
     buffer = (buffer ? buffer : '') + lines[lines.length - 1];
-}
-
-var keypress_is_active = false;
-
-function setup_keypress_for_input() {
-    keypress_is_active = true;
-}
-
-function disable_keypress_for_input() {
-    keypress_is_active = false;
-}
-
-function key_press_input(e, term) {
-    if (keypress_is_active) {
-        disable_keypress_for_input();
-        setTimeout(function () {
-            input_buffer.push(e.key);
-            if (backtrack()) {
-                try_running();
-            } else {
-                stdout('wam error: backtrack failed after getting new input character. Expected backtrack to be active in WAM suspended for input.');
-            }
-            top_level_after_solve_query(term)
-        }, 0);
-        return false; // do not echo the input. It is printed by the debugger.
-    }
 }
 
 function solve_query(query, term) {

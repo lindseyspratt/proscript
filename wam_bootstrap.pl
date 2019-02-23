@@ -325,6 +325,7 @@ reset:-
         reserve_predicate(get_terminal_char/1, predicate_get_terminal_char),
         reserve_predicate('$trace_set_retry'/1, predicate_trace_set_retry),
         reserve_predicate('$trace_retry_value'/1, predicate_trace_retry_value),
+        reserve_predicate('$trace_set_prompt'/1, predicate_trace_set_prompt),
 
         % Testing
         reserve_predicate(member/2, member),

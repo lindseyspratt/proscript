@@ -144,6 +144,7 @@ function initialize()
              trace_identifier: 0,
              trace_predicate: trace_predicate,
              trace_code: trace_code,
+             trace_prompt: '>',
              suspended: false};
     code = bootstrap_code;
 }
@@ -1351,7 +1352,7 @@ function predicate_trace_set(value) {
 
 function predicate_trace_set_info(term) {
     state.trace_info = term;
-    stdout('info: ' + term_to_string(term) + '\n');
+    //stdout('info: ' + term_to_string(term) + '\n');
     return true;
 }
 
