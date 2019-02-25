@@ -137,11 +137,11 @@ notrace :-
 '$trace_interact'(A, _B, G, Anc, ID) :- '$trace_interact'(A, G, Anc, ID).
 '$trace_interact'(_A, B, G, Anc, ID) :- '$trace_retry_value'(false), '$trace_interact'(B, G, Anc, ID), !, fail.
 
-'$trace_interact'(L, G, Anc, ID) :-
-    '$trace_prompt'(L, G, Anc, ID), % set up a terminal prompt using state.trace_prompt
-    '$trace_read_and_cmd'(L, G, Anc, ID).
+'$trace_interact'(P, G, Anc, ID) :-
+    '$trace_prompt'(P, G, Anc, ID), % set up a terminal prompt using state.trace_prompt
+    '$trace_read_and_cmd'(P, G, Anc, ID).
 
- '$trace_read_and_cmd'(L, G, Anc, ID) :-
+ '$trace_read_and_cmd'(P, G, Anc, ID) :-
     repeat,
     read_char(X), % read a terminal command (using suspend)
     (member(X, [c, s, f, r, a])
@@ -149,14 +149,55 @@ notrace :-
     writeln('Commands are: "c" (creep), "s" (skip), "f" (fail), "r" (retry), or "a" (ancestors).'),
     fail),
     !, % this cut terminates the repeat/0.,
-    '$trace_cmd'(X, L, G, Anc, ID).
+    '$trace_cmd'(X, P, G, Anc, ID).
 
 
-'$trace_prompt'(Label, Goal, Ancestors, ID) :-
+'$trace_prompt'(Port, Goal, Ancestors, ID) :-
     length(Ancestors, K),
-    concat_list([ID, ' ', K, ' ', Label, ' ', Goal], Prompt),
+    pad_number(ID, 7, PaddedID),
+    pad_number(K, 5, PaddedK),
+    capitalize(Port, CapitalizedPort),
+    concat_list([PaddedID, PaddedK, ' ', CapitalizedPort, ': ', Goal], Prompt),
     '$trace_set_prompt'(Prompt).
 
+pad_number(N, Size, PaddedN) :-
+    number_codes(N, NCodes),
+    length(NCodes, NLength),
+    (NLength < Size
+      -> K is Size - NLength,
+         pad_codes(K, PadCodes),
+         append(PadCodes, NCodes, PaddedNCodes)
+     ;
+         append(" ", NCodes, PaddedNCodes)
+    ),
+    atom_codes(PaddedN, PaddedNCodes).
+
+pad_codes(K, Codes) :-
+    length(Codes, K),
+    " " = [B],
+    pad_codes1(Codes, B).
+
+
+pad_codes1([], _).
+pad_codes1([B|T], B) :-
+    pad_codes1(T, B).
+
+capitalize(A, CA) :-
+    atom_codes(A, Xs),
+    Xs = [X|Codes],
+    capitalize_code(X, CX),
+    atom_codes(CA, [CX|Codes]).
+
+capitalize_code(X, CX) :-
+    "a" = [AC],
+    "z" = [ZC],
+    (AC =< X, X =< ZC ->
+      "A" = [AAC],
+      K is X - AC,
+      CX is K + AAC
+     ;
+     CX = X
+    ).
 
 '$trace_cmd'(c, call, G, Anc, _) :-
     !,
