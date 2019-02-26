@@ -116,7 +116,7 @@ function debug_msg(msg)
 
 function initialize()
 {
-    var trace_ftor = VAL(lookup_functor('$traceX', 3));
+    var trace_ftor = VAL(lookup_functor('$traceR', 3));
     var trace_predicate = predicates[trace_ftor];
     var trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
 
@@ -359,6 +359,19 @@ function backtrack()
     state.trace_info = memory[state.B + memory[state.B] + CP_TI];
     debug_msg("Set state.trace_call to " + state.trace_call);
     debug_msg("Set state.P to " + state.P);
+    return true;
+}
+
+function predicate_get_backtrack_frame(B) {
+    let term = PL_put_integer(state.B);
+    //stdout('Backtrack frame = ' + VAL(term) + '\n');
+    return unify(B, term);
+}
+
+function predicate_set_backtrack_frame(B) {
+    let type = TAG(B);
+    state.B = VAL(B);
+    //stdout('Backtrack frame set to ' + state.B + '\n');
     return true;
 }
 

@@ -326,6 +326,8 @@ reset:-
         reserve_predicate('$trace_set_retry'/1, predicate_trace_set_retry),
         reserve_predicate('$trace_retry_value'/1, predicate_trace_retry_value),
         reserve_predicate('$trace_set_prompt'/1, predicate_trace_set_prompt),
+        reserve_predicate('$get_backtrack_frame'/1, predicate_get_backtrack_frame),
+        reserve_predicate('$set_backtrack_frame'/1, predicate_set_backtrack_frame),
 
         % Testing
         reserve_predicate(member/2, member),

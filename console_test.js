@@ -95,6 +95,9 @@ function backtrack_level(command, term) {
     if (can_backtrack) {
         if (command === ';') {
             try_backtrack();
+            if (state.suspended) {
+                setup_term_for_input(term);
+            }
         } else if (command === 'a') {
             try_backtrack_all();
         } else if (command === 'h') {
@@ -182,6 +185,9 @@ function try_backtrack() {
 function try_backtrack_all() {
     while (backtrack()) {
         try_running();
+        if (state.suspended) {
+            setup_term_for_input(term);
+        }
     }
 
     stdout("no more solutions.\n");
