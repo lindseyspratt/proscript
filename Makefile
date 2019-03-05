@@ -10,6 +10,9 @@ clean:
 bootstrap.js:	wam_compiler.pl testing.pl wam_bootstrap.pl bootstrap_js.pl tests.pl simple_test.pl console_button_test.pl debugger.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['simple_test.pl', 'console_button_test.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'demo.pl'], 'foo'), halt"
 
+test_bootstrap.js:	wam_compiler.pl testing.pl wam_bootstrap.pl bootstrap_js.pl tests.pl simple_test.pl console_button_test.pl debugger.pl bench/chat_parser.pl bench/common.pl bench/hook.pl
+		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/chat_parser.pl', 'bench/common.pl', 'bench/hook.pl', 'simple_test.pl', 'console_button_test.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'demo.pl'], 'foo'), halt"
+
 wam-pp.js:	foreign.js wam.js read.js record.js fli.js stream.js gc.js dom.js dom_element_property.js dom_element_method.js debugger.js
 		$(SWIPL) -q -f js_preprocess.pl -g "preprocess(['foreign.js', 'wam.js', 'read.js', 'record.js', 'fli.js', 'stream.js', 'gc.js', 'dom.js', 'dom_element_property.js', 'dom_element_method.js', 'debugger.js'], 'wam-pp.js', [debug=$(DEBUG)]), halt"
 

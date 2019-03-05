@@ -124,6 +124,16 @@ function read_expression(s, precedence, isarg, islist, expression)
     var next;
     // Either the token is an operator, or it must be an atom (or the start of a list or curly-list)
     var op = prefix_operators[token];
+    let pt = {};
+    if(peek_token(s, pt)) {
+        // if the next token is ',', '.', '|', ']', or')' then
+        // do not treat the current token as an operator.
+        let ptToken = pt.value;
+        if(ptToken === "," || ptToken === "." || (ptToken === "|" && islist) || ptToken === "]" || ptToken === ")") {
+            op = undefined;
+        }
+    }
+
     if (op === undefined)
     {
         if (token === "\"")
@@ -184,9 +194,10 @@ function read_expression(s, precedence, isarg, islist, expression)
                 }
                 args.push(t);
                 next = {};
-                if (!read_token(s, next))
-                    return false;               
-                next = next.value;
+                    if (!read_token(s, next))
+                        return false;
+                    next = next.value;
+
                 if (next !== ',') {
                     if (next === "]" && token === "[") {
                         lhs = {list: args, tail: "[]"};
@@ -286,9 +297,9 @@ function read_expression(s, precedence, isarg, islist, expression)
                     return false;
                 args.push(arg.value);
                 next = {};
-                if (!read_token(s, next))
-                    return false;
-                next = next.value;
+                    if (!read_token(s, next))
+                        return false;
+                    next = next.value;
                 if (next === ')')
                     break;
                 else if (next !== ',')
@@ -836,7 +847,7 @@ function is_char(c)
             c === '_');
 }
 
-var punctuation_array = ['`', '~', '@', '#', '$', '^', '&', '*', '-', '+', '=', '<', '>', '/', '?', ':', ',', '\\', '.'];
+var punctuation_array = ['`', '~', '@', '#', '$', '^', '&', '*', '-', '+', '=', '<', '>', '/', '?', ':', '\\', '.'];
 
 function is_punctuation(c)
 {
@@ -896,8 +907,14 @@ function lex(s, t)
             }
         }
         break;
-    }    
-    if ((c >= 'A' && c <= 'Z') || c === '_')
+    }
+
+    if (c === ',') {
+        t.value = c;
+        return true;
+    }
+    else
+        if ((c >= 'A' && c <= 'Z') || c === '_')
     {
         token = {variable_name: "" + c};
         // Variable. May contain a-zA-Z0-9_
@@ -939,9 +956,14 @@ function lex(s, t)
             }
             else if (c === '.' && !seen_decimal)
             {
-                // Fixme: Also must check that the next char is actually a number. Otherwise 'X = 3.' will confuse things somewhat.
-                seen_decimal = true;
-                get_raw_char_with_conversion(s);
+                let x = peek_raw_char_with_conversion(s, 2);
+                if(x && x >= '0' && x <= '9') {
+                    seen_decimal = true;
+                    get_raw_char_with_conversion(s);
+                } else {
+                    t.value = negate?(-token):token;
+                    return true;
+                }
             }
             else if (is_char(c))
                 return syntax_error("illegal number" + token + ": " + c);
@@ -1076,11 +1098,11 @@ function get_raw_char_with_conversion(s)
         return tt;
 }
 
-function peek_raw_char_with_conversion(s)
+function peek_raw_char_with_conversion(s, position)
 {
     if (!prolog_flag_values['char_conversion'])
-        return peek_raw_char(s);    
-    var t = peek_raw_char(s);
+        return peek_raw_char(s, position);
+    var t = peek_raw_char(s, position);
     var tt = char_conversion_override[t];
     if (tt === undefined)
         return t;

@@ -67,7 +67,7 @@ function trace_level(command, term) {
     if (backtrack()) {
         try_running();
     } else {
-        stdout('wam error: backtrack failed after getting new input command. Expected backtrack to be active in WAM suspended for input.');
+        stdout('wam error: backtrack failed after getting new input command. Expected backtrack to be active in WAM suspended for input.\n');
     }
     trace_level_after_backtrack(term);
 }
@@ -101,7 +101,7 @@ function backtrack_level(command, term) {
         } else if (command === 'a') {
             try_backtrack_all();
         } else if (command === 'h') {
-            stdout("Action (; for next solution, a for all solutions, RET to stop)");
+            stdout("Action (; for next solution, a for all solutions, RET to stop)\n");
         } else {
             can_backtrack = false;
             term.pop();
@@ -161,7 +161,7 @@ function try_running() {
             stdout("false.\n");
         }
     } catch (anything) {
-        stdout('wam error: ' + anything);
+        stdout('wam error: ' + anything + '\n');
     }
 
     if (state.B !== 0) {

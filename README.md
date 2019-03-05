@@ -1,12 +1,13 @@
 # proscript
 A Javascript implementation of Prolog
 
-This is currently just a dump of what I was last doing since I got permission from the other copyright owners to publish it
-It needs a lot of tidying and organisation!
+This is a fork of the original Proscript project by Matt Lilley.
+There are two major enhancements in this fork: builtins to work with the DOM (Document Object Model) of HTML and
+a proper interactive Prolog tracing debugger that can be used in the client web page (using a JQuery Terminal).
+For the DOM enhancements there is a javascript function proscript("goal") that can be 
+called in onload to run a Prolog query.
 
-LLS: I extended the implementation with predicates to manipulate HTML and
-added a javascript function proscript("goal") that can be 
-called in onload to run a prolog query.
+As with the original project by Lilley, it still needs a lot of tidying and organisation.
 
 ## Organisation
 ### The WAM implementation
@@ -17,6 +18,8 @@ This is implemented primarily in wam.js. Extra stuff is also present in:
    * read.js: Handles input and output of terms, including parsing Prolog terms
    * record.js: Handles dynamic adjustment of the state: assert and friends
    * stream.js: Handles reading and writing to streams, and all the ISO predicates (the ones implemented anyway) like get_char/2 and put_code/2.
+   * dom.js, dom_element_method.js, dom_element_property.js: Builtins for working with the DOM.
+   * debugger.pl, debugger.js: The interactive Prolog tracing debugger.
 
 ### Bits you must implement, and the stubs provided
    * standalone.js: Contains implementations of stdout and flush_stdout/1. You can either include this (in which case you will get output printed to a variable called stdout_buffer), or implement them yourself to do something /with/ the stuff written to stdout.
@@ -42,5 +45,8 @@ You must include both of these if you want a working system. See test.html for a
 
 ## Trying it out
 test.html provides an execution environment for you to try out the final state
+
+console_test.html (with) console_test.js) is an example using the JQuery Terminal 
+to run the interactive Prolog debugger in a web page.
 
 simple_test.html uses simple_test.pl to write "Hello World".

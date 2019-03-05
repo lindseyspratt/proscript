@@ -320,6 +320,7 @@ reset:-
         % Debugging
         reserve_predicate(trace_unify/2, predicate_trace_unify),
         reserve_predicate('$trace_set'/1, predicate_trace_set),
+        reserve_predicate('$trace_value'/1, predicate_trace_value),
         reserve_predicate('$trace_set_info'/1, predicate_trace_set_info),
         reserve_predicate('$suspend_set'/1, predicate_suspend_set),
         reserve_predicate(get_terminal_char/1, predicate_get_terminal_char),
@@ -426,20 +427,32 @@ build_saved_state(SourceFiles, TopLevelQuery):-
 % eg bootstrap('demo.pl', (factorial(5, X), writeln(X))).
 % Ultimately, bootstrap('prolog.pl', prolog_toplevel).
 bootstrap(Source, Query):-
+        bootstrap('', [Source], Query).
+
+bootstrap(CorePrefix, Sources, Query):-
         % Since javascript will not support open/3, we must load it into an atom and pass it.
         % Ultimately we could use XmlHTTPRequest, but probably that is less useful anyway
-        file_to_atom(Source, Atom),
-        build_saved_state(['wam_compiler.pl',
-                           'debugger.pl',
-                           'bootstrap_js.pl'],
+        files_to_atoms(Sources, Atoms),
+        atom_concat(CorePrefix, 'wam_compiler.pl', WAM),
+        atom_concat(CorePrefix, 'debugger.pl', Debugger),
+        atom_concat(CorePrefix, 'bootstrap_js.pl', Bootstrap),
+        build_saved_state([WAM,
+                           Debugger,
+                           Bootstrap],
                           ( writeln(toplevel),
                             compile_clause(bootstrap:-Query),
                             statistics,
-                            compile_atom(Atom),
+                            compile_atoms(Atoms),
                             statistics,
                             !,
-                            bootstrap)).
+                            bootstrap
+                            )).
 
+
+files_to_atoms([], []).
+files_to_atoms([H|T], [HA|TA]) :-
+        file_to_atom(H, HA),
+        files_to_atoms(T, TA).
 
 file_to_atom(Filename, Atom):-
         open(Filename, read, R),

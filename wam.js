@@ -107,7 +107,7 @@ mode: READ or WRITE depending on whether are matching or creating an exemplar on
 
   It is important to note that B and E do not point to the *next available* place to put an environment frame or choicepoint, but the *current* one.
 */
-var debugging = false;
+var debugging = true;
 function debug_msg(msg)
 {
     if (debugging)
@@ -355,8 +355,10 @@ function backtrack()
     state.P = next.offset;
     code = next.code;
     state.current_predicate = next.predicate;
-    state.trace_call = memory[state.B + memory[state.B] + CP_TC];
-    state.trace_info = memory[state.B + memory[state.B] + CP_TI];
+//    if(state.trace_call !== 'no_trace') {
+        state.trace_call = memory[state.B + memory[state.B] + CP_TC];
+        state.trace_info = memory[state.B + memory[state.B] + CP_TI];
+//    }
     debug_msg("Set state.trace_call to " + state.trace_call);
     debug_msg("Set state.P to " + state.P);
     return true;
@@ -444,6 +446,33 @@ function wam_setup_and_call_foreign() {
     return result;
 }
 
+function wam_trace_call_or_execute(functor) {
+    return ! functor.startsWith('$trace') && functor !== 'true' && state.trace_predicate &&
+        (state.trace_call === 'trace' || state.trace_call === 'leap_trace');
+}
+
+function wam_suspend_trace() {
+    if(state.trace_call === 'trace') {
+        state.trace_call = 'skip_trace';
+    } else if (state.trace_call === 'leap_trace') {
+        state.trace_call = 'suspend_leap_trace';
+    } else {
+        abort("The state.trace_call register has an invalid value: '"
+            + state.trace_call + "'. It must be either 'trace' or 'leap_trace'");
+    }
+}
+
+function wam_advance_next_trace_conditionally() {
+    // 'trace_next' and 'leap_trace_next' only occur when call/1 is invoked by '$trace'.
+    if (state.trace_call === 'trace_next') {
+        state.trace_call = 'trace';
+        debug_msg("Set state.trace_call from 'trace_next' to " + state.trace_call);
+    } else if (state.trace_call === 'leap_trace_next') {
+        state.trace_call = 'leap_trace';
+        debug_msg("Set state.trace_call from 'leap_trace_next' to " + state.trace_call);
+    }
+}
+
 function wam()
 {
     var predicate;
@@ -505,7 +534,7 @@ function wam()
 
             functor = atable[ftable[code[state.P + 1]][0]];
 
-            if (! functor.startsWith('$trace') && functor !== 'true' && state.trace_predicate && state.trace_call === 'trace') {
+            if (wam_trace_call_or_execute(functor) ) {
                 // trace this call of X(...)
                 // by setting trace_call = no_trace and calling '$trace'(X(...))
                 // Setting trace_call = no_trace prevents the trace mechanism from tracing itself.
@@ -516,7 +545,8 @@ function wam()
                 };
                 state.B0 = state.B;
 
-                state.trace_call = 'no_trace';
+                wam_suspend_trace();
+
                 debug_msg("Set state.trace_call to " + state.trace_call);
 
                 state.trace_identifier++;
@@ -531,11 +561,8 @@ function wam()
                 code = state.trace_code;
                 state.P = 0;
             } else {
-                if (state.trace_call === 'trace_next') {
-                    // 'trace_next' only occurs when call/1 is invoked by '$trace'.
-                    state.trace_call = 'trace';
-                    debug_msg("Set state.trace_call from to 'trace_next' to " + state.trace_call);
-                }
+                wam_advance_next_trace_conditionally();
+
                 predicate = predicates[code[state.P + 1]];
                 if (predicate !== undefined) {
                     // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
@@ -577,11 +604,9 @@ function wam()
         case 4: // execute
              functor = atable[ftable[code[state.P + 1]][0]];
 
-            if (! functor.startsWith('$trace') && functor !== 'true' && state.trace_predicate && state.trace_call === 'trace') {
-                // trace this execute of X(...)
-                // by setting trace_call = no_trace and calling '$trace'(X(...))
-                // Setting trace_calls = false prevents the trace mechanism from tracing itself.
-                state.trace_call = 'no_trace';
+            if (wam_trace_call_or_execute(functor)) {
+                wam_suspend_trace();
+
                 state.trace_identifier++;
                 debug_msg("Set state.trace_call to " + state.trace_call);
                 let target_ftor = code[state.P+1];
@@ -595,12 +620,9 @@ function wam()
                 state.P = 0;
             }
             else {
+                wam_advance_next_trace_conditionally();
+
                 predicate = predicates[code[state.P+1]];
-                if(state.trace_call === 'trace_next') {
-                    // 'trace_next' only occurs when call/1 is invoked by '$trace'.
-                    state.trace_call = 'trace';
-                    debug_msg("Set state.trace_call from to 'trace_next' to " + state.trace_call);
-                }
 
                 if (predicate !== undefined)
                 {
@@ -1135,9 +1157,11 @@ function wam()
             state.H = memory[state.B + arity + CP_H];
             debug_msg("case 29: state.HB <- " + state.HB);
             state.HB = state.H;
-            state.trace_call = memory[state.B + arity + CP_TC];
-            debug_msg("Set state.trace_call " + state.trace_call + " from choicepoint at " + state.B);
-            state.trace_info = memory[state.B + arity + CP_TI];
+//            if(state.trace_call !== 'no_trace') {
+                state.trace_call = memory[state.B + arity + CP_TC];
+                debug_msg("Set state.trace_call " + state.trace_call + " from choicepoint at " + state.B);
+                state.trace_info = memory[state.B + arity + CP_TI];
+//            }
             state.P += 2;
             continue;
             
@@ -1159,9 +1183,11 @@ function wam()
             unwind_trail(memory[state.B + n + CP_TR], state.TR);
             state.TR = memory[state.B + n + CP_TR];
             state.H = memory[state.B + n + CP_H];
-            state.trace_call = memory[state.B + n + CP_TC];
-            debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
-            state.trace_info = memory[state.B + n + CP_TI];
+//            if(state.trace_call !== 'no_trace') {
+                state.trace_call = memory[state.B + n + CP_TC];
+                debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
+                state.trace_info = memory[state.B + n + CP_TI];
+ //           }
             state.B = memory[state.B + n + CP_B];
             state.HB = memory[state.B+ memory[state.B] + CP_H];
             debug_msg("state.B is now set back to " + state.B + " and state.HB is set back to " + state.HB);
@@ -1265,9 +1291,11 @@ function wam()
             state.TR = memory[state.B + n + CP_TR];
             state.H = memory[state.B + n + CP_H];
             state.HB = state.H;
-            state.trace_call = memory[state.B + n + CP_TC];
-            debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
-            state.trace_info = memory[state.B + n + CP_TI];
+//            if(state.trace_call !== 'no_trace') {
+                state.trace_call = memory[state.B + n + CP_TC];
+                debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
+                state.trace_info = memory[state.B + n + CP_TI];
+//            }
             continue;
         case 43: // get_choicepoint
             i = code[state.P+1];
@@ -1361,6 +1389,10 @@ function predicate_trace_set(value) {
     state.trace_call = atable[VAL(value)];
     debug_msg("predicate_trace_set: state.trace_call is now set to " + state.trace_call );
     return true;
+}
+
+function predicate_trace_value(value) {
+    return unify(value, lookup_atom(state.trace_call));
 }
 
 function predicate_trace_set_info(term) {

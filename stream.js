@@ -119,7 +119,7 @@ function predicate_flush_output(stream)
         return false;
     if (s.value.write != null)
     {
-        return s.value.buffer_size == s.value.write(s.value, 1, s.value.buffer_size, s.value.buffer);
+        return s.value.buffer_size === s.value.write(s.value, 1, s.value.buffer_size, s.value.buffer);
     }
     return permission_error("write", "stream", stream);
 }
@@ -129,7 +129,7 @@ function predicate_at_end_of_stream(stream)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return (peekch(s.value) != -1);
+    return (peekch(s.value) !== -1);
 }
 
 function predicate_set_stream_position(s, position)
@@ -177,10 +177,10 @@ function get_stream(term, ref)
 
 function get_stream_fd(term, s)
 {
-    if (TAG(term) != TAG_STR)
+    if (TAG(term) !== TAG_STR)
         return type_error("stream", term);
     ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] == "$stream" && ftable[ftor][1] == 1)
+    if (atable[ftable[ftor][0]] === "$stream" && ftable[ftor][1] === 1)
     {
         s.value = VAL(memory[VAL(term)+1]);
         return true;
@@ -207,7 +207,7 @@ function new_stream(read, write, seek, close, tell, user_data)
 function _get_char(s)
 {
     var t = getch(s);
-    if (t == -1)
+    if (t === -1)
         return "end_of_file";
     else
         return String.fromCharCode(t);
@@ -216,16 +216,16 @@ function _get_char(s)
 function get_raw_char(s)
 {
     var t = getch(s);
-    if (t == -1)
+    if (t === -1)
         return -1;
     else
         return String.fromCharCode(t);
 }
 
-function peek_raw_char(s)
+function peek_raw_char(s, position)
 {
-    var t = peekch(s);
-    if (t == -1)
+    var t = peekch(s, position);
+    if (t === -1)
         return -1;
     else
         return String.fromCharCode(t);
@@ -235,7 +235,7 @@ function peek_raw_char(s)
 function _peek_char(s)
 {
     var t = peekch(s);
-    if (t == -1)
+    if (t === -1)
         return "end_of_file";
     else
         return String.fromCharCode(t);
@@ -251,30 +251,29 @@ function _peek_code(s)
     return peekch(s);
 }
 // See getch for an explanation of what is going on here
-function peekch(s)
+function peekch(s, position)
 {
-    var b = peekb(s);
+    var b = peekb(s, position);
     var ch;
-    if (b == -1)
+    if (b === -1)
         return -1;
     // ASCII
     if (b <= 0x7F)
         return b;
-    ch = 0; 
-    var mask = 0x20;
+    ch = 0;
     var i = 0;
-    for (var mask = 0x20; mask != 0; mask >>=1 )
+    for (var mask = 0x20; mask !== 0; mask >>=1 )
     {        
         var next = s.buffer[i+1];
-        if (next == undefined)
+        if (next === undefined)
         {
             // This is a problem. We need to buffer more data! But we must also not lose the existing buffer since we are peeking.
             abort("Unicode break in peekch. This is a bug");
         }
-        if (next == -1)
+        if (next === -1)
             return -1;
         ch = (ch << 6) ^ (next & 0x3f);
-        if ((b & mask) == 0)
+        if ((b & mask) === 0)
             break;
         i++;
     }
@@ -286,24 +285,23 @@ function getch(s)
 {
     var b = getb(s);
     var ch;
-    if (b == -1)
+    if (b === -1)
         return -1;
     // ASCII
     if (b <= 0x7F)
         return b;
     ch = 0; 
     // Otherwise we have to crunch the numbers
-    var mask = 0x20;
     var i = 0;
     // The first byte has leading bits 1, then a 1 for every additional byte we need followed by a 0
     // After the 0 is the top 1-5 bits of the final character. This makes it quite confusing.
-    for (var mask = 0x20; mask != 0; mask >>=1 )
+    for (var mask = 0x20; mask !== 0; mask >>=1 )
     {        
         var next = getb(s);
-        if (next == -1)
+        if (next === -1)
             return -1;
         ch = (ch << 6) ^ (next & 0x3f);
-        if ((b & mask) == 0)
+        if ((b & mask) === 0)
             break;
         i++;
     }
@@ -332,7 +330,7 @@ function putb(s, c)
 
 function getb(s)
 {
-    if (s.buffer_size == 0)
+    if (s.buffer_size === 0)
     {
         debug_msg("Buffering...");
         s.buffer_size = s.read(s, 1, STREAM_BUFFER_SIZE, s.buffer);
@@ -341,16 +339,16 @@ function getb(s)
     if (s.buffer_size < 0)
         return s.buffer_size;
     // FIXME: Can this STILL be 0?
-    if (s.buffer_size == 0)
+    if (s.buffer_size === 0)
         return -1;
     // At this point the buffer has some data in it
     s.buffer_size--;
     return s.buffer.shift();
 }
 
-function peekb(s)
+function peekbA(s)
 {
-    if (s.buffer_size == 0)
+    if (s.buffer_size === 0)
     {
         debug_msg("Buffering...");
         s.buffer_size = s.read(s, 1, STREAM_BUFFER_SIZE, s.buffer);
@@ -359,10 +357,35 @@ function peekb(s)
     if (s.buffer_size < 0)
         return s.buffer_size;
     // FIXME: Can this STILL be 0?
-    if (s.buffer_size == 0)
+    if (s.buffer_size === 0)
         return -1;
     // At this point the buffer has some data in it
     return s.buffer[0];
+}
+
+function peekb(s, position)
+{
+    let offset = 0;
+    if(position) {
+        if(position < 1) {
+            domain_error('positive_integer', position);
+        }
+        offset = position - 1;
+    }
+    if (s.buffer_size >= 0 && s.buffer_size < offset+1)
+    {
+        let extend = offset+1 - s.buffer_size;
+        let newChars = [];
+        debug_msg("Buffering...");
+        s.read(s, extend, STREAM_BUFFER_SIZE, newChars);
+        s.buffer = s.buffer.concat( newChars);
+        s.buffer_size = s.buffer.length;
+        debug_msg("Buffer now contains " + s.buffer_size + " elements");
+    }
+    if (s.buffer_size < offset+1) // end-of-stream reached.
+        return -1;
+    // At this point the buffer has some data in it
+    return s.buffer[offset];
 }
 
 function get_stream_position(stream, property)

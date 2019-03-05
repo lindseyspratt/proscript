@@ -980,9 +980,9 @@ function check_compile_buffer(head, body)
 function add_clause_to_predicate(predicateP, head, body)
 {
     var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
-    if (predicates[predicate] === undefined)
+    if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))
     {
-        // Easy case. New predicate. Add it to the table then set up the <NOP,0> header
+        // Easy case. New or empty predicate. Add it to the table then set up the <NOP,0> header
         compile_buffer[0] = 254;
         compile_buffer[1] = 0;
         check_compile_buffer(head, body);
@@ -1216,6 +1216,8 @@ function predicate_jmp(vars)
 {
     if(state.trace_call === 'trace_next_jmp') {
         state.trace_call = 'trace_next';
+    } else if (state.trace_call === 'leap_trace_next_jmp') {
+        state.trace_call = 'leap_trace_next';
     }
 
 
@@ -1224,6 +1226,17 @@ function predicate_jmp(vars)
     register[0] = vars;
     return true;
 }
+
+// function predicate_trace_call(CP, args) {
+//     if(state.trace_call === 'trace_next_jmp') {
+//         state.trace_call = 'trace_next';
+//     }
+//
+//     code = CP.code;
+//     let offset = CP.offset;
+//     let predicate = CP.predicate;
+//     state.P = offset - 3; // P is incremented by 3 after this foreign call succeeds.
+// }
 
 function mark_top_choicepoint(vars_list, markpoint)
 {
@@ -2287,14 +2300,20 @@ function predicate_retract_clause(head, body)
         {
             // Delete this clause. This is not a trivial operation!
             var p = predicates[ftor];
-            // First case: This is the only predicate
+            // // First case: This is the only predicate
             if (p.clause_keys.length === 1)
             {
-                predicates[ftor] = undefined;
-                destroy_choicepoint();
+                //if(!predicates[ftor].is_dynamic) {
+                //    predicates[ftor] = undefined;
+                //}
+                // remove the key
+                p.clauses[key] = undefined;
+                p.clause_keys.shift();
+                //destroy_choicepoint();// reserve bindings
                 return true;
             }
-            else if (index === 0)
+            else
+                if (index === 0)
             {
                 // Delete the first clause. Update the second clause from either:
                 // 1) trust_me -> NOP
@@ -2305,7 +2324,6 @@ function predicate_retract_clause(head, body)
                     p.clauses[p.clause_keys[1]].code[0] = 28;
                 else
                     abort("Garbage clauses in retract: " + p.clauses[p.clause_keys[1]].code[0]);
-                p.clauses[key] = undefined;
                 // and remove the key
                 p.clauses[key] = undefined;
                 p.clause_keys.shift();
@@ -2326,7 +2344,7 @@ function predicate_retract_clause(head, body)
                 // and remove the key
                 p.clauses[key] = undefined;
                 p.clause_keys.pop();
-                destroy_choicepoint();
+                //destroy_choicepoint(); // preserve bindings
                 return true;
             }
             else

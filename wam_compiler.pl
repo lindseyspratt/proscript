@@ -70,7 +70,7 @@ Some gotchas:
 */
 
 % Directives are ignored by the WAM currently, so this is safe enough.
-:-module(wam_compiler, [build_saved_state/2, bootstrap/2, op(920, fy, ?), op(920, fy, ??)]).
+:-module(wam_compiler, [build_saved_state/2, bootstrap/2, bootstrap/3, op(920, fy, ?), op(920, fy, ??)]).
 :-ensure_loaded(testing).
 :-ensure_loaded(wam_bootstrap).
 
@@ -129,7 +129,6 @@ compile_clause_2(Head :- Body):-
         reset_compile_buffer,
         !,
         assemble(Opcodes, 2).
-
 
 
 compile_clause_2(Head):-
@@ -877,6 +876,12 @@ compile_stream_term(Stream, Term):-
         compile_clause(Term),
         !,
         compile_stream(Stream).
+
+
+compile_atoms([]).
+compile_atoms([H|T]) :-
+        compile_atom(H),
+        compile_atoms(T).
 
 compile_atom(Atom):-
         atom_to_memory_file(Atom, MemoryFile),
