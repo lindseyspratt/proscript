@@ -357,6 +357,7 @@ reset:-
         % GC
         reserve_predicate(gc/0, predicate_gc),
         reserve_predicate(statistics/0, predicate_statistics),
+        reserve_predicate(wam_duration/1, predicate_wam_duration),
 
         % Javascript
         reserve_predicate(eval_javascript/1, predicate_eval_javascript),
@@ -467,7 +468,34 @@ file_to_atom(Filename, Atom):-
 
 trace_unify(A, A).
 
-compile_message(A):- writeln(A).
-%compile_message(_).
+/*
+compile_message(A):-
+    A = [H|T] -> write(H), compile_message(T)
+    ;
+    A = [] -> writeln('')
+    ;
+    writeln(A).
+*/
+
+compile_message(_).
 flush_stdout.
 gc.
+
+
+concat_list(L, A) :-
+    concat_list(L, '', A).
+
+concat_list([], A, A).
+concat_list([H|T], A, B) :-
+    (atom(H) ->
+      atom_concat(A, H, X)
+    ;
+    number(H) ->
+      number_codes(H, HC),
+      atom_codes(HA, HC),
+      atom_concat(A, HA, X)
+    ;
+    format(atom(HA), '~w', [H]),
+    atom_concat(A, HA, X)
+    ),
+    concat_list(T, X, B).

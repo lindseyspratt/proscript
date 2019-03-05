@@ -56,7 +56,7 @@ function predicate_gc()
         e = memory[e];
     }
 */
-    if (total_marked != 0)
+    if (total_marked !== 0)
     {
         debug_msg("Warning: Some objects were not unmarked: " + total_marked);
     }
@@ -125,7 +125,7 @@ function sweep_stack()
 
 function sweep_environments(e, envsize)
 {
-    while (e != HEAP_SIZE)
+    while (e !== HEAP_SIZE)
     {
         // Traversing backwards to ensure we do not stop prematurely
         debug_msg("Environment is " + e + " and initially envcp is " + memory[e+1] + " environment has " + envsize + " slots");
@@ -133,7 +133,7 @@ function sweep_environments(e, envsize)
         {
             if (IS_HEAP_PTR(memory[e+2 + y]))
             {
-                if ((memory[e+2 + y] & M_BIT) == 0)
+                if ((memory[e+2 + y] & M_BIT) === 0)
                 {
                     // we have already swept this chain
                     debug_msg("Already swept this environment, since M_BIT is not set at " + (e+2+y) + " = " + hex(memory[e+2+y]));
@@ -159,7 +159,7 @@ function sweep_environments(e, envsize)
 function sweep_choicepoints()
 {
     var b = state.B;
-    while (b != 0)
+    while (b !== 0)
     {
         var cpcp = memory[b + memory[b] + 2];        
         var envsize = cpcp.code[cpcp.offset-1];
@@ -173,11 +173,11 @@ function sweep_choicepoints()
                 into_relocation_chain(VAL(memory[b+y+1]), b+y+1);
             }
         }
-        if ((memory[memory[b + memory[b] + 6]] & M_BIT) == 0)
+        if ((memory[memory[b + memory[b] + 6]] & M_BIT) === 0)
         {
             // The choicepoint has a saved value for H (ie HB) which is not marked
             // Make a fake atom on the heap and change the HB to point to it
-            memory[memory[b + memory[b] + 6]] = NIL ^ (M_BIT)
+            memory[memory[b + memory[b] + 6]] = NIL ^ (M_BIT);
             total_marked++;
         }
         debug_msg("Adding HB into relocation chain... " + hex(memory[0]));
@@ -205,7 +205,7 @@ function compact()
     // Upward
     for (current = state.H-1; current >= 0; current--)
     {
-        if ((memory[current] & M_BIT) == M_BIT)
+        if ((memory[current] & M_BIT) === M_BIT)
         {
             update_relocation_chain(current, dest);
             if (IS_HEAP_PTR(memory[current]))
@@ -216,7 +216,7 @@ function compact()
                     debug_msg("Adding to relocation chain: " + VAL(memory[current]) + ", " + current);
                     into_relocation_chain(VAL(memory[current]), current);
                 }
-                else if (VAL(memory[current]) == current)
+                else if (VAL(memory[current]) === current)
                 {
                     debug_msg("A cell pointing to itself. Must set the value to dest: " + dest);
                     memory[current] = (memory[current] & NV_MASK) ^ dest;
@@ -231,7 +231,7 @@ function compact()
     dest = 0;
     for (current = 0; current < state.H; current++)
     {
-        if ((memory[current] & M_BIT) == M_BIT)
+        if ((memory[current] & M_BIT) === M_BIT)
         {
             update_relocation_chain(current, dest);
             if (IS_HEAP_PTR(memory[current]) && VAL(memory[current]) > current)
@@ -257,7 +257,7 @@ function compact()
 function update_relocation_chain(current, dest)
 {
     var j;    
-    while ((memory[current] & F_BIT) == F_BIT)
+    while ((memory[current] & F_BIT) === F_BIT)
     {
         debug_msg("Current: " + current + " has F bit set");
         j = VAL(memory[current]);
@@ -280,7 +280,7 @@ function into_relocation_chain(j, current)
 function IS_HEAP_PTR(x)
 {
     var tag = TAG(x);
-    return (tag == TAG_STR || tag == TAG_LST || tag == TAG_REF) && (VAL(x) < HEAP_SIZE);
+    return (tag === TAG_STR || tag === TAG_LST || tag === TAG_REF) && (VAL(x) < HEAP_SIZE);
 }
 
 // Mark all the cells reachable from the registers as reachable (ie set their M bits)
@@ -293,7 +293,7 @@ function mark_registers()
             // register refers to the heap. We have to temporarily put this onto the heap since mark_variable
             // expects an address (ie an index into memory[]) and register[i]
             var tmp = state.H;
-            if (state.H == HEAP_SIZE)
+            if (state.H === HEAP_SIZE)
                 abort("Out of heap during GC");
             memory[state.H++] = register[i];
             mark_variable(tmp);
@@ -308,13 +308,13 @@ function mark_registers()
 function mark_environments(initial, envsize)
 {
     var e = initial;
-    while (e != HEAP_SIZE)
+    while (e !== HEAP_SIZE)
     {
         debug_msg("Marking environment " + e + " which has " + envsize + " slots");
         // Traversing backwards to ensure we do not stop prematurely
         for (var y = envsize-1; y >= 0; y--)
         {
-            if ((memory[e+2 + y] & M_BIT) == M_BIT)
+            if ((memory[e+2 + y] & M_BIT) === M_BIT)
             {
                 // we have already done this chain
                 debug_msg("Slot is already marked. Stopping marking");
@@ -345,7 +345,7 @@ function mark_environments(initial, envsize)
 function mark_choicepoints()
 {
     var b = state.B;
-    while (b != 0)
+    while (b !== 0)
     {
         var cpcp = memory[b + memory[b] + 2];
         var envsize = cpcp.code[cpcp.offset-1];
@@ -370,8 +370,8 @@ var total_marked = 0;
 function mark_variable(start)
 {
     debug_msg("\nMarking: " + start);
-    current = start;
-    next = VAL(memory[current]);
+    let current = start;
+    let next = VAL(memory[current]);
     memory[current] |= F_BIT;
     debug_msg("Set F on " + current);
     // mark_variable is always called with something which is either not on the heap
@@ -384,7 +384,7 @@ function mark_variable(start)
         while (true) // forward
         {
             debug_msg("Forward. (" + current + ", " + next + ")");
-            if ((memory[current] & M_BIT) == M_BIT)
+            if ((memory[current] & M_BIT) === M_BIT)
                 break; // goto backward
             debug_msg("Set M on " + current);
             memory[current] |= M_BIT;
@@ -393,26 +393,28 @@ function mark_variable(start)
             switch(TAG(memory[current]))
             {
             case TAG_REF: // Transformation 1
-                if ((memory[next] & F_BIT) == F_BIT)
+                if ((memory[next] & F_BIT) === F_BIT)
                 {
                     break; // goto backward
                 }
                 // REVERSE(current, next);
                 debug_msg("REVERSE(" + current + ", " + next + ")");
-                var temp = VAL(memory[next]);
-                var tag = TAG(memory[next]);
+            {
+                let temp = VAL(memory[next]);
+
                 memory[next] = (memory[next] & NV_MASK) ^ current;
                 current = next;
                 next = temp;
+            }
                 continue; // goto forward
             case TAG_STR: // Transform 2a
             case TAG_LST: // Transform 2b
-                if ((memory[next+1] & F_BIT) == F_BIT)
+                if ((memory[next+1] & F_BIT) === F_BIT)
                     break; // goto backward
                 // Optimisation: We can skip the structure if we have already marked all its arguments
                 // FIXME: Implement
 
-                if (TAG(memory[current]) == TAG_STR)
+                if (TAG(memory[current]) === TAG_STR)
                 {
                     var i;
                     for (i = 0; i < ftable[VAL(memory[next])][1]; i++)
@@ -430,11 +432,12 @@ function mark_variable(start)
                 }
                 debug_msg("REVERSE(" + current + ", " + next + ")");
                 //REVERSE(current, next);
-                var temp = VAL(memory[next]);
+            {
+                let temp = VAL(memory[next]);
                 memory[next] = (memory[next] & NV_MASK) ^ current;
                 current = next;
                 next = temp;
-
+            }
                 continue; // goto forward
             default:
                 // All other types: INT, ATM, FLT, etc
@@ -446,7 +449,7 @@ function mark_variable(start)
         while (true) // backward
         {
             debug_msg("Backward (" + current + ", " + next + ")");
-            if ((memory[current] & F_BIT) != F_BIT)
+            if ((memory[current] & F_BIT) !== F_BIT)
             {                
                 // current is an internal cell
                 // Transformation 4
@@ -462,7 +465,7 @@ function mark_variable(start)
             // current is the head of a chain
             debug_msg("Unset F on " + current);
             memory[current] &= ~F_BIT;
-            if (current == start)
+            if (current === start)
             {
                 // current is the head of the chain we started with. Finished!
                 return;
@@ -471,10 +474,12 @@ function mark_variable(start)
             current--; // Transformation 5
             //ADVANCE(current, next);
             debug_msg("ADVANCE(" + current + ", " + next + ")");
-            var temp = VAL(memory[current+1]);
-            memory[current+1] = (memory[current+1] & NV_MASK) ^ next;
-            next = VAL(memory[current]);
-            memory[current] = (memory[current] & NV_MASK) ^ temp;
+            {
+                let temp = VAL(memory[current + 1]);
+                memory[current + 1] = (memory[current + 1] & NV_MASK) ^ next;
+                next = VAL(memory[current]);
+                memory[current] = (memory[current] & NV_MASK) ^ temp;
+            }
             break; // goto forward
         }
     }
@@ -531,12 +536,52 @@ function dump_registers()
 
 function predicate_statistics()
 {
-    stdout("Heap size: " + state.H + "\n");
+    var aggregateDuration = statistics_wam_duration();
+    var heapSize = statistics_heap_size();
+
+    stdout("WAM duration: " + aggregateDuration + "\n");
+    stdout("Heap size: " + heapSize + "\n");
     return true;
+}
+
+function predicate_wam_duration(duration) {
+    var aggregateDuration = statistics_wam_duration();
+
+    if(Number.isSafeInteger(aggregateDuration)) {
+        return PL_unify_integer(duration, aggregateDuration);
+    } else {
+        return PL_unify_float(duration, aggregateDuration);
+    }
+}
+
+function statistics_wam_duration() {
+    var activeWamDuration = 0;
+
+    if(activeWamStartTime) {
+        var now = Date.now();
+        activeWamDuration = now - activeWamStartTime;
+    }
+
+    return activeWamDuration + wamDuration; // wamDuration may be float due to 0.1 fudge values being added.
+}
+
+function predicate_statistics_heap_size(size) {
+    var heapSize = statistics_heap_size();
+
+    if(Number.isSafeInteger(heapSize)) {
+        return PL_unify_integer(size, heapSize);
+    } else {
+        return PL_unify_float(size, heapSize);
+    }
+}
+
+function statistics_heap_size() {
+    return state.H;
 }
 
 function gc_check(t)
 {
+    // noinspection JSBitwiseOperatorUsage
     if (t & M_BIT)
         abort("GC exception: " + hex(t) + " has M_BIT set");
 }
@@ -551,14 +596,14 @@ function check_stacks(m)
 function check_environments(initial, envsize, m)
 {
     var e = initial;
-    while (e != HEAP_SIZE)
+    while (e !== HEAP_SIZE)
     {
         // Traversing backwards to ensure we do not stop prematurely
         debug_msg("Checking environment " + e);
         for (var y = 0; y < envsize; y++)
         {            
-            if (TAG(memory[e+2+y]) == TAG_STR || 
-                TAG(memory[e+2+y]) == TAG_LST)
+            if (TAG(memory[e+2+y]) === TAG_STR ||
+                TAG(memory[e+2+y]) === TAG_LST)
             {
                 debug_msg("Checking Y" + y);    
                 check_term(memory[e+2+y], m);
@@ -584,7 +629,7 @@ function check_term(t, m)
     {
         debug_msg(" == " + term_to_string(t));
     }
-    if ((t & M_BIT) == M_BIT)
+    if ((t & M_BIT) === M_BIT)
     {
         if (!m)
             abort("Term " + hex(t) + " is marked but should not be");
@@ -593,24 +638,24 @@ function check_term(t, m)
     {
         abort("Term " + hex(t) + " is not marked but is reachable");
     }
-    if ((t & F_BIT) == F_BIT)
+    if ((t & F_BIT) === F_BIT)
     {
         if (!m)
             abort("Term " + hex(t) + " is F but should not be");
     }
 
-    if (TAG(t) == TAG_LST)
+    if (TAG(t) === TAG_LST)
     {
         if (VAL(t) > state.H)
             abort("Term " + hex(t) + " exceeds heap: " + state.H);
         check_term(memory[VAL(t)], m);
         check_term(memory[VAL(t)+1], m);
     }
-    else if (TAG(t) == TAG_STR)
+    else if (TAG(t) === TAG_STR)
     {
         if (VAL(t) > state.H)
             abort("Term " + hex(t) + " exceeds heap: " + state.H);        
-        if (ftable[VAL(memory[VAL(t)])] == undefined)
+        if (ftable[VAL(memory[VAL(t)])] === undefined)
             abort("Illegal functor " + VAL(memory[VAL(t)]));
         var arity = ftable[VAL(memory[VAL(t)])][1];
         for (var i = 0; i < arity; i++)

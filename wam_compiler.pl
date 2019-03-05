@@ -81,10 +81,10 @@ expand_term(In, Out):-
 expand_term(In, In).
 
 compile_clause(Term):-
-        format('Compiling ~q~n', [Term]),
+        compile_message(['Compiling ', Term]),
         expand_term(Term, Terms),
         gc,
-        writeln(done_gc),
+        compile_message(done_gc),
         compile_clause_1(Terms).
 
 compile_clause_1([]):- !.

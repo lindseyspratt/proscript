@@ -2,6 +2,10 @@ var stdout_buffer = "";
 
 function stdout(msg)
 {
+    if(! debugging) {
+        return;
+    }
+
     var lines = (stdout_buffer + msg).split('\n');
     for (var i = 0; i < lines.length-1; i++)
     {

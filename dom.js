@@ -671,5 +671,7 @@ function proscript(queryJS) {
 }
 
 function debug(msg) {
-    alert(msg);
+    if(debugging) {
+        alert(msg);
+    }
 }

@@ -6,7 +6,8 @@ get_count(Count) :-
 	argument_value(1, ACount),
 	number_atom(Count, ACount).
 
-get_cpu_time(0).
+get_cpu_time(D) :-
+    wam_duration(D).
 
 nl :-
     writeln('').

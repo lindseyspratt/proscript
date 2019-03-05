@@ -7,9 +7,11 @@ main_test(Count) :-
 
 
 do_bench(Count) :-
+    statistics,
 	get_cpu_time(T1),
 	iterate_bench(Count),
 	get_cpu_time(T2),
+    statistics,
 	Time is T2-T1,
 	TimeIt is Time // Count,
 	write(TimeIt),

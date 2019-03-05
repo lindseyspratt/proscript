@@ -280,6 +280,11 @@ function PL_unify_integer(term, integer)
     return unify(term, integer ^ (TAG_INT << WORD_BITS));
 }
 
+function PL_unify_float(term, float)
+{
+    return unify(term, lookup_float(float));
+}
+
 function PL_unify_atom_chars(term, chars)
 {
     return unify(term, lookup_atom(string));

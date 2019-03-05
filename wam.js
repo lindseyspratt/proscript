@@ -107,7 +107,7 @@ mode: READ or WRITE depending on whether are matching or creating an exemplar on
 
   It is important to note that B and E do not point to the *next available* place to put an environment frame or choicepoint, but the *current* one.
 */
-var debugging = true;
+var debugging = false;
 function debug_msg(msg)
 {
     if (debugging)
@@ -473,6 +473,34 @@ function wam_advance_next_trace_conditionally() {
     }
 }
 
+var wamDuration = 0;
+var activeWamStartTime = undefined;
+var wamNestedInvocations = 0;
+
+function wamEntrance() {
+    wamNestedInvocations++;
+    if(wamNestedInvocations === 1) {
+        activeWamStartTime = Date.now();
+        stdout('start: ' + activeWamStartTime + '\n');
+    } else {
+        stdout('start nested: ' + wamNestedInvocations+ '\n');
+    }
+}
+
+function wamExit(result) {
+    wamNestedInvocations--;
+    if(wamNestedInvocations === 0) {
+        var wamTimeExit = Date.now();
+        var duration = Math.max(wamTimeExit - activeWamStartTime, 0.1);
+        wamDuration += duration;
+        activeWamStartTime = undefined;
+        stdout('exit: ' + wamTimeExit + ', duration: ' + duration + '\n');
+    } else {
+        stdout('exit nested: ' + wamNestedInvocations + '\n');
+    }
+    return result;
+}
+
 function wam()
 {
     var predicate;
@@ -482,6 +510,8 @@ function wam()
     var arg;
     var offset;
     var functor;
+
+    wamEntrance();
 
     state.running = true;
     while (state.running)
@@ -592,11 +622,12 @@ function wam()
                     result = wam_setup_and_call_foreign();
                     if (result)
                         state.P = state.P + 3;
-                    else if (!backtrack())
-                        return false;
+                    else if (!backtrack()){
+                        return wamExit(false);
+                    }
                 } else {
                     if (!undefined_predicate(code[state.P + 1]))
-                        return false;
+                        return wamExit(false);
                 }
             }
             continue;
@@ -645,12 +676,12 @@ function wam()
                         state.P = state.CP.offset;
                     }
                     else if (!backtrack())
-                        return false;
+                        return wamExit(false);
                 }
                 else
                 {
                     if (!undefined_predicate(code[state.P+1]))
-                        return false;
+                        return wamExit(false);
                 }
             }
             continue;
@@ -783,7 +814,7 @@ function wam()
             debug_msg("get_value: Unifying " + hex(source) + " and " + hex(target));
             if (!unify(source, target))
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             continue;
 
         case 17: // get_constant C from Ai            
@@ -801,7 +832,7 @@ function wam()
             {
                 debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             }
             continue;
 
@@ -812,7 +843,7 @@ function wam()
                 bind(sym, NIL);
             else if (sym !== NIL)
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             continue;
             
 
@@ -836,7 +867,7 @@ function wam()
             else
             {
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             }
             continue;
 
@@ -859,7 +890,7 @@ function wam()
             }
             else
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             continue;
 
         case 21: // get_integer I from Ai            
@@ -877,7 +908,7 @@ function wam()
             {
                 debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             }
             continue;
 
@@ -946,7 +977,7 @@ function wam()
             state.P += 3;
             if (did_fail)
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             continue;
         case 25: // unify_local_value
             var did_fail = false;
@@ -998,7 +1029,7 @@ function wam()
             state.P += 3;
             if (did_fail)
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             continue;
         case 26: // unify_constant
             if (state.mode === READ)
@@ -1014,7 +1045,7 @@ function wam()
                 }
                 else if (sym !== arg)
                     if (!backtrack())
-                        return false;
+                        return wamExit(false);
             }
             else
             {
@@ -1035,7 +1066,7 @@ function wam()
                 }
                 else if (sym !== arg)
                     if (!backtrack())
-                        return false;
+                        return wamExit(false);
             }
             else
             {
@@ -1214,7 +1245,7 @@ function wam()
             if (result)
                 state.P += 1;
             else if (!backtrack())
-                return false;
+                return wamExit(false);
             continue;
 
         case 32: // cut(I)
@@ -1240,7 +1271,7 @@ function wam()
             if (result)
                 state.P += 2;
             else if (!backtrack())
-                return false;
+                return wamExit(false);
             // noinspection UnnecessaryContinueJS
             continue;
         }
@@ -1325,7 +1356,7 @@ function wam()
             {
                 debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
                 if (!backtrack())
-                    return false;
+                    return wamExit(false);
             }
             continue;
         case 51: // put_float I into Ai
@@ -1344,7 +1375,7 @@ function wam()
                 }
                 else if (sym !== arg)
                     if (!backtrack())
-                        return false;
+                        return wamExit(false);
             }
             else
             {
@@ -1376,7 +1407,7 @@ function wam()
             abort("unexpected opcode at P=" + (((state.current_predicate == null)?("no predicate"):(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1])) + "@" + state.P + ": " + code[state.P]));
         }        
     }
-    return true;
+    return wamExit(true);
 }
 
 function predicate_suspend_set(value) {
