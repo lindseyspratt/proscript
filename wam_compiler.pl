@@ -919,10 +919,26 @@ repl(Atom):-
 
 repl_1(Atom):-
         atom_to_term(Atom, Query, Bindings),
+        wam_duration(Start),
         call(Query),
+        wam_duration(End),
         flush_stdout,
-        print_bindings(Bindings).
+        print_bindings(Bindings),
+        Duration is (1000 * (End - Start)) // 1000,
+        write_list(['(', Duration, 'ms)'], ''),
+        writeln('').
 
+
+write_list([], _).
+write_list([H|T], Separator) :-
+        write(H),
+        write_list1(T, Separator).
+
+write_list1([], _).
+write_list1([H|T], Separator) :-
+        write(Separator),
+        write(H),
+        write_list1(T, Separator).
 
 call_atom(QueryAtom, Bindings) :-
     atom_to_term(QueryAtom, Query, Bindings),

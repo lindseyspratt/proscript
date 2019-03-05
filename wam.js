@@ -481,9 +481,9 @@ function wamEntrance() {
     wamNestedInvocations++;
     if(wamNestedInvocations === 1) {
         activeWamStartTime = Date.now();
-        stdout('start: ' + activeWamStartTime + '\n');
+        //stdout('start: ' + activeWamStartTime + '\n');
     } else {
-        stdout('start nested: ' + wamNestedInvocations+ '\n');
+        //stdout('start nested: ' + wamNestedInvocations+ '\n');
     }
 }
 
@@ -494,9 +494,9 @@ function wamExit(result) {
         var duration = Math.max(wamTimeExit - activeWamStartTime, 0.1);
         wamDuration += duration;
         activeWamStartTime = undefined;
-        stdout('exit: ' + wamTimeExit + ', duration: ' + duration + '\n');
+        //stdout('exit: ' + wamTimeExit + ', duration: ' + duration + '\n');
     } else {
-        stdout('exit nested: ' + wamNestedInvocations + '\n');
+        //stdout('exit nested: ' + wamNestedInvocations + '\n');
     }
     return result;
 }
