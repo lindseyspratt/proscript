@@ -9,6 +9,7 @@
 %   November 1985
 %
 %   prove arithmetic theorem
+% Modified for GNU Prolog by Daniel Diaz.
 
 % boyer/1 creates huge terms. These are currently too large for proscript to handle.
 

@@ -73,15 +73,15 @@ var infix_operators = {":-": {precedence: 1200, fixity: "xfx"},
                        "=:=": {precedence: 700, fixity: "xfx"},
                        "=<": {precedence: 700, fixity: "xfx"},
                        "==": {precedence: 700, fixity: "xfx"},
-                       "=\=": {precedence: 700, fixity: "xfx"},
+                       "=\\=": {precedence: 700, fixity: "xfx"},
                        ">": {precedence: 700, fixity: "xfx"},
                        ">=": {precedence: 700, fixity: "xfx"},
                        "@<": {precedence: 700, fixity: "xfx"},
                        "@=<": {precedence: 700, fixity: "xfx"},
                        "@>": {precedence: 700, fixity: "xfx"},
                        "@>=": {precedence: 700, fixity: "xfx"},
-                       "\=": {precedence: 700, fixity: "xfx"},
-                       "\==": {precedence: 700, fixity: "xfx"},
+                       "\\=": {precedence: 700, fixity: "xfx"},
+                       "\\==": {precedence: 700, fixity: "xfx"},
                        "is": {precedence: 700, fixity: "xfx"},
                        ">:<": {precedence: 700, fixity: "xfx"},
                        ":<": {precedence: 700, fixity: "xfx"},
@@ -305,7 +305,7 @@ function read_expression(s, precedence, isarg, islist, expression)
                 else if (next !== ',')
                 {
                     if (next == null)
-                        return syntax_error("end_of_file");
+                        return syntax_error("end_of_file after "+arg.value);
                     else
                         return syntax_error(next);
                 }
@@ -470,7 +470,7 @@ function read_term(stream, term, options)
         if (!read_token(context, period))
             return false;
         if (period.value !== ".") // Missing period === eof
-            return syntax_error("end_of_file");
+            return syntax_error("end_of_file missing period " + period.value + " followed expression " + JSON.stringify(expression));
     }
     else
         expression = "end_of_file";

@@ -4,6 +4,7 @@
 %  chat_parser
 %
 %  Fernando C. N. Pereira and David H. D. Warren
+% Modified for GNU Prolog by Daniel Diaz.
 
 
 chat_parser(_) :-

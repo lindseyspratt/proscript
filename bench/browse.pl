@@ -6,8 +6,10 @@
 %   Tep Dobry (from Lisp version by R. P. Gabriel)
 %
 %   (modified January 1987 by Herve' Touati)
+% Modified for GNU Prolog by Daniel Diaz.
 
 % This test fails in proscript due to very large terms.
+
 
 
 browse(_) :-

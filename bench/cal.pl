@@ -7,6 +7,7 @@ This algorithm was published in comp.programming and comes from
 
 % Original Prolog version by Peter Ludemann,
 % optimized for BinProlog by Paul Tarau.
+% Modified for GNU Prolog by Daniel Diaz.
 
 */
 
