@@ -82,7 +82,7 @@ notrace :-
 
     '$trace_msg'('Call', 'Fail', Goal, Ancestors, ID),
 
-    '$trace_push_info'(Goal, Ancestors),
+    '$trace_push_info'(ID, Goal, Ancestors),
 
     % Setting state.trace_call == 'trace_next_jmp' makes the $jmp predicate set state.trace_call == 'trace_next'.
     % (The $jmp predicate is used in the implementation of the call/1 predicate to prepare for the invocation of the
@@ -98,6 +98,9 @@ notrace :-
     '$trace_set_info'(Ancestors),
     '$trace_msg'('Exit', 'Redo', Goal, Ancestors, ID),
     '$trace_set'(trace).
+
+'$trace_push_info'(ID, Goal, Ancestors) :- '$trace_set_info'([ID-Goal|Ancestors]).
+'$trace_push_info'(_, _, Ancestors) :- '$trace_set_info'(Ancestors), !, fail.
 
 '$trace_msg'(Success, _Failure, Goal, Ancestors, ID) :- '$trace_msg1'(Success, Goal, Ancestors, ID).
 '$trace_msg'(_Success, Failure, Goal, Ancestors, ID) :- '$trace_msg1'(Failure, Goal, Ancestors, ID), !, fail.
@@ -135,18 +138,21 @@ notrace :-
 % (e.g. process all ports and goals) instead of leap/spy processing.
 
 '$trace_is_suspended' :-
-    '$trace_value'(skip_trace) -> true
-    ;
-    '$trace_value'(suspend_leap_trace).
+    '$trace_value'(Value),
+    '$trace_is_suspended'(Value),
+    !.
 
+'$trace_is_suspended'(skip_trace).
+'$trace_is_suspended'(suspend_leap_trace).
 
 '$trace_suspend_if_active' :-
-    '$trace_value'(trace)
-      -> '$trace_set'(skip_trace)
-    ;
-    '$trace_value'(leap_trace)
-      -> '$trace_set'(suspend_leap_trace)
-    ; true.
+    '$trace_value'(Value),
+    '$trace_suspend_if_active'(Value),
+    !.
+
+'$trace_suspend_if_active'(trace) :- !, '$trace_set'(skip_trace).
+'$trace_suspend_if_active'(leap_trace) :- !, '$trace_set'(suspend_leap_trace).
+'$trace_suspend_if_active'(_).
 
 
 '$trace_retry'(ID, B) :-
@@ -171,6 +177,7 @@ notrace :-
 
 '$trace_interaction_enabled'(P, G) :-
     '$trace_spy_mode'(M),
+    write('Checking enabled for '), write(M), write(' '), write(P), write(' '), writeln(G),
     '$trace_interaction_enabled'(M, P, G).
 
 
@@ -180,7 +187,8 @@ notrace :-
     !,
      % double-negative to avoid persistent bindings of variables in G (if any).
     \+ \+ (
-      catch('$trace_spy_specification'(P, G, B), _Ball, fail), % use catch because dynamic directives are not implemented.
+      '$trace_spy_specification'(P, G, B),
+      write('Found spec for '), write(P), write(' '), writeln(G),
       (B = true -> true ; call(B))
       ).
 
@@ -200,11 +208,20 @@ notrace :-
 
 '$trace_prompt'(Port, Goal, Ancestors, ID) :-
     length(Ancestors, K),
+    '$trace_create_prompt'(K, Port, Goal, ID, Prompt),
+    '$trace_set_prompt'(Prompt).
+
+
+'$trace_create_prompt'(K, Goal, ID, Prompt) :-
+    pad_number(ID, 7, PaddedID),
+    pad_number(K, 5, PaddedK),
+    concat_list([PaddedID, PaddedK, ' ', Goal], Prompt).
+
+'$trace_create_prompt'(K, Port, Goal, ID, Prompt) :-
     pad_number(ID, 7, PaddedID),
     pad_number(K, 5, PaddedK),
     capitalize(Port, CapitalizedPort),
-    concat_list([PaddedID, PaddedK, ' ', CapitalizedPort, ': ', Goal], Prompt),
-    '$trace_set_prompt'(Prompt).
+    concat_list([PaddedID, PaddedK, ' ', CapitalizedPort, ': ', Goal], Prompt).
 
 
 '$trace_read_and_cmd'(P, G, Anc, ID, B) :-
@@ -223,9 +240,9 @@ notrace :-
     '$trace_check_command'(X).
 
 
-'$trace_cmd'(c, call, G, Anc, _, _) :-
+'$trace_cmd'(c, call, G, Anc, ID, _) :-
     !,
-    '$trace_push_info'(G, Anc),
+    '$trace_push_info'(ID, G, Anc),
 
     % Setting state.trace_call == 'trace_next_jmp' makes the $jmp predicate set state.trace_call == 'trace_next'.
     % (The $jmp predicate is used in the implementation of the call/1 predicate to prepare for the invocation of the
@@ -242,9 +259,9 @@ notrace :-
 '$trace_cmd'(c, _L, _, _, _, _) :- % _L \= call and \= exit
     !.
 
-'$trace_cmd'(l, call, G, Anc, _, _) :-
+'$trace_cmd'(l, call, G, Anc, ID, _) :-
     !,
-    '$trace_push_info'(G, Anc),
+    '$trace_push_info'(ID, G, Anc),
 
     % Setting state.trace_call == 'trace_next_jmp' makes the $jmp predicate set state.trace_call == 'trace_next'.
     % (The $jmp predicate is used in the implementation of the call/1 predicate to prepare for the invocation of the
@@ -288,20 +305,42 @@ notrace :-
 
 '$trace_cmd'(g, P, G, Anc, ID, B) :- % ancestors
     !,
-    write('Ancestors: '),
-    writeln(Anc),
+    '$trace_write_ancestors'(Anc),
     '$trace_read_and_cmd'(P, G, Anc, ID, B).
 
 '$trace_cmd'(+,  P, G, Anc, ID, B) :- % add spy specification
     !,
-    assertz('$trace_spy_specification'(P, G, true)),
+    G =.. [F|As],
+    length(As, L),
+    length(Ts, L),
+    GT =.. [F|Ts],
+    assertz('$trace_spy_specification'(_, GT, true)),
+    write('Spypoint placed on '), writeln(F / L),
     '$trace_read_and_cmd'(P, G, Anc, ID, B).
 
 '$trace_cmd'(-,  P, G, Anc, ID, B) :- % remove all spy specifications for P/G (if any).
     !,
-    retractall('$trace_spy_specification'(P, G, _)),
+    G =.. [F|As],
+    length(As, L),
+    length(Ts, L),
+    GT =.. [F|Ts],
+    retractall('$trace_spy_specification'(_, GT, _)),
+    write('Spypoint removed from '), writeln(F / L),
     '$trace_read_and_cmd'(P, G, Anc, ID, B).
 
+
+'$trace_write_ancestors'([]) :- !.
+'$trace_write_ancestors'(Anc) :-
+    reverse(Anc, RevAnc),
+    writeln('Ancestors:'),
+    '$trace_write_ancestors1'(RevAnc, 1).
+
+'$trace_write_ancestors1'([],_).
+'$trace_write_ancestors1'([ID-Goal|T], D) :-
+    '$trace_create_prompt'(D, Goal, ID, Prompt),
+    writeln(Prompt),
+    DNext is D + 1,
+    '$trace_write_ancestors1'(T, DNext).
 
 read_char(X) :- get_terminal_char(X), !.
 read_char(X) :- '$suspend', get_terminal_char(X).
@@ -350,6 +389,15 @@ capitalize_code(X, CX) :-
      CX = X
     ).
 
+
+reverse(L, R) :-
+    reverse(L, [], R).
+
+reverse([], R, R).
+reverse([H|T], X, R) :-
+    reverse(T, [H|X], R).
+
+
 concat_list(L, A) :-
     concat_list(L, '', A).
 
@@ -367,9 +415,3 @@ concat_list([H|T], A, B) :-
     atom_concat(A, HA, X)
     ),
     concat_list(T, X, B).
-
-p :- q.
-p :- r.
-
-q.
-r.

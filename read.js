@@ -45,7 +45,7 @@ var prefix_operators = {
     "multifile": {precedence: 1150, fixity: "fx"},
     "thread_local": {precedence: 1150, fixity: "fx"},
     "volatile": {precedence: 1150, fixity: "fx"},
-    "\+": {precedence: 900, fixity: "fy"},
+    "\\+": {precedence: 900, fixity: "fy"},
     "~": {precedence: 900, fixity: "fx"},
     "?": {precedence: 500, fixity: "fx"},
     "+": {precedence: 200, fixity: "fy"},

@@ -402,15 +402,16 @@ function alloc_list()
     return result;
 }
 
-function wam_setup_trace_call(target_ftor) {
+function wam_setup_trace_call(target_ftor_ofst) {
     // Create a 'traceArgStructure' for 'X(A0, ..., An-1)', copying
     // args A0 through An from register[0] to register[n-1]
     // where n = arity of predicate.
 
-    let traceArgArity = ftable[target_ftor][1];
+    let traceArgArity = ftable[target_ftor_ofst][1];
     if(traceArgArity === 0) {
-        register[0] = (ftable[target_ftor][0]) ^ (TAG_ATM << WORD_BITS);
+        register[0] = (ftable[target_ftor_ofst][0]) ^ (TAG_ATM << WORD_BITS);
     } else {
+        let target_ftor = target_ftor_ofst ^ (TAG_ATM << WORD_BITS);
         let traceArgStructure = alloc_structure(target_ftor);
         let argOfst = 0;
         for (; argOfst < traceArgArity; argOfst++) {
@@ -429,11 +430,17 @@ function wam_setup_trace_call(target_ftor) {
 }
 
 function wam_complete_call_or_execute(predicate) {
-    state.B0 = state.B;
-    state.num_of_args = ftable[code[state.P + 1]][1];
-    state.current_predicate = predicate;
-    code = predicate.clauses[predicate.clause_keys[0]].code;
-    state.P = 0;
+   if (predicate.clauses && predicate.clause_keys && predicate.clause_keys.length > 0
+           && predicate.clauses[predicate.clause_keys[0]]) {
+        state.B0 = state.B;
+        state.num_of_args = ftable[code[state.P + 1]][1];
+        state.current_predicate = predicate;
+        code = predicate.clauses[predicate.clause_keys[0]].code;
+        state.P = 0;
+       return true;
+    } else {
+        return false;
+    }
 }
 
 function wam_setup_and_call_foreign() {
@@ -501,7 +508,17 @@ function wamExit(result) {
     return result;
 }
 
-function wam()
+function wam() {
+    try {
+        return wam1();
+    } catch(e) {
+        wamExit(e);
+        throw e;
+    }
+
+}
+
+function wam1()
 {
     var predicate;
     var fargs;
@@ -581,10 +598,10 @@ function wam()
 
                 state.trace_identifier++;
 
-                let target_ftor = code[state.P+1];
-                let traceArgArity = wam_setup_trace_call(target_ftor);
+                let target_ftor_ofst = code[state.P+1];
+                let traceArgArity = wam_setup_trace_call(target_ftor_ofst);
 
-                debug_msg("Calling trace " + atable[ftable[target_ftor][0]] + "/" + traceArgArity + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
+                debug_msg("Calling trace " + atable[ftable[target_ftor_ofst][0]] + "/" + traceArgArity + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
 
                 state.num_of_args = 3;
                 state.current_predicate = state.trace_predicate;
@@ -604,7 +621,11 @@ function wam()
 
                     //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
                     debug_msg("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
-                    wam_complete_call_or_execute(predicate);
+                    let result =
+                        wam_complete_call_or_execute(predicate);
+                    if (!result && !backtrack()){
+                        return wamExit(false);
+                    }
                 } else if (foreign_predicates[code[state.P + 1]] !== undefined) {
                     // This is a bit counter-intuitive since it seems like we are never going to get a proceed to use the CP.
                     // Remember that any time we might need CP to be saved, it will be. (If there is more than one goal, there will be an environment).
@@ -661,7 +682,11 @@ function wam()
 
                     //stdout("Executing " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
                     debug_msg("Executing " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
-                    wam_complete_call_or_execute(predicate);
+                    let result =
+                        wam_complete_call_or_execute(predicate);
+                    if (!result && !backtrack()){
+                        return wamExit(false);
+                    }
                  }
                 else if (foreign_predicates[code[state.P+1]] !== undefined)
                 {
