@@ -752,7 +752,11 @@ function expression_to_term(s, varmap, singletons)
     }
     else if (s.variable_name !== undefined)
     {
-        if (varmap[s.variable_name] !== undefined)
+        if (s.variable_name === '_')
+        {
+            result = alloc_var(); // every '_' references a distinct variable.
+        }
+        else if (varmap[s.variable_name] !== undefined)
         {
             result = state.H;            
             memory[state.H] = varmap[s.variable_name];

@@ -261,7 +261,6 @@ function predicate_egt(a, b)
     var be = {};
     if (evaluate_expression(a, ae) && evaluate_expression(b, be))
     {
-        debug(ae.value + " >= " + be.value);
         return ae.value >= be.value;
     }
     return false;
@@ -911,9 +910,9 @@ function predicate_gensym(root, sym)
 function prepend_clause_to_predicate(predicate, head, body)
 {
     var predicateJS = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicate)+1]))], VAL(deref(memory[VAL(predicate)+2]))));
-    if (predicates[predicateJS] === undefined)
+    if (predicates[predicateJS] === undefined || (predicates[predicateJS].is_public && predicates[predicateJS].clause_keys.length === 0))
     {
-        // Easy case. New predicate. Add it to the table then set up the <NOP,0> header
+        // Easy case. New predicate or empty predicate. Add it to the table then set up the <NOP,0> header
         compile_buffer[0] = 254;
         compile_buffer[1] = 0;
         predicates[predicateJS] = {clauses: {0:{code:compile_buffer.slice(0),

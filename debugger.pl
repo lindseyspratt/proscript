@@ -177,7 +177,7 @@ notrace :-
 
 '$trace_interaction_enabled'(P, G) :-
     '$trace_spy_mode'(M),
-    write('Checking enabled for '), write(M), write(' '), write(P), write(' '), writeln(G),
+    % write('Checking enabled for '), write(M), write(' '), write(P), write(' '), writeln(G),
     '$trace_interaction_enabled'(M, P, G).
 
 
