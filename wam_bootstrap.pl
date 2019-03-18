@@ -329,6 +329,7 @@ reset:-
         reserve_predicate('$trace_set_prompt'/1, predicate_trace_set_prompt),
         reserve_predicate('$get_backtrack_frame'/1, predicate_get_backtrack_frame),
         reserve_predicate('$set_backtrack_frame'/1, predicate_set_backtrack_frame),
+        reserve_predicate('$trace_instruction_set'/1, predicate_trace_instruction_set),
 
         % Testing
         reserve_predicate(member/2, member),
@@ -468,16 +469,16 @@ file_to_atom(Filename, Atom):-
 
 trace_unify(A, A).
 
-/*
+
 compile_message(A):-
     A = [H|T] -> write(H), compile_message(T)
     ;
     A = [] -> writeln('')
     ;
     writeln(A).
-*/
 
-compile_message(_).
+
+%compile_message(_).
 flush_stdout.
 gc.
 

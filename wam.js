@@ -467,6 +467,12 @@ function wam_suspend_trace() {
         abort("The state.trace_call register has an invalid value: '"
             + state.trace_call + "'. It must be either 'trace' or 'leap_trace'");
     }
+
+    // ensure instruction tracing is disabled.
+    state.trace_instruction = 'no_trace';
+    state.trace_instruction_prompt = undefined;
+    instruction_suspend_set('false');
+
 }
 
 function wam_advance_next_trace_conditionally() {
@@ -535,6 +541,57 @@ function wam1()
     {
         debug_msg("---");        
         debug_msg("P=" + (((state.current_predicate == null)?("no predicate"):(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1])) + "@" + state.P + ": " + code[state.P]) + ", H=" + state.H + ", B=" + state.B + ", B0=" + state.B0 + ", E=" + state.E);
+        if(state.trace_call === 'trace' && state.trace_instruction &&
+            (state.trace_instruction === 'trace' || state.trace_instruction === 'step')) {
+            let instruction = decode_instruction(state.current_predicate, state.P);
+            if (state.trace_instruction === 'step') {
+                // set up the prompt to be displayed before reading a command character into
+                // input_buffer
+                state.trace_instruction_prompt = instruction;
+                let char = get_terminal_char();
+                if (char) {
+                    if (char === 'm') {
+                        // show internal debug info for current instruction (if DEBUG===true in Makefile)
+                        debugging = true;
+                        // break at next instruction
+                        state.trace_instruction = 'step';
+                    } else if (char === 'x') {
+                        // do not show internal debug info for current instruction
+                        debugging = false;
+                        // break at next instruction
+                        state.trace_instruction = 'step';
+                    } else if (char === 'y') {
+                        // do not show internal debug info for current and subsequent instructions
+                        debugging = false;
+                        // do not break at next instruction
+                        state.trace_instruction = 'trace';
+                    } else if (char === 'z') {
+                        // show internal debug info for current and subsequent instructions (if DEBUG===true in Makefile)
+                        debugging = true;
+                        // do not break at next instruction
+                        state.trace_instruction = 'trace';
+                    } else {
+                        stdout('Invalid command ' + char + '. Command must be "m", "x", "y", or "z".\n');
+                        instruction_suspend_set('true');
+                        return wamExit(true);
+                    }
+                } else {
+                    // No command character was available,
+                    // return to the wam caller (jquery terminal) where the
+                    // current prompt will be displayed (showing the current instruction)
+                    // the user will enter a command character,
+                    // the wam caller (jquery terminal) calls the wam again with the same
+                    // wam state as was present earlier so that the re-called wam
+                    // can continue the evaluation.
+                    instruction_suspend_set('true');
+                    return wamExit(true);
+                }
+            } else {
+                stdout(instruction + '\n');
+            }
+        } else {
+           debugging = false;
+        }
         // Decode an instruction
         switch(code[state.P])
         {
@@ -1436,8 +1493,18 @@ function wam1()
 }
 
 function predicate_suspend_set(value) {
-    state.suspended = (atable[VAL(value)] === 'true');
-    debug_msg("predicate_suspend_set: state.suspended is now set to " + state.suspended );
+    return suspend_set(atable[VAL(value)]);
+}
+
+function suspend_set(value) {
+    state.suspended = (value === 'true');
+    debug_msg("suspend_set: state.suspended is now set to " + state.suspended );
+    return true;
+}
+
+function instruction_suspend_set(value) {
+    state.instruction_suspended = (value === 'true');
+    debug_msg("instruction_suspend_set: state.instruction_suspended is now set to " + state.instruction_suspended );
     return true;
 }
 
@@ -1454,6 +1521,12 @@ function predicate_trace_value(value) {
 function predicate_trace_set_info(term) {
     state.trace_info = term;
     //stdout('info: ' + term_to_string(term) + '\n');
+    return true;
+}
+
+function predicate_trace_instruction_set(value) {
+    state.trace_instruction = atable[VAL(value)];
+    debug_msg("predicate_trace_instruction_set: state.trace_instruction is now set to " + state.trace_instruction );
     return true;
 }
 

@@ -3,7 +3,7 @@ DEBUG=false
 SWIPL=/opt/local/bin/swipl
 
 all: cal.test chat_parser.test crypt.test ham.test meta_qsort.test nand.test nrev.test poly_10.test qsort.test \
-    queens.test queensn.test query.test browse.test
+    queens.test queensn.test query.test reducer.test sendmore.test browse.test
 
 # boyer.test fails due to a heap overflow. It builds huge terms.
 boyer.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl boyer.pl
@@ -59,6 +59,25 @@ queensn.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl quee
 		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'queensn.pl'], main_test(1)), halt"
 		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"
 
+# query test fails if "D is (P * 100) // A" is not parenthesized: "D is P * 100 // A". Bug in yfx processing for * and //.
+# large iteration count (e.g. 100,000) causes test to fail: appears to be a memory leak when iterating.
 query.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl query.pl
 		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'query.pl'], main_test(20000)), halt"
+		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"
+
+reducer.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl reducer.pl
+		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'reducer.pl'], main_test(3)), halt"
+		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"
+
+sendmore.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl sendmore.pl
+		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'sendmore.pl'], main_test(20)), halt"
+		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"
+
+# tak.test fails: Top of frame exceeds bounds in allocate: 0x30006
+tak.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl tak.pl
+		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'tak.pl'], main_test(1)), halt"
+		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"
+
+zebra.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl zebra.pl
+		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'zebra.pl'], main_test(1)), halt"
 		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"

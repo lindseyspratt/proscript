@@ -39,7 +39,10 @@ function top_level(query, term) {
  }
 
 function top_level_after_solve_query(term) {
-    if (state.suspended) {
+    if (state.instruction_suspended) {
+        debug_msg("Instruction suspended");
+        setup_term_for_instruction_input(term);
+    } else if (state.suspended) {
         debug_msg("Suspended");
         setup_term_for_input(term);
     } else if (can_backtrack) {
@@ -49,6 +52,35 @@ function top_level_after_solve_query(term) {
             name: 'backtrack',
             prompt: '  ? '
         });
+    }
+}
+
+function setup_term_for_instruction_input(term) {
+
+    term.push(function (command, term) {
+        trace_instruction_level(command, term);
+    }, {
+        name: 'trace-instruction',
+        prompt: state.trace_instruction_prompt + ' : '
+    });
+}
+
+function trace_instruction_level(command, term) {
+    input_buffer.push(command);
+    try_running();
+
+    trace_instruction_level_after_running(term);
+}
+
+function trace_instruction_level_after_running(term) {
+    if (state.instruction_suspended) {
+        instruction_suspend_set('false');
+        term.set_prompt(state.trace_instruction_prompt + ' : ');
+    } else {
+        term.pop();
+        if(state.trace_prompt) {
+            term.set_prompt(state.trace_prompt + ' ? ');
+        }
     }
 }
 
@@ -73,20 +105,24 @@ function trace_level(command, term) {
 }
 
 function trace_level_after_backtrack(term) {
-        if (state.suspended) {
-            term.set_prompt(state.trace_prompt + ' ? ');
-        } else {
-            term.pop();
+    if (state.instruction_suspended) {
+        debug_msg("Instruction suspended");
+        setup_term_for_instruction_input(term);
+    } else if (state.suspended) {
+        term.set_prompt(state.trace_prompt + ' ? ');
+    } else {
+        term.pop();
 
-            if (can_backtrack) {
-                term.push(function (command, term) {
-                    backtrack_level(command, term);
-                }, {
-                    name: 'backtrack',
-                    prompt: '  ? '
-                });
-            }
+        if (can_backtrack) {
+            term.push(function (command, term) {
+                backtrack_level(command, term);
+            }, {
+                name: 'backtrack',
+                prompt: '  ? '
+            });
         }
+    }
+
 
 
 }

@@ -417,7 +417,7 @@ function predicate_functor(term, name, arity)
             ftor = VAL(memory[VAL(term)]);
             return unify(name, ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)) && unify(arity, ftable[ftor][1] ^ (TAG_INT << WORD_BITS));
         case TAG_LST:
-            return unify(name, NIL) && unify(arity, 2 ^ (TAG_INT << WORD_BITS));
+            return unify(name, lookup_atom('.')) && unify(arity, 2 ^ (TAG_INT << WORD_BITS));
     }
 }
 
@@ -429,14 +429,21 @@ function predicate_arg(n, t, a)
         return instantiation_error(t);
     if (TAG(n) !== TAG_INT)
         return type_error("integer", n);
-    if (TAG(t) !== TAG_STR)
+    if (TAG(t) !== TAG_STR && TAG(t) !== TAG_LST)
         return type_error("compound", t);
     if (VAL(n) < 0)
         return domain_error("not_less_than_zero", n);
-    var ftor = VAL(memory[VAL(t)]);
-    if (VAL(n) === 0 || VAL(n) > ftable[ftor][1])
-        return false;
-    return unify(memory[VAL(t) + VAL(n)], a);
+
+    if (TAG(t) === TAG_STR) {
+        var ftor = VAL(memory[VAL(t)]);
+        if (VAL(n) === 0 || VAL(n) > ftable[ftor][1])
+            return false;
+        return unify(memory[VAL(t) + VAL(n)], a);
+    } else if (TAG(t) === TAG_LST) {
+        if (VAL(n) > 2)
+            return false;
+        return unify(memory[VAL(t) + VAL(n) - 1], a);
+    }
 }
 
 function predicate_var(v)
@@ -461,7 +468,7 @@ function predicate_float(v)
 
 function predicate_compound(v)
 {
-    return TAG(v) === TAG_STR;
+    return TAG(v) === TAG_STR || TAG(v) === TAG_LST;
 }
 
 function predicate_ground(x)

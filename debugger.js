@@ -1,13 +1,16 @@
 var input_buffer = [];
 
 function predicate_get_terminal_char(c) {
-    let char = input_buffer.shift();
+    let char = get_terminal_char();
     if(char) {
         return unify(c, lookup_atom(char));
     } else {
         return false;
     }
+}
 
+function get_terminal_char() {
+    return input_buffer.shift();
 }
 
 var trace_retry = 'false';

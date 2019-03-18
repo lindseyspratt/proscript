@@ -232,32 +232,33 @@ notrace :-
 
 '$trace_check_command'(X) :-
     read_char(X),
-    member(X, [c, s, l, (+), (-), f, r, g, a, n]),
+    member(X, [c, s, l, (+), (-), f, r, g, a, n, m, x, y, z]),
     !.
 
 '$trace_check_command'(X) :-
-    writeln('Commands are: "c" (creep), "s" (skip), "l" (leap), "+" (spy this), "-" (nospy this), "f" (fail), "r" (retry), "g" (ancestors), "a" (abort), "n" (nodebug).'),
+    writeln('Commands are: "c" (creep), "s" (skip), "l" (leap), "+" (spy this), "-" (nospy this), "f" (fail), "r" (retry), "g" (ancestors), "a" (abort), "n" (nodebug), "m" (creep wam), "x" (creep wam long), "y" (trace wam), "z" (trace wam long).'),
     '$trace_check_command'(X).
 
 
-'$trace_cmd'(c, call, G, Anc, ID, _) :-
+'$trace_cmd'(c, P, G, Anc, ID, B) :-
     !,
-    '$trace_push_info'(ID, G, Anc),
+    '$trace_cmd_creep'(c, P, G, Anc, ID, B).
 
-    % Setting state.trace_call == 'trace_next_jmp' makes the $jmp predicate set state.trace_call == 'trace_next'.
-    % (The $jmp predicate is used in the implementation of the call/1 predicate to prepare for the invocation of the
-    % WAM call instruction.)
-    % The 'trace_next' state makes the WAM call instruction set state.trace_call == 'trace'
-    % so that the *next* evaluation of call instruction will invoke trace/1.
-
-    '$trace_set'(trace_next_jmp).
-
-'$trace_cmd'(c, exit, _, _, _, _) :- % _L \= call
+'$trace_cmd'(m, P, G, Anc, ID, B) :-
     !,
-    '$trace_set'(trace).
+    '$trace_cmd_creep'(m, P, G, Anc, ID, B).
 
-'$trace_cmd'(c, _L, _, _, _, _) :- % _L \= call and \= exit
-    !.
+'$trace_cmd'(x, P, G, Anc, ID, B) :-
+    !,
+    '$trace_cmd_creep'(x, P, G, Anc, ID, B).
+
+'$trace_cmd'(y, P, G, Anc, ID, _) :-
+    !,
+    '$trace_cmd_creep'(y, P, G, Anc, ID, B).
+
+'$trace_cmd'(z, P, G, Anc, ID, B) :-
+    !,
+    '$trace_cmd_creep'(z, P, G, Anc, ID, B).
 
 '$trace_cmd'(l, call, G, Anc, ID, _) :-
     !,
@@ -327,6 +328,48 @@ notrace :-
     retractall('$trace_spy_specification'(_, GT, _)),
     write('Spypoint removed from '), writeln(F / L),
     '$trace_read_and_cmd'(P, G, Anc, ID, B).
+
+
+'$trace_cmd_creep'(Cmd, call, G, Anc, ID, _) :-
+    !,
+    '$trace_push_info'(ID, G, Anc),
+
+    % Setting state.trace_call == 'trace_next_jmp' makes the $jmp predicate set state.trace_call == 'trace_next'.
+    % (The $jmp predicate is used in the implementation of the call/1 predicate to prepare for the invocation of the
+    % WAM call instruction.)
+    % The 'trace_next' state makes the WAM call instruction set state.trace_call == 'trace'
+    % so that the *next* evaluation of call instruction will invoke trace/1.
+
+    '$trace_cmd_creep_wam'(Cmd),
+    '$trace_set'(trace_next_jmp).
+
+'$trace_cmd_creep'(Cmd, exit, _, _, _, _) :- % _L \= call
+    !,
+    '$trace_set'(trace).
+
+'$trace_cmd_creep'(Cmd, _L, _, _, _, _) :- % _L \= call and \= exit
+    !.
+
+
+'$trace_cmd_creep_wam'(c) :-
+    '$trace_instruction_set'(no_trace),
+    nodebug.
+
+'$trace_cmd_creep_wam'(m) :-
+    '$trace_instruction_set'(step),
+    debug.
+
+'$trace_cmd_creep_wam'(x) :-
+    '$trace_instruction_set'(step),
+    nodebug.
+
+'$trace_cmd_creep_wam'(y) :-
+    '$trace_instruction_set'(trace),
+    debug.
+
+'$trace_cmd_creep_wam'(z) :-
+    '$trace_instruction_set'(trace),
+    nodebug.
 
 
 '$trace_write_ancestors'([]) :- !.
