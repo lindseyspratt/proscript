@@ -1,5 +1,5 @@
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
-DEBUG=true
+DEBUG=false
 SWIPL=/opt/local/bin/swipl
 
 

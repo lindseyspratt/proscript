@@ -469,16 +469,16 @@ file_to_atom(Filename, Atom):-
 
 trace_unify(A, A).
 
-
+/*
 compile_message(A):-
     A = [H|T] -> write(H), compile_message(T)
     ;
     A = [] -> writeln('')
     ;
     writeln(A).
+*/
 
-
-%compile_message(_).
+compile_message(_).
 flush_stdout.
 gc.
 

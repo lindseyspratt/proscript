@@ -79,5 +79,5 @@ tak.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl tak.pl
 		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"
 
 zebra.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl zebra.pl
-		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'zebra.pl'], main_test(1)), halt"
+		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'zebra.pl'], main_test(3)), halt"
 		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"

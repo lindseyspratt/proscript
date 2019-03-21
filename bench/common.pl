@@ -1,8 +1,7 @@
 % A generic benchmark interface
 
 main_test(Count) :-
-    debug,
-	!,
+    !,
 	do_bench(Count).
 
 
