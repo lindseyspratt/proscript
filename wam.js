@@ -283,6 +283,7 @@ function unify(a, b)
             }
         }
     }
+    PDL = []; // ensure there are no unused items in the PDL - such items could be used in a subsequent call to unify.
     return !failed;
 }
 

@@ -99,7 +99,7 @@ notrace :-
     '$trace_msg'('Exit', 'Redo', Goal, Ancestors, ID),
     '$trace_set'(trace).
 
-'$trace_push_info'(ID, Goal, Ancestors) :- '$trace_set_info'([ID-Goal|Ancestors]).
+'$trace_push_info'(ID, Goal, Ancestors) :- format(atom(X), '~w\n', [Goal]), '$trace_set_info'([ID-X|Ancestors]).
 '$trace_push_info'(_, _, Ancestors) :- '$trace_set_info'(Ancestors), !, fail.
 
 '$trace_msg'(Success, _Failure, Goal, Ancestors, ID) :- '$trace_msg1'(Success, Goal, Ancestors, ID).
