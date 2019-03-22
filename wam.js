@@ -86,7 +86,6 @@ var memory = new Array(HEAP_SIZE + STACK_SIZE + TRAIL_SIZE);
 var code = [255];
 var register = new Array(256);
 var state;
-var PDL = [];
 
 // Stack for managing cleanup handlers needed during a cut
 var cleanups = [];
@@ -214,6 +213,8 @@ function unwind_trail(from, to)
 // Returns boolean
 function unify(a, b)
 {
+    var PDL = [];
+
     PDL.push(a);
     PDL.push(b);
     var failed = false;
@@ -283,7 +284,6 @@ function unify(a, b)
             }
         }
     }
-    PDL = []; // ensure there are no unused items in the PDL - such items could be used in a subsequent call to unify.
     return !failed;
 }
 

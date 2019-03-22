@@ -8,7 +8,7 @@ term_expansion((test(Label, ExpectedPort):- Body), (test(Label):- (catch(setup_c
 run_unit_tests:-
         gc,
         writeln(running_tests),
-        %debug,
+        debug,
         forall(clause(test(Description), _),
                run_test(Description)),
         statistics.

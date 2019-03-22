@@ -3,7 +3,7 @@ DEBUG=false
 SWIPL=/opt/local/bin/swipl
 
 all: cal.test chat_parser.test crypt.test ham.test meta_qsort.test nand.test nrev.test poly_10.test qsort.test \
-    queens.test queensn.test query.test reducer.test sendmore.test browse.test
+    queens.test queensn.test query.test reducer.test sendmore.test zebra.test browse.test
 
 # boyer.test fails due to a heap overflow. It builds huge terms.
 boyer.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl boyer.pl
@@ -79,5 +79,5 @@ tak.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl tak.pl
 		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"
 
 zebra.test:	../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl zebra.pl
-		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'zebra.pl'], main_test(3)), halt"
+		$(SWIPL) -q -f ../wam_compiler.pl -g "bootstrap('../', ['common.pl', 'hook.pl', 'zebra.pl'], main_test(50)), halt"
 		$(JSC) ../wam-pp.js bootstrap.js standalone.js  -e "unit_tests($(DEBUG))"
