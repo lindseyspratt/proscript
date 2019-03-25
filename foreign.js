@@ -807,6 +807,16 @@ function predicate_lookup_functor(fname, arity, index)
     return unify(index, i ^ (TAG_INT << WORD_BITS));
 }
 
+function predicate_generate_initialization_goal(Init) {
+    if (TAG(Init) !== TAG_REF) {
+        return instantiation_error(Init);
+    }
+    let n = itable.length;
+    let atom = lookup_atom('$init_' + n);
+    itable.push(atom);
+    return unify(atom, Init);
+ }
+
 
 function predicate_trace_unify(a, b)
 {

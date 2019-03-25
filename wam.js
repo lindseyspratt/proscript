@@ -56,6 +56,7 @@ var atable = ['[]']; // Reserve first atom as [].
 var floats = [];
 var predicates = {};
 var exception = null;
+var itable = [];
 
 /* Constants. Should be auto-generated */
 const HEAP_SIZE = 131070;
@@ -359,7 +360,7 @@ function backtrack()
 //    if(state.trace_call !== 'no_trace') {
         state.trace_call = memory[state.B + memory[state.B] + CP_TC];
         state.trace_info = memory[state.B + memory[state.B] + CP_TI];
-//    }
+ //   }
     debug_msg("Set state.trace_call to " + state.trace_call);
     debug_msg("Set state.P to " + state.P);
     return true;
@@ -640,9 +641,8 @@ function wam1()
             functor = atable[ftable[code[state.P + 1]][0]];
 
             if (wam_trace_call_or_execute(functor) ) {
-                // trace this call of X(...)
-                // by setting trace_call = no_trace and calling '$trace'(X(...))
-                // Setting trace_call = no_trace prevents the trace mechanism from tracing itself.
+                // Trace this call of X(...).
+                // Suspend tracing to prevent the trace mechanism from tracing itself.
                 state.CP = {
                     code: code,
                     predicate: state.current_predicate,
@@ -1301,7 +1301,7 @@ function wam1()
                 state.trace_call = memory[state.B + n + CP_TC];
                 debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + n + CP_TI];
- //           }
+//            }
             state.B = memory[state.B + n + CP_B];
             state.HB = memory[state.B+ memory[state.B] + CP_H];
             debug_msg("state.B is now set back to " + state.B + " and state.HB is set back to " + state.HB);
@@ -1405,7 +1405,7 @@ function wam1()
             state.TR = memory[state.B + n + CP_TR];
             state.H = memory[state.B + n + CP_H];
             state.HB = state.H;
-//            if(state.trace_call !== 'no_trace') {
+ //           if(state.trace_call !== 'no_trace') {
                 state.trace_call = memory[state.B + n + CP_TC];
                 debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + n + CP_TI];

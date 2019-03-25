@@ -1,3 +1,4 @@
+
 simple_test :-
     dom_element_attribute_value(E, id, simpletest),
     dom_element_property(E, clientHeight, H),

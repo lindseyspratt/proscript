@@ -10,6 +10,12 @@ save_clausea(Fact):-
         functor(Fact, Name, Arity),
         prepend_clause_to_predicate(Name/Arity, Fact, true).
 
+/*
+wam_compiler:module(_). % dummy for proscript to allow compilation of wam_compiler.pl.
+wam_compiler:ensure_loaded(_). % dummy for proscript to allow compilation of wam_compiler.pl.
+*/
+include(_).
+
 call(Goal):-
         term_variables(Goal, Vars),
         % Compile this into a predicate, but do not actually declare it anywhere.

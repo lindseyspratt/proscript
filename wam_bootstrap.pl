@@ -17,6 +17,7 @@
 :-dynamic(clause_table/3). % clauses
 :-dynamic(fptable/2). % foreign predicates
 :-dynamic(ctable/2). % code
+:-dynamic(itable/1).
 
 lookup_functor(Functor, Arity, N):-
         lookup_atom(Functor, F),
@@ -44,6 +45,12 @@ lookup_float(Float, N):-
             assert(fltable(Float, N))
         ).
 
+generate_initialization_goal(Init) :-
+        flag(itable, N, N+1),
+        number_codes(N, NCs),
+        append("$init_", NCs, ICs),
+        atom_codes(Init, ICs),
+        assert(itable(Init)).
 
 emit_code(N, Code):-
         assert(ctable(N, Code)).
@@ -188,7 +195,11 @@ dump_tables(S):-
                 ),
                 FPredicates),
         atomic_list_concat(FPredicates, ', ', FPredicatesAtom),
-        format(S, 'foreign_predicates = {~w};~n', [FPredicatesAtom]).
+        format(S, 'foreign_predicates = {~w};~n', [FPredicatesAtom]),
+        findall(QG, (itable(G),quote_atom_for_javascript(G,QG)), QGs),
+        atomic_list_concat(QGs, ', ', InitializationAtom),
+        format(S, 'initialization = [~w];~n', [InitializationAtom]).
+
 
 reserve_predicate(Functor/Arity, Foreign):-
         lookup_functor(Functor, Arity, F),
@@ -316,6 +327,7 @@ reset:-
         reserve_predicate(debug/0, predicate_debug),
         reserve_predicate(nodebug/0, predicate_nodebug),
         reserve_predicate('$jmp'/1, predicate_jmp),
+        reserve_predicate(generate_initialization_goal/1, predicate_generate_initialization_goal),
 
         % Debugging
         reserve_predicate(trace_unify/2, predicate_trace_unify),
