@@ -100,11 +100,10 @@ compile_clause_1(Term):-
         save_clause(Term).
 
 compile_clause_2(:- Body) :-
-        Body = module(_,_) -> true
-        ;
         call(Body),
         generate_initialization_goal(Init),
         compile_clause_2(Init :- Body).
+
 
 compile_clause_2(?- Body):-
         !,

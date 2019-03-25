@@ -23,24 +23,17 @@ test_poly(P) :-
     poly_add(poly(z,[term(1,1)]),Q,P).
 
 % 'less_than'/2 for x, y, z
-/*
-%original:
 
 x less_than y.
 y less_than z.
 x less_than z.
-*/
-
-less_than(x, y).
-less_than(y, z).
-less_than(x, z).
 
 % polynomial addition
 
 poly_add(poly(Var,Terms1), poly(Var,Terms2), poly(Var,Terms)) :- !,
     term_add(Terms1, Terms2, Terms).
 poly_add(poly(Var1,Terms1), poly(Var2,Terms2), poly(Var1,Terms)) :-
-    less_than(Var1, Var2), !,
+    Var1 less_than Var2, !,
     add_to_order_zero_term(Terms1, poly(Var2,Terms2), Terms).
 poly_add(Poly, poly(Var,Terms2), poly(Var,Terms)) :- !,
     add_to_order_zero_term(Terms2, Poly, Terms).
@@ -84,7 +77,7 @@ poly_exp(N, Poly, Result) :-
 poly_mul(poly(Var,Terms1), poly(Var,Terms2), poly(Var,Terms)) :- !,
     term_mul(Terms1, Terms2, Terms).
 poly_mul(poly(Var1,Terms1), poly(Var2,Terms2), poly(Var1,Terms)) :-
-    less_than(Var1, Var2), !,
+    Var1 less_than Var2, !,
     mul_through(Terms1, poly(Var2,Terms2), Terms).
 poly_mul(P, poly(Var,Terms2), poly(Var,Terms)) :- !,
     mul_through(Terms2, P, Terms).
