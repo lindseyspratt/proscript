@@ -4,6 +4,8 @@ trace :-
 notrace :-
     '$trace_set'(no_trace).
 
+notrace_backtrackable :-
+    '$trace_set'(no_trace_backtrackable).
 
 '$trace'(notrace) :-
     !,
@@ -115,6 +117,10 @@ notrace :-
     !,
     '$trace_set'(no_trace).
 
+'$traceR'(notrace_backtrackable, _, _) :-
+    !,
+    '$trace_set'(notrace_backtrackable).
+
 '$traceR'(Goal, Ancestors, ID) :-
 
     %'$trace_is_suspended',
@@ -165,7 +171,10 @@ notrace :-
 
 
 '$trace_interact'(A, _B, G, Anc, ID, Bk) :- '$trace_interact'(A, G, Anc, ID, Bk).
-'$trace_interact'(_A, B, G, Anc, ID, Bk) :- \+ '$trace_value'(no_trace), '$trace_interact'(B, G, Anc, ID, Bk), !, fail.
+'$trace_interact'(_A, B, G, Anc, ID, Bk) :-
+    \+ '$trace_value'(no_trace),
+    \+ '$trace_value'(no_trace_backtrackable),
+    '$trace_interact'(B, G, Anc, ID, Bk), !, fail.
 
 '$trace_interact'(P, G, Anc, ID, B) :-
     '$trace_interaction_enabled'(P, G)

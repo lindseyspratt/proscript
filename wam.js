@@ -357,10 +357,10 @@ function backtrack()
     state.P = next.offset;
     code = next.code;
     state.current_predicate = next.predicate;
-//    if(state.trace_call !== 'no_trace') {
+    if(state.trace_call !== 'no_trace') {
         state.trace_call = memory[state.B + memory[state.B] + CP_TC];
         state.trace_info = memory[state.B + memory[state.B] + CP_TI];
- //   }
+    }
     debug_msg("Set state.trace_call to " + state.trace_call);
     debug_msg("Set state.P to " + state.P);
     return true;
@@ -1271,11 +1271,11 @@ function wam1()
             state.H = memory[state.B + arity + CP_H];
             debug_msg("case 29: state.HB <- " + state.HB);
             state.HB = state.H;
-//            if(state.trace_call !== 'no_trace') {
+            if(state.trace_call !== 'no_trace') {
                 state.trace_call = memory[state.B + arity + CP_TC];
                 debug_msg("Set state.trace_call " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + arity + CP_TI];
-//            }
+            }
             state.P += 2;
             continue;
             
@@ -1297,11 +1297,11 @@ function wam1()
             unwind_trail(memory[state.B + n + CP_TR], state.TR);
             state.TR = memory[state.B + n + CP_TR];
             state.H = memory[state.B + n + CP_H];
-//            if(state.trace_call !== 'no_trace') {
+            if(state.trace_call !== 'no_trace') {
                 state.trace_call = memory[state.B + n + CP_TC];
                 debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + n + CP_TI];
-//            }
+            }
             state.B = memory[state.B + n + CP_B];
             state.HB = memory[state.B+ memory[state.B] + CP_H];
             debug_msg("state.B is now set back to " + state.B + " and state.HB is set back to " + state.HB);
@@ -1405,11 +1405,11 @@ function wam1()
             state.TR = memory[state.B + n + CP_TR];
             state.H = memory[state.B + n + CP_H];
             state.HB = state.H;
- //           if(state.trace_call !== 'no_trace') {
+            if(state.trace_call !== 'no_trace') {
                 state.trace_call = memory[state.B + n + CP_TC];
                 debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + n + CP_TI];
-//            }
+            }
             continue;
         case 43: // get_choicepoint
             i = code[state.P+1];

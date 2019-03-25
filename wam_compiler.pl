@@ -928,6 +928,7 @@ repl_1(Atom):-
         atom_to_term(Atom, Query, Bindings),
         wam_duration(Start),
         call(Query),
+        notrace_backtrackable,
         wam_duration(End),
         flush_stdout,
         print_bindings(Bindings),
