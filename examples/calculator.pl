@@ -1,7 +1,9 @@
-current("0").
-memory("0").
-operation(0).
-maxlength(30).
+
+init :-
+  asserta(current("0")),
+  asserta(memory("0")),
+  asserta(operation(0)),
+  asserta(maxlength(30)).
 
 
 contains_list(List, Sublist) :-
@@ -11,43 +13,46 @@ contains_list(List, Prefix, Sublist, Suffix) :-
     append(Sublist, Suffix, Tail),
     append(Prefix, Tail, List).
 
+currentx(X) :-
+    clause(current(X), true).
+
 current_in_error :-
-    current(Current),
+    currentx(Current),
     contains_list(Current, "!").
 
 current_has_period :-
-    current(Current),
+    currentx(Current),
     contains_list(Current, ".").
 
 current_has_e0 :-
-    current(Current),
+    currentx(Current),
     contains_list(Current, "e0").
 
 current_too_long :-
-    current(Current),
+    currentx(Current),
     length(Current, Length),
-    maxlength(Maxlength)
+    maxlength(Maxlength),
     Length > Maxlength.
 
 extract_e_from_current :-
     retract(current(Current)),
     contains_list(Current, Prefix, "e", Suffix),
     append(Prefix, Suffix, X),
-    assert(current(X)).
+    asserta(current(X)).
 
 set_current(X) :-
     retractall(current(_)),
-    assert(current(X)).
+    asserta(current(X)).
 
 add_current(X) :-
     retract(current(C)),
     append(C, X, Y),
-    assert(current(Y)).
+    asserta(current(Y)).
 
 lowercase_current :-
     retract(current(C)),
     lowercase(C, Y),
-    assert(current(Y)).
+    asserta(current(Y)).
 
 lowercase([H|T], [LH|LT]) :-
     lowercase1(H, LH),
@@ -69,7 +74,7 @@ lowercase1([U|Us], X, [L|Ls], Y) :-
 
 set_dom_name_path_value([H|T], V) :-
     append("[name=", H, Select),
-    dom_select_element(Select, E)
+    dom_select_element(Select, E),
     set_dom_name_path_value(T, E, V).
 
 set_dom_name_path_value([], E, V) :-
@@ -108,6 +113,6 @@ dot :-
     \+ current_has_e
       -> add_current(".")
     ),
-    current(Current),
+    currentx(Current),
     set_dom_name_path_value(["Calculator", "Display"], Current).
 

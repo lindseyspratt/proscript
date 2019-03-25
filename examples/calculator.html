@@ -1,9 +1,22 @@
 <html lang="en">
 <head>
     <title>A simple JavaScript calculator</title>
-
+    <!-- https://www.anaesthetist.com/mnm/javascript/calc.htm -->
+    <script>
+        // noinspection JSUnusedLocalSymbols
+        function predicate_flush_stdout()
+        {
+            return true;
+        }
+        // noinspection JSUnusedLocalSymbols
+        function stdout(msg) {
+            alert(msg);
+        }
+    </script>
 </head>
-<body bgcolor="#F0F0FF">
+<body bgcolor="#F0F0FF" onload="proscript('init');">
+<script type="text/javascript" src="../wam-pp.js"></script>
+<script type="text/javascript" src="bootstrap.js"></script>
 
         <hr>
         <div align="center">
@@ -21,7 +34,7 @@
                 <tr><td width="65%" align="center">                   <!--left panel------>
 
                     <table><tr>
-                        <td><input type="button" name="seven" value="   7    " OnClick="AddDigit('7')"></td>
+                        <td><input type="button" name="seven" value="   7    " OnClick="proscript('add_digit(7)')"></td>
                         <td><input type="button" name="eight" value="   8    " OnClick="AddDigit('8')"></td>
                         <td><input type="button" name="nine" value="   9    " OnClick="AddDigit('9')"></td>
                     </tr><tr>

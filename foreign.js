@@ -2580,7 +2580,7 @@ function syntax_error(message)
     var ftor = lookup_functor('syntax_error', 1);
     var ref = state.H ^ (TAG_STR << WORD_BITS);
     memory[state.H++] = ftor;
-    memory[state.H++] = lookup_atom(message);
+    memory[state.H++] = lookup_atom(JSON.stringify(message));
     return predicate_throw(ref);
 }
 
