@@ -46,7 +46,7 @@ You must include both of these if you want a working system. See test.html for a
 ## Trying it out
 test.html provides an execution environment for you to try out the final state
 
-console_test.html (with) console_test.js) is an example using the JQuery Terminal 
+terminal_test.html (with terminal_test.js) is an example using the JQuery Terminal 
 to run the interactive Prolog debugger in a web page.
 
 simple_test.html uses simple_test.pl to write "Hello World".
