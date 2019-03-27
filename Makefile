@@ -7,8 +7,8 @@ all:		bootstrap.js wam-pp.js
 clean:		
 		rm -f wam-pp.js bootstrap.js
 
-bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl console_button_test.pl debugger.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['console_button_test.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'demo.pl'], 'foo'), halt"
+bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl
+		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'demo.pl'], 'foo'), halt"
 
 test_bootstrap.js:	wam_compiler.pl testing.pl wam_bootstrap.pl bootstrap_js.pl tests.pl simple_test.pl console_button_test.pl debugger.pl bench/zebra.pl bench/common.pl bench/hook.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/zebra.pl', 'bench/common.pl', 'bench/hook.pl', 'simple_test.pl', 'console_button_test.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'demo.pl'], 'foo'), halt"

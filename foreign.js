@@ -1615,11 +1615,9 @@ function predicate_atom_codes(atom, codes)
 {
     var codesJS;
 
-    if (TAG(codes) === TAG_REF)
+    if (TAG(atom) === TAG_ATM)
     {
-        // Atom -> codes
-        if (TAG(atom) !== TAG_ATM)
-            return type_error("atom", atom);
+        // Atom -> Codes
         codesJS = atable[VAL(atom)];
         var tmp = state.H ^ (TAG_LST << WORD_BITS);
         for (var i = 0; i < codesJS.length; i++)
@@ -1870,7 +1868,13 @@ function predicate_number_codes(n, codes)
         // Atom -> codes
         if (TAG(n) === TAG_INT)
         {
-            codesJS = VAL(n) + "";
+            let value;
+            if ((VAL(n) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
+                value = VAL(n) - (1 << WORD_BITS);
+            else
+                value = VAL(n);
+
+            codesJS = value + "";
         }
         else if (TAG(n) === TAG_FLT)
         {

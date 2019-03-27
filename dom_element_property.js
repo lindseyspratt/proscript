@@ -232,7 +232,7 @@ function getStringPLPropertyValue(valueJS) {
 }
 
 function getElementPLPropertyValue(valueJS) {
-    return lookup_element(valueJS);
+    return create_element_structure(valueJS);
 }
 
 function setupElementsForBoundPropertyValue(propertyJS, value) {
@@ -322,7 +322,7 @@ function ChildProperty() {
     };
     that.elementValuesFunction = function(elementJS) {
         /** @namespace elementJS.children */
-        return elementJS.children;
+        return [...elementJS.children];// This is the spread operator. It creates an array from the HTMLCollection of 'children'.
     };
     that.setValue = function(property, elementJS, value) {
         domain_error(property);
@@ -364,7 +364,7 @@ function ClassProperty() {
     };
     that.elementValuesFunction = function(elementJS) {
         /** @namespace elementJS.classList */
-        return elementJS.classList;
+        return [...elementJS.classList];// This is the spread operator. It creates an array from the DOMTokenList of 'classList'.
     };
 
     /**

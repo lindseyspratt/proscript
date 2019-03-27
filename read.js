@@ -117,157 +117,140 @@ function read_expression(s, precedence, isarg, islist, expression)
         expression.value = {end_of_file:true};
         return true;
     }
+
     var lhs;
     var args;
     var arg;
     var t;
     var next;
     // Either the token is an operator, or it must be an atom (or the start of a list or curly-list)
-    var op = prefix_operators[token];
-    let pt = {};
-    if(peek_token(s, pt)) {
-        // if the next token is ',', '.', '|', ']', or')' then
-        // do not treat the current token as an operator.
-        let ptToken = pt.value;
-        if(ptToken === "," || ptToken === "." || (ptToken === "|" && islist) || ptToken === "]" || ptToken === ")") {
-            op = undefined;
-        }
-    }
+    var op;
 
-    if (op === undefined)
-    {
-        if (token === "\"")
-        {
-            // We have to just read chars until we get a close " (taking care with \" in the middle)
-            args = [];
+    if (token === "\"") {
+        // We have to just read chars until we get a close " (taking care with \" in the middle)
+        args = [];
 
-            var mode = 0;
-            if (prolog_flag_values['double_quotes'] === "chars")
-                mode = 0;
-            else if (prolog_flag_values['double_quotes'] === "codes")
-                mode = 1;
-            else if (prolog_flag_values['double_quotes'] === "atom")
-                mode = 2;
-            while (true)
-            {
-                t = get_raw_char_with_conversion(s.stream);
-                if (t === '"')
-                    break;
-                if (t === "\\")
-                {
-                    if (peek_raw_char_with_conversion(s.stream) === '"')
-                    {
-                        get_raw_char_with_conversion(s.stream);
-                        if (mode === 1)
-                            args.push('"'.charCodeAt(0));
-                        else
-                            args.push('"');
-                        continue;
-                    }
+        var mode = 0;
+        if (prolog_flag_values['double_quotes'] === "chars")
+            mode = 0;
+        else if (prolog_flag_values['double_quotes'] === "codes")
+            mode = 1;
+        else if (prolog_flag_values['double_quotes'] === "atom")
+            mode = 2;
+        while (true) {
+            t = get_raw_char_with_conversion(s.stream);
+            if (t === '"')
+                break;
+            if (t === "\\") {
+                if (peek_raw_char_with_conversion(s.stream) === '"') {
+                    get_raw_char_with_conversion(s.stream);
+                    if (mode === 1)
+                        args.push('"'.charCodeAt(0));
+                    else
+                        args.push('"');
+                    continue;
                 }
-                if (mode === 1)
-                    args.push(t.charCodeAt(0));                
-                else
-                    args.push(t);
             }
-            if (mode === 2)
-                lhs = args.join('');
+            if (mode === 1)
+                args.push(t.charCodeAt(0));
             else
-                lhs = {list: args, tail: "[]"};
-        }
-        else if (token === "[" || token === "{")
-        {
-            // The principle for both of these is very similar
-            args = [];
-
-            while(true)
-            {
-                t = {};
-                if (!read_expression(s, Infinity, true, true, t))
-                    return false;
-                t = t.value;
-                if (t === "]")
-                {
-                    lhs = "[]";
-                    break;
-                    // Special case for the empty list, since the first argument is ']'
-                }
                 args.push(t);
-                next = {};
+        }
+        if (mode === 2)
+            lhs = args.join('');
+        else
+            lhs = {list: args, tail: "[]"};
+    } else {
+        op = prefix_operators[token];
+        let pt = {};
+        if (peek_token(s, pt)) {
+            // if the next token is ',', '.', '|', ']', or')' then
+            // do not treat the current token as an operator.
+            let ptToken = pt.value;
+            if (ptToken === "," || ptToken === "." || (ptToken === "|" && islist) || ptToken === "]" || ptToken === ")") {
+                op = undefined;
+            }
+        }
+
+        if (op === undefined) {
+            if (token === "[" || token === "{") {
+                // The principle for both of these is very similar
+                args = [];
+
+                while (true) {
+                    t = {};
+                    if (!read_expression(s, Infinity, true, true, t))
+                        return false;
+                    t = t.value;
+                    if (t === "]") {
+                        lhs = "[]";
+                        break;
+                        // Special case for the empty list, since the first argument is ']'
+                    }
+                    args.push(t);
+                    next = {};
                     if (!read_token(s, next))
                         return false;
                     next = next.value;
 
-                if (next !== ',') {
-                    if (next === "]" && token === "[") {
-                        lhs = {list: args, tail: "[]"};
-                        break;
-                    }
-                    else if (next === "}" && token === "{") {
-                        lhs = {functor: "{}", args: args};
-                        break;
-                    }
-                    else if (next === "|" && token === "[") {
-                        var tail = {};
-                        if (!read_expression(s, Infinity, true, true, tail))
-                            return false;
-                        lhs = {list: args, tail: tail.value};
-                        next = {};
-                        if (!read_token(s, next))
-                            return false;
-                        next = next.value;
-                        if (next === "]")
+                    if (next !== ',') {
+                        if (next === "]" && token === "[") {
+                            lhs = {list: args, tail: "[]"};
                             break;
-                        else
-                            return syntax_error("missing ]");
-                    }
-                    else {
-                        return syntax_error("mismatched " + token + " at " + next);
+                        } else if (next === "}" && token === "{") {
+                            lhs = {functor: "{}", args: args};
+                            break;
+                        } else if (next === "|" && token === "[") {
+                            var tail = {};
+                            if (!read_expression(s, Infinity, true, true, tail))
+                                return false;
+                            lhs = {list: args, tail: tail.value};
+                            next = {};
+                            if (!read_token(s, next))
+                                return false;
+                            next = next.value;
+                            if (next === "]")
+                                break;
+                            else
+                                return syntax_error("missing ]");
+                        } else {
+                            return syntax_error("mismatched " + token + " at " + next);
+                        }
                     }
                 }
+            } else if (token === "(") {
+                // Is this right? () just increases the precedence to infinity and reads another term?
+                lhs = {};
+                if (!read_expression(s, Infinity, false, false, lhs))
+                    return false;
+                lhs = lhs.value;
+                next = {};
+                if (!read_token(s, next))
+                    return false;
+                next = next.value;
+                if (next !== ")")
+                    return syntax_error("mismatched ( at " + next);
+            } else if (token === "]") {
+                expression.value = token;
+                return true;
+            } else {
+                // It is an atom
+                lhs = token;
             }
-        }
-        else if (token === "(")
-        {
-            // Is this right? () just increases the precedence to infinity and reads another term?
-            lhs = {};
-            if (!read_expression(s, Infinity, false, false, lhs))
+        } else if (op.fixity === "fx") {
+            arg = {};
+            if (!read_expression(s, op.precedence, isarg, islist, arg))
                 return false;
-            lhs = lhs.value;
-            next = {};
-            if (!read_token(s, next))
+            lhs = {functor: token, args: [arg.value]};
+        } else if (op.fixity === "fy") {
+            arg = {};
+            if (!read_expression(s, op.precedence + 0.5, isarg, islist, arg))
                 return false;
-            next = next.value;
-            if (next !== ")")
-                return syntax_error("mismatched ( at " + next);
-        }
-        else if (token === "]")
-        {
-            expression.value = token;
-            return true;
-        }
-        else
-        {
-            // It is an atom
-            lhs = token;
-        }
+            lhs = {functor: token, args: [arg.value]};
+        } else
+            return false; // Parse error
     }
-    else if (op.fixity === "fx")
-    {
-        arg = {};
-        if (!read_expression(s, op.precedence, isarg, islist, arg))
-            return false;
-        lhs = {functor: token, args:[arg.value]};
-    }
-    else if (op.fixity === "fy")
-    {
-        arg = {};
-        if (!read_expression(s, op.precedence+0.5, isarg, islist, arg))
-            return false;
-        lhs = {functor: token, args:[arg.value]};
-    }
-    else
-        return false; // Parse error    
+
     while (true)
     {
         var infix_operator = {};

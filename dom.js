@@ -230,13 +230,14 @@ function setupValues(element, attribute, value) {
 
     var valueJS;
 
-    if (TAG(value) !== TAG_REF) {
-        if (TAG(value) !== TAG_ATM) {
-            instantiation_error(value);
-        }
-        valueJS = atable[VAL(value)];
-        values.push(valueJS);
-    } else if (TAG(element) !== TAG_REF && TAG(attribute) !== TAG_REF) {
+    // if (TAG(value) !== TAG_REF) {
+    //     if (TAG(value) !== TAG_ATM) {
+    //         instantiation_error(value);
+    //     }
+    //     valueJS = atable[VAL(value)];
+    //     values.push(valueJS);
+    // } else
+    if (TAG(element) !== TAG_REF && TAG(attribute) !== TAG_REF) {
         if (TAG(element) !== TAG_STR) {
             instantiation_error(element);
         }
@@ -272,13 +273,14 @@ function setupValuesFromJSElementAndAttribute(elementJS, attributeJS, value) {
     var values = [];
     var valueJS;
 
-    if (TAG(value) !== TAG_REF) {
-        if (TAG(value) !== TAG_ATM) {
-            instantiation_error(value);
-        }
-        valueJS = atable[VAL(value)];
-        values.push(valueJS);
-    } else if (attributeJS === 'class') {
+    // if (TAG(value) !== TAG_REF) {
+    //     if (TAG(value) !== TAG_ATM) {
+    //         instantiation_error(value);
+    //     }
+    //     valueJS = atable[VAL(value)];
+    //     values.push(valueJS);
+    // } else
+    if (attributeJS === 'class') {
         values = Array.from(elementJS.classList);
     } else {
         valueJS = elementJS.getAttribute(attributeJS);
@@ -641,8 +643,20 @@ function setupElementsForSelectAll(query) {
     return document.querySelectorAll(queryJS);
 }
 
-function proscript(queryJS) {
+// proscript_init generally is only used once in a web page to set up the proscript globals.
+// Additional calls of Prolog queries should use proscript to avoid overwriting the global data,
+// particularly the predicates from assertions.
+
+function proscript_init(queryJS) {
     load_state();
+    proscript(queryJS);
+}
+
+// proscript calls the given query using the existing global data,
+// particularly the current predicates definitions. This allows the
+// asserta/assertz clauses to persist across calls of proscript.
+
+function proscript(queryJS) {
     initialize();
     allocate_first_frame();
     // call_atom(query, Bindings)
