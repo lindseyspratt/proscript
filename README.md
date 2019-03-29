@@ -16,6 +16,7 @@ As with the original project by Lilley, it still needs a lot of tidying and orga
 This is implemented primarily in wam.js. Extra stuff is also present in:
    * fli.js: SWI-Prolog-like foreign langauge interface. Allows escaping to Javascript from Prolog, so you can call low(er) level functions. Huge chunks of this (like PL_cut_query!) are not implemented
    * foreign.js: This implements a lot of core WAM building blocks directly in javascript. For example, you will find implemntations for univ, writeln and halt here.
+   * memory_files.js: stream IO with memory files.
    * gc.js: Implements a garbage collector
    * read.js: Handles input and output of terms, including parsing Prolog terms
    * record.js: Handles dynamic adjustment of the state: assert and friends

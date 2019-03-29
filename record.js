@@ -23,7 +23,7 @@ function recorda(key, term, ref)
         debug_msg("Creating new database...");
         // No such database yet. Create one, and store it in databases
         databases[key] = {data:{},
-                          keys:new Array(),
+                          keys:[],
                           ptr: 0};
         d = databases[key];
         debug_msg("Created databases[" + key + "] as " + JSON.stringify(databases[key]));
@@ -65,7 +65,7 @@ function recordz(key, term, ref)
         debug_msg("Creating new database...");
         // No such database yet. Create one, and store it in databases
         databases[key] = {data:{},
-                          keys:new Array(),
+                          keys:[],
                           ptr: 0};
         d = databases[key];
         debug_msg("Created databases[" + key + "] as " + JSON.stringify(databases[key]));
@@ -111,6 +111,7 @@ function recorded(key, term, ref)
     debug_msg("Keys: " + JSON.stringify(Object.keys(data)));
     var index = d.keys[0];
     debug_msg("Returning reference " + d.data[index].ref);
+    // noinspection UnnecessaryLocalVariableJS
     var result = unify(recall_term(d.data[index].value, {}), term) && unify(d.data[index].ref ^ (TAG_INT << WORD_BITS), ref);
     debug_msg("Result: " + result + " => " + term_to_string(term) + " ====> " + term_to_string(ref));
     return result;
@@ -130,9 +131,9 @@ function erase(ref)
     delete d.data[dr.index];
     // Now we must also delete the keys entry. This requires a search, unfortunately since there is no way to keep track of indices if we allow unshifting
     debug_msg("Deleting key " + dr.index);
-    for (i = 0; i < d.keys.length; i++)
+    for (var i = 0; i < d.keys.length; i++)
     {
-        if (d.keys[i] == dr.index)
+        if (d.keys[i] === dr.index)
         {
             d.keys.splice(i, 1);
             break;
@@ -165,7 +166,7 @@ function record_term(t)
         var value = [];
         var list = {type: TAG_LST,
                     value: value};
-        while (TAG(t) == TAG_LST)
+        while (TAG(t) === TAG_LST)
         {
             value.push(record_term(VAL(t)));
             t = memory[VAL(t)+1];
@@ -191,49 +192,47 @@ function recall_term(e, varmap)
     // return a reference to an equivalent WAM term to the expression e
     switch(e.type)
     {
-    case TAG_REF:
-        var result;
-        if (varmap[e.key] !== undefined)
-        {
-            result = state.H;            
+    case TAG_REF: {
+        let result;
+        if (varmap[e.key] !== undefined) {
+            result = state.H;
             memory[state.H] = varmap[e.key];
             state.H++;
-        }
-        else
-        {
+        } else {
             result = alloc_var();
-            varmap[e.key] = result;            
+            varmap[e.key] = result;
         }
         return result;
+    }
     case TAG_ATM:
         return lookup_atom(e.value);
     case TAG_FLT:
         return lookup_float(e.value);
     case TAG_INT:
         return e.value ^ (TAG_INT << WORD_BITS);
-    case TAG_LST:
-        var result = alloc_var();
+    case TAG_LST: {
+        let result = alloc_var();
         var tail = result;
         var head;
-        for (var i = 0; i < e.value.length; i++)
-        {
+        for (let i = 0; i < e.value.length; i++) {
             unify(tail, state.H ^ (TAG_LST << WORD_BITS));
             head = alloc_var();
             tail = alloc_var();
             unify(head, recall_term(e.value[i], varmap));
         }
         unify(tail, recall_term(e.tail, varmap));
-        return result;    
+        return result;
+    }
     case TAG_STR:
         var t = (state.H ^ TAG_STR << WORD_BITS);
         memory[state.H++] = lookup_functor(e.name, e.args.length);
         // Reserve space for the args
         var var_args = [];
-        for (var i = 0; i < e.args.length; i++)
+        for (let i = 0; i < e.args.length; i++)
             var_args[i] = alloc_var();
-        for (var i = 0; i < e.args.length; i++)
+        for (let i = 0; i < e.args.length; i++)
         {
-            z = recall_term(e.args[i], varmap);
+            let z = recall_term(e.args[i], varmap);
             unify(z, var_args[i]);
         }
         return t;

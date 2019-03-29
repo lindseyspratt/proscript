@@ -580,191 +580,6 @@ function lookup_functor(name, arity)
 }
 
 
-/* Memory files */
-var memory_files = [];
-
-function toByteArray(str)
-{
-    var byteArray = [];
-    for (var i = 0; i < str.length; i++)
-    {
-        if (str.charCodeAt(i) <= 0x7F)
-        {
-            byteArray.push(str.charCodeAt(i));
-        }
-        else 
-        {
-            var h = encodeURIComponent(str.charAt(i)).substr(1).split('%');
-            for (var j = 0; j < h.length; j++)
-            {
-                byteArray.push(parseInt(h[j], 16));
-            }
-        }
-    }
-    return byteArray;
-}
-
-// function JSfromByteArray(byteArray)
-// {
-//     var str = '';
-//     for (var i = 0; i < byteArray.length; i++)
-//     {
-//         str +=  byteArray[i] <= 0x7F?
-//                 byteArray[i] === 0x25 ? "%25" : // %
-//                 String.fromCharCode(byteArray[i]) :
-//                 "%" + byteArray[i].toString(16).toUpperCase();
-//     }
-//     return decodeURIComponent(str);
-// }
-
-function fromByteArray(byteArray)
-{
-    var str = '';
-    for (var i = 0; i < byteArray.length; i++) {
-        if (byteArray[i] <= 0x7F) {
-            str += String.fromCharCode(byteArray[i]);
-        }
-        else {
-            // Have to decode manually
-            var ch = 0;
-            var j = 0;
-            for (var mask = 0x20; mask !== 0; mask >>=1 )
-            {        
-                var next = byteArray[j+1];
-                if (next === undefined)
-                {
-                    abort("Unicode break in fromByteArray. The input is garbage");
-                }
-                ch = (ch << 6) ^ (next & 0x3f);
-                if ((byteArray[i] & mask) === 0)
-                    break;
-                j++;
-            }
-            ch ^= (ch & (0xff >> (i+3))) << (6*(i+1));
-            str += String.fromCharCode(ch);
-        }
-    }
-    return str;
-}
-
-function atom_to_memory_file(atom, memfile)
-{
-    var index = memory_files.length;
-    memory_files[index] = {data:toByteArray(atable[VAL(atom)]),
-                           ptr:0};
-    var ftor = lookup_functor('$memory_file', 1);
-    var ref = alloc_structure(ftor);
-    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
-    return unify(memfile, ref);
-}
-
-function memory_file_to_atom(memfile, atom)
-{
-    if (TAG(memfile) !== TAG_STR)
-        return type_error("memory_file", memfile);
-    var ftor = VAL(memory[VAL(memfile)]);
-    if (atable[ftable[ftor][0]] === "$memory_file" && ftable[ftor][1] === 1)
-    {
-        var f = memory_files[VAL(memory[VAL(memfile)+1])];
-        return unify(atom, lookup_atom(fromByteArray(f.data)));
-    }
-    return type_error("memory_file", memfile);
-}
-
-function new_memory_file(memfile)
-{
-    var index = memory_files.length;
-    memory_files[index] = {data:[],
-                           ptr:0};
-    var ftor = lookup_functor('$memory_file', 1);
-    var ref = alloc_structure(ftor);
-    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
-    return unify(memfile, ref);
-}
-
-function close_memory_file(stream)
-{
-    return true;
-}
-
-function read_memory_file(stream, size, count, buffer)
-{
-    var bytes_read = 0;
-    var records_read;
-    var memfile = memory_files[stream.data];
-    for (records_read = 0; records_read < count; records_read++)
-    {
-        for (var b = 0; b < size; b++)
-        {
-            var t = memfile.data[memfile.ptr++];
-            if (t === undefined)
-                return records_read;
-            buffer[bytes_read++] = t;
-        }
-    }
-    return records_read;
-}
-
-function write_memory_file(stream, size, count, buffer)
-{
-    var bytes_written = 0;
-    var records_written;
-    var memfile = memory_files[stream.data];
-    for (records_written = 0; records_written < count; records_written++)
-    {
-        for (var b = 0; b < size; b++)
-        {
-            memfile.data[memfile.ptr++] = buffer[bytes_written++];
-        }
-    }
-    return records_written;
-}
-
-function tell_memory_file(stream)
-{
-    return memory_files[stream.data].ptr;
-}
-
-
-function open_memory_file(memfile, mode, stream)
-{
-    var index = streams.length;
-    if (TAG(memfile) === TAG_REF)
-        return instantiation_error(memfile);
-    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
-        return type_error("memory_file", memfile);
-    var memindex = get_arg(memfile, 1);
-    if (TAG(memindex) !== TAG_INT)
-        return type_error("memory_file", memfile);
-    memindex = VAL(memindex);
-    if (TAG(mode) === TAG_REF)
-        return instantiation_error(mode);
-    else if (TAG(mode) !== TAG_ATM)
-        return type_error("atom", mode);
-    if (atable[VAL(mode)] === 'read')
-    {
-        streams[index] = new_stream(read_memory_file, null, null, close_memory_file, tell_memory_file, memindex);
-        
-    }
-    else if (atable[VAL(mode)] === 'write')
-    {
-        streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
-    }
-    else
-        return type_error("io_mode", mode);
-    var ftor = lookup_functor('$stream', 1);
-    var ref = alloc_structure(ftor);
-    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
-    return unify(stream, ref);   
-}
-
-function free_memory_file(memfile)
-{
-    var m = memory_files[VAL(get_arg(memfile, 1))];
-    memory_files[m] = null;
-    return true;
-}
-
 function emit_code(address, c)
 {
     // Not checking. Lets assume we know what we are doing!
@@ -2574,6 +2389,192 @@ function evaluation_error(message)
     memory[state.H++] = ftor;
     memory[state.H++] = lookup_atom(message);
     return predicate_throw(ref);
+}
+// File memory_files.js
+
+/* Memory files */
+var memory_files = [];
+
+function toByteArray(str)
+{
+    var byteArray = [];
+    for (var i = 0; i < str.length; i++)
+    {
+        if (str.charCodeAt(i) <= 0x7F)
+        {
+            byteArray.push(str.charCodeAt(i));
+        }
+        else
+        {
+            var h = encodeURIComponent(str.charAt(i)).substr(1).split('%');
+            for (var j = 0; j < h.length; j++)
+            {
+                byteArray.push(parseInt(h[j], 16));
+            }
+        }
+    }
+    return byteArray;
+}
+
+// function JSfromByteArray(byteArray)
+// {
+//     var str = '';
+//     for (var i = 0; i < byteArray.length; i++)
+//     {
+//         str +=  byteArray[i] <= 0x7F?
+//                 byteArray[i] === 0x25 ? "%25" : // %
+//                 String.fromCharCode(byteArray[i]) :
+//                 "%" + byteArray[i].toString(16).toUpperCase();
+//     }
+//     return decodeURIComponent(str);
+// }
+
+function fromByteArray(byteArray)
+{
+    var str = '';
+    for (var i = 0; i < byteArray.length; i++) {
+        if (byteArray[i] <= 0x7F) {
+            str += String.fromCharCode(byteArray[i]);
+        }
+        else {
+            // Have to decode manually
+            var ch = 0;
+            var j = 0;
+            for (var mask = 0x20; mask !== 0; mask >>=1 )
+            {
+                var next = byteArray[j+1];
+                if (next === undefined)
+                {
+                    abort("Unicode break in fromByteArray. The input is garbage");
+                }
+                ch = (ch << 6) ^ (next & 0x3f);
+                if ((byteArray[i] & mask) === 0)
+                    break;
+                j++;
+            }
+            ch ^= (ch & (0xff >> (i+3))) << (6*(i+1));
+            str += String.fromCharCode(ch);
+        }
+    }
+    return str;
+}
+
+function atom_to_memory_file(atom, memfile)
+{
+    var index = memory_files.length;
+    memory_files[index] = {data:toByteArray(atable[VAL(atom)]),
+        ptr:0};
+    var ftor = lookup_functor('$memory_file', 1);
+    var ref = alloc_structure(ftor);
+    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
+    return unify(memfile, ref);
+}
+
+function memory_file_to_atom(memfile, atom)
+{
+    if (TAG(memfile) !== TAG_STR)
+        return type_error("memory_file", memfile);
+    var ftor = VAL(memory[VAL(memfile)]);
+    if (atable[ftable[ftor][0]] === "$memory_file" && ftable[ftor][1] === 1)
+    {
+        var f = memory_files[VAL(memory[VAL(memfile)+1])];
+        return unify(atom, lookup_atom(fromByteArray(f.data)));
+    }
+    return type_error("memory_file", memfile);
+}
+
+function new_memory_file(memfile)
+{
+    var index = memory_files.length;
+    memory_files[index] = {data:[],
+        ptr:0};
+    var ftor = lookup_functor('$memory_file', 1);
+    var ref = alloc_structure(ftor);
+    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
+    return unify(memfile, ref);
+}
+
+function close_memory_file(stream)
+{
+    return true;
+}
+
+function read_memory_file(stream, size, count, buffer)
+{
+    var bytes_read = 0;
+    var records_read;
+    var memfile = memory_files[stream.data];
+    for (records_read = 0; records_read < count; records_read++)
+    {
+        for (var b = 0; b < size; b++)
+        {
+            var t = memfile.data[memfile.ptr++];
+            if (t === undefined)
+                return records_read;
+            buffer[bytes_read++] = t;
+        }
+    }
+    return records_read;
+}
+
+function write_memory_file(stream, size, count, buffer)
+{
+    var bytes_written = 0;
+    var records_written;
+    var memfile = memory_files[stream.data];
+    for (records_written = 0; records_written < count; records_written++)
+    {
+        for (var b = 0; b < size; b++)
+        {
+            memfile.data[memfile.ptr++] = buffer[bytes_written++];
+        }
+    }
+    return records_written;
+}
+
+function tell_memory_file(stream)
+{
+    return memory_files[stream.data].ptr;
+}
+
+
+function open_memory_file(memfile, mode, stream)
+{
+    var index = streams.length;
+    if (TAG(memfile) === TAG_REF)
+        return instantiation_error(memfile);
+    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
+        return type_error("memory_file", memfile);
+    var memindex = get_arg(memfile, 1);
+    if (TAG(memindex) !== TAG_INT)
+        return type_error("memory_file", memfile);
+    memindex = VAL(memindex);
+    if (TAG(mode) === TAG_REF)
+        return instantiation_error(mode);
+    else if (TAG(mode) !== TAG_ATM)
+        return type_error("atom", mode);
+    if (atable[VAL(mode)] === 'read')
+    {
+        streams[index] = new_stream(read_memory_file, null, null, close_memory_file, tell_memory_file, memindex);
+
+    }
+    else if (atable[VAL(mode)] === 'write')
+    {
+        streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
+    }
+    else
+        return type_error("io_mode", mode);
+    var ftor = lookup_functor('$stream', 1);
+    var ref = alloc_structure(ftor);
+    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
+    return unify(stream, ref);
+}
+
+function free_memory_file(memfile)
+{
+    var m = memory_files[VAL(get_arg(memfile, 1))];
+    memory_files[m] = null;
+    return true;
 }
 // File wam.js
 /* For general documentation, see wam_compiler.pl
@@ -5499,7 +5500,7 @@ function recorda(key, term, ref)
     {
         // No such database yet. Create one, and store it in databases
         databases[key] = {data:{},
-                          keys:new Array(),
+                          keys:[],
                           ptr: 0};
         d = databases[key];
     }
@@ -5535,7 +5536,7 @@ function recordz(key, term, ref)
     {
         // No such database yet. Create one, and store it in databases
         databases[key] = {data:{},
-                          keys:new Array(),
+                          keys:[],
                           ptr: 0};
         d = databases[key];
     }
@@ -5574,6 +5575,7 @@ function recorded(key, term, ref)
     var data = d.data;
     // We need the first actual key. This may not be [0] if something has been erased
     var index = d.keys[0];
+    // noinspection UnnecessaryLocalVariableJS
     var result = unify(recall_term(d.data[index].value, {}), term) && unify(d.data[index].ref ^ (TAG_INT << WORD_BITS), ref);
     return result;
 }
@@ -5588,9 +5590,9 @@ function erase(ref)
     // Now set to undefined
     delete d.data[dr.index];
     // Now we must also delete the keys entry. This requires a search, unfortunately since there is no way to keep track of indices if we allow unshifting
-    for (i = 0; i < d.keys.length; i++)
+    for (var i = 0; i < d.keys.length; i++)
     {
-        if (d.keys[i] == dr.index)
+        if (d.keys[i] === dr.index)
         {
             d.keys.splice(i, 1);
             break;
@@ -5622,7 +5624,7 @@ function record_term(t)
         var value = [];
         var list = {type: TAG_LST,
                     value: value};
-        while (TAG(t) == TAG_LST)
+        while (TAG(t) === TAG_LST)
         {
             value.push(record_term(VAL(t)));
             t = memory[VAL(t)+1];
@@ -5648,49 +5650,47 @@ function recall_term(e, varmap)
     // return a reference to an equivalent WAM term to the expression e
     switch(e.type)
     {
-    case TAG_REF:
-        var result;
-        if (varmap[e.key] !== undefined)
-        {
-            result = state.H;            
+    case TAG_REF: {
+        let result;
+        if (varmap[e.key] !== undefined) {
+            result = state.H;
             memory[state.H] = varmap[e.key];
             state.H++;
-        }
-        else
-        {
+        } else {
             result = alloc_var();
-            varmap[e.key] = result;            
+            varmap[e.key] = result;
         }
         return result;
+    }
     case TAG_ATM:
         return lookup_atom(e.value);
     case TAG_FLT:
         return lookup_float(e.value);
     case TAG_INT:
         return e.value ^ (TAG_INT << WORD_BITS);
-    case TAG_LST:
-        var result = alloc_var();
+    case TAG_LST: {
+        let result = alloc_var();
         var tail = result;
         var head;
-        for (var i = 0; i < e.value.length; i++)
-        {
+        for (let i = 0; i < e.value.length; i++) {
             unify(tail, state.H ^ (TAG_LST << WORD_BITS));
             head = alloc_var();
             tail = alloc_var();
             unify(head, recall_term(e.value[i], varmap));
         }
         unify(tail, recall_term(e.tail, varmap));
-        return result;    
+        return result;
+    }
     case TAG_STR:
         var t = (state.H ^ TAG_STR << WORD_BITS);
         memory[state.H++] = lookup_functor(e.name, e.args.length);
         // Reserve space for the args
         var var_args = [];
-        for (var i = 0; i < e.args.length; i++)
+        for (let i = 0; i < e.args.length; i++)
             var_args[i] = alloc_var();
-        for (var i = 0; i < e.args.length; i++)
+        for (let i = 0; i < e.args.length; i++)
         {
-            z = recall_term(e.args[i], varmap);
+            let z = recall_term(e.args[i], varmap);
             unify(z, var_args[i]);
         }
         return t;
