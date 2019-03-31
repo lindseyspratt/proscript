@@ -10,7 +10,10 @@ clean:
 bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl'], 'foo'), halt"
 
-test_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl bench/zebra.pl bench/common.pl bench/hook.pl
+tests_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl test/tests.pl
+		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'test/tests.pl'], 'foo'), halt"
+
+zebra_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl bench/zebra.pl bench/common.pl bench/hook.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/zebra.pl', 'bench/common.pl', 'bench/hook.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl'], 'foo'), halt"
 
 wam-pp.js:	foreign.js memory_files.js wam.js read.js record.js fli.js stream.js gc.js dom.js dom_element_property.js dom_element_method.js debugger.js decode_instruction.js

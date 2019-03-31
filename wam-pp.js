@@ -2459,6 +2459,71 @@ function fromByteArray(byteArray)
     return str;
 }
 
+function predicate_compile_urls(urlsPL, nextGoalPL) {
+    if(TAG(urlsPL) !== TAG_LST) {
+        return type_error("list", urlsPL);
+    }
+    let urlsJS = atom_list_to_array(urlsPL);
+    let nextGoalJS = atable[VAL(nextGoalPL)];
+    compile_urls(urlsJS, nextGoalJS);
+    return true;
+}
+
+function atom_list_to_array(listPL) {
+
+    let result = [];
+    var head = memory[VAL(listPL)];
+    var tail = memory[VAL(listPL)+1];
+    while (true)
+    {
+        if(TAG(head) !== TAG_ATM) {
+            throw('Invalid atom list. Item is not an atom.');
+        }
+
+        result.push(atable[VAL(head)]);
+
+        if (tail === NIL)
+            return result;
+        else if (TAG(tail) === TAG_LST)
+        {
+            head = memory[VAL(tail)];
+            tail = memory[VAL(tail)+1];
+        }
+        else
+            throw('Invalid atom list. Last item was not NIL.');
+    }
+}
+
+async function compile_urls(urls, next_goal) {
+    // fetch all the URLs in parallel
+    const textPromises = urls.map(async url => {
+        const response = await fetch(url);
+        return response.text();
+    });
+
+    // compile them in sequence
+    for (const textPromise of textPromises) {
+        await textPromise.then(function(text){
+            let index = memory_files.length;
+            memory_files[index] = {data:toByteArray(text),
+                ptr:0};
+            var ftor = lookup_functor('$memory_file', 1);
+            var ref = alloc_structure(ftor);
+            memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
+            return "'$memory_file'(" + index + ")";
+
+        }).then(function(memfile){
+            proscript("compile_and_free_memory_file(" + memfile + ")");
+
+        });
+    }
+
+    if(next_goal && next_goal !== '') {
+        proscript(next_goal);
+    }
+}
+
+
 function atom_to_memory_file(atom, memfile)
 {
     var index = memory_files.length;
@@ -7789,7 +7854,7 @@ function proscript(queryJS) {
     {
         if (!wam())
         {
-            stdout("false.\n");
+            stdout("Failed " + queryJS + ".\n");
         }
     }
     catch (anything)

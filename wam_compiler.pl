@@ -892,11 +892,17 @@ compile_atoms([H|T]) :-
 
 compile_atom(Atom):-
         atom_to_memory_file(Atom, MemoryFile),
+        compile_and_free_memory_file(MemoryFile),
+        writeln('Compiled atom').
+
+compile_and_free_memory_file(MemoryFile) :-
+        compile_memory_file(MemoryFile),
+        free_memory_file(MemoryFile).
+
+compile_memory_file(MemoryFile) :-
         open_memory_file(MemoryFile, read, Stream),
         compile_stream(Stream),
-        close(Stream),
-        free_memory_file(MemoryFile),
-        writeln('Compiled atom').
+        close(Stream).
 
 save_clause(Head:-Body):-
         !,

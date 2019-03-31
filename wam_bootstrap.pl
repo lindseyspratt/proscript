@@ -328,6 +328,7 @@ reset:-
         reserve_predicate(nodebug/0, predicate_nodebug),
         reserve_predicate('$jmp'/1, predicate_jmp),
         reserve_predicate(generate_initialization_goal/1, predicate_generate_initialization_goal),
+        reserve_predicate(compile_urls/2, predicate_compile_urls),
 
         % Debugging
         reserve_predicate(trace_unify/2, predicate_trace_unify),
@@ -395,7 +396,6 @@ reset:-
         % DOM Element/Node Methods
         reserve_predicate(dom_element_add_event_listener/3, predicate_dom_element_add_event_listener),
         reserve_predicate(dom_element_blur/1, predicate_dom_element_blur),
-        reserve_predicate(dom_element_focus/1, predicate_dom_element_focus),
         reserve_predicate(dom_element_bounding_client_rect/1, predicate_dom_element_bounding_client_rect),
         reserve_predicate(dom_element_click/1, predicate_dom_element_click),
         reserve_predicate(dom_element_clone_node/3, predicate_dom_element_clone_node),

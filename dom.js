@@ -672,7 +672,7 @@ function proscript(queryJS) {
     {
         if (!wam())
         {
-            stdout("false.\n");
+            stdout("Failed " + queryJS + ".\n");
         }
     }
     catch (anything)
