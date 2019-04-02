@@ -66,13 +66,13 @@ function fromByteArray(byteArray)
     return str;
 }
 
-function predicate_compile_urls(urlsPL, nextGoalPL) {
+function predicate_consult(urlsPL, nextGoalPL) {
     if(TAG(urlsPL) !== TAG_LST) {
         return type_error("list", urlsPL);
     }
     let urlsJS = atom_list_to_array(urlsPL);
     let nextGoalJS = atable[VAL(nextGoalPL)];
-    compile_urls(urlsJS, nextGoalJS);
+    consult(urlsJS, nextGoalJS);
     return true;
 }
 
@@ -101,9 +101,12 @@ function atom_list_to_array(listPL) {
     }
 }
 
-async function compile_urls(urls, next_goal) {
+async function consult(urls, next_goal) {
     // fetch all the URLs in parallel
     const textPromises = urls.map(async url => {
+        if(! url.includes(".")) {
+            url += ".pl";
+        }
         const response = await fetch(url);
         return response.text();
     });

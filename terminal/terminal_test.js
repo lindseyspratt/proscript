@@ -188,7 +188,7 @@ function solve_query(query, term) {
 }
 
 function debug(msg) {
-    stdout('debug: ' + msg + '\n');
+ //   stdout('debug: ' + msg + '\n');
 }
 
 function try_running() {

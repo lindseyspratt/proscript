@@ -51,7 +51,7 @@ function onload(initialConsult)
     stdout_buffer.innerHTML = "";
     output_console.appendChild(stdout_buffer);
     if(initialConsult) {
-        consult();
+        consult_for_test();
     }
 
     query_node = document.createElement('div');
@@ -68,12 +68,13 @@ function debug(e)
         newElement.innerHTML = '<div>' + e + '</div>';
         output_console.appendChild(newElement);
         scroll_to_bottom();
-    } else {
-        alert(e);
     }
+    // else {
+    //     alert(e);
+    // }
 }
 
-function consult()
+function consult_for_test()
 {
     code_atom = document.getElementById('code').value;
     /* Reset the entire WAM */

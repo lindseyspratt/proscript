@@ -328,7 +328,8 @@ reset:-
         reserve_predicate(nodebug/0, predicate_nodebug),
         reserve_predicate('$jmp'/1, predicate_jmp),
         reserve_predicate(generate_initialization_goal/1, predicate_generate_initialization_goal),
-        reserve_predicate(compile_urls/2, predicate_compile_urls),
+        reserve_predicate(consult/1, predicate_consult),
+        reserve_predicate(consult/2, predicate_consult),
 
         % Debugging
         reserve_predicate(trace_unify/2, predicate_trace_unify),

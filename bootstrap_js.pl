@@ -10,11 +10,10 @@ save_clausea(Fact):-
         functor(Fact, Name, Arity),
         prepend_clause_to_predicate(Name/Arity, Fact, true).
 
-/*
-wam_compiler:module(_). % dummy for proscript to allow compilation of wam_compiler.pl.
-wam_compiler:ensure_loaded(_). % dummy for proscript to allow compilation of wam_compiler.pl.
-*/
 include(_).
+
+call([H|T]) :-
+        call(consult([H|T])).
 
 call(Goal):-
         term_variables(Goal, Vars),
