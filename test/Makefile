@@ -1,6 +1,6 @@
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
 DEBUG=false
-SWIPL=/opt/local/bin/swipl
+SWIPL=/usr/local/bin/swipl --traditional
 
 
 test:		../wam-pp.js ../bootstrap.js standalone.js ../wam_compiler.pl tests.pl

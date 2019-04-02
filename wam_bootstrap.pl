@@ -445,6 +445,8 @@ bootstrap(Source, Query):-
         bootstrap('', [Source], Query).
 
 bootstrap(CorePrefix, Sources, Query):-
+        current_prolog_flag(version_data, swi(Mj, Mn, P, E)),
+        (Mj >= 7 -> true;throw(wrong_swi_version('expected >= 7', swi(Mj, Mn, P, E)))),
         % Since javascript will not support open/3, we must load it into an atom and pass it.
         % Ultimately we could use XmlHTTPRequest, but probably that is less useful anyway
         files_to_atoms(Sources, Atoms),
@@ -470,15 +472,12 @@ files_to_atoms([H|T], [HA|TA]) :-
         files_to_atoms(T, TA).
 
 file_to_atom(Filename, Atom):-
-        open(Filename, read, R),
-        new_memory_file(MemFile),
-        open_memory_file(MemFile, write, W),
-        copy_stream_data(R, W),
-        close(W),
-        close(R),
-        memory_file_to_atom(MemFile, Atom),
-        free_memory_file(MemFile).
-
+  with_output_to(atom(Atom),
+    (current_output(W),
+     open(Filename, read, R),
+     copy_stream_data(R, W),
+     close(R)
+    )).
 
 trace_unify(A, A).
 

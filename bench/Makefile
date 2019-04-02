@@ -1,6 +1,6 @@
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
 DEBUG=false
-SWIPL=/opt/local/bin/swipl
+SWIPL=/usr/local/bin/swipl --traditional
 
 all: cal.test chat_parser.test crypt.test ham.test meta_qsort.test nand.test nrev.test poly_10.test qsort.test \
     queens.test queensn.test query.test reducer.test sendmore.test zebra.test browse.test

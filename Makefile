@@ -1,6 +1,6 @@
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
 DEBUG=false
-SWIPL=/opt/local/bin/swipl
+SWIPL=/usr/local/bin/swipl --traditional
 
 
 all:		bootstrap.js wam-pp.js
