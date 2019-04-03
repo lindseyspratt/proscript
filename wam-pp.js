@@ -7834,7 +7834,9 @@ function setupElementsForSelectAll(query) {
 
 function proscript_init(queryJS) {
     load_state();
-    proscript(queryJS);
+    let initialization_predicates = initialization.join(", ");
+
+    proscript(initialization_predicates + ", " + queryJS);
 }
 
 // proscript calls the given query using the existing global data,

@@ -17,7 +17,9 @@
 :-dynamic(clause_table/3). % clauses
 :-dynamic(fptable/2). % foreign predicates
 :-dynamic(ctable/2). % code
-:-dynamic(itable/1).
+:-dynamic(itable/1). % initialization directive predicates
+:-dynamic(stable/1). % system directive predicates
+:-dynamic(dtable/1). % dynamic predicates
 
 lookup_functor(Functor, Arity, N):-
         lookup_atom(Functor, F),
@@ -26,6 +28,14 @@ lookup_functor(Functor, Arity, N):-
         ; otherwise->
             flag(ftable, N, N+1),
             assert(ftable(F/Arity, N))
+        ).
+
+lookup_dynamic_functor(Functor, Arity, N):-
+        lookup_functor(Functor, Arity, N),
+        ( dtable(N)->
+            true
+        ; otherwise->
+            assert(dtable(N))
         ).
 
 lookup_atom([], 0):- !.
@@ -45,15 +55,47 @@ lookup_float(Float, N):-
             assert(fltable(Float, N))
         ).
 
+generate_system_goal(Init) :-
+        flag(stable, N, N+1),
+        number_codes(N, NCs),
+        append("$sys_", NCs, ICs),
+        atom_codes(Init, ICs),
+        lookup_functor(Init, 0, FN),
+        assert(stable(FN)).
+
 generate_initialization_goal(Init) :-
         flag(itable, N, N+1),
         number_codes(N, NCs),
         append("$init_", NCs, ICs),
         atom_codes(Init, ICs),
-        assert(itable(Init)).
+        lookup_functor(Init, 0, FN),
+        assert(itable(FN)).
 
 emit_code(N, Code):-
         assert(ctable(N, Code)).
+
+define_dynamic_predicate(Name/Arity) :-
+        !,
+        define_dynamic_predicate1(Name/Arity).
+define_dynamic_predicate([H|T]) :-
+        !,
+        define_dynamic_predicate(H),
+        define_dynamic_predicate(T).
+define_dynamic_predicate((A,B)) :-
+        define_dynamic_predicate(A),
+        define_dynamic_predicate(B).
+
+% dynamic implies public. In proscript, public also implies dynamic.
+% the is_public flag will be set to true in the saved state
+% for predicate Name/Arity.
+
+define_dynamic_predicate1(Name/Arity) :-
+        lookup_dynamic_functor(Functor, Arity, Predicate),
+        (clause_table(Predicate, _, _)
+          -> true
+        ;
+         assertz(clause_table(Predicate, 0, []))
+        ).
 
 add_clause_to_predicate(Name/Arity, _, _):-
         setof(N-Code, T^(ctable(T, Code), N is T /\ 0x7fffffff), SortedCodes),
@@ -69,8 +111,12 @@ add_clause_to_predicate(Name/Arity, _, _):-
             % If we have a trust_me, then make it retry_me_else (since there must have been another clause to try first, if we then have to trust_me)
             assertz(clause_table(Predicate, I, [29, II|PreviousCodes])),
             assertz(clause_table(Predicate, II, [30, 0|Codes]))
+        ; retract(clause_table(Predicate, I, []))->
+            % Predicate defined with no clauses, possibly due to dynamic directive defining Predicate.
+            % add ours as a <NOP,0>
+            assertz(clause_table(Predicate, 0, [254, 0|Codes]))
         ; otherwise->
-            % Otherwise there are no clauses yet. So just add ours as a <NOP,0>
+            % Otherwise Predicate not defined so there are no clauses yet. So just add ours as a <NOP,0>
             assertz(clause_table(Predicate, 0, [254, 0|Codes]))
         ).
 
@@ -184,7 +230,8 @@ dump_tables(S):-
                   atomic_list_concat(IndexAtoms, ', ', IndexAtom),
                   atomic_list_concat(ClauseAtoms, ', ', ClauseAtom),
                   list_length(Clauses, I),
-                  format(atom(PredicateAtom), '~w: {clauses:{~w}, clause_keys:[~w], next_key:~w, key:~w}', [Functor, ClauseAtom, IndexAtom, I, Functor])
+                  (dtable(Functor) -> Dynamic = 'true';Dynamic = 'false'),
+                  format(atom(PredicateAtom), '~w: {is_public:~w, clauses:{~w}, clause_keys:[~w], next_key:~w, key:~w}', [Functor, Dynamic, ClauseAtom, IndexAtom, I, Functor])
                 ),
                 Predicates),
         atomic_list_concat(Predicates, ', ', PredicatesAtom),
@@ -196,8 +243,11 @@ dump_tables(S):-
                 FPredicates),
         atomic_list_concat(FPredicates, ', ', FPredicatesAtom),
         format(S, 'foreign_predicates = {~w};~n', [FPredicatesAtom]),
-        findall(QG, (itable(G),quote_atom_for_javascript(G,QG)), QGs),
-        atomic_list_concat(QGs, ', ', InitializationAtom),
+        findall(G, stable(G), SGs),
+        atomic_list_concat(SGs, ', ', SystemAtom),
+        format(S, 'system = [~w];~n', [SystemAtom]),
+        findall(G, itable(G), IGs),
+        atomic_list_concat(IGs, ', ', InitializationAtom),
         format(S, 'initialization = [~w];~n', [InitializationAtom]).
 
 
@@ -481,16 +531,16 @@ file_to_atom(Filename, Atom):-
 
 trace_unify(A, A).
 
-/*
+
 compile_message(A):-
     A = [H|T] -> write(H), compile_message(T)
     ;
     A = [] -> writeln('')
     ;
     writeln(A).
-*/
 
-compile_message(_).
+
+%compile_message(_).
 flush_stdout.
 gc.
 

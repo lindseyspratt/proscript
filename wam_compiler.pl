@@ -91,18 +91,64 @@ compile_clause(Term):-
 compile_clause_1([]):- !.
 compile_clause_1([Head|Tail]):-
         !,
-        compile_clause_2(Head),
-        save_clause(Head),
+        compile_clause_save(Head),
         compile_clause_1(Tail).
 compile_clause_1(Term):-
-        compile_clause_2(Term),
+        compile_clause_save(Term).
+
+compile_clause_save(:- Body) :-
         !,
+        compile_clause_directive(Body).
+compile_clause_save(Term) :-
+        compile_clause_2(Term),
         save_clause(Term).
 
-compile_clause_2(:- Body) :-
-        call(Body),
+compile_clause_directive(op(A,B,C)) :- compile_clause_system_directive(op(A,B,C)).
+compile_clause_directive(dynamic(PredIndicator)) :- compile_clause_compilation_directive(dynamic(PredIndicator)).
+compile_clause_directive(initialization(Goal)) :- compile_clause_initialization_directive(Goal).
+compile_clause_directive(ensure_loaded(_)). % Currently a no-op in Proscript.
+compile_clause_directive(module(_,_)). % Currently a no-op in Proscript.
+
+% A compilation directive is evaluated immediately
+% during compilation of a source unit (e.g. a file).
+% There is no evaluation of the directive when the
+% compiled WAM state is loaded and initialized.
+
+compile_clause_compilation_directive(dynamic(PredIndicator)) :-
+        define_dynamic_predicate(PredIndicator).
+
+% A system directive is evaluated immediately
+% during compilation of a source unit (e.g. a file).
+% The directive is also evaluated when the
+% compiled WAM state is loaded and initialized.
+% All of the system directives are evaluated
+% in the order encountered in the source.
+% They are evaluated prior to evaluating
+% any initialization directives.
+
+compile_clause_system_directive(Goal) :-
+        call(Goal),
+        generate_system_goal(Init),
+        Term = (Init :- Goal),
+        compile_clause_2(Term),
+        save_clause(Term).
+
+% An initialization directive is evaluated after
+% the compilation of the source unit (e.g. a file)
+% in which it is defined.
+% The initialization directive is also evaluated when the
+% compiled WAM state is loaded and initialized.
+% All of the initialization directives are evaluated
+% in the order encountered in the source.
+% They are evaluated after evaluating
+% any system directives.
+
+compile_clause_initialization_directive(Goal) :-
+        call(Goal),
         generate_initialization_goal(Init),
-        compile_clause_2(Init :- Body).
+        Term = (Init :- Goal),
+        compile_clause_2(Term),
+        save_clause(Term).
 
 
 compile_clause_2(?- Body):-

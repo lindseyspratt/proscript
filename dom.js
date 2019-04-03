@@ -649,7 +649,20 @@ function setupElementsForSelectAll(query) {
 
 function proscript_init(queryJS) {
     load_state();
-    proscript(queryJS);
+
+    let system_predicates = (! system || system.length === 0)
+        ? undefined
+        : system.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
+
+    let initialization_predicates = (! initialization || initialization.length === 0)
+        ? undefined
+        : initialization.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
+
+    let extended_query = (system_predicates ? (system_predicates + ", ") : "");
+    extended_query += (initialization_predicates ? (initialization_predicates + ", ") : "");
+    extended_query += queryJS;
+
+    proscript(extended_query);
 }
 
 // proscript calls the given query using the existing global data,
