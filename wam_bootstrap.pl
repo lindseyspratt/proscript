@@ -74,23 +74,12 @@ generate_initialization_goal(Init) :-
 emit_code(N, Code):-
         assert(ctable(N, Code)).
 
-define_dynamic_predicate(Name/Arity) :-
-        !,
-        define_dynamic_predicate1(Name/Arity).
-define_dynamic_predicate([H|T]) :-
-        !,
-        define_dynamic_predicate(H),
-        define_dynamic_predicate(T).
-define_dynamic_predicate((A,B)) :-
-        define_dynamic_predicate(A),
-        define_dynamic_predicate(B).
-
 % dynamic implies public. In proscript, public also implies dynamic.
 % the is_public flag will be set to true in the saved state
 % for predicate Name/Arity.
 
-define_dynamic_predicate1(Name/Arity) :-
-        lookup_dynamic_functor(Functor, Arity, Predicate),
+define_dynamic_predicate(Name/Arity) :-
+        lookup_dynamic_functor(Name, Arity, Predicate),
         (clause_table(Predicate, _, _)
           -> true
         ;
@@ -111,7 +100,7 @@ add_clause_to_predicate(Name/Arity, _, _):-
             % If we have a trust_me, then make it retry_me_else (since there must have been another clause to try first, if we then have to trust_me)
             assertz(clause_table(Predicate, I, [29, II|PreviousCodes])),
             assertz(clause_table(Predicate, II, [30, 0|Codes]))
-        ; retract(clause_table(Predicate, I, []))->
+        ; retract(clause_table(Predicate, 0, []))->
             % Predicate defined with no clauses, possibly due to dynamic directive defining Predicate.
             % add ours as a <NOP,0>
             assertz(clause_table(Predicate, 0, [254, 0|Codes]))
@@ -217,6 +206,9 @@ dump_tables(S):-
                 SortedFunctors),
         atomic_list_concat(SortedFunctors, ', ', FunctorAtom),
         format(S, 'ftable = [~w];~n', [FunctorAtom]),
+        ( setof(F, dtable(F), DynamicFunctors)-> true ; otherwise-> DynamicFunctors = []),
+        atomic_list_concat(DynamicFunctors, ', ', DynamicFunctorAtom),
+        format(S, 'dtable = [~w];~n', [DynamicFunctorAtom]),
         findall(PredicateAtom,
                 ( bagof(Clause-Index,
                         clause_table(Functor, Index, Clause),
@@ -378,6 +370,8 @@ reset:-
         reserve_predicate(nodebug/0, predicate_nodebug),
         reserve_predicate('$jmp'/1, predicate_jmp),
         reserve_predicate(generate_initialization_goal/1, predicate_generate_initialization_goal),
+        reserve_predicate(generate_system_goal/1, predicate_generate_system_goal),
+        reserve_predicate(define_dynamic_predicate/1, predicate_define_dynamic_predicate),
         reserve_predicate(consult/1, predicate_consult),
         reserve_predicate(consult/2, predicate_consult),
 
@@ -531,16 +525,16 @@ file_to_atom(Filename, Atom):-
 
 trace_unify(A, A).
 
-
+/*
 compile_message(A):-
     A = [H|T] -> write(H), compile_message(T)
     ;
     A = [] -> writeln('')
     ;
     writeln(A).
+*/
 
-
-%compile_message(_).
+compile_message(_).
 flush_stdout.
 gc.
 

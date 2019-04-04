@@ -150,7 +150,7 @@ function memory_file_to_atom(memfile, atom)
     if (TAG(memfile) !== TAG_STR)
         return type_error("memory_file", memfile);
     var ftor = VAL(memory[VAL(memfile)]);
-    if (atable[ftable[ftor][0]] === "$memory_file" && ftable[ftor][1] === 1)
+    if (atable[ftable[ftor][0]] === "$memory_file" && ftable_arity(ftor) === 1)
     {
         var f = memory_files[VAL(memory[VAL(memfile)+1])];
         return unify(atom, lookup_atom(fromByteArray(f.data)));

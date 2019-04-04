@@ -351,7 +351,7 @@ function PL_call(term, module)
     initialize();
     allocate_first_frame();
     state.P = predicates[ftor];
-    for (i = 0; i < ftable[ftor][1]; i++)
+    for (i = 0; i < ftable_arity(ftor); i++)
         register[i] = memory[VAL(term) + 1 + i];
     return wam();    
 }

@@ -1,9 +1,7 @@
 /* To do list
-    Garbage collection
     indexing
     Bignums?
     Modules
-    Directives
     ISO exceptions
     Fix the 0x80000000 hack. Just make new opcodes for try/retry/trust in aux clauses.
     Environment trimming is not quite right. We cannot trim the environment at the point where it gets deallocated, since
@@ -107,6 +105,7 @@ compile_clause_directive(op(A,B,C)) :- compile_clause_system_directive(op(A,B,C)
 compile_clause_directive(dynamic(PredIndicator)) :- compile_clause_compilation_directive(dynamic(PredIndicator)).
 compile_clause_directive(initialization(Goal)) :- compile_clause_initialization_directive(Goal).
 compile_clause_directive(ensure_loaded(_)). % Currently a no-op in Proscript.
+compile_clause_directive(include(_)). % Currently a no-op in Proscript.
 compile_clause_directive(module(_,_)). % Currently a no-op in Proscript.
 
 % A compilation directive is evaluated immediately
@@ -115,7 +114,19 @@ compile_clause_directive(module(_,_)). % Currently a no-op in Proscript.
 % compiled WAM state is loaded and initialized.
 
 compile_clause_compilation_directive(dynamic(PredIndicator)) :-
-        define_dynamic_predicate(PredIndicator).
+        define_dynamic_predicates(PredIndicator).
+
+define_dynamic_predicates(Name/Arity) :-
+        !,
+        define_dynamic_predicate(Name/Arity).
+define_dynamic_predicates([]).
+define_dynamic_predicates([H|T]) :-
+        !,
+        define_dynamic_predicates(H),
+        define_dynamic_predicates(T).
+define_dynamic_predicates((A,B)) :-
+        define_dynamic_predicates(A),
+        define_dynamic_predicates(B).
 
 % A system directive is evaluated immediately
 % during compilation of a source unit (e.g. a file).

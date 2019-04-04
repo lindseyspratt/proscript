@@ -430,7 +430,7 @@ function get_element_id_object(term, s) {
     if (TAG(term) !== TAG_STR)
         return type_error("element", term);
     var ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] === "$element" && ftable[ftor][1] === 1) {
+    if (atable[ftable[ftor][0]] === "$element" && ftable_arity(ftor) === 1) {
         var arg = memory[VAL(term) + 1];
         if (TAG(arg) !== TAG_ATM)
             return type_error("element_arg");
@@ -650,6 +650,12 @@ function setupElementsForSelectAll(query) {
 function proscript_init(queryJS) {
     load_state();
 
+    call_directives();
+
+    proscript(queryJS);
+}
+
+function call_directives() {
     let system_predicates = (! system || system.length === 0)
         ? undefined
         : system.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
@@ -658,11 +664,21 @@ function proscript_init(queryJS) {
         ? undefined
         : initialization.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
 
-    let extended_query = (system_predicates ? (system_predicates + ", ") : "");
-    extended_query += (initialization_predicates ? (initialization_predicates + ", ") : "");
-    extended_query += queryJS;
+    let extended_query = "";
 
-    proscript(extended_query);
+    if(system_predicates){
+        if(initialization_predicates){
+            extended_query = system_predicates + ", " + initialization_predicates;
+        } else {
+            extended_query = system_predicates;
+        }
+    } else if(initialization_predicates){
+        extended_query = initialization_predicates;
+    }
+
+    if(extended_query !== "") {
+        proscript(extended_query);
+    }
 }
 
 // proscript calls the given query using the existing global data,

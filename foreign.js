@@ -303,7 +303,7 @@ function term_variables(z)
         else if (TAG(t) === TAG_STR)
         {
             var ftor = VAL(memory[VAL(t)]);
-            for (var i = ftable[ftor][1]-1; i >= 0 ; i--)
+            for (var i = ftable_arity(ftor)-1; i >= 0 ; i--)
                 pdl.push(memory[VAL(t) + 1 + i]);
         }
     }
@@ -372,7 +372,7 @@ function predicate_univ(term, list_term)
             if (ftable[ftor] === undefined)
                 abort("Garbage functor " + hex(ftor) + " pointed at by " + hex(term));
             list = [ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)];
-        for (var i = 0; i < ftable[ftor][1]; i++)
+        for (var i = 0; i < ftable_arity(ftor); i++)
         {
             debug_msg("Arg " + i + " is at " + (VAL(term)+1+i) + " and has value " + hex(memory[VAL(term)+1+i]));
             list.push(memory[VAL(term)+1+i]);
@@ -415,7 +415,7 @@ function predicate_functor(term, name, arity)
             return unify(name, term) && unify(arity, 0 ^ (TAG_INT << WORD_BITS));
         case TAG_STR:
             ftor = VAL(memory[VAL(term)]);
-            return unify(name, ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)) && unify(arity, ftable[ftor][1] ^ (TAG_INT << WORD_BITS));
+            return unify(name, ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)) && unify(arity, ftable_arity(ftor) ^ (TAG_INT << WORD_BITS));
         case TAG_LST:
             return unify(name, lookup_atom('.')) && unify(arity, 2 ^ (TAG_INT << WORD_BITS));
     }
@@ -436,7 +436,7 @@ function predicate_arg(n, t, a)
 
     if (TAG(t) === TAG_STR) {
         var ftor = VAL(memory[VAL(t)]);
-        if (VAL(n) === 0 || VAL(n) > ftable[ftor][1])
+        if (VAL(n) === 0 || VAL(n) > ftable_arity(ftor))
             return false;
         return unify(memory[VAL(t) + VAL(n)], a);
     } else if (TAG(t) === TAG_LST) {
@@ -491,7 +491,7 @@ function predicate_ground(x)
             continue;
         case TAG_STR:
             var ftor = VAL(memory[VAL(arg)]);
-            for (var i = 0; i < ftable[ftor][1]; i++)
+            for (var i = 0; i < ftable_arity(ftor); i++)
                 args.push(memory[VAL(arg)+1+i]);
 
         }
@@ -585,6 +585,22 @@ function lookup_functor(name, arity)
     return i ^ (TAG_ATM << WORD_BITS);    
 }
 
+function lookup_dynamic_functor(name, arity) {
+    let a = lookup_functor(name, arity);
+
+    let already_dynamic = false;
+    for (let i = 0; i < dtable.length; i++) {
+        if (dtable[i] === a) {
+            already_dynamic = true;
+            break;
+        }
+    }
+
+    if(! already_dynamic) {
+        dtable.push(a);
+    }
+    return a;
+}
 
 function emit_code(address, c)
 {
@@ -620,16 +636,66 @@ function predicate_lookup_functor(fname, arity, index)
     return unify(index, i ^ (TAG_INT << WORD_BITS));
 }
 
+function predicate_generate_system_goal(Sys) {
+    if (TAG(Sys) !== TAG_REF) {
+        return instantiation_error(Sys);
+    }
+    let n = stable.length;
+    let functor = lookup_functor('$sys_' + n, 0);
+    stable.push(functor);
+    return unify(functor, Sys);
+}
+
 function predicate_generate_initialization_goal(Init) {
     if (TAG(Init) !== TAG_REF) {
         return instantiation_error(Init);
     }
     let n = itable.length;
-    let atom = lookup_atom('$init_' + n);
-    itable.push(atom);
-    return unify(atom, Init);
+    let functor = lookup_functor('$init_' + n, 0);
+    itable.push(functor);
+    return unify(functor, Init);
  }
 
+// dynamic implies public. In proscript, public also implies dynamic.
+// the is_public flag will be set to true in the saved state
+// for predicate Name/Arity.
+
+
+function predicate_define_dynamic_predicate(indicator) {
+    var slash2 = lookup_functor("/", 2);
+    if (TAG(indicator) === TAG_STR && memory[VAL(indicator)] === slash2)
+    {
+        var name = deref(memory[VAL(indicator) + 1]);
+        var arity = deref(memory[VAL(indicator) + 2]);
+        if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT)
+        {
+            if (VAL(arity) < 0)
+                return domain_error("not_less_than_zero", arity);
+            var ftor = VAL(lookup_dynamic_functor(atable[VAL(name)], VAL(arity)));
+            if (! predicates[ftor]){
+                predicates[ftor] = {clauses: {},
+                    key:ftor,
+                    clause_keys: [],
+                    is_public: true,
+                    next_key: 0};
+            } else if (! predicates[ftor].is_public)
+                return permission_error("modify", "static_procedure", indicator);
+            return true;
+        }
+        else if (TAG(name) === TAG_REF)
+            return instantiation_error(name);
+        else if (TAG(name) !== TAG_ATM)
+            return type_error("atom", name);
+        else if (TAG(arity) === TAG_REF)
+            return instantiation_error(arity);
+        else if (TAG(arity) !== TAG_INT)
+            return type_error("integer", arity);
+    }
+    else if (TAG(indicator) === TAG_REF)
+        return instantiation_error(indicator);
+    else
+        return type_error("predicate_indicator", indicator);
+}
 
 function predicate_trace_unify(a, b)
 {
@@ -1095,7 +1161,7 @@ function predicate_format(stream, fmt, args) {
     //look for atom(X)
     if (TAG(stream) === TAG_STR) {
         let ftor = VAL(memory[VAL(stream)]);
-        if (atable[ftable[ftor][0]] === "atom" && ftable[ftor][1] === 1) {
+        if (atable[ftable[ftor][0]] === "atom" && ftable_arity(ftor) === 1) {
             let arg = memory[VAL(stream)+1];
             if(TAG(arg) === TAG_REF) {
                 let result = format_to_string(fmt, args);

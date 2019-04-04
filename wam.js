@@ -52,11 +52,13 @@ const CP_SIZE = 10;
 
 
 var ftable = [];
+var dtable = [];
 var atable = ['[]']; // Reserve first atom as [].
 var floats = [];
 var predicates = {};
 var exception = null;
 var itable = [];
+var stable = [];
 
 /* Constants. Should be auto-generated */
 const HEAP_SIZE = 131070;
@@ -339,6 +341,13 @@ function TAG(p)
 function VAL(p)
 {
     return p & ((1 << WORD_BITS)-1);
+}
+
+function ftable_arity(ftor) {
+    if(ftable[ftor] === undefined) {
+        throw('no ftable entry at ' + ftor);
+    }
+    return ftable[ftor][1];
 }
 
 // Ideally this would be inlined, but javascript does not support macros. Ultimately this could be generated dynamically.
@@ -1681,12 +1690,12 @@ function undefined_predicate(ftor)
         var indicator = state.H ^ (TAG_STR << WORD_BITS);
         memory[state.H++] = lookup_functor("/", 2);
         memory[state.H++] = ftable[ftor][0] ^ (TAG_ATM << WORD_BITS);
-        memory[state.H++] = ftable[ftor][1] ^ (TAG_INT << WORD_BITS);
+        memory[state.H++] = ftable_arity(ftor) ^ (TAG_INT << WORD_BITS);
         existence_error("procedure", indicator);
     }
     else if (prolog_flag_values.unknown === "warning")
     {
-        stdout("Undefined predicate " + atable[ftable[ftor][0]] + "/" + ftable[ftor][1] + "\n");
+        stdout("Undefined predicate " + atable[ftable[ftor][0]] + "/" + ftable_arity(ftor) + "\n");
     }
     if (!backtrack())
     {
@@ -1707,6 +1716,7 @@ function demo(d)
     stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
     stdout("Loaded " + atable.length + " atoms\n");
     stdout("Loaded " + ftable.length + " functors\n");
+    call_directives();
     initialize();
     allocate_first_frame();
 
@@ -1733,6 +1743,8 @@ function unit_tests(d)
     stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
     stdout("Loaded " + atable.length + " atoms\n");
     stdout("Loaded " + ftable.length + " functors\n");
+    call_directives();
+
     initialize();
     allocate_first_frame();
 

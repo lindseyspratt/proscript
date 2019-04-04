@@ -496,7 +496,8 @@ function gc_test(d)
     stdout("Loaded " + atable.length + " atoms");
     stdout("Loaded " + ftable.length + " functors");
     stdout("Loaded " + code.length + " bytes of code");
-    
+    call_directives();
+
     memory[0] = 0x20000088;
     memory[1] = 0x20000071;
     memory[2] = 0x20000072;

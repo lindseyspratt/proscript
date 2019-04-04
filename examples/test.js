@@ -5,6 +5,7 @@ var query = "";
 debugging = false;
 var output_console = null;
 load_state();
+call_directives();
 initialize();
 var can_backtrack = false;
 
@@ -79,6 +80,7 @@ function consult_for_test()
     code_atom = document.getElementById('code').value;
     /* Reset the entire WAM */
     load_state();
+    call_directives();
     initialize();
     atom = lookup_atom(code_atom);
     ftor = VAL(lookup_functor("consult_atom", 1));

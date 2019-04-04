@@ -1,4 +1,5 @@
 load_state();
+call_directives();
 initialize();
 var can_backtrack = false;
 var x_history = [];

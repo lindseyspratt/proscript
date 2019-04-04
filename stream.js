@@ -180,7 +180,7 @@ function get_stream_fd(term, s)
     if (TAG(term) !== TAG_STR)
         return type_error("stream", term);
     ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] === "$stream" && ftable[ftor][1] === 1)
+    if (atable[ftable[ftor][0]] === "$stream" && ftable_arity(ftor) === 1)
     {
         s.value = VAL(memory[VAL(term)+1]);
         return true;

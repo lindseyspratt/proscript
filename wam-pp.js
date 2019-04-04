@@ -302,7 +302,7 @@ function term_variables(z)
         else if (TAG(t) === TAG_STR)
         {
             var ftor = VAL(memory[VAL(t)]);
-            for (var i = ftable[ftor][1]-1; i >= 0 ; i--)
+            for (var i = ftable_arity(ftor)-1; i >= 0 ; i--)
                 pdl.push(memory[VAL(t) + 1 + i]);
         }
     }
@@ -367,7 +367,7 @@ function predicate_univ(term, list_term)
             if (ftable[ftor] === undefined)
                 abort("Garbage functor " + hex(ftor) + " pointed at by " + hex(term));
             list = [ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)];
-        for (var i = 0; i < ftable[ftor][1]; i++)
+        for (var i = 0; i < ftable_arity(ftor); i++)
         {
             list.push(memory[VAL(term)+1+i]);
         }
@@ -409,7 +409,7 @@ function predicate_functor(term, name, arity)
             return unify(name, term) && unify(arity, 0 ^ (TAG_INT << WORD_BITS));
         case TAG_STR:
             ftor = VAL(memory[VAL(term)]);
-            return unify(name, ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)) && unify(arity, ftable[ftor][1] ^ (TAG_INT << WORD_BITS));
+            return unify(name, ftable[ftor][0] ^ (TAG_ATM << WORD_BITS)) && unify(arity, ftable_arity(ftor) ^ (TAG_INT << WORD_BITS));
         case TAG_LST:
             return unify(name, lookup_atom('.')) && unify(arity, 2 ^ (TAG_INT << WORD_BITS));
     }
@@ -430,7 +430,7 @@ function predicate_arg(n, t, a)
 
     if (TAG(t) === TAG_STR) {
         var ftor = VAL(memory[VAL(t)]);
-        if (VAL(n) === 0 || VAL(n) > ftable[ftor][1])
+        if (VAL(n) === 0 || VAL(n) > ftable_arity(ftor))
             return false;
         return unify(memory[VAL(t) + VAL(n)], a);
     } else if (TAG(t) === TAG_LST) {
@@ -485,7 +485,7 @@ function predicate_ground(x)
             continue;
         case TAG_STR:
             var ftor = VAL(memory[VAL(arg)]);
-            for (var i = 0; i < ftable[ftor][1]; i++)
+            for (var i = 0; i < ftable_arity(ftor); i++)
                 args.push(memory[VAL(arg)+1+i]);
 
         }
@@ -579,6 +579,22 @@ function lookup_functor(name, arity)
     return i ^ (TAG_ATM << WORD_BITS);    
 }
 
+function lookup_dynamic_functor(name, arity) {
+    let a = lookup_functor(name, arity);
+
+    let already_dynamic = false;
+    for (let i = 0; i < dtable.length; i++) {
+        if (dtable[i] === a) {
+            already_dynamic = true;
+            break;
+        }
+    }
+
+    if(! already_dynamic) {
+        dtable.push(a);
+    }
+    return a;
+}
 
 function emit_code(address, c)
 {
@@ -614,16 +630,66 @@ function predicate_lookup_functor(fname, arity, index)
     return unify(index, i ^ (TAG_INT << WORD_BITS));
 }
 
+function predicate_generate_system_goal(Sys) {
+    if (TAG(Sys) !== TAG_REF) {
+        return instantiation_error(Sys);
+    }
+    let n = stable.length;
+    let functor = lookup_functor('$sys_' + n, 0);
+    stable.push(functor);
+    return unify(functor, Sys);
+}
+
 function predicate_generate_initialization_goal(Init) {
     if (TAG(Init) !== TAG_REF) {
         return instantiation_error(Init);
     }
     let n = itable.length;
-    let atom = lookup_atom('$init_' + n);
-    itable.push(atom);
-    return unify(atom, Init);
+    let functor = lookup_functor('$init_' + n, 0);
+    itable.push(functor);
+    return unify(functor, Init);
  }
 
+// dynamic implies public. In proscript, public also implies dynamic.
+// the is_public flag will be set to true in the saved state
+// for predicate Name/Arity.
+
+
+function predicate_define_dynamic_predicate(indicator) {
+    var slash2 = lookup_functor("/", 2);
+    if (TAG(indicator) === TAG_STR && memory[VAL(indicator)] === slash2)
+    {
+        var name = deref(memory[VAL(indicator) + 1]);
+        var arity = deref(memory[VAL(indicator) + 2]);
+        if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT)
+        {
+            if (VAL(arity) < 0)
+                return domain_error("not_less_than_zero", arity);
+            var ftor = VAL(lookup_dynamic_functor(atable[VAL(name)], VAL(arity)));
+            if (! predicates[ftor]){
+                predicates[ftor] = {clauses: {},
+                    key:ftor,
+                    clause_keys: [],
+                    is_public: true,
+                    next_key: 0};
+            } else if (! predicates[ftor].is_public)
+                return permission_error("modify", "static_procedure", indicator);
+            return true;
+        }
+        else if (TAG(name) === TAG_REF)
+            return instantiation_error(name);
+        else if (TAG(name) !== TAG_ATM)
+            return type_error("atom", name);
+        else if (TAG(arity) === TAG_REF)
+            return instantiation_error(arity);
+        else if (TAG(arity) !== TAG_INT)
+            return type_error("integer", arity);
+    }
+    else if (TAG(indicator) === TAG_REF)
+        return instantiation_error(indicator);
+    else
+        return type_error("predicate_indicator", indicator);
+}
 
 function predicate_trace_unify(a, b)
 {
@@ -1072,7 +1138,7 @@ function predicate_format(stream, fmt, args) {
     //look for atom(X)
     if (TAG(stream) === TAG_STR) {
         let ftor = VAL(memory[VAL(stream)]);
-        if (atable[ftable[ftor][0]] === "atom" && ftable[ftor][1] === 1) {
+        if (atable[ftable[ftor][0]] === "atom" && ftable_arity(ftor) === 1) {
             let arg = memory[VAL(stream)+1];
             if(TAG(arg) === TAG_REF) {
                 let result = format_to_string(fmt, args);
@@ -2543,7 +2609,7 @@ function memory_file_to_atom(memfile, atom)
     if (TAG(memfile) !== TAG_STR)
         return type_error("memory_file", memfile);
     var ftor = VAL(memory[VAL(memfile)]);
-    if (atable[ftable[ftor][0]] === "$memory_file" && ftable[ftor][1] === 1)
+    if (atable[ftable[ftor][0]] === "$memory_file" && ftable_arity(ftor) === 1)
     {
         var f = memory_files[VAL(memory[VAL(memfile)+1])];
         return unify(atom, lookup_atom(fromByteArray(f.data)));
@@ -2699,11 +2765,13 @@ const CP_SIZE = 10;
 
 
 var ftable = [];
+var dtable = [];
 var atable = ['[]']; // Reserve first atom as [].
 var floats = [];
 var predicates = {};
 var exception = null;
 var itable = [];
+var stable = [];
 
 /* Constants. Should be auto-generated */
 const HEAP_SIZE = 131070;
@@ -2981,6 +3049,13 @@ function TAG(p)
 function VAL(p)
 {
     return p & ((1 << WORD_BITS)-1);
+}
+
+function ftable_arity(ftor) {
+    if(ftable[ftor] === undefined) {
+        throw('no ftable entry at ' + ftor);
+    }
+    return ftable[ftor][1];
 }
 
 // Ideally this would be inlined, but javascript does not support macros. Ultimately this could be generated dynamically.
@@ -4220,12 +4295,12 @@ function undefined_predicate(ftor)
         var indicator = state.H ^ (TAG_STR << WORD_BITS);
         memory[state.H++] = lookup_functor("/", 2);
         memory[state.H++] = ftable[ftor][0] ^ (TAG_ATM << WORD_BITS);
-        memory[state.H++] = ftable[ftor][1] ^ (TAG_INT << WORD_BITS);
+        memory[state.H++] = ftable_arity(ftor) ^ (TAG_INT << WORD_BITS);
         existence_error("procedure", indicator);
     }
     else if (prolog_flag_values.unknown === "warning")
     {
-        stdout("Undefined predicate " + atable[ftable[ftor][0]] + "/" + ftable[ftor][1] + "\n");
+        stdout("Undefined predicate " + atable[ftable[ftor][0]] + "/" + ftable_arity(ftor) + "\n");
     }
     if (!backtrack())
     {
@@ -4246,6 +4321,7 @@ function demo(d)
     stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
     stdout("Loaded " + atable.length + " atoms\n");
     stdout("Loaded " + ftable.length + " functors\n");
+    call_directives();
     initialize();
     allocate_first_frame();
 
@@ -4272,6 +4348,8 @@ function unit_tests(d)
     stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
     stdout("Loaded " + atable.length + " atoms\n");
     stdout("Loaded " + ftable.length + " functors\n");
+    call_directives();
+
     initialize();
     allocate_first_frame();
 
@@ -4885,9 +4963,9 @@ function quote_atom(a)
 function is_operator(ftor)
 {
     ftor = VAL(ftor);
-    if (ftable[ftor][1] === 2 && infix_operators[atable[ftable[ftor][0]]] !== undefined)
+    if (ftable_arity(ftor) === 2 && infix_operators[atable[ftable[ftor][0]]] !== undefined)
         return true;
-    return ftable[ftor][1] === 1 && prefix_operators[atable[ftable[ftor][0]]] !== undefined;
+    return ftable_arity(ftor) === 1 && prefix_operators[atable[ftable[ftor][0]]] !== undefined;
 
 }
 
@@ -4942,10 +5020,10 @@ function format_term(value, options)
         {
             // Print in canonical form functor(arg1, arg2, ...)
             result = format_term(ftable[ftor][0] ^ (TAG_ATM << WORD_BITS), options) + "(";
-            for (var i = 0; i < ftable[ftor][1]; i++)
+            for (var i = 0; i < ftable_arity(ftor); i++)
             {
                 result += format_term(memory[VAL(value)+1+i], options);
-                if (i+1 < ftable[ftor][1])
+                if (i+1 < ftable_arity(ftor))
                     result += ",";
             }
             return result + ")";            
@@ -4954,7 +5032,7 @@ function format_term(value, options)
         {
             // Print as an operator
             var fname = atable[ftable[ftor][0]];
-            if (ftable[ftor][1] === 2 && infix_operators[fname] !== undefined)
+            if (ftable_arity(ftor) === 2 && infix_operators[fname] !== undefined)
             {
                 // Infix operator
                 var lhs = format_term(memory[VAL(value)+1], options);
@@ -4974,7 +5052,7 @@ function format_term(value, options)
                 else
                     return result + " " + rhs1;
             }
-            else if (ftable[ftor][1] === 1 && prefix_operators[fname] !== undefined)
+            else if (ftable_arity(ftor) === 1 && prefix_operators[fname] !== undefined)
             {
                 // Prefix operator
                 var rhs2 = format_term(memory[VAL(value)+1], options);
@@ -6120,7 +6198,7 @@ function PL_call(term, module)
     initialize();
     allocate_first_frame();
     state.P = predicates[ftor];
-    for (i = 0; i < ftable[ftor][1]; i++)
+    for (i = 0; i < ftable_arity(ftor); i++)
         register[i] = memory[VAL(term) + 1 + i];
     return wam();    
 }
@@ -6326,7 +6404,7 @@ function get_stream_fd(term, s)
     if (TAG(term) !== TAG_STR)
         return type_error("stream", term);
     ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] === "$stream" && ftable[ftor][1] === 1)
+    if (atable[ftable[ftor][0]] === "$stream" && ftable_arity(ftor) === 1)
     {
         s.value = VAL(memory[VAL(term)+1]);
         return true;
@@ -7037,7 +7115,8 @@ function gc_test(d)
     stdout("Loaded " + atable.length + " atoms");
     stdout("Loaded " + ftable.length + " functors");
     stdout("Loaded " + code.length + " bytes of code");
-    
+    call_directives();
+
     memory[0] = 0x20000088;
     memory[1] = 0x20000071;
     memory[2] = 0x20000072;
@@ -7617,7 +7696,7 @@ function get_element_id_object(term, s) {
     if (TAG(term) !== TAG_STR)
         return type_error("element", term);
     var ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] === "$element" && ftable[ftor][1] === 1) {
+    if (atable[ftable[ftor][0]] === "$element" && ftable_arity(ftor) === 1) {
         var arg = memory[VAL(term) + 1];
         if (TAG(arg) !== TAG_ATM)
             return type_error("element_arg");
@@ -7834,9 +7913,36 @@ function setupElementsForSelectAll(query) {
 
 function proscript_init(queryJS) {
     load_state();
-    let initialization_predicates = initialization.join(", ");
 
-    proscript(initialization_predicates + ", " + queryJS);
+    call_directives();
+
+    proscript(queryJS);
+}
+
+function call_directives() {
+    let system_predicates = (! system || system.length === 0)
+        ? undefined
+        : system.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
+
+    let initialization_predicates = (! initialization || initialization.length === 0)
+        ? undefined
+        : initialization.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
+
+    let extended_query = "";
+
+    if(system_predicates){
+        if(initialization_predicates){
+            extended_query = system_predicates + ", " + initialization_predicates;
+        } else {
+            extended_query = system_predicates;
+        }
+    } else if(initialization_predicates){
+        extended_query = initialization_predicates;
+    }
+
+    if(extended_query !== "") {
+        proscript(extended_query);
+    }
 }
 
 // proscript calls the given query using the existing global data,

@@ -589,9 +589,9 @@ function quote_atom(a)
 function is_operator(ftor)
 {
     ftor = VAL(ftor);
-    if (ftable[ftor][1] === 2 && infix_operators[atable[ftable[ftor][0]]] !== undefined)
+    if (ftable_arity(ftor) === 2 && infix_operators[atable[ftable[ftor][0]]] !== undefined)
         return true;
-    return ftable[ftor][1] === 1 && prefix_operators[atable[ftable[ftor][0]]] !== undefined;
+    return ftable_arity(ftor) === 1 && prefix_operators[atable[ftable[ftor][0]]] !== undefined;
 
 }
 
@@ -646,10 +646,10 @@ function format_term(value, options)
         {
             // Print in canonical form functor(arg1, arg2, ...)
             result = format_term(ftable[ftor][0] ^ (TAG_ATM << WORD_BITS), options) + "(";
-            for (var i = 0; i < ftable[ftor][1]; i++)
+            for (var i = 0; i < ftable_arity(ftor); i++)
             {
                 result += format_term(memory[VAL(value)+1+i], options);
-                if (i+1 < ftable[ftor][1])
+                if (i+1 < ftable_arity(ftor))
                     result += ",";
             }
             return result + ")";            
@@ -658,7 +658,7 @@ function format_term(value, options)
         {
             // Print as an operator
             var fname = atable[ftable[ftor][0]];
-            if (ftable[ftor][1] === 2 && infix_operators[fname] !== undefined)
+            if (ftable_arity(ftor) === 2 && infix_operators[fname] !== undefined)
             {
                 // Infix operator
                 var lhs = format_term(memory[VAL(value)+1], options);
@@ -678,7 +678,7 @@ function format_term(value, options)
                 else
                     return result + " " + rhs1;
             }
-            else if (ftable[ftor][1] === 1 && prefix_operators[fname] !== undefined)
+            else if (ftable_arity(ftor) === 1 && prefix_operators[fname] !== undefined)
             {
                 // Prefix operator
                 var rhs2 = format_term(memory[VAL(value)+1], options);
