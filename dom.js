@@ -656,6 +656,7 @@ function proscript_init(queryJS) {
 }
 
 function call_directives() {
+
     let system_predicates = (! system || system.length === 0)
         ? undefined
         : system.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");

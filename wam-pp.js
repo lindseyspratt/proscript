@@ -2163,6 +2163,10 @@ function predicate_retract_clause(head, body)
     }
     var key = predicates[ftor].clause_keys[index];
     var varmap = {};
+    let functor = ftable[ftor][0];
+    // print('retract: ' + atable[functor] + ', key ' + key + ' at index ' + index);
+    // print('  predicate: ' + JSON.stringify(predicates[ftor]));
+
     var head_ref = recall_term(predicates[ftor].clauses[key].head, varmap);
     if (unify(head_ref, head))
     {
@@ -7920,6 +7924,7 @@ function proscript_init(queryJS) {
 }
 
 function call_directives() {
+
     let system_predicates = (! system || system.length === 0)
         ? undefined
         : system.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");

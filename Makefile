@@ -13,8 +13,8 @@ bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl
 tests_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl test/tests.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'test/tests.pl'], 'foo'), halt"
 
-poly_10_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl bench/poly_10.pl bench/common.pl bench/hook.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/poly_10.pl', 'bench/common.pl', 'bench/hook.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl'], 'foo'), halt"
+cal_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl bench/cal.pl bench/common.pl bench/hook.pl
+		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/cal.pl', 'bench/common.pl', 'bench/hook.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl'], 'foo'), halt"
 
 wam-pp.js:	foreign.js memory_files.js wam.js read.js record.js fli.js stream.js gc.js dom.js dom_element_property.js dom_element_method.js debugger.js decode_instruction.js
 		$(SWIPL) -q -f js_preprocess.pl -g "preprocess(['foreign.js', 'memory_files.js', 'wam.js', 'read.js', 'record.js', 'fli.js', 'stream.js', 'gc.js', 'dom.js', 'dom_element_property.js', 'dom_element_method.js', 'debugger.js', 'decode_instruction.js'], 'wam-pp.js', [debug=$(DEBUG)]), halt"

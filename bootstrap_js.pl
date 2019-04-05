@@ -27,6 +27,18 @@ call(Goal):-
         % and I dont want to muck with CP inside $jmp.
         true.
 
+dynamic(Name/Arity) :-
+        !,
+        define_dynamic_predicate(Name/Arity).
+dynamic([]).
+dynamic([H|T]) :-
+        !,
+        dynamic(H),
+        dynamic(T).
+dynamic((A,B)) :-
+        dynamic(A),
+        dynamic(B).
+
 consult_atom(Atom):-
         % FIXME: Needs to abolish the old clauses!
         compile_atom(Atom).
@@ -401,6 +413,16 @@ length([], K, K) :- !.
 length([_|T], J, K) :-
         N is J + 1,
         length(T, N, K).
+
+%   delete(List, Elem, Residue)
+%   is true when List is a list, in which Elem may or may not occur, and
+%   Residue is a copy of List with all elements equal to Elem deleted.
+
+delete([], _, []) :- !.
+delete([Kill|Tail], Kill, Rest) :- !,
+	delete(Tail, Kill, Rest).
+delete([Head|Tail], Kill, [Head|Rest]) :- !,
+	delete(Tail, Kill, Rest).
 
 call(A, B):-
         A =.. [Functor|Args],

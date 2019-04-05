@@ -210,21 +210,7 @@ dump_tables(S):-
         atomic_list_concat(DynamicFunctors, ', ', DynamicFunctorAtom),
         format(S, 'dtable = [~w];~n', [DynamicFunctorAtom]),
         findall(PredicateAtom,
-                ( bagof(Clause-Index,
-                        clause_table(Functor, Index, Clause),
-                        Clauses),
-                  aggregate_all(r(bag(ClauseAtom),
-                                  bag(I)),
-                                ( member(Clause-I, Clauses),
-                                  format(atom(ClauseAtom), '~w:{code:~w, key:~w}', [I, Clause, I])
-                                ),
-                                r(ClauseAtoms, IndexAtoms)),
-                  atomic_list_concat(IndexAtoms, ', ', IndexAtom),
-                  atomic_list_concat(ClauseAtoms, ', ', ClauseAtom),
-                  list_length(Clauses, I),
-                  (dtable(Functor) -> Dynamic = 'true';Dynamic = 'false'),
-                  format(atom(PredicateAtom), '~w: {is_public:~w, clauses:{~w}, clause_keys:[~w], next_key:~w, key:~w}', [Functor, Dynamic, ClauseAtom, IndexAtom, I, Functor])
-                ),
+                dump_predicate(PredicateAtom),
                 Predicates),
         atomic_list_concat(Predicates, ', ', PredicatesAtom),
         format(S, 'predicates = {~w};~n', [PredicatesAtom]),
@@ -242,6 +228,28 @@ dump_tables(S):-
         atomic_list_concat(IGs, ', ', InitializationAtom),
         format(S, 'initialization = [~w];~n', [InitializationAtom]).
 
+dump_predicate(PredicateAtom) :-
+       bagof(Clause-Index,
+            clause_table(Functor, Index, Clause), % Clause = [] only holds for dynamic predicate pseudo-clause.
+            Clauses),
+       (Clauses = [[]-0]
+         -> ClauseAtom = '', IndexAtom = '', I = 0
+       ;
+%       delete(Clauses, []-0, RealClauses),
+       Clauses = RealClauses,
+       aggregate_all(r(bag(ClauseAtom),
+                      bag(I)),
+                    ( member(Clause-I, RealClauses),
+                      format(atom(ClauseAtom), '~w:{code:~w, key:~w}', [I, Clause, I])
+                    ),
+                    r(ClauseAtoms, IndexAtoms)),
+       atomic_list_concat(IndexAtoms, ', ', IndexAtom),
+       atomic_list_concat(ClauseAtoms, ', ', ClauseAtom),
+       list_length(RealClauses, I)
+       )
+       ,
+       (dtable(Functor) -> Dynamic = 'true';Dynamic = 'false'),
+       format(atom(PredicateAtom), '~w: {is_public:~w, clauses:{~w}, clause_keys:[~w], next_key:~w, key:~w}', [Functor, Dynamic, ClauseAtom, IndexAtom, I, Functor]).
 
 reserve_predicate(Functor/Arity, Foreign):-
         lookup_functor(Functor, Arity, F),

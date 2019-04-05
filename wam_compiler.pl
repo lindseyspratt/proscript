@@ -71,6 +71,7 @@ Some gotchas:
 :-module(wam_compiler, [build_saved_state/2, bootstrap/2, bootstrap/3, op(920, fy, ?), op(920, fy, ??)]).
 :-ensure_loaded(testing).
 :-ensure_loaded(wam_bootstrap).
+:-dynamic(delayed_initialization/1).
 
 expand_term(In, Out):-
         current_predicate(term_expansion/2),
@@ -155,7 +156,7 @@ compile_clause_system_directive(Goal) :-
 % any system directives.
 
 compile_clause_initialization_directive(Goal) :-
-        call(Goal),
+        assertz(delayed_initialization(Goal)),
         generate_initialization_goal(Init),
         Term = (Init :- Goal),
         compile_clause_2(Term),
@@ -935,7 +936,7 @@ compile_stream(Stream):-
         read_term(Stream, Term, []),
         compile_stream_term(Stream, Term).
 
-compile_stream_term(_, end_of_file):- !.
+compile_stream_term(_, end_of_file):- !, forall(retract(delayed_initialization(Goal)), call(Goal)).
 compile_stream_term(Stream, Term):-
         compile_clause(Term),
         !,
