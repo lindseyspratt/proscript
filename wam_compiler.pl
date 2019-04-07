@@ -936,12 +936,19 @@ compile_stream(Stream):-
         read_term(Stream, Term, []),
         compile_stream_term(Stream, Term).
 
-compile_stream_term(_, end_of_file):- !, forall(retract(delayed_initialization(Goal)), call(Goal)).
+% Originally this used 'forall(retract(delayed_initialization(Goal)), call(Goal))'.
+% However, this caused some tests to perform very poorly. E.g. bench/nrev took almost 3 times longer (speed decreased from 3 Mlips to 1.2Mlips).
+% The slowdown is puzzling since there were no initialization goals defined in the test.
+compile_stream_term(_, end_of_file):- !, findall(Goal, delayed_initialization(Goal), Goals), retractall(delayed_initialization(_)), call_list(Goals).
 compile_stream_term(Stream, Term):-
         compile_clause(Term),
         !,
         compile_stream(Stream).
 
+call_list([]).
+call_list([H|T]) :-
+        call(H),
+        call_list(T).
 
 compile_atoms([]).
 compile_atoms([H|T]) :-
