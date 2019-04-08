@@ -235,7 +235,7 @@ dump_predicate(PredicateAtom) :-
        (Clauses = [[]-0]
          -> ClauseAtom = '', IndexAtom = '', I = 0
        ;
-%       delete(Clauses, []-0, RealClauses),
+       delete(Clauses, []-0, RealClauses),
        Clauses = RealClauses,
        aggregate_all(r(bag(ClauseAtom),
                       bag(I)),

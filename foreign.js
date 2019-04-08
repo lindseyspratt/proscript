@@ -2191,7 +2191,7 @@ function predicate_retract_clause(head, body)
     }
     var key = predicates[ftor].clause_keys[index];
     var varmap = {};
-    let functor = ftable[ftor][0];
+    // let functor = ftable[ftor][0];
     // print('retract: ' + atable[functor] + ', key ' + key + ' at index ' + index);
     // print('  predicate: ' + JSON.stringify(predicates[ftor]));
 
