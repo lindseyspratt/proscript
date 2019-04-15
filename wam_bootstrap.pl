@@ -380,8 +380,11 @@ reset:-
         reserve_predicate(generate_initialization_goal/1, predicate_generate_initialization_goal),
         reserve_predicate(generate_system_goal/1, predicate_generate_system_goal),
         reserve_predicate(define_dynamic_predicate/1, predicate_define_dynamic_predicate),
-        reserve_predicate(consult/1, predicate_consult),
-        reserve_predicate(consult/2, predicate_consult),
+
+        % Promises
+        reserve_predicate(request_result/1, predicate_request_result),
+        reserve_predicate(handle_result/2, predicate_handle_result),
+        reserve_predicate(fetch_promise/2, predicate_fetch_promise),
 
         % Debugging
         reserve_predicate(trace_unify/2, predicate_trace_unify),

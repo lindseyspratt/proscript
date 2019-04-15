@@ -72,6 +72,7 @@ Some gotchas:
 :-ensure_loaded(testing).
 :-ensure_loaded(wam_bootstrap).
 :-dynamic(delayed_initialization/1).
+:-dynamic('$loaded'/1).
 
 expand_term(In, Out):-
         current_predicate(term_expansion/2),
@@ -918,7 +919,6 @@ encode_opcode(get_choicepoint(N, y(I)), 3, [43, N, I]).
 
 encode_opcode(nop2, 2, [254, 0]).
 
-%-------------------------- Next we have some utility predicates for bootstrapping ----------------------
 
 compile_files([]):- !.
 compile_files([File|Files]):-
@@ -979,6 +979,31 @@ save_clause(Fact):-
         functor(Fact, Name, Arity),
         add_clause_to_predicate(Name/Arity, Fact, true).
 
+% first fetch all of the URLs, then compile them.
+% This allows the client to get the URLs in parallel.
+
+consult(URLs) :-
+  fetch_promises(URLs, Ps),
+  compile_results(Ps).
+
+fetch_promises([], []).
+fetch_promises([H|T], [H-HP|TP]) :-
+    fetch_promise(H, HP),
+    fetch_promises(T, TP).
+
+compile_results([]).
+compile_results([URL-Promise|T]) :-
+  promise_result(Promise, R),
+  compile_and_free_memory_file(R),
+  retractall('$loaded'(URL)), % clear old loaded fact, if any.
+  assertz('$loaded'(URL)),
+  compile_results(T).
+
+ensure_loaded(URL) :-
+  '$loaded'(URL)
+    -> true
+  ;
+  consult([URL]).
 
 
 %-------------------------- Finally we have a crude toplevel ----------------------

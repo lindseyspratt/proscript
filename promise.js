@@ -11,13 +11,13 @@
 // runtime environment; request_promise_results/1 and
 // handle_promise_results/2, respectively.
 //
-// There is a utility Proscript predicate promise_results/2
-// that coordinates the use of request_promise_results/1 and
-// handle_promise_results/2 with suspending the WAM and
+// There is a utility Proscript predicate promise_result/2
+// that coordinates the use of request_promise_result/1 and
+// handle_promise_result/2 with suspending the WAM and
 // backtracking to restart the WAM:
 //
-// promise_results(Promise, _) :- promise_request_results(Promise), halt.
-// promise_results(Promise, Results) :- promise_handle_results(Promise, Results).
+// promise_result(Promise, _) :- request_result(Promise), halt.
+// promise_result(Promise, Result) :- handle_result(Promise, Result).
 //
 // The halt/0 goal suspends the WAM (stops running it), leaving
 // its evaluation state intact.
@@ -29,7 +29,7 @@
 // - starts the WAM.
 // This WAM restart then evaluates the promise_handle_results/2 goal
 // which unifies the cached promise identifier and result value
-// with the Promise and Results arguments, respectively.
+// with the Promise and Result arguments, respectively.
 //
 // This mechanism can be extended to allow multiple promise_request_results/1
 // goals to be evaluated prior to the halt/0 goal evaluation. In this case
@@ -38,6 +38,29 @@
 // to get all of these results, e.g. setof(P-R, promise_handle_results(P,R), ResultPairs).
 
 var idsToPromises = new Map();
+var promisesToIDs = new Map();
+
+function create_promise_structure(promiseJS) {
+    var promiseMapID = lookup_promise(promiseJS);
+    var lookupPromise = lookup_atom(promiseMapID);
+    // '$promise'(lookupPromise)
+    var ftor = lookup_functor('$promise', 1);
+    var promisePL = alloc_structure(ftor);
+    memory[state.H++] = lookupPromise;
+    return promisePL;
+}
+
+function lookup_promise(promiseTerm) {
+    var promiseMapID = promisesToIDs.get(promiseTerm);
+    if (promiseMapID) {
+        return promiseMapID;
+    }
+
+    promiseMapID = 'emi' + promisesToIDs.size;
+    promisesToIDs.set(promiseTerm, promiseMapID);
+    idsToPromises.set(promiseMapID, promiseTerm);
+    return promiseMapID;
+}
 
 function get_promise_object(term, ref) {
     let promiseIDObject = {};
@@ -70,6 +93,7 @@ function predicate_request_result(promise) {
     let promises = [];
     let promiseJS = promiseObject.value;
 
+    promise_requests.set(promise, '');
     request_result(promise, promiseJS);
     return true;
 }
@@ -81,9 +105,12 @@ async function request_result(promise, promiseJS) {
 
 }
 
+var promise_requests = new Map();
+var promise_results = new Map();
+
 function promise_callback(promise, result) {
-    promise_results.push({promise:promise, result:result});
-    promise_requests.remove(promise);
+    promise_results.set(promise, result);
+    promise_requests.delete(promise);
     if(promise_requests.size === 0) {
         if(backtrack()){
             if(! wam()) {
@@ -101,9 +128,11 @@ var promise_results_key_array = [];
 
 function predicate_handle_result(promise, result) {
     if (TAG(promise) !== TAG_REF) {
-        let value = promise_results.get(promise);
-        if (value) {
-            return unify(value, result);
+        let text = promise_results.get(promise);
+        if (text) {
+            let memory_file = create_memory_file_structure(text);
+
+            return unify(result, memory_file);
         } else {
             return false;
         }
@@ -126,14 +155,67 @@ function predicate_handle_result(promise, result) {
 
     result_index++;
 
+    let text;
+    let memory_file;
+    while(! text && result_index < promise_results_key_array.length) {
+        let promise_key = promise_results_key_array[result_index];
+        text = promise_results.get(promise_key);
+        if (text) {
+            memory_file = create_memory_file_structure(text);
+        } else {
+            result_index++;
+        }
+    }
+
     if(result_index < promise_results_key_array.length) {
         update_choicepoint_data(result_index);
-
-        let promise_key = promise_results_key_array[result_index];
-        let value = promise_results.get(promise_key);
-        return unify(promise, promise_key) && unify(result, value);
-    } else {
+        return unify(promise, promise_key) && unify(result, memory_file);
+     } else {
         destroy_choicepoint();
         return false;
+    }
+}
+
+function predicate_fetch_promise(url, promise) {
+    if(TAG(url) !== TAG_ATM) {
+        return type_error('atom', url);
+    }
+
+    let promiseJS = fetch_promise(atable[VAL(url)]);
+    let promisePL = create_promise_structure(promiseJS);
+    return unify(promise, promisePL);
+}
+
+async function fetch_promise(urlJS) {
+    if (!urlJS.includes(".")) {
+        urlJS += ".pl";
+    }
+    const response = await fetch(urlJS);
+    return response.text();
+}
+
+async function consult(urls, next_goal) {
+    // fetch all the URLs in parallel
+    const textPromises = urls.map(async url => {
+        if(! url.includes(".")) {
+            url += ".pl";
+        }
+        const response = await fetch(url);
+        return response.text();
+    });
+
+    // compile them in sequence
+    for (const textPromise of textPromises) {
+        await textPromise.then(function(text){
+            let index = text_to_memory_file(text);
+            return "'$memory_file'(" + index + ")";
+        }).then(function(memfile){
+            proscript("compile_and_free_memory_file(" + memfile + ")");
+
+        });
+    }
+
+    if(next_goal && next_goal !== '') {
+        proscript(next_goal);
     }
 }

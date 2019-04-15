@@ -101,47 +101,24 @@ function atom_list_to_array(listPL) {
     }
 }
 
-async function consult(urls, next_goal) {
-    // fetch all the URLs in parallel
-    const textPromises = urls.map(async url => {
-        if(! url.includes(".")) {
-            url += ".pl";
-        }
-        const response = await fetch(url);
-        return response.text();
-    });
-
-    // compile them in sequence
-    for (const textPromise of textPromises) {
-        await textPromise.then(function(text){
-            let index = memory_files.length;
-            memory_files[index] = {data:toByteArray(text),
-                ptr:0};
-            var ftor = lookup_functor('$memory_file', 1);
-            var ref = alloc_structure(ftor);
-            memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
-            return "'$memory_file'(" + index + ")";
-
-        }).then(function(memfile){
-            proscript("compile_and_free_memory_file(" + memfile + ")");
-
-        });
-    }
-
-    if(next_goal && next_goal !== '') {
-        proscript(next_goal);
-    }
+function text_to_memory_file(text) {
+    let index = memory_files.length;
+    memory_files[index] = {data:toByteArray(text), ptr:0};
+    return index;
 }
 
+function create_memory_file_structure(text) {
+    var index = text_to_memory_file(text);
+    // '$memory_file'(index)
+    var ftor = lookup_functor('$memory_file', 1);
+    var memory_file = alloc_structure(ftor);
+    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
+    return memory_file;
+}
 
 function atom_to_memory_file(atom, memfile)
 {
-    var index = memory_files.length;
-    memory_files[index] = {data:toByteArray(atable[VAL(atom)]),
-        ptr:0};
-    var ftor = lookup_functor('$memory_file', 1);
-    var ref = alloc_structure(ftor);
-    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
+    var ref = create_memory_file_structure(atable[VAL(atom)]);
     return unify(memfile, ref);
 }
 
@@ -160,12 +137,7 @@ function memory_file_to_atom(memfile, atom)
 
 function new_memory_file(memfile)
 {
-    var index = memory_files.length;
-    memory_files[index] = {data:[],
-        ptr:0};
-    var ftor = lookup_functor('$memory_file', 1);
-    var ref = alloc_structure(ftor);
-    memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
+    var ref = create_memory_file_structure('');
     return unify(memfile, ref);
 }
 
