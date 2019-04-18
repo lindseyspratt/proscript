@@ -43,6 +43,12 @@ consult_atom(Atom):-
         % FIXME: Needs to abolish the old clauses!
         compile_atom(Atom).
 
+ensure_loaded(URL) :-
+  '$loaded'(URL)
+    -> true
+  ;
+  consult([URL]).
+
 format(Format, Args):-
         current_output(Stream), format(Stream, Format, Args).
 

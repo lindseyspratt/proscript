@@ -73,6 +73,7 @@ Some gotchas:
 :-ensure_loaded(wam_bootstrap).
 :-dynamic(delayed_initialization/1).
 :-dynamic('$loaded'/1).
+:-dynamic('$current_compile_url'/1).
 
 expand_term(In, Out):-
         current_predicate(term_expansion/2),
@@ -106,7 +107,7 @@ compile_clause_save(Term) :-
 compile_clause_directive(op(A,B,C)) :- compile_clause_system_directive(op(A,B,C)).
 compile_clause_directive(dynamic(PredIndicator)) :- compile_clause_compilation_directive(dynamic(PredIndicator)).
 compile_clause_directive(initialization(Goal)) :- compile_clause_initialization_directive(Goal).
-compile_clause_directive(ensure_loaded(_)). % Currently a no-op in Proscript.
+compile_clause_directive(ensure_loaded(Spec)) :- compile_clause_compilation_directive(ensure_loaded(Spec)).
 compile_clause_directive(include(_)). % Currently a no-op in Proscript.
 compile_clause_directive(module(_,_)). % Currently a no-op in Proscript.
 
@@ -117,6 +118,8 @@ compile_clause_directive(module(_,_)). % Currently a no-op in Proscript.
 
 compile_clause_compilation_directive(dynamic(PredIndicator)) :-
         define_dynamic_predicates(PredIndicator).
+compile_clause_compilation_directive(ensure_loaded(Spec)) :-
+        ensure_loaded(Spec).
 
 define_dynamic_predicates(Name/Arity) :-
         !,
@@ -983,8 +986,82 @@ save_clause(Fact):-
 % This allows the client to get the URLs in parallel.
 
 consult(URLs) :-
-  fetch_promises(URLs, Ps),
+  canonical_sources(URLs, CanonicalURLs),
+  fetch_promises(CanonicalURLs, Ps),
   compile_results(Ps).
+
+canonical_sources([], []).
+canonical_sources([H|T], [HC|TC]) :-
+  canonical_source(H, HC),
+  canonical_sources(T, TC).
+
+canonical_source(S, BSC) :-
+  atom_codes(S, Scodes),
+  (append(_, ".pl", Scodes)
+    -> SC = S
+   ;
+    append(Scodes, ".pl", SCcodes),
+    atom_codes(SC, SCcodes)
+  ),
+  convert_URL_to_base(SC, BSC).
+
+convert_URL_to_base(URL, BaseURL) :-
+  absolute_url(URL)
+    -> URL = BaseURL
+  ;
+  current_compile_url(ReferenceURL)
+    -> url_directory(ReferenceURL, ReferenceDirectory),
+       resolve_url(ReferenceDirectory, URL, BaseURL)
+  ;
+  true
+    -> URL = BaseURL.
+
+absolute_url(URL) :-
+  atom_codes(URL, URLCodes),
+  (append(":", _, Suffix),
+   append(_, Suffix, URLCodes)
+    -> true
+  ;
+  append("/", _, URLCodes)
+  ).
+
+url_directory(URL, Directory) :-
+  atom_codes(URL, URLCodes),
+  append("/", _, TestSuffix),
+  append("/", FileCodes, Suffix),
+  (append(Prefix, Suffix, URLCodes),
+  \+ append(_, TestSuffix, FileCodes)
+    -> append(Prefix, "/", DirectoryCodes),
+       atom_codes(Directory, DirectoryCodes)
+  ;
+  Directory = './'
+  ).
+
+
+resolve_url('./', URL, URL) :- !.
+
+resolve_url(Directory, URL, BaseURL) :-
+  atom_codes(URL, URLCodes),
+  (append("../", PrefixCodes, URLCodes)
+    -> trim_directory(Directory, TrimmedDirectory),
+       atom_codes(Prefix, PrefixCodes),
+       resolve_url(TrimmedDirectory, Prefix, BaseURL)
+   ;
+   atom_codes(Directory, DirectoryCodes),
+   append(DirectoryCodes, URLCodes, BaseURLCodes),
+   atom_codes(BaseURL, BaseURLCodes)
+   ).
+
+% TrimmedDirectory is Directory with the last component
+% removed. Directory = 'X/_Y/' -> TrimmedDirectory = 'X/'.
+
+trim_directory(Directory, TrimmedDirectory) :-
+  atom_codes(Directory, DirectoryCodes),
+  append(A, "/", DirectoryCodes), % A = X/_Y
+  append("/", _Y, B),              % B = /_Y
+  append(X, B, A),
+  append(X, "/", C),              % C = X/
+  atom_codes(TrimmedDirectory, C).
 
 fetch_promises([], []).
 fetch_promises([H|T], [H-HP|TP]) :-
@@ -994,17 +1071,27 @@ fetch_promises([H|T], [H-HP|TP]) :-
 compile_results([]).
 compile_results([URL-Promise|T]) :-
   promise_result(Promise, R),
+  push_current_compile_url(URL),
   compile_and_free_memory_file(R),
+  pop_current_compile_url(URL),
   retractall('$loaded'(URL)), % clear old loaded fact, if any.
   assertz('$loaded'(URL)),
   compile_results(T).
 
-ensure_loaded(URL) :-
-  '$loaded'(URL)
-    -> true
-  ;
-  consult([URL]).
+current_compile_url(URL) :-
+  '$current_compile_url'([URL|_]).
 
+push_current_compile_url(URL) :-
+  (retract('$current_compile_url'(URLs))
+    -> true
+   ;
+   URLs = []
+  ),
+  asserta('$current_compile_url'([URL|URLs])).
+
+pop_current_compile_url(URL) :-
+  retract('$current_compile_url'([URL|URLs])),
+  asserta('$current_compile_url'(URLs)).
 
 %-------------------------- Finally we have a crude toplevel ----------------------
 % swipl -f wam_compiler.pl -t "make, bootstrap('demo.pl', call_test), halt" && /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc foreign.js wam.js bootstrap.js read.js -e "demo(false)"
