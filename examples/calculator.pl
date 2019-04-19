@@ -1,3 +1,23 @@
+% Purpose: Support a simple HTML Calculator. The calculator allows positive and negative
+% numbers including exponent notation. It supports four operators: +, -, *, and /.
+%
+% Author: Lindsey Spratt, 2019.
+%
+% Implementation: This calculator implementation uses clauses to store
+% state (implemented in calculator_data.pl).
+% 'current' is the current register value. This is
+% where digits input from the user are held and
+% where results of operations are displayed.
+% 'memory' holds the previous value of 'current'.
+% Clicking on an operator in the interface records
+% the index (1 - 4) of that operator, copies 'current'
+% to 'memory', and resets 'current' to empty.
+% Clicking on '=' in the interface runs the
+% calculate/0 predicate that evaluates
+% 'operator'('memory', 'current') to get new
+% vaue for 'current'.
+
+
 :- ensure_loaded(calculator_data).
 :- ensure_loaded('../library/dom.pl').
 :- ensure_loaded('../library/listut.pl').
@@ -123,8 +143,7 @@ eval_current(R) :-
 
 % eval codes with 'e': e.g. "2.1e-3"
 eval_codes(C, R) :-
-    append(PrefixE, Suffix, C),
-    append(Prefix, "e", PrefixE),
+    split_list(C, Prefix, "e", Suffix),
     !,
     eval_codes(Prefix, P),
     eval_codes(Suffix, S),

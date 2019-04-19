@@ -1,4 +1,5 @@
 :- dynamic([current/1, memory/1, operation/1, maxlength/1]).
+:- initialization(init).
 
 init :-
   asserta(current("0")),
