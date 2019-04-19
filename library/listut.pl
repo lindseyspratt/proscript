@@ -18,7 +18,7 @@
 
 /*
 :- public
-	append/3,			%   List x List -> List
+%	append/3,			%   List x List -> List
 	correspond/4,			%   Elem <- List x List -> Elem
 	delete/3,			%   List x Elem -> List
 	last/2,				%   List -> Elem
@@ -44,7 +44,7 @@
 	sumlist/2.			%   List -> Integer
 
 :- mode
-	append(?, ?, ?),
+%	append(?, ?, ?),
 	correspond(?, +, +, ?),
 	delete(+, +, -),
 	last(?, ?),
