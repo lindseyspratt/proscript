@@ -1,10 +1,10 @@
 
 simple_test :-
     dom_element_attribute_value(E, id, simpletest),
-    dom_element_property(E, clientHeight, H),
+    dom_object_property(_, E, clientHeight, H),
     number_codes(H, Hs),
     append("Hello World: ", Hs, Greeting),
-    set_dom_element_property(E, innerHTML, Greeting).
+    set_dom_object_property(E, innerHTML, Greeting).
 
 simple_button_test :-
     dom_element_attribute_value(E, id, simpletest),
@@ -19,7 +19,7 @@ simple_button_test2 :-
     create_dom_element('BUTTON', Button),
     create_dom_text_node("Click Me", NewContent),
     append_dom_node_child(Button, NewContent),
-    set_dom_element_attribute_value(Button, onclick, 'proscript(\'alert(\\\'Hello World!\\\')\')'),
+    set_dom_element_attribute_value(Button, onclick, ''), % 'proscript(\'alert(\\\'Hello World!\\\')\')'),
     append_dom_node_child(E, Button).
 
 add_element_test :-
@@ -32,7 +32,7 @@ add_element_test :-
 
   % add the newly created element and its content into the DOM
   dom_element_attribute_value(CurrentDiv, id, simpletest),
-  dom_element_property(Body, tag, body),
+  dom_object_property(_, Body, tag, body),
   insert_before_dom_node(Body, CurrentDiv, NewDiv).
 
 % === mem, p, q, and r predicates

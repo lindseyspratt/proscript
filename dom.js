@@ -4,8 +4,6 @@ predicates to read and modify the javascript DOM for HTML
 
 /** @namespace Map */
 
-var idsToElements = new Map();
-var elementsToIDs = new Map();
 var deavCursors = new Map();
 var deavCursorCounter = 0;
 var desaCursors = new Map();
@@ -380,64 +378,13 @@ function setupElements(element, attribute, value) {
 }
 
 function create_element_structure(elementJS) {
-    var elementMapID = lookup_element(elementJS);
-    var lookupElement = lookup_atom(elementMapID);
-    // '$element'(lookupElement)
-    var ftor = lookup_functor('$element', 1);
-    var elementPL = alloc_structure(ftor);
-    memory[state.H++] = lookupElement;
-    return elementPL;
+    return create_object_structure(elementJS);
 }
-
-function lookup_element(elementTerm) {
-    var elementMapID = elementsToIDs.get(elementTerm);
-    if (elementMapID) {
-        return elementMapID;
-    }
-
-    elementMapID = 'emi' + elementsToIDs.size;
-    elementsToIDs.set(elementTerm, elementMapID);
-    idsToElements.set(elementMapID, elementTerm);
-    return elementMapID;
-}
-
-// ElementStructure = '$element'(emi1234)
-// elementIDObject = {"value":"emi1234"}
-// elementObject = {"value":element}
 
 function get_element_object(term, ref) {
-    var elementIDObject = {};
-    if (!get_element_id_object(term, elementIDObject)) {
-        return false;
-    }
-    ref.value = idsToElements.get(elementIDObject.value);
-    return true;
-}
+    return get_object_container(term, ref);
 
-// ElementStructure = '$element'(emi1234)
-// X = VAL(term)
-// ftor = memory[X]
-// V = memory[X+1] = atomOfst for element key
-//
-// F = ftable[ftor][0]
-// atable[F] = "$element"
-//
-// E = atable[VAL(V)] = "emi1234"
-//
-// s = {"value": E}
-
-function get_element_id_object(term, s) {
-    if (TAG(term) !== TAG_STR)
-        return type_error("element", term);
-    var ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] === "$element" && ftable_arity(ftor) === 1) {
-        var arg = memory[VAL(term) + 1];
-        if (TAG(arg) !== TAG_ATM)
-            return type_error("element_arg");
-        s.value = atable[VAL(arg)];
-        return true;
-    }
-    return type_error("element", term);
+     //(ref.type === 'element') ||  (ref.type === 'htmlelement') ;
 }
 
 function string_to_codes(string) {

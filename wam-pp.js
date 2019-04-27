@@ -7248,8 +7248,6 @@ predicates to read and modify the javascript DOM for HTML
 
 /** @namespace Map */
 
-var idsToElements = new Map();
-var elementsToIDs = new Map();
 var deavCursors = new Map();
 var deavCursorCounter = 0;
 var desaCursors = new Map();
@@ -7622,64 +7620,13 @@ function setupElements(element, attribute, value) {
 }
 
 function create_element_structure(elementJS) {
-    var elementMapID = lookup_element(elementJS);
-    var lookupElement = lookup_atom(elementMapID);
-    // '$element'(lookupElement)
-    var ftor = lookup_functor('$element', 1);
-    var elementPL = alloc_structure(ftor);
-    memory[state.H++] = lookupElement;
-    return elementPL;
+    return create_object_structure(elementJS);
 }
-
-function lookup_element(elementTerm) {
-    var elementMapID = elementsToIDs.get(elementTerm);
-    if (elementMapID) {
-        return elementMapID;
-    }
-
-    elementMapID = 'emi' + elementsToIDs.size;
-    elementsToIDs.set(elementTerm, elementMapID);
-    idsToElements.set(elementMapID, elementTerm);
-    return elementMapID;
-}
-
-// ElementStructure = '$element'(emi1234)
-// elementIDObject = {"value":"emi1234"}
-// elementObject = {"value":element}
 
 function get_element_object(term, ref) {
-    var elementIDObject = {};
-    if (!get_element_id_object(term, elementIDObject)) {
-        return false;
-    }
-    ref.value = idsToElements.get(elementIDObject.value);
-    return true;
-}
+    return get_object_container(term, ref);
 
-// ElementStructure = '$element'(emi1234)
-// X = VAL(term)
-// ftor = memory[X]
-// V = memory[X+1] = atomOfst for element key
-//
-// F = ftable[ftor][0]
-// atable[F] = "$element"
-//
-// E = atable[VAL(V)] = "emi1234"
-//
-// s = {"value": E}
-
-function get_element_id_object(term, s) {
-    if (TAG(term) !== TAG_STR)
-        return type_error("element", term);
-    var ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] === "$element" && ftable_arity(ftor) === 1) {
-        var arg = memory[VAL(term) + 1];
-        if (TAG(arg) !== TAG_ATM)
-            return type_error("element_arg");
-        s.value = atable[VAL(arg)];
-        return true;
-    }
-    return type_error("element", term);
+     //(ref.type === 'element') ||  (ref.type === 'htmlelement') ;
 }
 
 function string_to_codes(string) {
@@ -7959,462 +7906,6 @@ function debug(msg) {
         alert(msg);
     }
 }
-// File dom_element_property.js
-var depCursors = new Map();
-var depCursorCounter = 0;
-
-// dom_element_property(E, P, T) binds T to all values of property P of element E.
-// Property must be a ground value (i.e. not TAG(property) === TAG_REF)
-// At least one of E or T must be ground.
-function predicate_dom_element_property(element, property, value) {
-    var cursor;
-    var cursorIDPL;
-    var cursorIDJS;
-
-    if (state.foreign_retry) {
-        cursorIDPL = state.foreign_value;
-        cursorIDJS = atable[VAL(cursorIDPL)];
-        cursor = depCursors.get(cursorIDJS);
-
-    }
-    else {
-        cursor = {
-            elements: setupElementsForPropertyValue(element, property, value),
-            property_values: setupPropertyValues(element, property, value)
-        };
-        cursorIDJS = 'crs' + depCursorCounter++;
-        depCursors.set(cursorIDJS, cursor);
-        cursorIDPL = lookup_atom(cursorIDJS);
-
-        create_choicepoint();
-    }
-
-    update_choicepoint_data(cursorIDPL);
-
-    if (cursor.elements && cursor.elements.length > 0) {
-        var elementJS = cursor.elements[0];
-        var elementPL = create_element_structure(elementJS);
-
-        if (!cursor.property_values) {
-            cursor.property_values = setupPropertyValuesFromJSElement(elementJS, property, value);
-        }
-
-        if (cursor.property_values && cursor.property_values.length > 0) {
-            var classJS = cursor.property_values.pop();
-            var classPL = propertyValueToPL(property, classJS);
-            return unify(value, classPL) &&
-                unify(element, elementPL);
-        }
-
-        // All classNames for current elementJS have been processed.
-        // Set the cursor.tags to undefined to force recalculation of tags
-        // with next element.
-        // Move to the next element by removing elements[0].
-
-        cursor.property_values = undefined;
-        cursor.elements = cursor.elements.slice(1);
-        return false; // go to next choice (of element)
-    } else {
-        destroy_choicepoint();
-        return false;
-    }
-}
-
-
-function setupElementsForPropertyValue(element, property, value) {
-    if (TAG(property) === TAG_REF) {
-        instantiation_error(property);
-    } else {
-        var propertyJS = atable[VAL(property)];
-    }
-
-    if (TAG(element) !== TAG_REF) {
-        if (TAG(element) !== TAG_STR) {
-            instantiation_error(element);
-        }
-        var elementObject = {};
-        if (!get_element_object(element, elementObject)) {
-            return undefined;
-        }
-        var elementJS = elementObject.value;
-        var elements = [];
-        elements.push(elementJS);
-        return elements;
-    } else if (TAG(value) !== TAG_REF) {
-        return setupElementsForBoundPropertyValue(propertyJS, value);
-    } else {
-        return Array.from(document.querySelectorAll('*'));
-    }
-}
-
-function setupPropertyValuesFromJSElement(elementJS, property, value) {
-    if (TAG(property) === TAG_REF) {
-        instantiation_error(property);
-    } else {
-        var propertyJS = atable[VAL(property)];
-    }
-    var values;
-    if (TAG(value) !== TAG_REF) {
-        values = setupPropertyValuesFromBoundValue(property, propertyJS, value);
-    } else {
-        values = setupPropertyValuesFromJSElement1(elementJS, property, propertyJS);
-    }
-    return values;
-}
-
-function setupPropertyValues(element, property, value) {
-    if (TAG(property) === TAG_REF) {
-        instantiation_error(property);
-    } else {
-        var propertyJS = atable[VAL(property)];
-    }
-    var values;
-    if (TAG(value) !== TAG_REF) {
-        values = setupPropertyValuesFromBoundValue(property, propertyJS, value);
-    } else if (TAG(element) !== TAG_REF) {
-        if (TAG(element) !== TAG_STR) {
-            instantiation_error(element);
-        }
-        var elementObject = {};
-        if (!get_element_object(element, elementObject)) {
-            return undefined;
-        }
-        var elementJS = elementObject.value;
-        values = setupPropertyValuesFromJSElement1(elementJS, property, propertyJS);
-    } else {
-        values = undefined;
-    }
-    return values;
-}
-
-function propertyValueToJS(type, value) {
-    if(type === 'atom') {
-        return getAtomPropertyValue(value);
-    } else if(type === 'boolean') {
-        return getBooleanPropertyValue(value);
-    } else if(type === 'number') {
-        return getNumberPropertyValue(value);
-    } else if(type === 'string') {
-        return getStringPropertyValue(value);
-    } else if(type === 'element') {
-        return getElementPropertyValue(value);
-    } else {
-        domain_error(type);
-    }
-}
-
-function getAtomPropertyValue(value) {
-    return atable[VAL(value)];
-}
-
-function getBooleanPropertyValue(value) {
-    var valueJS = atable[VAL(value)];
-    return valueJS === 'true';
-}
-
-/**
- * Convert a prolog list of atoms to a space separated string of tokens.
- * @param value
- * @returns {string}
- */
-function getClassListPropertyValue(value) {
-    if(TAG(value) !== TAG_LST) {
-        instantiation_error(value);
-    }
-
-    var string = '';
-    var list = value;
-    while(list !== NIL) {
-        if(TAG(list) !== TAG_LST) {
-            instantiation_error(list);
-        }
-
-        var atomPL = memory[VAL(list)];
-        if(TAG(atomPL) !== TAG_ATM) {
-            instantiation_error(atomPL);
-        } else {
-            if(string !== '') {
-                string += ' ';
-            }
-            string += atable[VAL(value)];
-            list = memory[VAL(list) + 1];
-        }
-    }
-
-    return string;
-}
-
-function getNumberPropertyValue(value) {
-    return VAL(value);
-}
-
-function getStringPropertyValue(value) {
-    return codes_to_string(value);
-}
-
-function getElementPropertyValue(value) {
-    var valueElementObject = {};
-    if (!get_element_object(value, valueElementObject)) {
-        return undefined;
-    }
-    return valueElementObject.value;
-}
-
-function propertyValueToPL(property, valueJS) {
-    var propertySpec = propertyMap.get(atable[VAL(property)]);
-    if (propertySpec) {
-        if (propertySpec.type === 'atom') {
-            return getAtomPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'number') {
-            return getNumberPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'string') {
-            return getStringPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'element') {
-            return getElementPLPropertyValue(valueJS);
-        } else {
-            domain_error(type);
-        }
-    } else {
-        domain_error(property);
-    }
-}
-
-function getAtomPLPropertyValue(valueJS) {
-    return lookup_atom(valueJS);
-}
-
-function getNumberPLPropertyValue(valueJS) {
-    return valueJS ^ (TAG_INT << WORD_BITS);
-}
-
-function getStringPLPropertyValue(valueJS) {
-    return string_to_codes(valueJS);
-}
-
-function getElementPLPropertyValue(valueJS) {
-    return create_element_structure(valueJS);
-}
-
-function setupElementsForBoundPropertyValue(propertyJS, value) {
-    var propertySpec = propertyMap.get(propertyJS);
-    if(propertySpec) {
-        var valueJS = propertyValueToJS(propertySpec.type, value);
-        return propertySpec.elements(valueJS);
-    } else {
-        domain_error(property);
-    }
-}
-
-function setupPropertyValuesFromBoundValue(property, propertyJS, value) {
-    var propertySpec = propertyMap.get(propertyJS);
-    if(propertySpec) {
-        var values = [];
-        var valueJS = propertyValueToJS(propertySpec.type, value);
-        values.push(valueJS);
-        return values;
-    } else {
-        domain_error(property);
-    }
-}
-
-function setupPropertyValuesFromJSElement1(elementJS, property, propertyJS) {
-    var propertySpec = propertyMap.get(propertyJS);
-    if(propertySpec) {
-        return propertySpec.elementValuesFunction(elementJS);
-    } else {
-        domain_error(property);
-    }
-}
-
-function predicate_set_dom_element_property(element, property, value) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    if (TAG(property) === TAG_REF) {
-        instantiation_error(property);
-    } else {
-        var propertyJS = atable[VAL(property)];
-    }
-
-    var propertySpec = propertyMap.get(propertyJS);
-    if(propertySpec) {
-        propertySpec.setValue(property, elementJS, value);
-    } else {
-        domain_error(property);
-    }
-    return true;
-}
-
-function TagProperty() {
-    var that = {};
-    that.name = "tag";
-    that.type = 'atom';
-    that.elements = function(valueJS) {
-        return Array.from(document.getElementsByTagName(valueJS));
-    };
-    that.elementValuesFunction = function(elementJS) {
-        var values = [];
-        values.push(elementJS.tagName);
-        return values;
-    };
-    // noinspection JSUnusedLocalSymbols
-    that.setValue = function(property, elementJS, value) {
-        domain_error(property);
-    };
-    return that;
-}
-
-function ChildProperty() {
-    var that = {};
-    that.name = "child";
-    that.type = 'element';
-    that.elements = function(valueJS) {
-        var elements = [];
-        elements.push(valueJS.parentElement);
-        return elements;
-    };
-    that.elementValuesFunction = function(elementJS) {
-        /** @namespace elementJS.children */
-        return [...elementJS.children];// This is the spread operator. It creates an array from the HTMLCollection of 'children'.
-    };
-    that.setValue = function(property, elementJS, value) {
-        domain_error(property);
-    };
-    return that;
-}
-
-function SimpleChildProperty(propertyName) {
-    var that = {};
-    that.name = "firstChild";
-    that.type = 'element';
-    that.elements = function(valueJS) {
-        var elements = [];
-        elements.push(valueJS.parentElement);
-        return elements;
-    };
-    that.elementValuesFunction = function(elementJS) {
-        var elements = [];
-        /** @namespace elementJS.firstChild */
-        elements.push(elementJS[propertyName]);
-        return elements;
-    };
-    that.setValue = function(property, elementJS, value) {
-        domain_error(property);
-    };
-    return that;
-}
-
-/**
- * This prolog 'class' property uses the classList and className HTML Element properties.
- */
-
-function ClassProperty() {
-    var that = {};
-    that.name = "class";
-    that.type = 'atom';
-    that.elements = function(valueJS) {
-        return document.getElementsByClassName(valueJS);
-    };
-    that.elementValuesFunction = function(elementJS) {
-        /** @namespace elementJS.classList */
-        return [...elementJS.classList];// This is the spread operator. It creates an array from the DOMTokenList of 'classList'.
-    };
-
-    /**
-     * Set the 'className' property to the given class or classes.
-     * If the 'value' is a single atom then set the className to the string for that atom.
-     * If the 'value' is a list of atoms then set the className to the
-     * string that is the strings for those atoms separated by spaces.
-     * @param property
-     * @param elementJS
-     * @param value
-     */
-    that.setValue = function(property, elementJS, value) {
-        var valueJS;
-        if (TAG(element) === TAG_ATM) {
-            valueJS = getAtomPropertyValue(value);
-        } else if (TAG(element) === TAG_LST) {
-            valueJS = getClassListPropertyValue(value);
-        }
-        elementJS.className = valueJS;
-    };
-    return that;
-}
-
-function SimpleProperty(type, propertyName, settable) {
-    var that = {};
-    that.name = propertyName;
-    that.type = type;
-    that.elements = function(valueJS) {
-        return Array.from(document.querySelectorAll('*')); // return all elements for later filtering by unification
-    };
-    that.elementValuesFunction = function(elementJS) {
-        var values = [];
-        values.push(elementJS[propertyName]);
-        return values;
-    };
-    that.setValue = function(property, elementJS, value) {
-        if(settable) {
-            elementJS[propertyName] = propertyValueToJS(type, value);
-        } else {
-            domain_error(property);
-        }
-    };
-    return that;
-}
-
-var propertyMap = new Map([
-    ['tag', TagProperty()],
-    ['child', ChildProperty()],
-    ['childElementCount', SimpleProperty('number','childElementCount')],
-    ['class', ClassProperty()],
-    ['accesskey', SimpleProperty('atom','accesskey', true)],
-    ['clientHeight', SimpleProperty('number','clientHeight')],
-    ['clientLeft', SimpleProperty('number','clientLeft')],
-    ['clientTop', SimpleProperty('number','clientTop')],
-    ['clientWidth', SimpleProperty('number','clientWidth')],
-    ['contentEditable', SimpleProperty('boolean','contentEditable', true)],
-    ['dir', SimpleProperty('atom','dir', true)], // rtl, ltr, auto
-    ['firstChild', SimpleChildProperty('firstChild')],
-    ['firstElementChild', SimpleChildProperty('firstElementChild')],
-    ['id', SimpleProperty('atom','id', true)],
-    ['innerHTML', SimpleProperty('string', 'innerHTML', true)],
-    ['innerText', SimpleProperty('string', 'innerText', true)],
-    ['lang', SimpleProperty('atom','lang', true)], // ISO 639-1 Language Codes: en, de, ja, ...
-    ['lastChild', SimpleChildProperty('lastChild')],
-    ['lastElementChild', SimpleChildProperty('lastElementChild')],
-    ['namespaceURI', SimpleProperty('string', 'namespaceURI')],
-    ['nextSibling', SimpleChildProperty('nextSibling')],
-    ['nextElementSibling', SimpleChildProperty('nextElementSibling')],
-    ['nodeName', SimpleProperty('atom','nodeName')],
-    ['nodeType', SimpleProperty('atom','nodeType')],
-    ['nodeValue', SimpleProperty('string','nodeValue', true)],
-    ['offsetHeight', SimpleProperty('number','offsetHeight')],
-    ['offsetLeft', SimpleProperty('number','offsetLeft')],
-    ['offsetParent', SimpleProperty('number','offsetParent')],
-    ['offsetTop', SimpleProperty('number','offsetTop')],
-    ['offsetWidth', SimpleProperty('number','offsetWidth')],
-    ['ownerDocument', SimpleChildProperty('ownerDocument')],
-    ['parentNode', SimpleChildProperty('parentNode')],
-    ['parentElement', SimpleChildProperty('parentElement')],
-    ['previousSibling', SimpleChildProperty('previousSibling')],
-    ['previousElementSibling', SimpleChildProperty('previousElementSibling')],
-    ['scrollHeight', SimpleProperty('number','scrollHeight')],
-    ['scrollLeft', SimpleProperty('number','scrollLeft')],
-    ['scrollTop', SimpleProperty('number','scrollTop')],
-    ['scrollWidth', SimpleProperty('number','scrollWidth')],
-    ['style', SimpleProperty('string', 'style', true)],
-    ['tabIndex', SimpleProperty('number','tabIndex')],
-    ['textContent', SimpleProperty('string', 'textContent', true)],
-    ['title', SimpleProperty('string', 'title', true)]
-]);
 // File dom_element_method.js
 function predicate_dom_element_add_event_listener(element, event, goal) {
     if (TAG(element) !== TAG_STR) {
@@ -9198,52 +8689,16 @@ function decode_instruction(predicateID, codePosition) {
 // been returned or failed. Then promise_handle_results/2 may be used
 // to get all of these results, e.g. setof(P-R, promise_handle_results(P,R), ResultPairs).
 
-var idsToPromises = new Map();
-var promisesToIDs = new Map();
-
 function create_promise_structure(promiseJS) {
-    var promiseMapID = lookup_promise(promiseJS);
-    var lookupPromise = lookup_atom(promiseMapID);
-    // '$promise'(lookupPromise)
-    var ftor = lookup_functor('$promise', 1);
-    var promisePL = alloc_structure(ftor);
-    memory[state.H++] = lookupPromise;
-    return promisePL;
-}
-
-function lookup_promise(promiseTerm) {
-    var promiseMapID = promisesToIDs.get(promiseTerm);
-    if (promiseMapID) {
-        return promiseMapID;
-    }
-
-    promiseMapID = 'emi' + promisesToIDs.size;
-    promisesToIDs.set(promiseTerm, promiseMapID);
-    idsToPromises.set(promiseMapID, promiseTerm);
-    return promiseMapID;
+    return create_object_structure(promiseJS, 'promise');
 }
 
 function get_promise_object(term, ref) {
-    let promiseIDObject = {};
-    if (!get_promise_id_object(term, promiseIDObject)) {
+    if(!get_object_container(term, ref)) {
         return false;
     }
-    ref.value = idsToPromises.get(promiseIDObject.value);
-    return true;
-}
 
-function get_promise_id_object(term, s) {
-    if (TAG(term) !== TAG_STR)
-        return type_error("promise", term);
-    var ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] === "$promise" && ftable_arity(ftor) === 1) {
-        var arg = memory[VAL(term) + 1];
-        if (TAG(arg) !== TAG_ATM)
-            return type_error("promise_arg");
-        s.value = atable[VAL(arg)];
-        return true;
-    }
-    return type_error("promise", term);
+    return(ref.type === 'promise');
 }
 
 function predicate_request_result(promise) {
@@ -9379,3 +8834,884 @@ async function consult(urls, next_goal) {
         proscript(next_goal);
     }
 }
+// File object.js
+var idsToObjects = new Map();
+var idsToTypes = new Map();
+var objectsToIDs = new Map();
+
+// create_object_structure interns a Javascript object by creating
+// a unique key string for that object and storing the relationship
+// between that key and the object in two global static Map objects.
+// It constructs a one-argument Prolog structure with a distinctive functor
+// and the key as the argument to identify that Javascript object.
+// Finally, it returns the internal Prolog reference (index in
+// the global memory array of the root of the structure term)
+// to the newly allocated structure.
+//
+// get_object_id_container takes a reference to a Prolog structure
+// term as created by create_object_structure and an 'idContainer'
+// Javascript object as input,
+// sets idContainer.value to the key used internally that identifies a Javascript object,
+// and returns 'true'.
+//
+// get_object_container takes an object-identifying Prolog structure
+// term (as above) and a 'container' Javascript object as input,
+// sets container.value to the identified Javascript object, and
+// returns 'true'.
+
+// functor for an object that is an instance of Foo is typically '$foo'.
+function create_object_structure(objectJS, specifiedTypeJS) {
+    var objectMapID = lookup_object(objectJS, specifiedTypeJS);
+    var lookupObject = lookup_atom(objectMapID);
+    // '$obj'(lookupObject)
+    var ftor = lookup_functor('$obj', 1);
+    var objectPL = alloc_structure(ftor);
+    memory[state.H++] = lookupObject;
+    return objectPL;
+}
+
+function lookup_object(objectJS, specifiedTypeJS) {
+    var objectMapID = objectsToIDs.get(objectJS);
+    if (objectMapID) {
+        return objectMapID;
+    }
+
+    objectMapID = 'obj' + objectsToIDs.size;
+    objectsToIDs.set(objectJS, objectMapID);
+    idsToObjects.set(objectMapID, objectJS);
+    let objectType = specifiedTypeJS ? specifiedTypeJS : object_type_check(objectJS);
+    idsToTypes.set(objectMapID, objectType);
+    return objectMapID;
+}
+
+// For objects of type Foo the 'type' = 'foo' and functor = '$foo'.
+function get_object_container(term, container) {
+    let objectIDContainer = {};
+    if (!get_object_id_container(term, objectIDContainer)) {
+        return false;
+    }
+    container.value = idsToObjects.get(objectIDContainer.value);
+    container.type = idsToTypes.get(objectIDContainer.value);
+    return true;
+}
+
+// For objects of type Foo the 'type' = 'foo' and functor = '$foo'.
+function get_object_id_container(term, idContainer) {
+    if (TAG(term) !== TAG_STR)
+        return type_error('obj', term);
+    var ftor = VAL(memory[VAL(term)]);
+    if (atable[ftable[ftor][0]] === '$obj' && ftable_arity(ftor) === 1) {
+        var arg = memory[VAL(term) + 1];
+        if (TAG(arg) !== TAG_ATM)
+            return type_error("obj_arg");
+        idContainer.value = atable[VAL(arg)];
+        return true;
+    }
+    return type_error(type, term);
+}
+
+var parentMap = new Map([
+    ['eventtarget', []],
+    ['node', ['eventtarget']],
+    ['element', ['node']],
+    ['htmlelement', ['element']]
+]);
+
+var childMap = new Map();
+
+function calculate_inheritance_children() {
+    for(let objectType of parentMap.keys()) {
+        let parents = parentMap.get(objectType);
+
+        for(let ofst = 0;ofst < parents.length;ofst++) {
+            let parent = parents[ofst];
+            let children = childMap.get(parent);
+            if(children) {
+                children.push(objectType);
+            } else {
+                childMap.set(parent, [objectType]);
+            }
+        }
+    }
+}
+
+calculate_inheritance_children();
+
+var distinctivePropertyMap = {
+    node:'nodeType',
+    element:'id',
+    htmlelement:'title'
+};
+
+var distinctiveMethodMap = {
+    eventtarget: 'addEventListener'
+};
+
+function get_method_spec(leafObjectType, methodName) {
+    let spec;
+    let objectType = leafObjectType;
+    while (!spec && objectType) {
+        let specs = objectMethodSpecs.get(objectType);
+        spec = specs.get(methodName);
+        objectType = parentMap.get(objectType);
+    }
+
+}
+
+function object_type_check(object, candidates) {
+    if(! candidates) {
+        candidates = [];
+        for(let candidate of parentMap.keys()) {
+            let parents = parentMap.get(candidate);
+            if(parents.length === 0) {
+                candidates.push(candidate);
+            }
+        }
+    }
+
+    for (let ofst = 0;ofst < candidates.length;ofst++) {
+        let candidate = candidates[ofst];
+        let checkProperty = distinctivePropertyMap[candidate];
+        let checkMethod = distinctiveMethodMap[candidate];
+        if ((checkProperty && typeof object[checkProperty] !== 'undefined')
+            || (checkMethod && typeof object[checkMethod] === 'function')) {
+            if (! childMap.get(candidate)) {
+                return candidate;
+            } else {
+                let childType = object_type_check(object, childMap.get(candidate));
+                if(childType) {
+                    return childType;
+                } else {
+                    return candidate;
+                }
+            }
+        }
+    }
+    return undefined;
+}
+
+
+// File object_property.js
+
+var dopCursors = new Map();
+var dopCursorCounter = 0;
+
+// dom_object_property(Type, Object, Property, Value) binds Value to all values of Property of Object of Type.
+// Property must be a ground value (i.e. not TAG(property) === TAG_REF)
+// At least two of Type, Object, and Value must be ground.
+function predicate_dom_object_property(type, object, property, value) {
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = dopCursors.get(cursorIDJS);
+
+    }
+    else {
+        cursor = {
+            objects: setupObjectsForPropertyValue(type, object, property, value),
+            property_values: setupPropertyValues(type, object, property, value)
+        };
+        cursorIDJS = 'crs' + dopCursorCounter++;
+        dopCursors.set(cursorIDJS, cursor);
+        cursorIDPL = lookup_atom(cursorIDJS);
+
+        create_choicepoint();
+    }
+
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.objects && cursor.objects.length > 0) {
+        var elementJS = cursor.objects[0].value;
+        var typeJS = cursor.objects[0].type;
+        var elementPL = create_object_structure(elementJS, typeJS);
+
+        if (!cursor.property_values) {
+            cursor.property_values = setupPropertyValuesFromJSElement(typeJS, elementJS, property, value);
+        }
+
+        if (cursor.property_values && cursor.property_values.length > 0) {
+            var valueJS = cursor.property_values.pop();
+            var valuePL = propertyValueToPL(typeJS, property, valueJS);
+            return unify(value, valuePL) &&
+                unify(object, elementPL);
+        }
+
+        // All classNames for current elementJS have been processed.
+        // Set the cursor.tags to undefined to force recalculation of tags
+        // with next element.
+        // Move to the next element by removing objects[0].
+
+        cursor.property_values = undefined;
+        cursor.objects = cursor.objects.slice(1);
+        return false; // go to next choice (of element)
+    } else {
+        destroy_choicepoint();
+        return false;
+    }
+}
+
+
+function setupObjectsForPropertyValue(type, object, property, value) {
+    if (TAG(property) === TAG_REF) {
+        instantiation_error(property);
+    } else {
+        var propertyJS = atable[VAL(property)];
+    }
+
+    if (TAG(object) !== TAG_REF) {
+        if (TAG(object) !== TAG_STR) {
+            instantiation_error(object);
+        }
+        var objectContainer = {};
+        if (!get_object_container(object, objectContainer)) {
+            return undefined;
+        }
+        var objectContainers = [];
+        objectContainers.push(objectContainer);
+        return objectContainers;
+    } else if (TAG(value) !== TAG_REF && TAG(type) === TAG_ATM) {
+        return setupObjectsForBoundPropertyValue(atable[VAL(type)], propertyJS, value);
+    } else if (TAG(type) === TAG_ATM && atable[VAL(type)] === 'element') {
+        return objectsToContainers(document.querySelectorAll('*'), 'element');
+    } else {
+        return undefined;
+    }
+}
+
+function objectsToContainers(objects, typeJS) {
+    let objectContainers = [];
+
+    for(let object of objects) {
+        objectContainers.push({value:object, type:'element'});
+    }
+    return objectContainers;
+}
+
+function setupPropertyValuesFromJSElement(typeJS, objectJS, property, value) {
+    if (TAG(property) === TAG_REF) {
+        instantiation_error(property);
+    } else {
+        var propertyJS = atable[VAL(property)];
+    }
+    var values;
+    if (TAG(value) !== TAG_REF ) {
+        values = setupPropertyValuesFromBoundValue(typeJS, property, propertyJS, value);
+    } else {
+        values = setupPropertyValuesFromJSElement1(typeJS, objectJS, property, propertyJS);
+    }
+    return values;
+}
+
+function setupPropertyValues(type, object, property, value) {
+    if (TAG(property) === TAG_REF) {
+        instantiation_error(property);
+    } else {
+        var propertyJS = atable[VAL(property)];
+    }
+    var values;
+    if (TAG(value) !== TAG_REF && TAG(type) === TAG_ATM) {
+        values = setupPropertyValuesFromBoundValue(atable[VAL(type)], property, propertyJS, value);
+    } else if (TAG(object) !== TAG_REF) {
+        if (TAG(object) !== TAG_STR) {
+            instantiation_error(object);
+        }
+        var objectContainer = {};
+        if (!get_object_container(object, objectContainer)) {
+            return undefined;
+        }
+        let objectJS = objectContainer.value;
+        let typeJS = objectContainer.type;
+        if(type === TAG_ATM && atable[VAL(type)] !== typeJS) {
+            throw 'incompatible object types. Param type is ' + atable[VAL(type)] + ' and object ' + JSON.stringify(objectJS) + ' is tagged with type ' + typeJS;
+        }
+        values = setupPropertyValuesFromJSElement1(typeJS, objectJS, property, propertyJS);
+    } else {
+        values = undefined;
+    }
+    return values;
+}
+
+function propertyValueToJS(type, value) {
+    if(type === 'atom') {
+        return getAtomPropertyValue(value);
+    } else if(type === 'boolean') {
+        return getBooleanPropertyValue(value);
+    } else if(type === 'number') {
+        return getNumberPropertyValue(value);
+    } else if(type === 'string') {
+        return getStringPropertyValue(value);
+    } else if(type === 'object') {
+        return getObjectPropertyValue(value);
+    } else {
+        domain_error(type);
+    }
+}
+
+function getAtomPropertyValue(value) {
+    return atable[VAL(value)];
+}
+
+function getBooleanPropertyValue(value) {
+    var valueJS = atable[VAL(value)];
+    return valueJS === 'true';
+}
+
+/**
+ * Convert a prolog list of atoms to a space separated string of tokens.
+ * @param value
+ * @returns {string}
+ */
+function getClassListPropertyValue(value) {
+    if(TAG(value) !== TAG_LST) {
+        instantiation_error(value);
+    }
+
+    var string = '';
+    var list = value;
+    while(list !== NIL) {
+        if(TAG(list) !== TAG_LST) {
+            instantiation_error(list);
+        }
+
+        var atomPL = memory[VAL(list)];
+        if(TAG(atomPL) !== TAG_ATM) {
+            instantiation_error(atomPL);
+        } else {
+            if(string !== '') {
+                string += ' ';
+            }
+            string += atable[VAL(value)];
+            list = memory[VAL(list) + 1];
+        }
+    }
+
+    return string;
+}
+
+function getNumberPropertyValue(value) {
+    return VAL(value);
+}
+
+function getStringPropertyValue(value) {
+    return codes_to_string(value);
+}
+
+function getObjectPropertyValue(value) {
+    var valueObjectContainer = {};
+    if (!get_object_container(value, valueObjectContainer)) {
+        return undefined;
+    }
+    return valueObjectContainer.value;
+}
+
+function propertyValueToPL(typeJS, property, valueJS) {
+    let propertyJS = PL_get_atom_chars(property);
+    let propertySpec = getPropertySpecification(typeJS, propertyJS);
+
+    if (propertySpec) {
+        if (propertySpec.type === 'atom') {
+            return getAtomPLPropertyValue(valueJS);
+        } else if (propertySpec.type === 'number') {
+            return getNumberPLPropertyValue(valueJS);
+        } else if (propertySpec.type === 'string') {
+            return getStringPLPropertyValue(valueJS);
+        } else if (propertySpec.type === 'object') {
+            return getObjectPLPropertyValue(valueJS);
+        } else {
+            domain_error(propertySpec.type);
+        }
+    } else {
+        domain_error(property);
+    }
+}
+
+function getAtomPLPropertyValue(valueJS) {
+    return lookup_atom(valueJS);
+}
+
+function getNumberPLPropertyValue(valueJS) {
+    return valueJS ^ (TAG_INT << WORD_BITS);
+}
+
+function getStringPLPropertyValue(valueJS) {
+    return string_to_codes(valueJS);
+}
+
+function getObjectPLPropertyValue(valueJS) {
+    return create_object_structure(valueJS);
+}
+
+function setupObjectsForBoundPropertyValue(typeJS, propertyJS, value) {
+    let propertySpec = getPropertySpecification(typeJS, propertyJS);
+    if (propertySpec) {
+        var valueJS = propertyValueToJS(propertySpec.type, value);
+        return objectsToContainers(propertySpec.objects(valueJS), typeJS);
+    } else {
+        domain_error(propertyJS);
+    }
+}
+
+function setupPropertyValuesFromBoundValue(typeJS, property, propertyJS, value) {
+    let propertySpec = getPropertySpecification(typeJS, propertyJS);
+    if (propertySpec) {
+        let values = [];
+        let valueJS = propertyValueToJS(propertySpec.type, value);
+        values.push(valueJS);
+        return values;
+    } else {
+        domain_error(property);
+    }
+}
+
+function setupPropertyValuesFromJSElement1(typeJS, elementJS, property, propertyJS) {
+    let propertySpec = getPropertySpecification(typeJS, propertyJS);
+    if (propertySpec) {
+        return propertySpec.elementValuesFunction(elementJS);
+    } else {
+        domain_error(property);
+    }
+}
+
+// Walk up the interface type hierarchy until propertyJS is
+// found. Use a breadth-first search of parents in case
+// there are multiple parents for a particular interface.
+
+function getPropertySpecification(typeJS, propertyJS) {
+    let stack = [typeJS];
+    while (stack.length > 0) {
+        let testType = stack.shift(0);
+        let webInterface = webInterfaces.get(testType);
+        if (webInterface) {
+            if (webInterface.properties) {
+                let result = webInterface.properties.get(propertyJS);
+                if (result) {
+                    return result;
+                }
+            }
+
+            // propertyJS not found. put interface.parents on the
+            // bottom of the stack (for breadth-first search of
+            // parents)
+
+            let parents = webInterface.parent;
+            if (parents) {
+                for (let ofst = 0; ofst < parents.length; ofst++) {
+                    stack.push(parents[ofst]);
+                }
+            }
+        }
+    }
+    return undefined;
+}
+
+function predicate_set_dom_object_property(object, property, value) {
+    if (TAG(object) !== TAG_STR) {
+        instantiation_error(object);
+    }
+
+    let objectContainer = {};
+    if (!get_object_container(object, objectContainer)) {
+        return false;
+    }
+    let elementJS = objectContainer.value;
+    let typeJS = objectContainer.type;
+
+    if (TAG(property) === TAG_REF) {
+        instantiation_error(property);
+    } else {
+        var propertyJS = atable[VAL(property)];
+    }
+
+    let propertySpec = getPropertySpecification(typeJS, propertyJS);
+    if (propertySpec) {
+        propertySpec.setValue(property, elementJS, value);
+    } else {
+        domain_error(property);
+    }
+    return true;
+}
+
+/*
+W3C Web API specifies 'APIs', 'webInterfaces', and 'mixins'.
+(It also uses the term 'object type' to refer to
+these webInterfaces. Javascript (through ECMAScript 2020) does not define 'interface'
+as a language concept - it continues to rely on 'duck typing' (if it walks like
+a duck, sounds like a duck, then it is a duck). So the Web API webInterfaces appear
+to be an informal concept.)
+
+An interface is a collection of properties, methods, and events. It may inherit properties,
+methods, and/or events from a 'parent' interface and any number of mixins.
+The properties and methods of an interface are implemented by a Javascript object.
+An interface may correspond to an object type, or it may only be used as part of the
+definition of an object type. For instance, the Navigator interface does not 'inherit'
+any properties or methods from other webInterfaces but it does implement properties and
+methods defined by other webInterfaces such as NavigatorID. The NavigatorID interface is not used
+as an object type: i.e. there are no Javascript objects in the W3C Web API
+implementations that are created solely from the NavigatorID interface.
+[I do not know why the Web API documentation does not consider an object
+that implements the Navigator interface (and thus is of the Navigator
+object type) to not also be of the NavigatorID interface and object type. Perhaps because
+it is not completely described by the NavigatorID interface?]
+
+A mixin is similar to an interface but "...you can't create an object of type [mixin]".
+It appears that a mixin is the same as the non-object-type webInterfaces mentioned above
+(such as NavigatorID), but the WebAPI documentation does not make that connection. An
+example mixin is WindowEventHandlers:
+"[it] describes the event handlers common to several webInterfaces like Window,
+or HTMLBodyElement and HTMLFrameSetElement. Each of these webInterfaces can
+implement additional specific event handlers."
+
+An API is a collection of webInterfaces, a collection of properties for
+other webInterfaces, and a collection of methods for other webInterfaces.
+More precisely, API X has webInterfaces [I1, ..., In],
+properties [Ip1.P1,...,Ip.Pj],
+and methods [Im.M1(...), ..., Im.Mk(...)], where:
+  * Ia != Ib for all 1 <= a <= n, 1 <= b <= n, and a != b;
+  * Ipx != Ia for all 1 <= x <= j and 1 <= a <= n;
+  * Imx != Ia for all 1 <= x <= k and 1 <= a <= n.
+
+The Proscript implementation provides explicit access to selected properties and methods
+of various WebAPI objects and Javascript runtime objects.
+Currently the supported WebAPI objects are Node, Element, and HTMLElement.
+The Javascript runtime object is Promise.
+
+The properties are handled in the Javascript supporting Proscript
+in a systematic fashion using a propertyMap to map
+a property name to a property specification. The property specification defines
+the name and type properties and the objects(valueJS), objectValues(objectJS),
+and setValue(property, objectJS, value) methods.
+
+The name property is the same name as is used in the propertyMap key.
+
+The type property is the type of the return value for the property. The
+propertyValueToJS(type, valueJS) function translates a Javascript
+property value to its Prolog representation. The defined types are:
+'atom', 'number', 'string', 'object'. The 'object' type translates
+a Javascript object to a Prolog representation by looking up the
+object in a map. If the object is already in the map then it returns
+the identifier stored in the map. If it is not already known then it
+generates a unique identifier for that object and stores it in the map.
+
+The objects(valueJS) method returns an Array of the objects that have
+the 'name' property with value 'valueJS'. This may return 'undefined'
+if no mapping from property value to object is available.
+
+The objectValues(objectJS) method returns an Array of Javascript
+values for the 'name' property of object 'objectJS'.
+
+The setValue(property, objectJS, value) method sets the 'property'
+of 'objectJS' to 'value'. This may set 'exception' to domain_error if
+the property is read-only.
+
+A property that is a single value that can be accessed
+by "elementJS[propertyName]" is defined using specification
+return by the SimpleProperty(type, propertyName, settable) method.
+
+Other specification-returning methods are used for properties
+that do not meet the constraints of the SimpleProperty method.
+
+*/
+function TagPropertyX() {
+    var that = {};
+    that.name = "tag";
+    that.type = 'atom';
+    that.objects = function(valueJS) {
+        return Array.from(document.getElementsByTagName(valueJS));
+    };
+    that.elementValuesFunction = function(elementJS) {
+        var values = [];
+        values.push(elementJS.tagName);
+        return values;
+    };
+    // noinspection JSUnusedLocalSymbols
+    that.setValue = function(property, elementJS, value) {
+        domain_error(property);
+    };
+    return that;
+}
+
+function ChildNodePropertyX() {
+    var that = {};
+    that.name = "childNode";
+    that.type = 'object';
+    that.objects = function(valueJS) {
+        var objects = [];
+        objects.push(valueJS.parentNode);
+        return objects;
+    };
+    that.elementValuesFunction = function(objectJS) {
+        /** @namespace elementJS.children */
+        return [...objectJS.childNodes];// This is the spread operator. It creates an array from the NodeList of 'childNodes'.
+    };
+    that.setValue = function(property, elementJS, value) {
+        domain_error(property);
+    };
+    return that;
+}
+
+function SimpleChildNodePropertyX(propertyName) {
+    var that = {};
+    that.name = "firstChild";
+    that.type = 'object';
+    that.objects = function(valueJS) {
+        var objects = [];
+        objects.push(valueJS.parentElement);
+        return objects;
+    };
+    that.elementValuesFunction = function(elementJS) {
+        var objects = [];
+        /** @namespace elementJS.firstChild */
+        objects.push(elementJS[propertyName]);
+        return objects;
+    };
+    that.setValue = function(property, elementJS, value) {
+        domain_error(property);
+    };
+    return that;
+}
+
+function ChildPropertyX() {
+    var that = {};
+    that.name = "child";
+    that.type = 'object';
+    that.objects = function(valueJS) {
+        var objects = [];
+        objects.push(valueJS.parentElement);
+        return objects;
+    };
+    that.elementValuesFunction = function(elementJS) {
+        /** @namespace elementJS.children */
+        return [...elementJS.children];// This is the spread operator. It creates an array from the HTMLCollection of 'children'.
+    };
+    that.setValue = function(property, elementJS, value) {
+        domain_error(property);
+    };
+    return that;
+}
+
+function SimpleChildPropertyX(propertyName) {
+    var that = {};
+    that.name = "firstChild";
+    that.type = 'object';
+    that.objects = function(valueJS) {
+        var objects = [];
+        objects.push(valueJS.parentElement);
+        return objects;
+    };
+    that.elementValuesFunction = function(elementJS) {
+        var objects = [];
+        /** @namespace elementJS.firstChild */
+        objects.push(elementJS[propertyName]);
+        return objects;
+    };
+    that.setValue = function(property, elementJS, value) {
+        domain_error(property);
+    };
+    return that;
+}
+
+/**
+ * This prolog 'class' property uses the classList and className HTML Element properties.
+ */
+
+function ClassPropertyX() {
+    var that = {};
+    that.name = "class";
+    that.type = 'atom';
+    that.objects = function(valueJS) {
+        return document.getElementsByClassName(valueJS);
+    };
+    that.elementValuesFunction = function(elementJS) {
+        /** @namespace elementJS.classList */
+        return [...elementJS.classList];// This is the spread operator. It creates an array from the DOMTokenList of 'classList'.
+    };
+
+    /**
+     * Set the 'className' property to the given class or classes.
+     * If the 'value' is a single atom then set the className to the string for that atom.
+     * If the 'value' is a list of atoms then set the className to the
+     * string that is the strings for those atoms separated by spaces.
+     * @param property
+     * @param elementJS
+     * @param value
+     */
+    that.setValue = function(property, elementJS, value) {
+        var valueJS;
+        if (TAG(element) === TAG_ATM) {
+            valueJS = getAtomPropertyValue(value);
+        } else if (TAG(element) === TAG_LST) {
+            valueJS = getClassListPropertyValue(value);
+        }
+        elementJS.className = valueJS;
+    };
+    return that;
+}
+
+function SimplePropertyX(type, propertyName, settable) {
+    var that = {};
+    that.name = propertyName;
+    that.type = type;
+    that.objects = function(valueJS) {
+        return Array.from(document.querySelectorAll('*')); // return all objects for later filtering by unification
+    };
+    that.elementValuesFunction = function(elementJS) {
+        var values = [];
+        values.push(elementJS[propertyName]);
+        return values;
+    };
+    that.setValue = function(property, elementJS, value) {
+        if(settable) {
+            elementJS[propertyName] = propertyValueToJS(type, value);
+        } else {
+            domain_error(property);
+        }
+    };
+    return that;
+}
+
+var webInterfaces = new Map();
+
+webInterfaces.set('eventtarget', {name: 'eventtarget'});
+
+var nodeInterfaceProperties = new Map([
+    // baseURI
+    // baseURIObject
+    ['childNode', ChildNodePropertyX()], // adapted from childNodes
+    ['firstChild', SimpleChildNodePropertyX('firstChild')],
+    // isConnected
+    ['lastChild', SimpleChildPropertyX('lastChild')],
+    //['namespaceURI', SimplePropertyX('string', 'namespaceURI')], // deprecated in Node interface: moved to Element.
+    ['nextSibling', SimpleChildPropertyX('nextSibling')],
+    ['nodeName', SimplePropertyX('atom','nodeName')],
+    ['nodeType', SimplePropertyX('atom','nodeType')],
+    ['nodeValue', SimplePropertyX('string','nodeValue', true)],
+    // outerText
+    ['ownerDocument', SimpleChildPropertyX('ownerDocument')],
+    ['parentElement', SimpleChildPropertyX('parentElement')],
+    ['parentNode', SimpleChildPropertyX('parentNode')],
+    ['previousSibling', SimpleChildPropertyX('previousSibling')],
+    ['textContent', SimplePropertyX('string', 'textContent', true)]
+]);
+
+webInterfaces.set('node', {name: 'node', parent: ['eventtarget'], properties:nodeInterfaceProperties});
+
+var elementInterfaceProperties = new Map([
+    ['accesskey', SimplePropertyX('atom','accesskey', true)],
+    // attributes
+    ['child', ChildPropertyX()], // adapted from children
+    ['childElementCount', SimplePropertyX('number','childElementCount')],
+    ['class', ClassPropertyX()], // adapted from classList, className
+    ['clientHeight', SimplePropertyX('number','clientHeight')],
+    ['clientLeft', SimplePropertyX('number','clientLeft')],
+    ['clientTop', SimplePropertyX('number','clientTop')],
+    ['clientWidth', SimplePropertyX('number','clientWidth')],
+    // currentStyle
+    ['firstElementChild', SimpleChildPropertyX('firstElementChild')],
+    ['id', SimplePropertyX('atom','id', true)],
+    ['innerHTML', SimplePropertyX('string', 'innerHTML', true)],
+    ['lang', SimplePropertyX('atom','lang', true)], // ISO 639-1 Language Codes: en, de, ja, ...
+    ['lastChild', SimpleChildPropertyX('lastChild')],
+    ['lastElementChild', SimpleChildPropertyX('lastElementChild')],
+    // name
+    ['namespaceURI', SimplePropertyX('string', 'namespaceURI')],
+    ['nextElementSibling', SimpleChildPropertyX('nextElementSibling')],
+    ['previousElementSibling', SimpleChildPropertyX('previousElementSibling')],
+    // runtimeStyle
+    ['scrollHeight', SimplePropertyX('number','scrollHeight')],
+    ['scrollLeft', SimplePropertyX('number','scrollLeft')],
+    // scrollLeftMax
+    ['scrollTop', SimplePropertyX('number','scrollTop')],
+    // scrollTopMax
+    ['scrollWidth', SimplePropertyX('number','scrollWidth')],
+    ['tag', TagPropertyX()] // for tagName
+]);
+
+webInterfaces.set('element', {name: 'element', parent: ['node'], properties:elementInterfaceProperties});
+
+var htmlElementInterfaceProperties = new Map([
+    ['contentEditable', SimplePropertyX('boolean','contentEditable', true)],
+    // contextMenu, deprecated
+    // dataset
+    ['dir', SimplePropertyX('atom','dir', true)], // rtl, ltr, auto
+    // hidden
+    ['innerText', SimplePropertyX('string', 'innerText', true)],
+    ['lang', SimplePropertyX('atom','lang', true)], // ISO 639-1 Language Codes: en, de, ja, ...
+    // nonce, experimental
+    ['offsetHeight', SimplePropertyX('number','offsetHeight')],
+    ['offsetLeft', SimplePropertyX('number','offsetLeft')],
+    ['offsetParent', SimplePropertyX('number','offsetParent')],
+    ['offsetTop', SimplePropertyX('number','offsetTop')],
+    ['offsetWidth', SimplePropertyX('number','offsetWidth')],
+    // onabort, experimental
+    // onanimationcancel
+    // onanimationend
+    // onanimationiteration, experimental
+    // onauxclick, experimental
+    // onblur
+    // oncancel
+    // oncanplay
+    // oncanplaythrough
+    // onchange
+    // onclick
+    // onclose, experimental
+    // oncontextmenu
+    // oncopy, experimental
+    // oncuechange
+    // oncut, experimental
+    // ondblclick
+    // ondurationchange
+    // onended
+    // onerror
+    // onfocus
+    // ongotpointercapture
+    // oninput
+    // oninvalid
+    // onkeydown
+    // onkeypress
+    // onkeyup
+    // onload
+    // onloadeddata
+    // onloadedmetadata
+    // onloadend
+    // onloadstart
+    // onlostpointercapture
+    // onmousedown
+    // onmouseenter
+    // onmouseleave
+    // onmousemove
+    // onmouseout
+    // onmouseover
+    // onmouseup
+    // onpaste, experimental
+    // onplay
+    // onpointercancel
+    // onpointerdown
+    // onpointerenter
+    // onpointerleave
+    // onpointermove
+    // onpointerout
+    // onpointerover
+    // onpointerup
+    // onreset
+    // onresize
+    // onscroll
+    // onselect
+    // onselectionchange, experimental
+    // onselectstart, experimental
+    // onsubmit
+    // ontouchcancel, experimental
+    // ontouchstart, experimental
+    // ontransitioncancel
+    // ontransitionend
+    // onwheel
+    // outerText
+    ['style', SimplePropertyX('string', 'style', true)],
+    ['tabIndex', SimplePropertyX('number','tabIndex')],
+    ['title', SimplePropertyX('string', 'title', true)]
+]);
+webInterfaces.set('htmlelement', {name: 'htmlelement', parent: ['element'], properties:htmlElementInterfaceProperties});
+

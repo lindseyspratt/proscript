@@ -17,12 +17,12 @@ set_dom_name_path_value([], E, V) :-
     set_dom_element_attribute_value(E, value, V).
 % Set value for leaf in path with a direct child with name H and sub-nodes for path T.
 set_dom_name_path_value([H|T], E, V) :-
-    dom_element_property(E, child, C),
+    dom_object_property(_, E, child, C),
     atom_codes(HA, H),
     dom_element_attribute_value(C, name, HA),
     set_dom_name_path_value(T, C, V).
 % Set value for leaf in path with an indirect child with name H and sub-nodes for path T.
 set_dom_name_path_value([H|T], E, V) :-
-    dom_element_property(E, child, C),
+    dom_object_property(_, E, child, C),
     set_dom_name_path_value([H|T], C, V).
 

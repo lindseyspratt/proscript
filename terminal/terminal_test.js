@@ -5,7 +5,7 @@ var can_backtrack = false;
 var x_history = [];
 
 jQuery(function ($, undefined) {
-    $('#simpletest').terminal(function (command, term) {
+    $('#proscriptinterpreter').terminal(function (command, term) {
         if (command !== '') {
             try {
                 top_level(command, this);

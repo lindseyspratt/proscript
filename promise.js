@@ -37,52 +37,16 @@
 // been returned or failed. Then promise_handle_results/2 may be used
 // to get all of these results, e.g. setof(P-R, promise_handle_results(P,R), ResultPairs).
 
-var idsToPromises = new Map();
-var promisesToIDs = new Map();
-
 function create_promise_structure(promiseJS) {
-    var promiseMapID = lookup_promise(promiseJS);
-    var lookupPromise = lookup_atom(promiseMapID);
-    // '$promise'(lookupPromise)
-    var ftor = lookup_functor('$promise', 1);
-    var promisePL = alloc_structure(ftor);
-    memory[state.H++] = lookupPromise;
-    return promisePL;
-}
-
-function lookup_promise(promiseTerm) {
-    var promiseMapID = promisesToIDs.get(promiseTerm);
-    if (promiseMapID) {
-        return promiseMapID;
-    }
-
-    promiseMapID = 'emi' + promisesToIDs.size;
-    promisesToIDs.set(promiseTerm, promiseMapID);
-    idsToPromises.set(promiseMapID, promiseTerm);
-    return promiseMapID;
+    return create_object_structure(promiseJS, 'promise');
 }
 
 function get_promise_object(term, ref) {
-    let promiseIDObject = {};
-    if (!get_promise_id_object(term, promiseIDObject)) {
+    if(!get_object_container(term, ref)) {
         return false;
     }
-    ref.value = idsToPromises.get(promiseIDObject.value);
-    return true;
-}
 
-function get_promise_id_object(term, s) {
-    if (TAG(term) !== TAG_STR)
-        return type_error("promise", term);
-    var ftor = VAL(memory[VAL(term)]);
-    if (atable[ftable[ftor][0]] === "$promise" && ftable_arity(ftor) === 1) {
-        var arg = memory[VAL(term) + 1];
-        if (TAG(arg) !== TAG_ATM)
-            return type_error("promise_arg");
-        s.value = atable[VAL(arg)];
-        return true;
-    }
-    return type_error("promise", term);
+    return(ref.type === 'promise');
 }
 
 function predicate_request_result(promise) {

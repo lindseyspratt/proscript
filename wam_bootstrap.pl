@@ -445,8 +445,10 @@ reset:-
         reserve_predicate(insert_before_dom_node/3, predicate_insert_before_dom_node),
         reserve_predicate(dom_select_element/2, predicate_dom_select_element),
         reserve_predicate(dom_select_all_elements/2, predicate_dom_select_all_elements),
-        reserve_predicate(dom_element_property/3, predicate_dom_element_property),
-        reserve_predicate(set_dom_element_property/3, predicate_set_dom_element_property),
+        %reserve_predicate(dom_element_property/3, predicate_dom_element_property),
+        reserve_predicate(dom_object_property/4, predicate_dom_object_property),
+        %reserve_predicate(set_dom_element_property/3, predicate_set_dom_element_property),
+        reserve_predicate(set_dom_object_property/3, predicate_set_dom_object_property),
         reserve_predicate(alert/1, predicate_alert),
 
         % DOM Element/Node Methods
