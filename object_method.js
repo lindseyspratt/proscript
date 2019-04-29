@@ -7,8 +7,6 @@ This file implements access to Javascript object methods.
 
  */
 
-var objectMethodSpecs = new Map(); // key is object type, e.g. element
-
 // object_method(Element, add_event_listener(click, bar(thing))).
 // method:EventAgent.addEventListener, arguments:[string, goal_function]
 // object_method_no_return(objectJS, EventAgent.addEventListener, [eventJS, handlerFunction]);
@@ -29,7 +27,7 @@ function predicate_dom_object_method(object, methodStructure) {
     var objectJS = objectContainer.value;
 
     let methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
-    let spec = get_method_spec(objectType, methodName);
+    let spec = getInterfaceItemSpec(objectType, 'method', methodName);
     var arity = ftable[VAL(memory[VAL(methodStructure)])][1];
     if(spec.returns && ! spec.returns.type === 'boolean') {
         arity --; // the last argument to the methodStructure is for the return value.
@@ -160,37 +158,3 @@ function object_method_return() {
     let method_arguments = arguments[2];
     return Reflect.apply(object[object_method], object, method_arguments);
 }
-
-var eventTargetMethodSpecs = new Map([
-    ['addEventListener',{name:'addEventListener',arguments:[{type:'string'},{type:'goal_function'}]}]
-]);
-
-objectMethodSpecs.set('eventtarget',eventTargetMethodSpecs);
-
-var nodeMethodSpecs = new Map([
-    ['cloneNode',{name:'cloneNode',arguments:[{type:'boolean'}],returns:{type:'object'}}],
-    ['compareDocumentPosition',{name:'compareDocumentPosition',arguments:[{type:'object'}],returns:{type:'number'}}],
-    ['contains',{name:'contains',arguments:[{type:'object'}],returns:{type:'boolean'}}],
-    ['isEqualNode',{name:'isEqualNode',arguments:[{type:'object'}],returns:{type:'boolean'}}],
-    ['normalize',{name:'normalize',arguments:[]}]
-]);
-
-objectMethodSpecs.set('node',nodeMethodSpecs);
-
-var elementMethodSpecs = new Map([
-    ['getBoundingClientRect',{name:'getBoundingClientRect',arguments:[],returns:{type:'dom_rect'}}],
-    ['insertAdjacentElement',{name:'insertAdjacentElement',arguments:[{type:'position'},{type:'object'}]}],
-    ['insertAdjacentHTML',{name:'insertAdjacentHTML',arguments:[{type:'position'},{type:'string_codes'}]}],
-    ['insertAdjacentText',{name:'insertAdjacentText',arguments:[{type:'position'},{type:'string_codes'}]}],
-    ['scrollIntoView',{name:'scrollIntoView',arguments:[{type:'boolean'}]}]
-]);
-
-objectMethodSpecs.set('element',elementMethodSpecs);
-
-var htmlElementMethodSpecs = new Map([
-    ['blur',{name:'blur',arguments:[]}],
-    ['click',{name:'click',arguments:[]}],
-    ['focus',{name:'focus',arguments:[]}]
-]);
-
-objectMethodSpecs.set('htmlelement',htmlElementMethodSpecs);

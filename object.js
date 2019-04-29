@@ -110,17 +110,27 @@ var distinctiveMethodMap = {
     eventtarget: 'addEventListener'
 };
 
-function get_method_spec(typeJS, methodName) {
+function getInterfaceItemSpec(typeJS, itemType, itemName) {
+    let itemsMember;
+    if(itemType === 'method') {
+        itemsMember = 'methods';
+    } else if(itemType === 'property') {
+        itemsMember = 'properties';
+    } else {
+        throw 'internal error: invalid interface item type = ' + itemType + '. Must be either "method" or "property".';
+    }
+
     let stack = [typeJS];
     while (stack.length > 0) {
         let testType = stack.shift(0);
-        let specs = objectMethodSpecs.get(testType);
-        if (specs) {
-            let spec = specs.get(methodName);
-            if (spec) {
-                return spec;
+        let specs = webInterfaces.get(testType);
+        if (specs ) {
+            if(specs[itemsMember]) {
+                let spec = specs[itemsMember].get(itemName);
+                if (spec) {
+                    return spec;
+                }
             }
-
             // methodName not found. put parentMap.get(testType) on the
             // bottom of the stack (for breadth-first search of
             // parents)
