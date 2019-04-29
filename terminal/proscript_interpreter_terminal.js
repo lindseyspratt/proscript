@@ -26,7 +26,7 @@ jQuery(function ($, undefined) {
     });
 });
 
-var stdout;
+var stdout = console.log;
 
 function predicate_flush_stdout() {
     // no op
