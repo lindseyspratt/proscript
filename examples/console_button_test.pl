@@ -15,7 +15,7 @@ console_button_test :-
     set_dom_element_attribute_value(Button, id, console_button),
     create_dom_text_node("Create Console", NewContent),
     append_dom_node_child(Button, NewContent),
-    dom_element_add_event_listener(Button, click, setup_div_and_console),
+    dom_object_method(Button, addEventListener(click, setup_div_and_console)),
     append_dom_node_child(E, Button).
 
 setup_div_and_console :-

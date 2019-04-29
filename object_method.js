@@ -13,7 +13,7 @@ var objectMethodSpecs = new Map(); // key is object type, e.g. element
 // method:EventAgent.addEventListener, arguments:[string, goal_function]
 // object_method_no_return(objectJS, EventAgent.addEventListener, [eventJS, handlerFunction]);
 
-function predicate_object_method(object, methodStructure) {
+function predicate_dom_object_method(object, methodStructure) {
     if (TAG(object) !== TAG_STR) {
         instantiation_error(object);
     }
@@ -59,6 +59,11 @@ function predicate_object_method(object, methodStructure) {
 }
 
 function convert_method_argument(term, spec) {
+    if(TAG(term) === TAG_REF) {
+        instantiation_error(term);
+        // error
+    }
+
     let arg;
     if(spec.type === 'string') {
         if (TAG(term) === TAG_ATM) {
@@ -75,20 +80,25 @@ function convert_method_argument(term, spec) {
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
             let value = PL_atom_chars(term);
-            arg = (value === 'true' ? true : value === 'false' ? false : (throw 'boolean must be "true" or "false": ' + value));
+            if(value === 'true') {
+                arg = true;
+            } else if(value === 'false') {
+                arg = false
+            } else {
+                domain_error(boolean, term);
+            }
         } else {
             // error
         }
     } else if(spec.type === 'position') {
         if (TAG(term) === TAG_ATM) {
-            let arg = PL_atom_chars(term);
+            arg = PL_atom_chars(term);
             if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(arg) === -1) {
                 domain_error("not_valid_insert_adjacent_mode", mode);
                 // error
             }
-
-        } else {
-            // error
+        } else  {
+            type_error('atom', term);
         }
     } else if(spec.type === 'goal_function') {
         let goal;
@@ -97,14 +107,14 @@ function convert_method_argument(term, spec) {
         } else if (TAG(term) === TAG_STR) {
             goal = format_term(term, {quoted:true});
         } else {
-            // error
+            type_error('atom or structure', term);
         }
 
-        let arg = function () {
+        arg = function () {
             proscript(goal)
         }
     } else {
-        // error
+        throw 'internal error: spec.type not recognized. ' + spec.type;
     }
 
     return arg;
@@ -140,21 +150,15 @@ function convert_result(resultJS, spec) {
 function object_method_no_return() {
     let object = arguments[0];
     let object_method = arguments[1];
-    let method_arguments = [];
-    for(let ofst = 2;ofst < arguments.length;ofst++) {
-        method_arguments[ofst] = arguments[ofst+1];
-    }
-    Reflect.apply(object_method, object, method_arguments);
+    let method_arguments = arguments[2];
+    Reflect.apply(object[object_method], object, method_arguments);
 }
 
 function object_method_return() {
     let object = arguments[0];
     let object_method = arguments[1];
-    let method_arguments = [];
-    for(let ofst = 2;ofst < arguments.length;ofst++) {
-        method_arguments[ofst] = arguments[ofst+1];
-    }
-    return Reflect.apply(object_method, object, method_arguments);
+    let method_arguments = arguments[2];
+    return Reflect.apply(object[object_method], object, method_arguments);
 }
 
 var eventTargetMethodSpecs = new Map([

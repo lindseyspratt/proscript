@@ -7906,346 +7906,6 @@ function debug(msg) {
         alert(msg);
     }
 }
-// File dom_element_method.js
-function predicate_dom_element_add_event_listener(element, event, goal) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(event) !== TAG_ATM) {
-        instantiation_error(event);
-    }
-
-    if (TAG(goal) !== TAG_STR && TAG(goal) !== TAG_ATM) {
-        instantiation_error(goal);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var eventJS = PL_atom_chars(event);
-
-    var goalJS = format_term(goal, {quoted:true});
-
-    function handlerFunction () {
-        proscript(goalJS)
-    }
-
-    elementJS.addEventListener(eventJS, handlerFunction);
-
-    return true;
-}
-
-function predicate_dom_element_blur(element) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    elementJS.blur();
-
-    return true;
-}
-
-function predicate_dom_element_focus(element) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    elementJS.focus();
-
-    return true;
-}
-
-function predicate_dom_element_click(element) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    elementJS.click();
-
-    return true;
-}
-
-function predicate_dom_element_clone_node(element, flag, clone) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(flag) !== TAG_ATM) {
-        instantiation_error(flag);
-    }
-
-    if (TAG(clone) !== TAG_REF) {
-        instantiation_error(clone);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var flagJS = PL_atom_chars(flag); //atable[VAL(flag)];
-    if(flagJS !== "true" && flagJS !== "false") {
-        domain_error('not_valid_boolean', flag);
-    }
-
-    var cloneElementJS = elementJS.cloneNode(flagJS === "true");
-
-    var cloneElementPL = create_element_structure(cloneElementJS);
-    return unify(clone, cloneElementPL);
-}
-
-function predicate_dom_element_compare_document_position(element, otherElement, comparison) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(otherElement) !== TAG_STR) {
-        instantiation_error(otherElement);
-    }
-
-    if (TAG(comparison) !== TAG_REF) {
-        instantiation_error(comparison);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var otherElementObject = {};
-    if (!get_element_object(otherElement, otherElementObject)) {
-        return false;
-    }
-    var otherElementJS = otherElementObject.value;
-
-    var comparisonJS = elementJS.compareDocumentPosition(otherElementJS);
-    var comparisonPL = PL_put_integer(comparisonJS);
-    return unify(comparison, comparisonPL);
-}
-
-function predicate_dom_element_contains(element, otherElement) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(otherElement) !== TAG_STR) {
-        instantiation_error(otherElement);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var otherElementObject = {};
-    if (!get_element_object(otherElement, otherElementObject)) {
-        return false;
-    }
-    var otherElementJS = otherElementObject.value;
-
-    return elementJS.contains(otherElementJS);
-}
-
-function predicate_dom_element_bounding_client_rect(element, rect) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(rect) !== TAG_STR && TAG(rect) !== TAG_REF) {
-        instantiation_error(rect);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var rectJS = elementJS.getBoundingClientRect();
-
-    var ftor = lookup_functor('dom_rect', 8);
-    var rectPL = alloc_structure(ftor);
-    memory[state.H++] = PL_put_integer(rectJS.left);
-    memory[state.H++] = PL_put_integer(rectJS.top);
-    memory[state.H++] = PL_put_integer(rectJS.right);
-    memory[state.H++] = PL_put_integer(rectJS.bottom);
-    memory[state.H++] = PL_put_integer(rectJS.x);
-    memory[state.H++] = PL_put_integer(rectJS.y);
-    memory[state.H++] = PL_put_integer(rectJS.width);
-    memory[state.H++] = PL_put_integer(rectJS.height);
-
-    return unify(rect, rectPL);
-}
-
-function predicate_dom_element_insert_adjacent_element(element, mode, otherElement) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(otherElement) !== TAG_STR) {
-        instantiation_error(otherElement);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var modeJS = PL_atom_chars(mode);
-    if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(modeJS) === -1) {
-        domain_error("not_valid_insert_adjacent_mode", mode);
-    }
-
-    var otherElementObject = {};
-    if (!get_element_object(otherElement, otherElementObject)) {
-        return false;
-    }
-    var otherElementJS = otherElementObject.value;
-
-    elementJS.insertAdjacentElement(modeJS, otherElementJS);
-    return true;
-}
-
-function predicate_dom_element_insert_adjacent_html(element, mode, html) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(html) !== TAG_LST) {
-        instantiation_error(html);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var modeJS = PL_atom_chars(mode);
-    if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(modeJS) === -1) {
-        domain_error("not_valid_insert_adjacent_mode", mode);
-    }
-
-    var htmlJS = codes_to_string(html);
-
-    elementJS.insertAdjacentHTML(modeJS, htmlJS);
-    return true;
-}
-
-function predicate_dom_element_insert_adjacent_text(element, mode, text) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(html) !== TAG_LST) {
-        instantiation_error(html);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var modeJS = PL_atom_chars(mode);
-    if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(modeJS) === -1) {
-        domain_error("not_valid_insert_adjacent_mode", mode);
-    }
-
-    var textJS = codes_to_string(text);
-
-    elementJS.insertAdjacentText(modeJS, textJS);
-    return true;
-}
-
-function predicate_dom_element_is_equal_node(element, otherElement) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(otherElement) !== TAG_STR) {
-        instantiation_error(otherElement);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var otherElementObject = {};
-    if (!get_element_object(otherElement, otherElementObject)) {
-        return false;
-    }
-    var otherElementJS = otherElementObject.value;
-
-    return elementJS.isEqualNode(otherElementJS);
-}
-
-function predicate_dom_element_normalize(element) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    elementJS.normalize();
-    return true;
-}
-
-function predicate_dom_element_scroll_into_view(element, flag) {
-    if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
-    }
-
-    if (TAG(flag) !== TAG_ATM) {
-        instantiation_error(flag);
-    }
-
-    var elementObject = {};
-    if (!get_element_object(element, elementObject)) {
-        return false;
-    }
-    var elementJS = elementObject.value;
-
-    var flagJS = PL_atom_chars(flag);
-    if(flagJS !== "true" && flagJS !== "false") {
-        domain_error('not_valid_boolean', flag);
-    }
-
-    elementJS.scrollIntoView(flagJS === "true");
-    return true;
-}
 // File debugger.js
 var input_buffer = [];
 
@@ -8947,15 +8607,30 @@ var distinctiveMethodMap = {
     eventtarget: 'addEventListener'
 };
 
-function get_method_spec(leafObjectType, methodName) {
-    let spec;
-    let objectType = leafObjectType;
-    while (!spec && objectType) {
-        let specs = objectMethodSpecs.get(objectType);
-        spec = specs.get(methodName);
-        objectType = parentMap.get(objectType);
-    }
+function get_method_spec(typeJS, methodName) {
+    let stack = [typeJS];
+    while (stack.length > 0) {
+        let testType = stack.shift(0);
+        let specs = objectMethodSpecs.get(testType);
+        if (specs) {
+            let spec = specs.get(methodName);
+            if (spec) {
+                return spec;
+            }
 
+            // methodName not found. put parentMap.get(testType) on the
+            // bottom of the stack (for breadth-first search of
+            // parents)
+
+            let parents = parentMap.get(testType);
+            if (parents) {
+                for (let parent of parents) {
+                    stack.push(parent);
+                }
+            }
+        }
+    }
+    return undefined;
 }
 
 function object_type_check(object, candidates) {
@@ -9715,3 +9390,200 @@ var htmlElementInterfaceProperties = new Map([
 ]);
 webInterfaces.set('htmlelement', {name: 'htmlelement', parent: ['element'], properties:htmlElementInterfaceProperties});
 
+// File object_method.js
+/*
+The general approach to providing access to Javascript objects
+through Prolog predicates is described in object_property.js.
+
+This file implements access to Javascript object methods.
+
+
+ */
+
+var objectMethodSpecs = new Map(); // key is object type, e.g. element
+
+// object_method(Element, add_event_listener(click, bar(thing))).
+// method:EventAgent.addEventListener, arguments:[string, goal_function]
+// object_method_no_return(objectJS, EventAgent.addEventListener, [eventJS, handlerFunction]);
+
+function predicate_dom_object_method(object, methodStructure) {
+    if (TAG(object) !== TAG_STR) {
+        instantiation_error(object);
+    }
+    if (TAG(methodStructure) !== TAG_STR) {
+        instantiation_error(method);
+    }
+
+    var objectContainer = {};
+    if (!get_object_container(object, objectContainer)) {
+        return false;
+    }
+    let objectType = objectContainer.type;
+    var objectJS = objectContainer.value;
+
+    let methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
+    let spec = get_method_spec(objectType, methodName);
+    var arity = ftable[VAL(memory[VAL(methodStructure)])][1];
+    if(spec.returns && ! spec.returns.type === 'boolean') {
+        arity --; // the last argument to the methodStructure is for the return value.
+    }
+
+    let specArguments = spec.arguments;
+    let applyArguments = [];
+    for (var i = 0; i < arity; i++)
+    {
+        let specArgument = specArguments[i];
+        let applyArgument = convert_method_argument(memory[VAL(methodStructure)+i+1], specArgument);
+        applyArguments.push(applyArgument);
+    }
+
+    if(spec.returns) {
+        let resultJS = object_method_return(objectJS, spec.name, applyArguments);
+        let resultPL = convert_result(resultJS, spec.returns);
+        if(spec.returns.type === 'boolean') {
+            return resultPL;
+        } else {
+            return unify(resultPL, memory[VAL(methodStructure) + arity + 1]);
+        }
+    } else {
+        object_method_no_return(objectJS, spec.name, applyArguments);
+        return true;
+    }
+}
+
+function convert_method_argument(term, spec) {
+    if(TAG(term) === TAG_REF) {
+        instantiation_error(term);
+        // error
+    }
+
+    let arg;
+    if(spec.type === 'string') {
+        if (TAG(term) === TAG_ATM) {
+            arg = PL_atom_chars(term);
+        } else {
+            arg = format_term(term, {quoted:true});
+        }
+    } else if(spec.type === 'string_codes') {
+        if (TAG(term) === TAG_ATM) {
+            arg = codes_to_string(term);
+        } else {
+            // error
+        }
+    } else if(spec.type === 'boolean') {
+        if (TAG(term) === TAG_ATM) {
+            let value = PL_atom_chars(term);
+            if(value === 'true') {
+                arg = true;
+            } else if(value === 'false') {
+                arg = false
+            } else {
+                domain_error(boolean, term);
+            }
+        } else {
+            // error
+        }
+    } else if(spec.type === 'position') {
+        if (TAG(term) === TAG_ATM) {
+            arg = PL_atom_chars(term);
+            if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(arg) === -1) {
+                domain_error("not_valid_insert_adjacent_mode", mode);
+                // error
+            }
+        } else  {
+            type_error('atom', term);
+        }
+    } else if(spec.type === 'goal_function') {
+        let goal;
+        if (TAG(term) === TAG_ATM) {
+            goal = PL_atom_chars(term);
+        } else if (TAG(term) === TAG_STR) {
+            goal = format_term(term, {quoted:true});
+        } else {
+            type_error('atom or structure', term);
+        }
+
+        arg = function () {
+            proscript(goal)
+        }
+    } else {
+        throw 'internal error: spec.type not recognized. ' + spec.type;
+    }
+
+    return arg;
+}
+
+function convert_result(resultJS, spec) {
+    let resultPL;
+    if(spec.type === 'atom') {
+        resultPL = lookup_atom(resultJS);
+    } else if(spec.type === 'number') {
+        resultPL = PL_put_integer(resultJS);
+    } else if(spec.type === 'boolean') {
+        resultPL = resultJS;
+    } else if(spec.type === 'object') {
+        resultPL = create_object_structure(resultJS);
+    } else if(spec.type === 'dom_rect') {
+        let ftor = lookup_functor('dom_rect', 8);
+        resultPL = alloc_structure(ftor);
+        memory[state.H++] = PL_put_integer(resultJS.left);
+        memory[state.H++] = PL_put_integer(resultJS.top);
+        memory[state.H++] = PL_put_integer(resultJS.right);
+        memory[state.H++] = PL_put_integer(resultJS.bottom);
+        memory[state.H++] = PL_put_integer(resultJS.x);
+        memory[state.H++] = PL_put_integer(resultJS.y);
+        memory[state.H++] = PL_put_integer(resultJS.width);
+        memory[state.H++] = PL_put_integer(resultJS.height);
+    } else {
+        // error
+    }
+    return resultPL;
+}
+
+function object_method_no_return() {
+    let object = arguments[0];
+    let object_method = arguments[1];
+    let method_arguments = arguments[2];
+    Reflect.apply(object[object_method], object, method_arguments);
+}
+
+function object_method_return() {
+    let object = arguments[0];
+    let object_method = arguments[1];
+    let method_arguments = arguments[2];
+    return Reflect.apply(object[object_method], object, method_arguments);
+}
+
+var eventTargetMethodSpecs = new Map([
+    ['addEventListener',{name:'addEventListener',arguments:[{type:'string'},{type:'goal_function'}]}]
+]);
+
+objectMethodSpecs.set('eventtarget',eventTargetMethodSpecs);
+
+var nodeMethodSpecs = new Map([
+    ['cloneNode',{name:'cloneNode',arguments:[{type:'boolean'}],returns:{type:'object'}}],
+    ['compareDocumentPosition',{name:'compareDocumentPosition',arguments:[{type:'object'}],returns:{type:'number'}}],
+    ['contains',{name:'contains',arguments:[{type:'object'}],returns:{type:'boolean'}}],
+    ['isEqualNode',{name:'isEqualNode',arguments:[{type:'object'}],returns:{type:'boolean'}}],
+    ['normalize',{name:'normalize',arguments:[]}]
+]);
+
+objectMethodSpecs.set('node',nodeMethodSpecs);
+
+var elementMethodSpecs = new Map([
+    ['getBoundingClientRect',{name:'getBoundingClientRect',arguments:[],returns:{type:'dom_rect'}}],
+    ['insertAdjacentElement',{name:'insertAdjacentElement',arguments:[{type:'position'},{type:'object'}]}],
+    ['insertAdjacentHTML',{name:'insertAdjacentHTML',arguments:[{type:'position'},{type:'string_codes'}]}],
+    ['insertAdjacentText',{name:'insertAdjacentText',arguments:[{type:'position'},{type:'string_codes'}]}],
+    ['scrollIntoView',{name:'scrollIntoView',arguments:[{type:'boolean'}]}]
+]);
+
+objectMethodSpecs.set('element',elementMethodSpecs);
+
+var htmlElementMethodSpecs = new Map([
+    ['blur',{name:'blur',arguments:[]}],
+    ['click',{name:'click',arguments:[]}],
+    ['focus',{name:'focus',arguments:[]}]
+]);
+
+objectMethodSpecs.set('htmlelement',htmlElementMethodSpecs);

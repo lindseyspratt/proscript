@@ -110,15 +110,30 @@ var distinctiveMethodMap = {
     eventtarget: 'addEventListener'
 };
 
-function get_method_spec(leafObjectType, methodName) {
-    let spec;
-    let objectType = leafObjectType;
-    while (!spec && objectType) {
-        let specs = objectMethodSpecs.get(objectType);
-        spec = specs.get(methodName);
-        objectType = parentMap.get(objectType);
-    }
+function get_method_spec(typeJS, methodName) {
+    let stack = [typeJS];
+    while (stack.length > 0) {
+        let testType = stack.shift(0);
+        let specs = objectMethodSpecs.get(testType);
+        if (specs) {
+            let spec = specs.get(methodName);
+            if (spec) {
+                return spec;
+            }
 
+            // methodName not found. put parentMap.get(testType) on the
+            // bottom of the stack (for breadth-first search of
+            // parents)
+
+            let parents = parentMap.get(testType);
+            if (parents) {
+                for (let parent of parents) {
+                    stack.push(parent);
+                }
+            }
+        }
+    }
+    return undefined;
 }
 
 function object_type_check(object, candidates) {

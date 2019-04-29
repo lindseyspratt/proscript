@@ -11,7 +11,7 @@ simple_button_test :-
     create_dom_element('BUTTON', Button),
     create_dom_text_node("Click Me", NewContent),
     append_dom_node_child(Button, NewContent),
-    dom_element_add_event_listener(Button, click, alert('Hello World!')),
+    dom_object_method(Button, addEventListener(click, alert('Hello World!'))),
     append_dom_node_child(E, Button).
 
 simple_button_test2 :-

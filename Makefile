@@ -17,11 +17,11 @@ cal_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl b
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/cal.pl', 'bench/common.pl', 'bench/hook.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl'], 'foo'), halt"
 
 wam-pp.js:	foreign.js memory_files.js wam.js read.js record.js fli.js stream.js gc.js dom.js\
-            dom_element_method.js debugger.js decode_instruction.js promise.js object.js object_property.js
+            debugger.js decode_instruction.js promise.js object.js object_property.js object_method.js
 		$(SWIPL) -q -f js_preprocess.pl\
 		    -g "preprocess(['foreign.js', 'memory_files.js', 'wam.js', 'read.js', 'record.js', 'fli.js', 'stream.js',\
-		                    'gc.js', 'dom.js', 'dom_element_method.js', 'debugger.js',\
-		                    'decode_instruction.js', 'promise.js', 'object.js', 'object_property.js'],\
+		                    'gc.js', 'dom.js', 'debugger.js',\
+		                    'decode_instruction.js', 'promise.js', 'object.js', 'object_property.js', 'object_method.js'],\
 		                   'wam-pp.js', [debug=$(DEBUG)]),\
 		        halt"
 
