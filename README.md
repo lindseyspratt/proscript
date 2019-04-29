@@ -21,7 +21,7 @@ This is implemented primarily in wam.js. Extra stuff is also present in:
    * read.js: Handles input and output of terms, including parsing Prolog terms
    * record.js: Handles dynamic adjustment of the state: assert and friends
    * stream.js: Handles reading and writing to streams, and all the ISO predicates (the ones implemented anyway) like get_char/2 and put_code/2.
-   * dom.js, dom_element_method.js, dom_element_property.js: Builtins for working with the DOM.
+   * dom.js, object_method.js, object_property.js: Builtins for working with the DOM.
    * debugger.pl, debugger.js: The interactive Prolog tracing debugger.
 
 ### Bits you must implement, and the stubs provided
