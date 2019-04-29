@@ -48,7 +48,7 @@ You must include both of these if you want a working system. See test.html for a
 
 ### Debugging terminal
 A debugging terminal can be displayed in an HTML page using the 
-terminal/terminal_test.js. An example with just the terminal is terminal/terminal_test.html.
+terminal/proscript_interpreter_terminal.js. An example with just the terminal is terminal/terminal_test.html.
 Another example is examples/calculator.html.
 The debugging terminal is a command-line Prolog interpreter.
 It also supports the 'trace' predicate to enable the 
@@ -61,7 +61,7 @@ simple_test.html, console_button_test.html, and calculator.html.
 
 test.html provides an execution environment for you to try out the final state
 
-terminal_test.html (with terminal_test.js) is an example using the JQuery Terminal 
+terminal_test.html (with proscript_interpreter_terminal.js) is an example using the JQuery Terminal 
 to run the interactive Prolog debugger in a web page.
 
 simple_test.html uses simple_test.pl to write "Hello World".
