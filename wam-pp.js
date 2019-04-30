@@ -1037,6 +1037,11 @@ function update_choicepoint_data(value)
     return true;
 }
 
+function destroy_all_choicepoints() {
+    while(state.B !== 0) {
+        destroy_choicepoint();
+    }
+}
 
 function destroy_choicepoint()
 {
@@ -1122,7 +1127,7 @@ function mark_top_choicepoint(vars_list, markpoint)
     if (vars_list !== NIL)
         abort("Invalid list in mark_top_choicepoint");
 
-    mark = {B: state.B,
+    let mark = {B: state.B,
             V: vars,
             P: state.P+3,
             code: code};
@@ -2838,6 +2843,7 @@ function initialize()
              trace_prompt: '>',
              suspended: false};
     code = bootstrap_code;
+    cleanups = [];
 }
 
 function abort(why)

@@ -149,6 +149,7 @@ function initialize()
              trace_prompt: '>',
              suspended: false};
     code = bootstrap_code;
+    cleanups = [];
 }
 
 function abort(why)

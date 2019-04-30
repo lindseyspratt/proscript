@@ -23,10 +23,19 @@ jQuery(function ($, undefined) {
         name: 'pl_interp',
         height: 600,
         prompt: '| ?- '
+        ,
+        onInit: function(term) {
+            stdout = function (msg) {
+                buffered_write(msg, term);
+            };
+        }
     });
 });
 
-var stdout = console.log;
+var stdout;
+// = function(msg){
+//     alert(msg);
+// };
 
 function predicate_flush_stdout() {
     // no op
@@ -138,10 +147,14 @@ function backtrack_level(command, term) {
         } else if (command === 'a') {
             try_backtrack_all();
         } else if (command === 'h') {
-            stdout("Action (; for next solution, a for all solutions, RET to stop)\n");
-        } else {
+            stdout("Action (; for next solution, a for all solutions, RET to stop, h for this message)\n");
+        } else if (command === '') {
+            destroy_all_choicepoints();
             can_backtrack = false;
             term.pop();
+        } else {
+            stdout("Unrecognized command '" + command + "'.\n");
+            stdout("Action (; for next solution, a for all solutions, RET to stop, h for this message)\n");
         }
     } else {
         term.pop();

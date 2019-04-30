@@ -1054,6 +1054,11 @@ function update_choicepoint_data(value)
     return true;
 }
 
+function destroy_all_choicepoints() {
+    while(state.B !== 0) {
+        destroy_choicepoint();
+    }
+}
 
 function destroy_choicepoint()
 {
@@ -1145,7 +1150,7 @@ function mark_top_choicepoint(vars_list, markpoint)
         abort("Invalid list in mark_top_choicepoint");
 
     debug_msg("Marking choicepoint " + state.B+ " with cleanup at " + (state.P+3) + " and code = " + code);
-    mark = {B: state.B,
+    let mark = {B: state.B,
             V: vars,
             P: state.P+3,
             code: code};
