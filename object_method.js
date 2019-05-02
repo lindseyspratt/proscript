@@ -103,14 +103,27 @@ function convert_method_argument(term, spec) {
         if (TAG(term) === TAG_ATM) {
             goal = PL_atom_chars(term);
         } else if (TAG(term) === TAG_STR) {
-            goal = format_term(term, {quoted:true});
+            goal = format_term(term, {quoted: true});
         } else {
             type_error('atom or structure', term);
         }
 
-        arg = function () {
-            proscript(goal)
+        arg = goalFunctions.get(goal);
+        if (!arg) {
+            arg = function () {
+                proscript(goal)
+            };
+
+            goalFunctions.set(goal, arg);
         }
+    } else if(spec.type === 'event'){
+        let eventName;
+        if (TAG(term) === TAG_ATM) {
+            eventName = PL_atom_chars(term);
+        } else {
+            type_error('atom', term);
+        }
+        arg = new Event(eventName);
     } else {
         throw 'internal error: spec.type not recognized. ' + spec.type;
     }

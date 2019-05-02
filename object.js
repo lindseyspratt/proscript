@@ -1,6 +1,7 @@
 var idsToObjects = new Map();
 var idsToTypes = new Map();
 var objectsToIDs = new Map();
+var goalFunctions = new Map();
 
 // create_object_structure interns a Javascript object by creating
 // a unique key string for that object and storing the relationship

@@ -78,10 +78,10 @@ function promise_callback(promise, result) {
     if(promise_requests.size === 0) {
         if(backtrack()){
             if(! wam()) {
-                throw 'fail callback ' + promise + ' result ' + result;
+                throw 'promise_callback failed: callback ' + promise + ' result ' + result;
             }
         } else {
-            throw 'error callback ' + promise + ' result ' + result;
+            throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
         }
     } else {
         // waiting on one or more requests.
@@ -157,29 +157,29 @@ async function fetch_promise(urlJS) {
     const response = await fetch(urlJS);
     return response.text();
 }
-
-async function consult(urls, next_goal) {
-    // fetch all the URLs in parallel
-    const textPromises = urls.map(async url => {
-        if(! url.includes(".")) {
-            url += ".pl";
-        }
-        const response = await fetch(url);
-        return response.text();
-    });
-
-    // compile them in sequence
-    for (const textPromise of textPromises) {
-        await textPromise.then(function(text){
-            let index = text_to_memory_file(text);
-            return "'$memory_file'(" + index + ")";
-        }).then(function(memfile){
-            proscript("compile_and_free_memory_file(" + memfile + ")");
-
-        });
-    }
-
-    if(next_goal && next_goal !== '') {
-        proscript(next_goal);
-    }
-}
+//
+// async function consult(urls, next_goal) {
+//     // fetch all the URLs in parallel
+//     const textPromises = urls.map(async url => {
+//         if(! url.includes(".")) {
+//             url += ".pl";
+//         }
+//         const response = await fetch(url);
+//         return response.text();
+//     });
+//
+//     // compile them in sequence
+//     for (const textPromise of textPromises) {
+//         await textPromise.then(function(text){
+//             let index = text_to_memory_file(text);
+//             return "'$memory_file'(" + index + ")";
+//         }).then(function(memfile){
+//             proscript("compile_and_free_memory_file(" + memfile + ")");
+//
+//         });
+//     }
+//
+//     if(next_goal && next_goal !== '') {
+//         proscript(next_goal);
+//     }
+// }

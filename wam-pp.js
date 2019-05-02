@@ -2831,7 +2831,7 @@ function initialize()
              E: HEAP_SIZE,
              TR: HEAP_SIZE + STACK_SIZE,
              mode: READ,
-             running: true,
+             running: false,
              foreign_retry: false,
              num_of_args: 0,
              current_predicate: null,
@@ -4181,6 +4181,10 @@ function copy_state(s)
 function copy_registers(r)
 {
     return r.slice(0);
+}
+
+function copy_memory(m) {
+    return m.slice(0);
 }
 
 
@@ -7843,6 +7847,8 @@ function setupElementsForSelectAll(query) {
 function proscript_init(queryJS) {
     load_state();
 
+    initialize(); // ensure state is initialized. proscript saves and restores state.
+
     call_directives();
 
     proscript(queryJS);
@@ -7875,11 +7881,23 @@ function call_directives() {
     }
 }
 
-// proscript calls the given query using the existing global data,
-// particularly the current predicates definitions. This allows the
-// asserta/assertz clauses to persist across calls of proscript.
+// proscript calls the given query using the current predicates definitions.
+// All other global runtime data is saved and restored.
+// This allows the asserta/assertz clauses to persist across calls of proscript.
 
 function proscript(queryJS) {
+    let saved_state;
+    let saved_registers;
+    let saved_code;
+    let saved_memory;
+    let restore_environment = false;
+    if(state.running) {
+        saved_state = copy_state(state);
+        saved_registers = copy_registers(register);
+        saved_code = code;
+        saved_memory = copy_memory(memory);
+        restore_environment = true;
+    }
     initialize();
     allocate_first_frame();
     // call_atom(query, Bindings)
@@ -7904,6 +7922,13 @@ function proscript(queryJS) {
             console.log(anything);
         }
         debug("Error. " + anything);
+    }
+
+    if(restore_environment) {
+        register = copy_registers(saved_registers);
+        state = copy_state(saved_state);
+        code = saved_code;
+        memory = copy_memory(saved_memory);
     }
 }
 
@@ -8396,10 +8421,10 @@ function promise_callback(promise, result) {
     if(promise_requests.size === 0) {
         if(backtrack()){
             if(! wam()) {
-                throw 'fail callback ' + promise + ' result ' + result;
+                throw 'promise_callback failed: callback ' + promise + ' result ' + result;
             }
         } else {
-            throw 'error callback ' + promise + ' result ' + result;
+            throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
         }
     } else {
         // waiting on one or more requests.
@@ -8474,36 +8499,37 @@ async function fetch_promise(urlJS) {
     const response = await fetch(urlJS);
     return response.text();
 }
-
-async function consult(urls, next_goal) {
-    // fetch all the URLs in parallel
-    const textPromises = urls.map(async url => {
-        if(! url.includes(".")) {
-            url += ".pl";
-        }
-        const response = await fetch(url);
-        return response.text();
-    });
-
-    // compile them in sequence
-    for (const textPromise of textPromises) {
-        await textPromise.then(function(text){
-            let index = text_to_memory_file(text);
-            return "'$memory_file'(" + index + ")";
-        }).then(function(memfile){
-            proscript("compile_and_free_memory_file(" + memfile + ")");
-
-        });
-    }
-
-    if(next_goal && next_goal !== '') {
-        proscript(next_goal);
-    }
-}
+//
+// async function consult(urls, next_goal) {
+//     // fetch all the URLs in parallel
+//     const textPromises = urls.map(async url => {
+//         if(! url.includes(".")) {
+//             url += ".pl";
+//         }
+//         const response = await fetch(url);
+//         return response.text();
+//     });
+//
+//     // compile them in sequence
+//     for (const textPromise of textPromises) {
+//         await textPromise.then(function(text){
+//             let index = text_to_memory_file(text);
+//             return "'$memory_file'(" + index + ")";
+//         }).then(function(memfile){
+//             proscript("compile_and_free_memory_file(" + memfile + ")");
+//
+//         });
+//     }
+//
+//     if(next_goal && next_goal !== '') {
+//         proscript(next_goal);
+//     }
+// }
 // File object.js
 var idsToObjects = new Map();
 var idsToTypes = new Map();
 var objectsToIDs = new Map();
+var goalFunctions = new Map();
 
 // create_object_structure interns a Javascript object by creating
 // a unique key string for that object and storing the relationship
@@ -8925,7 +8951,9 @@ function SimpleProperty(type, propertyName, settable) {
 var webInterfaces = new Map();
 
 var eventTargetMethodSpecs = new Map([
-    ['addEventListener',{name:'addEventListener',arguments:[{type:'string'},{type:'goal_function'}]}]
+    ['addEventListener',{name:'addEventListener',arguments:[{type:'string'},{type:'goal_function'}]}],
+    ['removeEventListener',{name:'removeEventListener',arguments:[{type:'string'},{type:'goal_function'}]}],
+    ['dispatchEvent',{name:'dispatchEvent',arguments:[{type:'event'}],returns:{type:'boolean'}}]
 ]);
 
 webInterfaces.set('eventtarget',
@@ -9537,14 +9565,27 @@ function convert_method_argument(term, spec) {
         if (TAG(term) === TAG_ATM) {
             goal = PL_atom_chars(term);
         } else if (TAG(term) === TAG_STR) {
-            goal = format_term(term, {quoted:true});
+            goal = format_term(term, {quoted: true});
         } else {
             type_error('atom or structure', term);
         }
 
-        arg = function () {
-            proscript(goal)
+        arg = goalFunctions.get(goal);
+        if (!arg) {
+            arg = function () {
+                proscript(goal)
+            };
+
+            goalFunctions.set(goal, arg);
         }
+    } else if(spec.type === 'event'){
+        let eventName;
+        if (TAG(term) === TAG_ATM) {
+            eventName = PL_atom_chars(term);
+        } else {
+            type_error('atom', term);
+        }
+        arg = new Event(eventName);
     } else {
         throw 'internal error: spec.type not recognized. ' + spec.type;
     }

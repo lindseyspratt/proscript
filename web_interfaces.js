@@ -240,7 +240,9 @@ function SimpleProperty(type, propertyName, settable) {
 var webInterfaces = new Map();
 
 var eventTargetMethodSpecs = new Map([
-    ['addEventListener',{name:'addEventListener',arguments:[{type:'string'},{type:'goal_function'}]}]
+    ['addEventListener',{name:'addEventListener',arguments:[{type:'string'},{type:'goal_function'}]}],
+    ['removeEventListener',{name:'removeEventListener',arguments:[{type:'string'},{type:'goal_function'}]}],
+    ['dispatchEvent',{name:'dispatchEvent',arguments:[{type:'event'}],returns:{type:'boolean'}}]
 ]);
 
 webInterfaces.set('eventtarget',

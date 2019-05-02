@@ -597,6 +597,8 @@ function setupElementsForSelectAll(query) {
 function proscript_init(queryJS) {
     load_state();
 
+    initialize(); // ensure state is initialized. proscript saves and restores state.
+
     call_directives();
 
     proscript(queryJS);
@@ -629,11 +631,23 @@ function call_directives() {
     }
 }
 
-// proscript calls the given query using the existing global data,
-// particularly the current predicates definitions. This allows the
-// asserta/assertz clauses to persist across calls of proscript.
+// proscript calls the given query using the current predicates definitions.
+// All other global runtime data is saved and restored.
+// This allows the asserta/assertz clauses to persist across calls of proscript.
 
 function proscript(queryJS) {
+    let saved_state;
+    let saved_registers;
+    let saved_code;
+    let saved_memory;
+    let restore_environment = false;
+    if(state.running) {
+        saved_state = copy_state(state);
+        saved_registers = copy_registers(register);
+        saved_code = code;
+        saved_memory = copy_memory(memory);
+        restore_environment = true;
+    }
     initialize();
     allocate_first_frame();
     // call_atom(query, Bindings)
@@ -658,6 +672,13 @@ function proscript(queryJS) {
             console.log(anything);
         }
         debug("Error. " + anything);
+    }
+
+    if(restore_environment) {
+        register = copy_registers(saved_registers);
+        state = copy_state(saved_state);
+        code = saved_code;
+        memory = copy_memory(saved_memory);
     }
 }
 

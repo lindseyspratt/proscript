@@ -137,7 +137,7 @@ function initialize()
              E: HEAP_SIZE,
              TR: HEAP_SIZE + STACK_SIZE,
              mode: READ,
-             running: true,
+             running: false,
              foreign_retry: false,
              num_of_args: 0,
              current_predicate: null,
@@ -1592,6 +1592,10 @@ function copy_state(s)
 function copy_registers(r)
 {
     return r.slice(0);
+}
+
+function copy_memory(m) {
+    return m.slice(0);
 }
 
 
