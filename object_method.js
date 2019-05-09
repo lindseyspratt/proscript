@@ -15,8 +15,8 @@ function predicate_dom_object_method(object, methodStructure) {
     if (TAG(object) !== TAG_STR) {
         instantiation_error(object);
     }
-    if (TAG(methodStructure) !== TAG_STR) {
-        instantiation_error(method);
+    if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
+        instantiation_error(methodStructure);
     }
 
     var objectContainer = {};
@@ -26,29 +26,45 @@ function predicate_dom_object_method(object, methodStructure) {
     let objectType = objectContainer.type;
     var objectJS = objectContainer.value;
 
-    let methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
+    let methodName;
+    let arity;
+    if (TAG(methodStructure) === TAG_ATM) {
+        methodName = atable[VAL(methodStructure)];
+        arity = 0;
+    } else {
+        methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
+        arity = ftable[VAL(memory[VAL(methodStructure)])][1];
+    }
+
     let spec = getInterfaceItemSpec(objectType, 'method', methodName);
-    var arity = ftable[VAL(memory[VAL(methodStructure)])][1];
-    if(spec.returns && ! spec.returns.type === 'boolean') {
-        arity --; // the last argument to the methodStructure is for the return value.
+    if (spec.returns && spec.returns.type !== 'boolean') {
+        arity--; // the last argument to the methodStructure is for the return value.
     }
 
     let specArguments = spec.arguments;
     let applyArguments = [];
-    for (var i = 0; i < arity; i++)
-    {
+    for (var i = 0; i < arity; i++) {
         let specArgument = specArguments[i];
-        let applyArgument = convert_method_argument(memory[VAL(methodStructure)+i+1], specArgument);
-        applyArguments.push(applyArgument);
+        let applyArgumentContainer = {};
+        if (convert_method_argument(memory[VAL(methodStructure) + i + 1], specArgument, applyArgumentContainer)) {
+            applyArguments.push(applyArgumentContainer.value);
+        } else {
+            return false;
+        }
     }
 
-    if(spec.returns) {
+    if (spec.returns) {
         let resultJS = object_method_return(objectJS, spec.name, applyArguments);
-        let resultPL = convert_result(resultJS, spec.returns);
-        if(spec.returns.type === 'boolean') {
-            return resultPL;
+        let resultContainer = {};
+        if(convert_result(resultJS, spec.returns, resultContainer)) {
+            let resultPL = resultContainer.value;
+            if (spec.returns.type === 'boolean') {
+                return resultPL;
+            } else {
+                return unify(resultPL, memory[VAL(methodStructure) + arity + 1]);
+            }
         } else {
-            return unify(resultPL, memory[VAL(methodStructure) + arity + 1]);
+            return false;
         }
     } else {
         object_method_no_return(objectJS, spec.name, applyArguments);
@@ -56,24 +72,38 @@ function predicate_dom_object_method(object, methodStructure) {
     }
 }
 
-function convert_method_argument(term, spec) {
+function convert_method_argument(term, spec, resultContainer) {
     if(TAG(term) === TAG_REF) {
-        instantiation_error(term);
+        return instantiation_error(term);
         // error
     }
 
     let arg;
-    if(spec.type === 'string') {
+    if(typeof spec.type === 'object') {
+        // union of multiple types
+        for(let subtype of spec.type) {
+            if(convert_method_argument(term, {type: subtype}, resultContainer)) {
+                return true;
+            }
+        }
+        return false;
+    } else if(spec.type === 'string') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
         } else {
             arg = format_term(term, {quoted:true});
         }
     } else if(spec.type === 'string_codes') {
-        if (TAG(term) === TAG_ATM) {
+        if (TAG(term) === TAG_LST) {
             arg = codes_to_string(term);
         } else {
-            // error
+            return type_error('list', term);
+        }
+    } else if(spec.type === 'integer') {
+        if (TAG(term) === TAG_INT) {
+            arg = getNumberPropertyValue(term);
+        } else {
+            return type_error('integer', term);
         }
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
@@ -83,7 +113,7 @@ function convert_method_argument(term, spec) {
             } else if(value === 'false') {
                 arg = false
             } else {
-                domain_error(boolean, term);
+                return domain_error('boolean', term);
             }
         } else {
             // error
@@ -91,12 +121,12 @@ function convert_method_argument(term, spec) {
     } else if(spec.type === 'position') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
-            if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(arg) === -1) {
-                domain_error("not_valid_insert_adjacent_mode", mode);
+            if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(arg.toLowerCase()) === -1) {
+                return domain_error("not_valid_insert_adjacent_mode", term);
                 // error
             }
         } else  {
-            type_error('atom', term);
+            return type_error('atom', term);
         }
     } else if(spec.type === 'goal_function') {
         let goal;
@@ -105,7 +135,7 @@ function convert_method_argument(term, spec) {
         } else if (TAG(term) === TAG_STR) {
             goal = format_term(term, {quoted: true});
         } else {
-            type_error('atom or structure', term);
+            return type_error('atom or structure', term);
         }
 
         arg = goalFunctions.get(goal);
@@ -121,17 +151,86 @@ function convert_method_argument(term, spec) {
         if (TAG(term) === TAG_ATM) {
             eventName = PL_atom_chars(term);
         } else {
-            type_error('atom', term);
+            return type_error('atom', term);
         }
         arg = new Event(eventName);
+    } else if(spec.type === 'object'){
+        if (TAG(term) === TAG_STR) {
+            var objectContainer = {};
+            if (!get_object_container(term, objectContainer)) {
+                return existence_error('object', term);
+            }
+            arg = objectContainer.value;
+        } else {
+            return type_error('object', term);
+        }
+    } else if(spec.type === 'options') {
+        // [key-value|_]
+        if(TAG(term) === TAG_LST) {
+            let optionsContainer = {};
+            if(terms_to_options(term, optionsContainer)) {
+                arg = optionsContainer.value;
+            } else {
+                return type_error('option list', term);
+            }
+        }
     } else {
         throw 'internal error: spec.type not recognized. ' + spec.type;
     }
 
-    return arg;
+    resultContainer.value = arg;
+    return true;
 }
 
-function convert_result(resultJS, spec) {
+function terms_to_options(listRoot, optionsContainer) {
+    var options = {};
+
+    var list = listRoot;
+
+    while(list !== NIL) {
+        if(TAG(list) !== TAG_LST) {
+            return instantiation_error(list);
+        }
+
+        var keyValuePairPL = memory[VAL(list)];
+        if(TAG(keyValuePairPL) !== TAG_STR) {
+            return instantiation_error(codePL);
+        } else {
+            // key-value
+            let functor = atable[ftable[VAL(memory[VAL(keyValuePairPL)])][0]];
+            let arity = ftable[VAL(memory[VAL(keyValuePairPL)])][1];
+            if(functor !== '-') {
+                return type_error('key - value: functor should be "-".', functor);
+            }
+
+            if(arity !== 2) {
+                return type_error('key - value: term should have two arguments.', arity);
+            }
+
+            let keyPL = memory[VAL(keyValuePairPL) + 1];
+            if(TAG(keyPL) !== TAG_ATM) {
+                return type_error('key - value: key should be an atom.', keyPL);
+            }
+            let keyJS = atable[VAL(keyPL)];
+
+            // TODO: extend value to allow any JSON-ish type - atom, number, boolean, list/JSON array, or keyValue list/JSON object.
+            let valuePL = memory[VAL(keyValuePairPL) + 2];
+            if(TAG(valuePL) !== TAG_ATM) {
+                return type_error('key - value: value should be an atom.', valuePL);
+            }
+            let valueJS = atable[VAL(valuePL)];
+
+            options.put(keyJS, valueJS);
+
+            list = memory[VAL(list) + 1];
+        }
+    }
+
+    optionsContainer.value = options;
+    return true;
+}
+
+function convert_result(resultJS, spec, resultContainer) {
     let resultPL;
     if(spec.type === 'atom') {
         resultPL = lookup_atom(resultJS);
@@ -153,8 +252,9 @@ function convert_result(resultJS, spec) {
         memory[state.H++] = PL_put_integer(resultJS.width);
         memory[state.H++] = PL_put_integer(resultJS.height);
     } else {
-        // error
+        return type_error('method result specification type', lookup_atom(spec.type));
     }
+    resultContainer.value = resultPL;
     return resultPL;
 }
 

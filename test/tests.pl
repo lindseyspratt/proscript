@@ -240,3 +240,40 @@ test(error_setup_call_cleanup, exit):-
               Exception,
               Error = Exception),
         check_value(Error, egg).
+
+/*
+The nested_structure_vars test exercises an obscure bug in the wam_compiler.
+The bug is fixed by 'adjust_unify_variable(OpcodesX, Opcodes)' in the second
+clause of compile_body_args/8.
+The bug arises due to the setup of a variable being dependent on whether a
+reference to the variable is the first reference or not combined with the
+wam_compiler processing terms in left-to-right order but re-ordering instructions
+for nested structure terms to precede the structure term in which they are nested.
+E.g. for a(X, b(X)) the instructions are generated:
+    - a: alloc structure for a/2
+    - b: set var X (apparent first reference to X)
+    - c: alloc structure for b/1
+    - d: get value of var X (apparent second reference to X)
+    - e: reference b/1 structure in 2nd arg of b/1
+However the instructions are ordered as c, d, a, b, e.
+In the output ordering the instruction 'd' is getting the value
+of var X even though it has not been initialized yet.
+The adjust_unify_variable/2 predicate is used to repair these
+out-of-order variable references.
+
+In the nested_structure_vars test the variable Y in nsvtop/0 is
+an example of a variable with out-of-order instructions that
+are repaired by adjust_unify_variable/2.
+*/
+
+nsv1(1, a).
+nsv1(1, b).
+
+nsv(G) :-
+        call(G).
+
+nsvtop :-
+        nsv(findall(Y, nsv1(1, Y), [a,b])).
+
+test(nested_structure_vars, exit) :-
+        nsvtop.

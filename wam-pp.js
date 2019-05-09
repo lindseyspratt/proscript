@@ -3240,7 +3240,7 @@ function wam1()
             if (state.trace_instruction === 'step') {
                 // set up the prompt to be displayed before reading a command character into
                 // input_buffer
-                state.trace_instruction_prompt = instruction;
+                state.trace_instruction_prompt = instruction.string;
                 let char = get_terminal_char();
                 if (char) {
                     if (char === 'm') {
@@ -3280,7 +3280,7 @@ function wam1()
                     return wamExit(true);
                 }
             } else {
-                stdout(instruction + '\n');
+                stdout(instruction.string + '\n');
             }
         } else {
            debugging = false;
@@ -5022,18 +5022,19 @@ function format_term(value, options)
             {
                 // Infix operator
                 var lhs = format_term(memory[VAL(value)+1], options);
-                if (is_punctuation(lhs.charAt(lhs.length-1)) && !is_punctuation(fname.charAt(0)))
+                if (is_punctuation_charAt(lhs, lhs.length-1) && !is_punctuation(fname.charAt(0)))
                     result = lhs + fname;
-                else if (!is_punctuation(lhs.charAt(lhs.length-1)) && is_punctuation(fname.charAt(0)))
+                else if (!is_punctuation_charAt(lhs, lhs.length-1) && is_punctuation(fname.charAt(0)))
                     result = lhs + fname;
                 else
                 {
                     result = lhs + " " + fname;
                 }
                 var rhs1 = format_term(memory[VAL(value)+2], options);
-                if (is_punctuation(rhs1.charAt(0)) && !is_punctuation(fname.charAt(fname.length-1)))
+
+                if (is_punctuation_charAt(rhs1, 0) && !is_punctuation(fname.charAt(fname.length-1)))
                     return result + rhs1;
-                else if (!is_punctuation(rhs1.charAt(0)) && is_punctuation(fname.charAt(fname.length-1)))
+                else if (!is_punctuation_charAt(rhs1, 0) && is_punctuation(fname.charAt(fname.length-1)))
                     return result + rhs1;
                 else
                     return result + " " + rhs1;
@@ -5042,9 +5043,9 @@ function format_term(value, options)
             {
                 // Prefix operator
                 var rhs2 = format_term(memory[VAL(value)+1], options);
-                if (is_punctuation(rhs2.charAt(0)) && !is_punctuation(fname.charAt(fname.length-1)))
+                if (is_punctuation_charAt(rhs2, 0) && !is_punctuation(fname.charAt(fname.length-1)))
                     return fname + rhs2;
-                else if (!is_punctuation(rhs2.charAt(0)) && is_punctuation(fname.charAt(fname.length-1)))
+                else if (!is_punctuation_charAt(rhs2,0) && is_punctuation(fname.charAt(fname.length-1)))
                     return fname + rhs2;
                 else
                     return fname + " " + rhs2;
@@ -5077,6 +5078,9 @@ function format_term(value, options)
     }
 }
 
+function is_punctuation_charAt(object, position) {
+    return typeof object.chartAt === 'function' && is_punctuation(object.charAt(position));
+}
 
 function expression_to_term(s, varmap, singletons)
 {
@@ -7851,7 +7855,9 @@ function proscript_init(queryJS) {
 
     call_directives();
 
-    proscript(queryJS);
+    if(queryJS && queryJS !== '') {
+        proscript(queryJS);
+    }
 }
 
 function call_directives() {
@@ -7981,17 +7987,20 @@ function predicate_trace_set_prompt(value) {
 // File decode_instruction.js
 
 function decode_instruction(predicateID, codePosition) {
-    let predicate = (predicateID == null)?("no predicate"):(atable[ftable[predicateID.key][0]] + "/" + ftable[predicateID.key][1]);
+    let predicate = (predicateID == null) ? ("no predicate") : (atable[ftable[predicateID.key][0]] + "/" + ftable[predicateID.key][1]);
     let op = code[codePosition];
     let instruction = '';
+    let instructionSize = -1;
 
     switch(op) {
         // Control instructions 1-5
         case 1: // allocate
             instruction = 'allocate';
+            instructionSize = 1;
             break;
         case 2: // deallocate
             instruction = 'deallocate';
+            instructionSize = 1;
             break;
         case 3: // call: [3, I, N]
         {
@@ -8005,6 +8014,7 @@ function decode_instruction(predicateID, codePosition) {
             let arity = ftable[i][1];
 
             instruction = 'call(' + functor + '/' + arity + ',' + N + ')';
+            instructionSize = 3;
             break;
         }
         case 4: // execute: [4, I]
@@ -8018,10 +8028,12 @@ function decode_instruction(predicateID, codePosition) {
             let arity = ftable[i][1];
 
             instruction = 'execute(' + functor + '/' + arity + ')';
+            instructionSize = 2;
             break;
         }
         case 5: // proceed
             instruction = 'proceed';
+            instructionSize = 1;
             break;
 
         // Put instructions 6-15, 51, and 60
@@ -8030,12 +8042,14 @@ function decode_instruction(predicateID, codePosition) {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
             instruction = 'put_variable(y(' + N + '), x(' + I + '))';
-            break;
+            instructionSize = 3;
+           break;
         }
         case 60: // put_variable: [60, N]
         {
             let N = code[codePosition + 1];
             instruction = 'put_variable(y(' + N + '))';
+            instructionSize = 2;
             break;
         }
         case 7: // put_variable: [7, N, I]
@@ -8043,6 +8057,7 @@ function decode_instruction(predicateID, codePosition) {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
             instruction = 'put_variable(x(' + N + '), x(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 8: // put_value: [8, 0, N, I] or [8, 1, N, I]
@@ -8054,6 +8069,7 @@ function decode_instruction(predicateID, codePosition) {
             let V = (A === 0) ? 'y' : 'x';
 
             instruction = 'put_variable(' + V  + '(' + N + '), x(' + I + '))';
+            instructionSize = 4;
             break;
         }
         case 9: // put_unsafe_value: [9, N, I]
@@ -8061,6 +8077,7 @@ function decode_instruction(predicateID, codePosition) {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
             instruction = 'put_unsafe_value(y(' + N + '), x(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 10: // put_constant: [10, K, I]
@@ -8070,12 +8087,14 @@ function decode_instruction(predicateID, codePosition) {
 
             let C = atable[VAL(K)];
             instruction = 'put_constant(' + C + ', x(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 11: // put_nil: [I]
         {
             let I = code[codePosition + 1];
             instruction = 'put_nil(x(' + I + '))';
+            instructionSize = 1;
             break;
         }
         case 12: // put_structure: [12, F, I]
@@ -8088,6 +8107,7 @@ function decode_instruction(predicateID, codePosition) {
             let functor = atable[nameID];
             let arity = ftable[f][1];
             instruction = 'put_structure('  + functor + '/' + arity +  ', x(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 13: // put_list: [13, I]
@@ -8095,6 +8115,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 1];
 
             instruction = 'put_list(x(' + I + '))';
+            instructionSize = 2;
             break;
         }
         case 14: // put_integer: [14, C, I]
@@ -8103,6 +8124,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             instruction = 'put_integer(' + C + ', x(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 51: // put_float: [51, N, I]
@@ -8112,6 +8134,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let C = floats[VAL(N)];
             instruction = 'put_float(' + C + ', x(' + I + '))';
+            instructionSize = 3;
             break;
         }
 
@@ -8125,6 +8148,7 @@ function decode_instruction(predicateID, codePosition) {
             let V = (A === 0) ? 'y' : 'x';
 
             instruction = 'get_variable(' + V  + '(' + N + '), x(' + I + '))';
+            instructionSize = 4;
             break;
         }
         case 16: // get_value: [16, 0, N, I] or [16, 1, N, I]
@@ -8136,6 +8160,7 @@ function decode_instruction(predicateID, codePosition) {
             let V = (A === 0) ? 'y' : 'x';
 
             instruction = 'get_value(' + V  + '(' + N + '), x(' + I + '))';
+            instructionSize = 4;
             break;
         }
         case 17: // get_constant: [17, K, I]
@@ -8145,12 +8170,14 @@ function decode_instruction(predicateID, codePosition) {
 
             let C = atable[VAL(K)];
             instruction = 'get_constant(' + C + ', x(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 18: // get_nil: [18, I]
         {
             let I = code[codePosition + 1];
             instruction = 'get_nil(x(' + I + '))';
+            instructionSize = 2;
             break;
         }
         case 19: // get_structure: [19, F, I]
@@ -8163,6 +8190,7 @@ function decode_instruction(predicateID, codePosition) {
             let functor = atable[nameID];
             let arity = ftable[f][1];
             instruction = 'get_structure('  + functor + '/' + arity +  ', x(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 20: // get_list: [20, I]
@@ -8170,6 +8198,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 1];
 
             instruction = 'get_list(x(' + I + '))';
+            instructionSize = 2;
             break;
         }
         case 21: // get_integer: [21, C, I]
@@ -8178,6 +8207,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             instruction = 'get_integer(' + C + ', x(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 50: // get_float: [50, N, I]
@@ -8187,6 +8217,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let C = floats[VAL(N)];
             instruction = 'get_float(' + C + ', x(' + I + '))';
+            instructionSize = 3;
             break;
         }
 
@@ -8196,6 +8227,7 @@ function decode_instruction(predicateID, codePosition) {
             let N = code[codePosition + 1];
 
             instruction = 'unify_void(' + N + ')';
+            instructionSize = 2;
             break;
         }
         case 23: // unify_variable: [23, 0, N] or [23, 1, N]
@@ -8206,6 +8238,7 @@ function decode_instruction(predicateID, codePosition) {
             let V = (A === 0) ? 'y' : 'x';
 
             instruction = 'unify_variable(' + V  + '(' + N + ')';
+            instructionSize = 3;
             break;
         }
         case 24: // unify_value: [24, 0, N] or [24, 1, N]
@@ -8216,6 +8249,7 @@ function decode_instruction(predicateID, codePosition) {
             let V = (A === 0) ? 'y' : 'x';
 
             instruction = 'unify_value(' + V  + '(' + N + ')';
+            instructionSize = 3;
             break;
         }
         case 25: // unify_local_value: [25, 0, N] or [25, 1, N]
@@ -8226,6 +8260,7 @@ function decode_instruction(predicateID, codePosition) {
             let V = (A === 0) ? 'y' : 'x';
 
             instruction = 'unify_local_value(' + V  + '(' + N + ')';
+            instructionSize = 3;
             break;
         }
         case 26: // unify_constant: [26, K]
@@ -8234,6 +8269,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let C = atable[VAL(K)];
             instruction = 'unify_constant(' + C + ')';
+            instructionSize = 2;
             break;
         }
         case 27: // unify_integer: [27, C]
@@ -8241,6 +8277,7 @@ function decode_instruction(predicateID, codePosition) {
             let C = code[codePosition + 1];
 
             instruction = 'unify_integer(' + C + ')';
+            instructionSize = 2;
             break;
         }
         case 52: // unify_float: [52, N]
@@ -8249,6 +8286,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let C = floats[VAL(N)];
             instruction = 'unify_float(' + C + ')';
+            instructionSize = 2;
             break;
         }
             // Indexing instructions 28-30
@@ -8257,6 +8295,7 @@ function decode_instruction(predicateID, codePosition) {
             let L = code[codePosition + 1];
 
             instruction = 'try_me_else(' + L + ')';
+            instructionSize = 2;
             break;
         }
         case 29: // retry_me_else: [29, L]
@@ -8264,11 +8303,13 @@ function decode_instruction(predicateID, codePosition) {
             let L = code[codePosition + 1];
 
             instruction = 'retry_me_else(' + L + ')';
+            instructionSize = 2;
             break;
         }
         case 30: // trust_me: [30, 0]
         {
             instruction = 'trust_me(0)';
+            instructionSize = 2;
             break;
         }
 
@@ -8276,6 +8317,7 @@ function decode_instruction(predicateID, codePosition) {
         case 31: // neck_cut: [31]
         {
             instruction = 'neck_cut';
+            instructionSize = 1;
             break;
         }
         case 32: // cut: [32, I]
@@ -8283,6 +8325,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 1];
 
             instruction = 'cut(y(' + I + '))';
+            instructionSize = 2;
             break;
         }
         case 33: // get_level: [33, I]
@@ -8290,6 +8333,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 1];
 
             instruction = 'get_level(y(' + I + '))';
+            instructionSize = 2;
             break;
         }
 
@@ -8301,6 +8345,7 @@ function decode_instruction(predicateID, codePosition) {
             let N = code[codePosition + 3];
 
             instruction = 'call_aux(' + P + ',' + A + ',' + N +'))';
+            instructionSize = 4;
             break;
         }
         case 41: // execute_aux: [41, P, A]
@@ -8309,12 +8354,14 @@ function decode_instruction(predicateID, codePosition) {
             let A = code[codePosition + 2];
 
             instruction = 'execute_aux(' + P + ',' + A +'))';
+            instructionSize = 3;
             break;
         }
         // retry_foreign is for foreign predicates with nondeterministic behaviour
         case 42: // retry_foreign: [42]
         {
             instruction = 'retry_foreign';
+            instructionSize = 1;
             break;
         }
             // get_choicepoint is used for setup_call_cleanup
@@ -8324,20 +8371,23 @@ function decode_instruction(predicateID, codePosition) {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
             instruction = 'get_choicepoint(' + N + ', y(' + I + '))';
+            instructionSize = 3;
             break;
         }
         case 254: // nop2: [254, 0]
         {
             instruction = 'nop2(0)';
+            instructionSize = 2;
             break;
         }
 
         default:
             instruction = 'unknown(' + op + ')';
+            instructionSize = 1;
             break;
     }
 
-    return (predicate + ':' + '(' + instruction + ',' + codePosition + ')');
+    return {string: (predicate + ':' + '(' + instruction + ',' + codePosition + ')'), size:instructionSize};
 
 }
 // File promise.js
@@ -8605,8 +8655,11 @@ function get_object_id_container(term, idContainer) {
 var parentMap = new Map([
     ['eventtarget', []],
     ['node', ['eventtarget']],
+    ['document', ['node']],
     ['element', ['node']],
-    ['htmlelement', ['element']]
+    ['htmlelement', ['element']],
+    ['cssstyledeclaration', []],
+    ['cssrule', []]
 ]);
 
 var childMap = new Map();
@@ -8632,11 +8685,14 @@ calculate_inheritance_children();
 var distinctivePropertyMap = {
     node:'nodeType',
     element:'id',
-    htmlelement:'title'
+    htmlelement:'title',
+    cssrule: 'parentStyleSheet'
 };
 
 var distinctiveMethodMap = {
-    eventtarget: 'addEventListener'
+    eventtarget: 'addEventListener',
+    document: 'getElementById',
+    cssstyledeclaration:'getPropertyPriority'
 };
 
 function getInterfaceItemSpec(typeJS, itemType, itemName) {
@@ -8707,7 +8763,18 @@ function object_type_check(object, candidates) {
     return undefined;
 }
 
+function predicate_dom_object_type(object, type) {
+    if(TAG(object) === TAG_REF) {
+        return instantiation_error(object);
+    }
 
+    let objectContainer = {};
+    if (!get_object_container(object, objectContainer)) {
+        return false;
+    }
+    let typeJS = objectContainer.type;
+    return unify(type, lookup_atom(typeJS));
+}
 // File web_interfaces.js
 /*
 W3C Web API specifies 'APIs', 'webInterfaces', and 'mixins'.
@@ -8839,8 +8906,10 @@ function SimpleChildNodeProperty(propertyName) {
     };
     that.elementValuesFunction = function(elementJS) {
         var objects = [];
-        /** @namespace elementJS.firstChild */
-        objects.push(elementJS[propertyName]);
+        let propertyValue = elementJS[propertyName];
+        if(typeof propertyValue !== 'undefined' && propertyValue !== null) {
+            objects.push(propertyValue);
+        }
         return objects;
     };
     that.setValue = function(property, elementJS, value) {
@@ -8879,8 +8948,10 @@ function SimpleChildProperty(propertyName) {
     };
     that.elementValuesFunction = function(elementJS) {
         var objects = [];
-        /** @namespace elementJS.firstChild */
-        objects.push(elementJS[propertyName]);
+        let value = elementJS[propertyName];
+        if(typeof value !== 'undefined' && value !== null) {
+            objects.push(value);
+        }
         return objects;
     };
     that.setValue = function(property, elementJS, value) {
@@ -8935,7 +9006,10 @@ function SimpleProperty(type, propertyName, settable) {
     };
     that.elementValuesFunction = function(elementJS) {
         var values = [];
-        values.push(elementJS[propertyName]);
+        let value = elementJS[propertyName];
+        if(typeof value !== 'undefined' && value !== null) {
+            values.push(value);
+        }
         return values;
     };
     that.setValue = function(property, elementJS, value) {
@@ -8972,7 +9046,7 @@ var nodeInterfaceProperties = new Map([
     //['namespaceURI', SimpleProperty('string', 'namespaceURI')], // deprecated in Node interface: moved to Element.
     ['nextSibling', SimpleChildProperty('nextSibling')],
     ['nodeName', SimpleProperty('atom','nodeName')],
-    ['nodeType', SimpleProperty('atom','nodeType')],
+    ['nodeType', SimpleProperty('number','nodeType')],
     ['nodeValue', SimpleProperty('string','nodeValue', true)],
     // outerText
     ['ownerDocument', SimpleChildProperty('ownerDocument')],
@@ -8987,7 +9061,8 @@ var nodeMethodSpecs = new Map([
     ['compareDocumentPosition',{name:'compareDocumentPosition',arguments:[{type:'object'}],returns:{type:'number'}}],
     ['contains',{name:'contains',arguments:[{type:'object'}],returns:{type:'boolean'}}],
     ['isEqualNode',{name:'isEqualNode',arguments:[{type:'object'}],returns:{type:'boolean'}}],
-    ['normalize',{name:'normalize',arguments:[]}]
+    ['normalize',{name:'normalize',arguments:[]}],
+    ['removeChild',{name:'removeChild',arguments:[{type:'object'}]}]
 ]);
 
 webInterfaces.set('node',
@@ -8999,7 +9074,7 @@ webInterfaces.set('node',
     });
 
 var elementInterfaceProperties = new Map([
-    ['accesskey', SimpleProperty('atom','accesskey', true)],
+    ['accessKey', SimpleProperty('atom','accessKey', true)],
     // attributes
     ['child', ChildProperty()], // adapted from children
     ['childElementCount', SimpleProperty('number','childElementCount')],
@@ -9012,8 +9087,6 @@ var elementInterfaceProperties = new Map([
     ['firstElementChild', SimpleChildProperty('firstElementChild')],
     ['id', SimpleProperty('atom','id', true)],
     ['innerHTML', SimpleProperty('string', 'innerHTML', true)],
-    ['lang', SimpleProperty('atom','lang', true)], // ISO 639-1 Language Codes: en, de, ja, ...
-    ['lastChild', SimpleChildProperty('lastChild')],
     ['lastElementChild', SimpleChildProperty('lastElementChild')],
     // name
     ['namespaceURI', SimpleProperty('string', 'namespaceURI')],
@@ -9034,7 +9107,7 @@ var elementMethodSpecs = new Map([
     ['insertAdjacentElement',{name:'insertAdjacentElement',arguments:[{type:'position'},{type:'object'}]}],
     ['insertAdjacentHTML',{name:'insertAdjacentHTML',arguments:[{type:'position'},{type:'string_codes'}]}],
     ['insertAdjacentText',{name:'insertAdjacentText',arguments:[{type:'position'},{type:'string_codes'}]}],
-    ['scrollIntoView',{name:'scrollIntoView',arguments:[{type:'boolean'}]}]
+    ['scrollIntoView',{name:'scrollIntoView',arguments:[{type:['boolean', 'options']}]}]
 ]);
 
 webInterfaces.set('element',
@@ -9046,7 +9119,7 @@ webInterfaces.set('element',
     });
 
 var htmlElementInterfaceProperties = new Map([
-    ['contentEditable', SimpleProperty('boolean','contentEditable', true)],
+    ['contentEditable', SimpleProperty('atom','contentEditable', true)],
     // contextMenu, deprecated
     // dataset
     ['dir', SimpleProperty('atom','dir', true)], // rtl, ltr, auto
@@ -9056,7 +9129,7 @@ var htmlElementInterfaceProperties = new Map([
     // nonce, experimental
     ['offsetHeight', SimpleProperty('number','offsetHeight')],
     ['offsetLeft', SimpleProperty('number','offsetLeft')],
-    ['offsetParent', SimpleProperty('number','offsetParent')],
+    ['offsetParent', SimpleProperty('object','offsetParent')],
     ['offsetTop', SimpleProperty('number','offsetTop')],
     ['offsetWidth', SimpleProperty('number','offsetWidth')],
     // onabort, experimental
@@ -9122,7 +9195,7 @@ var htmlElementInterfaceProperties = new Map([
     // ontransitionend
     // onwheel
     // outerText
-    ['style', SimpleProperty('string', 'style', true)],
+    ['style', SimpleProperty('object', 'style', true)], // object has a CSSStyleDeclaration interface.
     ['tabIndex', SimpleProperty('number','tabIndex')],
     ['title', SimpleProperty('string', 'title', true)]
 ]);
@@ -9140,6 +9213,41 @@ webInterfaces.set('htmlelement',
         methods:htmlElementMethodSpecs
     });
 
+var cssStyleDeclarationInterfaceProperties = new Map( [
+    ['cssText', SimpleProperty('string', 'cssText', true)], // documented as Attribute, but not listed as Property.
+    ['length', SimpleProperty('number', 'length')],
+    ['parentRule', SimpleProperty('object', 'parentRule')] // object has a CSSRule interface.
+]);
+
+
+var cssStyleDeclarationMethodSpecs = new Map([
+    ['getPropertyPriority',{name:'getPropertyPriority',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['getPropertyValue',{name:'getPropertyValue',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['item',{name:'item',arguments:[{type:'integer'}],returns:{type:'atom'}}],
+    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+]);
+
+webInterfaces.set('cssstyledeclaration',
+    {name: 'cssstyledeclaration',
+        properties:cssStyleDeclarationInterfaceProperties,
+        methods:cssStyleDeclarationMethodSpecs
+    });
+
+var cssRuleInterfaceProperties = new Map( [
+    ['cssText', SimpleProperty('string', 'cssText', true)],
+    ['parentStyleSheet', SimpleProperty('object', 'parentStyleSheet')],
+    ['parentRule', SimpleProperty('object', 'parentRule')], // documented as Attribute, but not listed as Property.
+    ['type', SimpleProperty('number', 'type')], // documented as Attribute, but not listed as Property.
+]);
+
+var cssRuleMethodSpecs = new Map([]);
+
+webInterfaces.set('cssrule',
+    {name: 'cssrule',
+        properties:cssRuleInterfaceProperties,
+        methods:cssRuleMethodSpecs
+    });
 // File object_property.js
 
 var dopCursors = new Map();
@@ -9342,7 +9450,12 @@ function getClassListPropertyValue(value) {
 }
 
 function getNumberPropertyValue(value) {
-    return VAL(value);
+    let result;
+    if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
+        result = VAL(value) - (1 << WORD_BITS);
+    else
+        result = VAL(value);
+    return result;
 }
 
 function getStringPropertyValue(value) {
@@ -9383,7 +9496,7 @@ function getAtomPLPropertyValue(valueJS) {
 }
 
 function getNumberPLPropertyValue(valueJS) {
-    return valueJS ^ (TAG_INT << WORD_BITS);
+    return (valueJS  & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
 }
 
 function getStringPLPropertyValue(valueJS) {
@@ -9477,8 +9590,8 @@ function predicate_dom_object_method(object, methodStructure) {
     if (TAG(object) !== TAG_STR) {
         instantiation_error(object);
     }
-    if (TAG(methodStructure) !== TAG_STR) {
-        instantiation_error(method);
+    if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
+        instantiation_error(methodStructure);
     }
 
     var objectContainer = {};
@@ -9488,29 +9601,45 @@ function predicate_dom_object_method(object, methodStructure) {
     let objectType = objectContainer.type;
     var objectJS = objectContainer.value;
 
-    let methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
+    let methodName;
+    let arity;
+    if (TAG(methodStructure) === TAG_ATM) {
+        methodName = atable[VAL(methodStructure)];
+        arity = 0;
+    } else {
+        methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
+        arity = ftable[VAL(memory[VAL(methodStructure)])][1];
+    }
+
     let spec = getInterfaceItemSpec(objectType, 'method', methodName);
-    var arity = ftable[VAL(memory[VAL(methodStructure)])][1];
-    if(spec.returns && ! spec.returns.type === 'boolean') {
-        arity --; // the last argument to the methodStructure is for the return value.
+    if (spec.returns && spec.returns.type !== 'boolean') {
+        arity--; // the last argument to the methodStructure is for the return value.
     }
 
     let specArguments = spec.arguments;
     let applyArguments = [];
-    for (var i = 0; i < arity; i++)
-    {
+    for (var i = 0; i < arity; i++) {
         let specArgument = specArguments[i];
-        let applyArgument = convert_method_argument(memory[VAL(methodStructure)+i+1], specArgument);
-        applyArguments.push(applyArgument);
+        let applyArgumentContainer = {};
+        if (convert_method_argument(memory[VAL(methodStructure) + i + 1], specArgument, applyArgumentContainer)) {
+            applyArguments.push(applyArgumentContainer.value);
+        } else {
+            return false;
+        }
     }
 
-    if(spec.returns) {
+    if (spec.returns) {
         let resultJS = object_method_return(objectJS, spec.name, applyArguments);
-        let resultPL = convert_result(resultJS, spec.returns);
-        if(spec.returns.type === 'boolean') {
-            return resultPL;
+        let resultContainer = {};
+        if(convert_result(resultJS, spec.returns, resultContainer)) {
+            let resultPL = resultContainer.value;
+            if (spec.returns.type === 'boolean') {
+                return resultPL;
+            } else {
+                return unify(resultPL, memory[VAL(methodStructure) + arity + 1]);
+            }
         } else {
-            return unify(resultPL, memory[VAL(methodStructure) + arity + 1]);
+            return false;
         }
     } else {
         object_method_no_return(objectJS, spec.name, applyArguments);
@@ -9518,24 +9647,38 @@ function predicate_dom_object_method(object, methodStructure) {
     }
 }
 
-function convert_method_argument(term, spec) {
+function convert_method_argument(term, spec, resultContainer) {
     if(TAG(term) === TAG_REF) {
-        instantiation_error(term);
+        return instantiation_error(term);
         // error
     }
 
     let arg;
-    if(spec.type === 'string') {
+    if(typeof spec.type === 'object') {
+        // union of multiple types
+        for(let subtype of spec.type) {
+            if(convert_method_argument(term, {type: subtype}, resultContainer)) {
+                return true;
+            }
+        }
+        return false;
+    } else if(spec.type === 'string') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
         } else {
             arg = format_term(term, {quoted:true});
         }
     } else if(spec.type === 'string_codes') {
-        if (TAG(term) === TAG_ATM) {
+        if (TAG(term) === TAG_LST) {
             arg = codes_to_string(term);
         } else {
-            // error
+            return type_error('list', term);
+        }
+    } else if(spec.type === 'integer') {
+        if (TAG(term) === TAG_INT) {
+            arg = getNumberPropertyValue(term);
+        } else {
+            return type_error('integer', term);
         }
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
@@ -9545,7 +9688,7 @@ function convert_method_argument(term, spec) {
             } else if(value === 'false') {
                 arg = false
             } else {
-                domain_error(boolean, term);
+                return domain_error('boolean', term);
             }
         } else {
             // error
@@ -9553,12 +9696,12 @@ function convert_method_argument(term, spec) {
     } else if(spec.type === 'position') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
-            if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(arg) === -1) {
-                domain_error("not_valid_insert_adjacent_mode", mode);
+            if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(arg.toLowerCase()) === -1) {
+                return domain_error("not_valid_insert_adjacent_mode", term);
                 // error
             }
         } else  {
-            type_error('atom', term);
+            return type_error('atom', term);
         }
     } else if(spec.type === 'goal_function') {
         let goal;
@@ -9567,7 +9710,7 @@ function convert_method_argument(term, spec) {
         } else if (TAG(term) === TAG_STR) {
             goal = format_term(term, {quoted: true});
         } else {
-            type_error('atom or structure', term);
+            return type_error('atom or structure', term);
         }
 
         arg = goalFunctions.get(goal);
@@ -9583,17 +9726,86 @@ function convert_method_argument(term, spec) {
         if (TAG(term) === TAG_ATM) {
             eventName = PL_atom_chars(term);
         } else {
-            type_error('atom', term);
+            return type_error('atom', term);
         }
         arg = new Event(eventName);
+    } else if(spec.type === 'object'){
+        if (TAG(term) === TAG_STR) {
+            var objectContainer = {};
+            if (!get_object_container(term, objectContainer)) {
+                return existence_error('object', term);
+            }
+            arg = objectContainer.value;
+        } else {
+            return type_error('object', term);
+        }
+    } else if(spec.type === 'options') {
+        // [key-value|_]
+        if(TAG(term) === TAG_LST) {
+            let optionsContainer = {};
+            if(terms_to_options(term, optionsContainer)) {
+                arg = optionsContainer.value;
+            } else {
+                return type_error('option list', term);
+            }
+        }
     } else {
         throw 'internal error: spec.type not recognized. ' + spec.type;
     }
 
-    return arg;
+    resultContainer.value = arg;
+    return true;
 }
 
-function convert_result(resultJS, spec) {
+function terms_to_options(listRoot, optionsContainer) {
+    var options = {};
+
+    var list = listRoot;
+
+    while(list !== NIL) {
+        if(TAG(list) !== TAG_LST) {
+            return instantiation_error(list);
+        }
+
+        var keyValuePairPL = memory[VAL(list)];
+        if(TAG(keyValuePairPL) !== TAG_STR) {
+            return instantiation_error(codePL);
+        } else {
+            // key-value
+            let functor = atable[ftable[VAL(memory[VAL(keyValuePairPL)])][0]];
+            let arity = ftable[VAL(memory[VAL(keyValuePairPL)])][1];
+            if(functor !== '-') {
+                return type_error('key - value: functor should be "-".', functor);
+            }
+
+            if(arity !== 2) {
+                return type_error('key - value: term should have two arguments.', arity);
+            }
+
+            let keyPL = memory[VAL(keyValuePairPL) + 1];
+            if(TAG(keyPL) !== TAG_ATM) {
+                return type_error('key - value: key should be an atom.', keyPL);
+            }
+            let keyJS = atable[VAL(keyPL)];
+
+            // TODO: extend value to allow any JSON-ish type - atom, number, boolean, list/JSON array, or keyValue list/JSON object.
+            let valuePL = memory[VAL(keyValuePairPL) + 2];
+            if(TAG(valuePL) !== TAG_ATM) {
+                return type_error('key - value: value should be an atom.', valuePL);
+            }
+            let valueJS = atable[VAL(valuePL)];
+
+            options.put(keyJS, valueJS);
+
+            list = memory[VAL(list) + 1];
+        }
+    }
+
+    optionsContainer.value = options;
+    return true;
+}
+
+function convert_result(resultJS, spec, resultContainer) {
     let resultPL;
     if(spec.type === 'atom') {
         resultPL = lookup_atom(resultJS);
@@ -9615,8 +9827,9 @@ function convert_result(resultJS, spec) {
         memory[state.H++] = PL_put_integer(resultJS.width);
         memory[state.H++] = PL_put_integer(resultJS.height);
     } else {
-        // error
+        return type_error('method result specification type', lookup_atom(spec.type));
     }
+    resultContainer.value = resultPL;
     return resultPL;
 }
 

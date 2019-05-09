@@ -559,7 +559,7 @@ function wam1()
             if (state.trace_instruction === 'step') {
                 // set up the prompt to be displayed before reading a command character into
                 // input_buffer
-                state.trace_instruction_prompt = instruction;
+                state.trace_instruction_prompt = instruction.string;
                 let char = get_terminal_char();
                 if (char) {
                     if (char === 'm') {
@@ -599,7 +599,7 @@ function wam1()
                     return wamExit(true);
                 }
             } else {
-                stdout(instruction + '\n');
+                stdout(instruction.string + '\n');
             }
         } else {
            debugging = false;

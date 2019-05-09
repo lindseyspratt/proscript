@@ -710,39 +710,101 @@ compile_aux_call(call, ArgCount, EnvSize, Label, O1, O2):-
 
 compile_body_args([], _, _, _PermanentVariables, State, State, Tail, Tail):- !.
 compile_body_args([Arg|Args], Position, I, PermanentVariables, S1, S3, Opcodes, Tail):-
-        compile_body_arg(Arg, Position, x(I), PermanentVariables, S1, S2, Opcodes, O1),
+        compile_body_arg(Arg, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, GUV),
+        compile_message(guv(GUV)),
+        %OpcodesX = Opcodes,
+        compile_body_arg_adjust(GUV, OpcodesX, Opcodes),
         II is I+1,
         compile_body_args(Args, Position, II, PermanentVariables, S2, S3, O1, Tail).
 
-compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_constant(Arg, Dest)|Tail], Tail):-
-        atom_or_empty_list(Arg), !.
-compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_integer(Arg, Dest)|Tail], Tail):-
-        integer(Arg), !.
-compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_float(Arg, Dest)|Tail], Tail):-
-        float(Arg), !.
-compile_body_arg(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail):-
-        var(Arg), !, put_variable(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail).
-compile_body_arg([Head|Tail], Position, Dest, PermanentVariables, State, S1, Opcodes, OpcodesTail):-
-        compile_body_unification([Head, Tail], Position, State, S1, PermanentVariables, Opcodes, [put_list(Dest)|R], R, OpcodesTail).
+compile_body_arg_adjust(GUV, OpcodesX, Opcodes) :-
+        var(GUV),
+        !,
+        OpcodesX=Opcodes.
+compile_body_arg_adjust(_GUV, OpcodesX, Opcodes) :-
+        adjust_unify_variable(OpcodesX, Opcodes).
 
-compile_body_arg(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail):-
+compile_body_arg(Arg, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1) :-
+        compile_body_arg(Arg, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, _).
+
+compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_constant(Arg, Dest)|Tail], Tail, _):-
+        atom_or_empty_list(Arg), !.
+compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_integer(Arg, Dest)|Tail], Tail, _):-
+        integer(Arg), !.
+compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_float(Arg, Dest)|Tail], Tail, _):-
+        float(Arg), !.
+compile_body_arg(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, _):-
+        var(Arg), !, put_variable(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail).
+compile_body_arg([Head|Tail], Position, Dest, PermanentVariables, State, S1, Opcodes, OpcodesTail, GUV):-
+        compile_body_unification([Head, Tail], Position, State, S1, PermanentVariables, Opcodes, [put_list(Dest)|R], R, OpcodesTail, GUV).
+
+compile_body_arg(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
         Arg =.. [Functor|Args],
         list_length(Args, Arity),
-        compile_body_unification(Args, Position, State, S1, PermanentVariables, Opcodes, [put_structure(Functor/Arity, Dest)|R], R, Tail).
+        compile_body_unification(Args, Position, State, S1, PermanentVariables, Opcodes, [put_structure(Functor/Arity, Dest)|R], R, Tail, GUV).
 
-compile_body_unification([], _, State, State, _PermanentVariables, Opcodes, Opcodes, R, R):- !.
-compile_body_unification([Arg|Args], Position, State, S1, PermanentVariables, O, OT, [unify_constant(Arg)|R], RT):-
-        atom_or_empty_list(Arg), !, compile_body_unification(Args, Position, State, S1, PermanentVariables, O, OT, R, RT).
-compile_body_unification([Arg|Args], Position, State, S1, PermanentVariables, O, OT, [unify_integer(Arg)|R], RT):-
-        integer(Arg), !, compile_body_unification(Args, Position, State, S1, PermanentVariables, O, OT, R, RT).
-compile_body_unification([Arg|Args], Position, State, S2, PermanentVariables, O, OT, R, RT):-
+compile_body_unification([], _, State, State, _PermanentVariables, Opcodes, Opcodes, R, R, _):- !.
+compile_body_unification([Arg|Args], Position, State, S1, PermanentVariables, O, OT, [unify_constant(Arg)|R], RT, GUV):-
+        atom_or_empty_list(Arg), !, compile_body_unification(Args, Position, State, S1, PermanentVariables, O, OT, R, RT, GUV).
+compile_body_unification([Arg|Args], Position, State, S1, PermanentVariables, O, OT, [unify_integer(Arg)|R], RT, GUV):-
+        integer(Arg), !, compile_body_unification(Args, Position, State, S1, PermanentVariables, O, OT, R, RT, GUV).
+compile_body_unification([Arg|Args], Position, State, S2, PermanentVariables, O, OT, R, RT, generated_unify_variable):-
         var(Arg), !,
         unify_variable(Arg, PermanentVariables, State, S1, R, R1),
-        compile_body_unification(Args, Position, S1, S2, PermanentVariables, O, OT, R1, RT).
-compile_body_unification([Arg|Args], Position, State, S3, PermanentVariables, O, OT, [unify_value(Xi)|R], RT):-
+        compile_body_unification(Args, Position, S1, S2, PermanentVariables, O, OT, R1, RT, _).
+compile_body_unification([Arg|Args], Position, State, S3, PermanentVariables, O, OT, [unify_value(Xi)|R], RT, GUV):-
         fresh_variable(State, S1, Xi),
-        compile_body_arg(Arg, Position, Xi, PermanentVariables, S1, S2, O, O1),
-        compile_body_unification(Args, Position, S2, S3, PermanentVariables, O1, OT, R, RT).
+        compile_body_arg(Arg, Position, Xi, PermanentVariables, S1, S2, O, O1, GUV),
+        compile_body_unification(Args, Position, S2, S3, PermanentVariables, O1, OT, R, RT, GUV).
+
+% if unify_value(x(N)) precedes unify_variable(x(N)) then swap them.
+adjust_unify_variable(O, A) :-
+        adjust_unify_variable(O, A,[], []).
+
+adjust_unify_variable(O, O, Swap, UnifyVariables) :-
+        var(O),
+        !,
+        compile_message(adjust(Swap, UnifyVariables)),
+        adjust_unify_variable1(Swap, UnifyVariables).
+adjust_unify_variable([unify_value(x(N))|O], [InstA|A], Swap, UnifyVariables) :-
+        Inst = unify_value(x(N)),
+         \+ member(_ - _/N, UnifyVariables),
+         \+ member(Inst-_/_, Swap),
+        !,
+        adjust_unify_variable(O, A, [Inst-InstA/N|Swap], UnifyVariables).
+adjust_unify_variable([unify_variable(x(N))|O], [InstA|A], Swap, UnifyVariables) :-
+        Inst = unify_variable(x(N)),
+        !,
+        adjust_unify_variable(O, A, Swap, [Inst-InstA/N|UnifyVariables]).
+adjust_unify_variable([Inst|O], [Inst|A], Swap, UnifyVariables) :-
+        adjust_unify_variable(O, A, Swap, UnifyVariables).
+
+
+adjust_unify_variable1(Swap, []) :-
+        !,
+        adjust_unify_variable11(Swap).
+adjust_unify_variable1(Swap, UV) :-
+        adjust_unify_variable10(Swap, UV).
+
+adjust_unify_variable10([], UnifyVariables) :-
+        adjust_unify_variable2(UnifyVariables).
+adjust_unify_variable10([Inst-InstVar/N|SwapT], UnifyVariables) :-
+        member(InstVar-Inst/N, UnifyVariables),
+        !,
+        adjust_unify_variable10(SwapT, UnifyVariables).
+adjust_unify_variable10([Inst-Inst/_N|SwapT], UnifyVariables) :-
+        adjust_unify_variable10(SwapT, UnifyVariables).
+
+adjust_unify_variable11([]).
+adjust_unify_variable11([Inst-Inst/_N|SwapT]) :-
+        adjust_unify_variable11(SwapT).
+
+adjust_unify_variable2([]).
+adjust_unify_variable2([InstVar-InstVar/_N|T])  :-
+        !,
+        adjust_unify_variable2(T).
+adjust_unify_variable2([_|T])  :-
+        adjust_unify_variable2(T).
 
 
 % -------------------- Below is the assembler -----------------------------
@@ -968,9 +1030,13 @@ compile_and_free_memory_file(MemoryFile) :-
         free_memory_file(MemoryFile).
 
 compile_memory_file(MemoryFile) :-
+%        wam_duration(D1),
+%write('Start compile '), write(MemoryFile), write(': WAM duration = '), writeln(D1),
         open_memory_file(MemoryFile, read, Stream),
         compile_stream(Stream),
         close(Stream).
+%        wam_duration(D2),
+%write('Finish compile '), write(MemoryFile), write(': WAM duration = '), writeln(D2).
 
 save_clause(Head:-Body):-
         !,

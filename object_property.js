@@ -201,7 +201,12 @@ function getClassListPropertyValue(value) {
 }
 
 function getNumberPropertyValue(value) {
-    return VAL(value);
+    let result;
+    if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
+        result = VAL(value) - (1 << WORD_BITS);
+    else
+        result = VAL(value);
+    return result;
 }
 
 function getStringPropertyValue(value) {
@@ -242,7 +247,7 @@ function getAtomPLPropertyValue(valueJS) {
 }
 
 function getNumberPLPropertyValue(valueJS) {
-    return valueJS ^ (TAG_INT << WORD_BITS);
+    return (valueJS  & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
 }
 
 function getStringPLPropertyValue(valueJS) {

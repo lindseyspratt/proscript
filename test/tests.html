@@ -1,12 +1,17 @@
 <html lang="en">
 <head>
     <title>Unit Test</title>
+    <link rel="stylesheet" href="tests.css"/>
     <script src="../terminal/jquery-3.3.1.js"></script>
     <script src="../terminal/jquery_terminal.js"></script>
     <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
 </head>
 <body onload="proscript_init('consult([\'web_tests.pl\']).');">
-<div id="test1"></div>
+<div id="test1" class="foo bar" style="color: blue; border: 1px solid black">
+    <div id="test1child">
+        test 1 child
+    </div>
+</div>
 <script type="text/javascript" src="../wam-pp.js"></script>
 <script type="text/javascript" src="../bootstrap.js"></script>
 <script type="text/javascript" src="../terminal/proscript_interpreter_terminal.js"></script>

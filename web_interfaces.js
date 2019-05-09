@@ -128,8 +128,10 @@ function SimpleChildNodeProperty(propertyName) {
     };
     that.elementValuesFunction = function(elementJS) {
         var objects = [];
-        /** @namespace elementJS.firstChild */
-        objects.push(elementJS[propertyName]);
+        let propertyValue = elementJS[propertyName];
+        if(typeof propertyValue !== 'undefined' && propertyValue !== null) {
+            objects.push(propertyValue);
+        }
         return objects;
     };
     that.setValue = function(property, elementJS, value) {
@@ -168,8 +170,10 @@ function SimpleChildProperty(propertyName) {
     };
     that.elementValuesFunction = function(elementJS) {
         var objects = [];
-        /** @namespace elementJS.firstChild */
-        objects.push(elementJS[propertyName]);
+        let value = elementJS[propertyName];
+        if(typeof value !== 'undefined' && value !== null) {
+            objects.push(value);
+        }
         return objects;
     };
     that.setValue = function(property, elementJS, value) {
@@ -224,7 +228,10 @@ function SimpleProperty(type, propertyName, settable) {
     };
     that.elementValuesFunction = function(elementJS) {
         var values = [];
-        values.push(elementJS[propertyName]);
+        let value = elementJS[propertyName];
+        if(typeof value !== 'undefined' && value !== null) {
+            values.push(value);
+        }
         return values;
     };
     that.setValue = function(property, elementJS, value) {
@@ -261,7 +268,7 @@ var nodeInterfaceProperties = new Map([
     //['namespaceURI', SimpleProperty('string', 'namespaceURI')], // deprecated in Node interface: moved to Element.
     ['nextSibling', SimpleChildProperty('nextSibling')],
     ['nodeName', SimpleProperty('atom','nodeName')],
-    ['nodeType', SimpleProperty('atom','nodeType')],
+    ['nodeType', SimpleProperty('number','nodeType')],
     ['nodeValue', SimpleProperty('string','nodeValue', true)],
     // outerText
     ['ownerDocument', SimpleChildProperty('ownerDocument')],
@@ -276,7 +283,8 @@ var nodeMethodSpecs = new Map([
     ['compareDocumentPosition',{name:'compareDocumentPosition',arguments:[{type:'object'}],returns:{type:'number'}}],
     ['contains',{name:'contains',arguments:[{type:'object'}],returns:{type:'boolean'}}],
     ['isEqualNode',{name:'isEqualNode',arguments:[{type:'object'}],returns:{type:'boolean'}}],
-    ['normalize',{name:'normalize',arguments:[]}]
+    ['normalize',{name:'normalize',arguments:[]}],
+    ['removeChild',{name:'removeChild',arguments:[{type:'object'}]}]
 ]);
 
 webInterfaces.set('node',
@@ -288,7 +296,7 @@ webInterfaces.set('node',
     });
 
 var elementInterfaceProperties = new Map([
-    ['accesskey', SimpleProperty('atom','accesskey', true)],
+    ['accessKey', SimpleProperty('atom','accessKey', true)],
     // attributes
     ['child', ChildProperty()], // adapted from children
     ['childElementCount', SimpleProperty('number','childElementCount')],
@@ -301,8 +309,6 @@ var elementInterfaceProperties = new Map([
     ['firstElementChild', SimpleChildProperty('firstElementChild')],
     ['id', SimpleProperty('atom','id', true)],
     ['innerHTML', SimpleProperty('string', 'innerHTML', true)],
-    ['lang', SimpleProperty('atom','lang', true)], // ISO 639-1 Language Codes: en, de, ja, ...
-    ['lastChild', SimpleChildProperty('lastChild')],
     ['lastElementChild', SimpleChildProperty('lastElementChild')],
     // name
     ['namespaceURI', SimpleProperty('string', 'namespaceURI')],
@@ -323,7 +329,7 @@ var elementMethodSpecs = new Map([
     ['insertAdjacentElement',{name:'insertAdjacentElement',arguments:[{type:'position'},{type:'object'}]}],
     ['insertAdjacentHTML',{name:'insertAdjacentHTML',arguments:[{type:'position'},{type:'string_codes'}]}],
     ['insertAdjacentText',{name:'insertAdjacentText',arguments:[{type:'position'},{type:'string_codes'}]}],
-    ['scrollIntoView',{name:'scrollIntoView',arguments:[{type:'boolean'}]}]
+    ['scrollIntoView',{name:'scrollIntoView',arguments:[{type:['boolean', 'options']}]}]
 ]);
 
 webInterfaces.set('element',
@@ -335,7 +341,7 @@ webInterfaces.set('element',
     });
 
 var htmlElementInterfaceProperties = new Map([
-    ['contentEditable', SimpleProperty('boolean','contentEditable', true)],
+    ['contentEditable', SimpleProperty('atom','contentEditable', true)],
     // contextMenu, deprecated
     // dataset
     ['dir', SimpleProperty('atom','dir', true)], // rtl, ltr, auto
@@ -345,7 +351,7 @@ var htmlElementInterfaceProperties = new Map([
     // nonce, experimental
     ['offsetHeight', SimpleProperty('number','offsetHeight')],
     ['offsetLeft', SimpleProperty('number','offsetLeft')],
-    ['offsetParent', SimpleProperty('number','offsetParent')],
+    ['offsetParent', SimpleProperty('object','offsetParent')],
     ['offsetTop', SimpleProperty('number','offsetTop')],
     ['offsetWidth', SimpleProperty('number','offsetWidth')],
     // onabort, experimental
@@ -411,7 +417,7 @@ var htmlElementInterfaceProperties = new Map([
     // ontransitionend
     // onwheel
     // outerText
-    ['style', SimpleProperty('string', 'style', true)],
+    ['style', SimpleProperty('object', 'style', true)], // object has a CSSStyleDeclaration interface.
     ['tabIndex', SimpleProperty('number','tabIndex')],
     ['title', SimpleProperty('string', 'title', true)]
 ]);
@@ -429,3 +435,38 @@ webInterfaces.set('htmlelement',
         methods:htmlElementMethodSpecs
     });
 
+var cssStyleDeclarationInterfaceProperties = new Map( [
+    ['cssText', SimpleProperty('string', 'cssText', true)], // documented as Attribute, but not listed as Property.
+    ['length', SimpleProperty('number', 'length')],
+    ['parentRule', SimpleProperty('object', 'parentRule')] // object has a CSSRule interface.
+]);
+
+
+var cssStyleDeclarationMethodSpecs = new Map([
+    ['getPropertyPriority',{name:'getPropertyPriority',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['getPropertyValue',{name:'getPropertyValue',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['item',{name:'item',arguments:[{type:'integer'}],returns:{type:'atom'}}],
+    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+]);
+
+webInterfaces.set('cssstyledeclaration',
+    {name: 'cssstyledeclaration',
+        properties:cssStyleDeclarationInterfaceProperties,
+        methods:cssStyleDeclarationMethodSpecs
+    });
+
+var cssRuleInterfaceProperties = new Map( [
+    ['cssText', SimpleProperty('string', 'cssText', true)],
+    ['parentStyleSheet', SimpleProperty('object', 'parentStyleSheet')],
+    ['parentRule', SimpleProperty('object', 'parentRule')], // documented as Attribute, but not listed as Property.
+    ['type', SimpleProperty('number', 'type')], // documented as Attribute, but not listed as Property.
+]);
+
+var cssRuleMethodSpecs = new Map([]);
+
+webInterfaces.set('cssrule',
+    {name: 'cssrule',
+        properties:cssRuleInterfaceProperties,
+        methods:cssRuleMethodSpecs
+    });

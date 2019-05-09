@@ -601,7 +601,9 @@ function proscript_init(queryJS) {
 
     call_directives();
 
-    proscript(queryJS);
+    if(queryJS && queryJS !== '') {
+        proscript(queryJS);
+    }
 }
 
 function call_directives() {

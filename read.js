@@ -662,18 +662,19 @@ function format_term(value, options)
             {
                 // Infix operator
                 var lhs = format_term(memory[VAL(value)+1], options);
-                if (is_punctuation(lhs.charAt(lhs.length-1)) && !is_punctuation(fname.charAt(0)))
+                if (is_punctuation_charAt(lhs, lhs.length-1) && !is_punctuation(fname.charAt(0)))
                     result = lhs + fname;
-                else if (!is_punctuation(lhs.charAt(lhs.length-1)) && is_punctuation(fname.charAt(0)))
+                else if (!is_punctuation_charAt(lhs, lhs.length-1) && is_punctuation(fname.charAt(0)))
                     result = lhs + fname;
                 else
                 {
                     result = lhs + " " + fname;
                 }
                 var rhs1 = format_term(memory[VAL(value)+2], options);
-                if (is_punctuation(rhs1.charAt(0)) && !is_punctuation(fname.charAt(fname.length-1)))
+
+                if (is_punctuation_charAt(rhs1, 0) && !is_punctuation(fname.charAt(fname.length-1)))
                     return result + rhs1;
-                else if (!is_punctuation(rhs1.charAt(0)) && is_punctuation(fname.charAt(fname.length-1)))
+                else if (!is_punctuation_charAt(rhs1, 0) && is_punctuation(fname.charAt(fname.length-1)))
                     return result + rhs1;
                 else
                     return result + " " + rhs1;
@@ -682,9 +683,9 @@ function format_term(value, options)
             {
                 // Prefix operator
                 var rhs2 = format_term(memory[VAL(value)+1], options);
-                if (is_punctuation(rhs2.charAt(0)) && !is_punctuation(fname.charAt(fname.length-1)))
+                if (is_punctuation_charAt(rhs2, 0) && !is_punctuation(fname.charAt(fname.length-1)))
                     return fname + rhs2;
-                else if (!is_punctuation(rhs2.charAt(0)) && is_punctuation(fname.charAt(fname.length-1)))
+                else if (!is_punctuation_charAt(rhs2,0) && is_punctuation(fname.charAt(fname.length-1)))
                     return fname + rhs2;
                 else
                     return fname + " " + rhs2;
@@ -717,6 +718,9 @@ function format_term(value, options)
     }
 }
 
+function is_punctuation_charAt(object, position) {
+    return typeof object.chartAt === 'function' && is_punctuation(object.charAt(position));
+}
 
 function expression_to_term(s, varmap, singletons)
 {

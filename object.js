@@ -77,8 +77,11 @@ function get_object_id_container(term, idContainer) {
 var parentMap = new Map([
     ['eventtarget', []],
     ['node', ['eventtarget']],
+    ['document', ['node']],
     ['element', ['node']],
-    ['htmlelement', ['element']]
+    ['htmlelement', ['element']],
+    ['cssstyledeclaration', []],
+    ['cssrule', []]
 ]);
 
 var childMap = new Map();
@@ -104,11 +107,14 @@ calculate_inheritance_children();
 var distinctivePropertyMap = {
     node:'nodeType',
     element:'id',
-    htmlelement:'title'
+    htmlelement:'title',
+    cssrule: 'parentStyleSheet'
 };
 
 var distinctiveMethodMap = {
-    eventtarget: 'addEventListener'
+    eventtarget: 'addEventListener',
+    document: 'getElementById',
+    cssstyledeclaration:'getPropertyPriority'
 };
 
 function getInterfaceItemSpec(typeJS, itemType, itemName) {
@@ -179,4 +185,15 @@ function object_type_check(object, candidates) {
     return undefined;
 }
 
+function predicate_dom_object_type(object, type) {
+    if(TAG(object) === TAG_REF) {
+        return instantiation_error(object);
+    }
 
+    let objectContainer = {};
+    if (!get_object_container(object, objectContainer)) {
+        return false;
+    }
+    let typeJS = objectContainer.type;
+    return unify(type, lookup_atom(typeJS));
+}

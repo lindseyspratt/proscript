@@ -1,6 +1,6 @@
-load_state();
-call_directives();
-initialize();
+//load_state();
+//call_directives();
+//initialize();
 var can_backtrack = false;
 var x_history = [];
 
@@ -32,10 +32,10 @@ jQuery(function ($, undefined) {
     });
 });
 
-var stdout;
-// = function(msg){
-//     alert(msg);
-// };
+var stdout
+= function(msg){
+    alert(msg);
+};
 
 function predicate_flush_stdout() {
     // no op

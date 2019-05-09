@@ -1,12 +1,8 @@
-:- dynamic(test_result/1).
+:- ensure_loaded(web_test_utility).
 
-event_listener_test :-
-    dom_element_attribute_value(E, id, test1),
-    dom_object_method(E, addEventListener(test_event, asserta(test_result(test_event_dispatched)))),
-    dom_object_method(E, dispatchEvent(test_event)),
-    !,
-    (retract(test_result(test_event_dispatched))
-      -> writeln(success)
-     ;
-     writeln(failed)
-    ).
+:- ensure_loaded(web_test_event_target).
+:- ensure_loaded(web_test_node).
+:- ensure_loaded(web_test_element).
+:- ensure_loaded(web_test_htmlelement).
+:- ensure_loaded(web_test_css_style_declaration).
+
