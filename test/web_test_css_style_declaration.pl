@@ -1,11 +1,15 @@
 :- ensure_loaded(web_test_utility).
+:- ensure_loaded('../library/listut2').
 
 % Properties
 
 test('CSSStyleDeclaration', 'cssText of style of test1 finds "color: blue; border: 1px solid black;"', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_property(_, E, style, S),
-    dom_object_property(_, S, cssText, "color: blue; border: 1px solid black;").
+    dom_object_property(_, S, cssText, Codes),
+    % the order of the styles may be changed by previous runs of tests for removeProperty and setProperty.
+    contains_list(Codes, "color: blue;"),
+    contains_list(Codes, "border: 1px solid black;").
 
 test('CSSStyleDeclaration', 'length of style of test1 finds 18', succeeded) :-
     dom_element_attribute_value(E, id, test1),

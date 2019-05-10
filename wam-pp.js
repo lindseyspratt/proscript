@@ -2354,7 +2354,11 @@ function predicate_eval_javascript(expression, result)
     if (TAG(expression) === TAG_ATM) {
         expressionJS = PL_atom_chars(expression);
     } else if (TAG(expression) === TAG_LST) {
-        expressionJS = codes_to_string(expression);
+        let container = {};
+        if(!codes_to_string(expression, container)) {
+            return false;
+        }
+        expressionJS = container.value;
     } else {
         instantiation_error(expression);
     }
@@ -7270,15 +7274,15 @@ var desaCursorCounter = 0;
 
 function predicate_set_dom_element_attribute_value(element, attribute, value) {
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(attribute) !== TAG_ATM) {
-        instantiation_error(attribute);
+        return instantiation_error(attribute);
     }
 
     if (TAG(value) !== TAG_ATM) {
-        instantiation_error(value);
+        return instantiation_error(value);
     }
 
     var elementObject = {};
@@ -7300,11 +7304,11 @@ function predicate_set_dom_element_attribute_value(element, attribute, value) {
 
 function predicate_remove_dom_element_class(element, value) {
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(value) !== TAG_ATM) {
-        instantiation_error(value);
+        return instantiation_error(value);
     }
 
     var elementObject = {};
@@ -7321,15 +7325,15 @@ function predicate_remove_dom_element_class(element, value) {
 
 function predicate_replace_dom_element_class(element, oldValue, value) {
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(oldValue) !== TAG_ATM) {
-        instantiation_error(oldValue);
+        return instantiation_error(oldValue);
     }
 
     if (TAG(value) !== TAG_ATM) {
-        instantiation_error(value);
+        return instantiation_error(value);
     }
 
     var elementObject = {};
@@ -7347,11 +7351,11 @@ function predicate_replace_dom_element_class(element, oldValue, value) {
 
 function predicate_toggle_dom_element_class(element, value, action) {
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(value) !== TAG_ATM) {
-        instantiation_error(value);
+        return instantiation_error(value);
     }
 
     var elementObject = {};
@@ -7374,7 +7378,7 @@ function predicate_toggle_dom_element_class(element, value, action) {
         return bind(action, lookup_atom(actionJS))
     } else {
         if (TAG(action) !== TAG_ATM) {
-            instantiation_error(action);
+            return instantiation_error(action);
         }
 
         actionJS = atable[VAL(action)];
@@ -7383,7 +7387,7 @@ function predicate_toggle_dom_element_class(element, value, action) {
         } else if(actionJS === 'remove') {
             flag = false;
         } else {
-            domain_error(action);
+            return domain_error(action);
         }
 
         elementJS.classList.toggle(valueJS, flag);
@@ -7417,10 +7421,14 @@ function predicate_dom_element_attribute_value(element, attribute, value) {
 
     }
     else {
+        let container = {};
+        if(!setupValues(element, attribute, value, container)) {
+            return false;
+        }
         cursor = {
             elements: setupElements(element, attribute, value),
             attributes: setupAttributes(element, attribute),
-            values: setupValues(element, attribute, value)
+            values: container.value
         };
         cursorIDJS = 'crs' + deavCursorCounter++;
         deavCursors.set(cursorIDJS, cursor);
@@ -7479,7 +7487,7 @@ function predicate_dom_element_attribute_value(element, attribute, value) {
     }
 }
 
-function setupValues(element, attribute, value) {
+function setupValues(element, attribute, value, container) {
     var values = [];
 
     var valueJS;
@@ -7493,16 +7501,17 @@ function setupValues(element, attribute, value) {
     // } else
     if (TAG(element) !== TAG_REF && TAG(attribute) !== TAG_REF) {
         if (TAG(element) !== TAG_STR) {
-            instantiation_error(element);
+            return instantiation_error(element);
         }
 
         if (TAG(attribute) !== TAG_ATM) {
-            instantiation_error(attribute);
+            return instantiation_error(attribute);
         }
 
         var elementObject = {};
         if (!get_element_object(element, elementObject)) {
-            return undefined;
+            container.value = undefined;
+            return true;
         }
         var elementJS = elementObject.value;
         var attributeJS = atable[VAL(attribute)];
@@ -7520,7 +7529,8 @@ function setupValues(element, attribute, value) {
     } else {
         values = undefined;
     }
-    return values;
+    container.value = values;
+    return true;
 }
 
 function setupValuesFromJSElementAndAttribute(elementJS, attributeJS, value) {
@@ -7660,25 +7670,26 @@ function string_to_codes(string) {
     return tmp;
 }
 
-function codes_to_string(codes) {
+function codes_to_string(codes, container, reportError) {
     var string = '';
 
     var list = codes;
 
     while(list !== NIL) {
         if(TAG(list) !== TAG_LST) {
-            instantiation_error(list);
+            return reportError && instantiation_error(list);
         }
 
         var codePL = memory[VAL(list)];
         if(TAG(codePL) !== TAG_INT) {
-            instantiation_error(codePL);
+            return reportError && instantiation_error(codePL);
         } else {
             string += String.fromCharCode(codePL);
             list = memory[VAL(list) + 1];
         }
     }
-    return string;
+    container.value = string;
+    return true;
 }
 
 function predicate_alert(term) {
@@ -7689,11 +7700,11 @@ function predicate_alert(term) {
 
 function predicate_create_dom_element(tag, element) {
     if(TAG(tag) !== TAG_ATM) {
-        instantiation_error(tag);
+        return instantiation_error(tag);
     }
 
     if(TAG(element) !== TAG_REF) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     var tagJS = atable[VAL(tag)];
@@ -7705,14 +7716,19 @@ function predicate_create_dom_element(tag, element) {
 
 function predicate_create_dom_text_node(text, element) {
     if(TAG(text) !== TAG_LST) {
-        instantiation_error(text);
+        return instantiation_error(text);
     }
 
     if(TAG(element) !== TAG_REF) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
-    var textJS = codes_to_string(text);
+    let container = {};
+    if(! codes_to_string(text, container)) {
+        return false;
+    }
+    var textJS = container.value;
+
     var elementJS = document.createTextNode(textJS);
     var elementPL = create_element_structure(elementJS);
 
@@ -7722,11 +7738,11 @@ function predicate_create_dom_text_node(text, element) {
 
 function predicate_append_dom_node_child(element, child) {
     if(TAG(child) !== TAG_STR) {
-        instantiation_error(child);
+        return instantiation_error(child);
     }
 
     if(TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     var elementObject = {};
@@ -7751,32 +7767,32 @@ function predicate_append_dom_node_child(element, child) {
 function predicate_insert_before_dom_node(parent, element, before) {
 
     if (TAG(parent) !== TAG_STR) {
-        instantiation_error(parent);
+        return instantiation_error(parent);
     }
 
     if (TAG(before) !== TAG_STR) {
-        instantiation_error(before);
+        return instantiation_error(before);
     }
 
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     var parentObject = {};
     if (!get_element_object(parent, parentObject)) {
-        existence_error("element", parent);
+        return existence_error("element", parent);
     }
     var parentJS = parentObject.value;
 
     var elementObject = {};
     if (!get_element_object(element, elementObject)) {
-        existence_error("element", element);
+        return existence_error("element", element);
     }
     var elementJS = elementObject.value;
 
     var beforeObject = {};
     if (!get_element_object(before, beforeObject)) {
-        existence_error("element", before);
+        return existence_error("element", before);
     }
     var beforeJS = beforeObject.value;
 
@@ -7788,14 +7804,18 @@ function predicate_insert_before_dom_node(parent, element, before) {
 
 function predicate_dom_select_element(query, element) {
     if (TAG(element) !== TAG_STR && TAG(element) !== TAG_REF) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(query) !== TAG_LST) {
-        instantiation_error(query);
+        return instantiation_error(query);
     }
 
-    var queryJS = codes_to_string(query);
+    let container = {};
+    if(!codes_to_string(query)) {
+        return false;
+    }
+    var queryJS = container.value;
 
     var elementJS = document.querySelector(queryJS);
     var elementPL = create_element_structure(elementJS);
@@ -7814,8 +7834,12 @@ function predicate_dom_select_all_elements(query, element) {
 
     }
     else {
+        let container = {};
+        if(!setupElementsForSelectAll(query, container)) {
+            return false;
+        }
         cursor = {
-            elements: setupElementsForSelectAll(query)
+            elements: container.value
         };
         cursorIDJS = 'crs' + desaCursorCounter++;
         desaCursors.set(cursorIDJS, cursor);
@@ -7837,11 +7861,15 @@ function predicate_dom_select_all_elements(query, element) {
     }
 }
 
-function setupElementsForSelectAll(query) {
+function setupElementsForSelectAll(query, container) {
 
-    var queryJS = codes_to_string(query);
+    let queryContainer = {};
+    if(!codes_to_string(query, queryContainer, true)) {
+        return false;
+    }
 
-    return document.querySelectorAll(queryJS);
+    container.value = document.querySelectorAll(queryContainer.value);
+    return true;
 }
 
 // proscript_init generally is only used once in a web page to set up the proscript globals.
@@ -7936,6 +7964,54 @@ function proscript(queryJS) {
         code = saved_code;
         memory = copy_memory(saved_memory);
     }
+}
+
+function proscript_apply(goalArguments, goal) {
+    // goal = '[Tx-X,Ty-Y,...] ^ G' where G is an expression referencing X, Y, ...
+    // goalArguments is an array [a,b, ...] where each item is applied to the corresonding
+    // entry in [X, Y, ...].The combined expression is:
+    //     ParamGoal = Arguments ^ BoundGoal, call(BoundGoal)
+    // proscript();
+    // However, the goalArguments must be converted to their Prolog syntactic representation.
+    // How this is done depends on the expected type, which is encoded in the goal's argument T specification.
+
+    // goal = "[a-B, c-D]^ foo(B, D)" -> ["[a-B, c-D]", "a-B, c-D"]
+    // for each argument[i], create formatted term F[i] of prolog transform(type[i], argument[i].
+    // new goal = "F[i] = A[i], ..., G"
+    let typedArgumentStrings = goal.match(/^ *\[(.*)] *\^/);
+
+    let goalReconstituted;
+    if(typedArgumentStrings) {
+        let typedArgumentPrefix = typedArgumentStrings[0];
+        let goalString = goal.substring(typedArgumentPrefix.length);
+
+        let typedArgumentString = typedArgumentStrings[1];
+        let typedArguments = typedArgumentString.trim().split(",");
+
+        let unificationExpressions = [];
+        let limit = Math.min(typedArguments.length, goalArguments.length);
+
+        for (let ofst = 0; ofst < limit; ofst++) {
+            let typedArgumentString = typedArguments[ofst];
+            let items = typedArgumentString.trim().split('-');
+            let type = items[0].trim();
+            let variable = items[1].trim();
+            let argument = goalArguments[ofst];
+            let resultContainer = {};
+            if (convert_result(argument, {type: type}, resultContainer)) {
+                let argumentPL = resultContainer.value;
+                let argumentReconstituted = format_term(argumentPL, {quoted: true});
+                unificationExpressions.push(variable + " = " + argumentReconstituted);
+            }
+        }
+
+        let argumentUnificationsPrefix = unificationExpressions.join(", ");
+        goalReconstituted = argumentUnificationsPrefix + ", " + goalString;
+    } else {
+        goalReconstituted = goal;
+    }
+
+    proscript(goalReconstituted);
 }
 
 function debug(msg) {
@@ -8658,6 +8734,7 @@ var parentMap = new Map([
     ['document', ['node']],
     ['element', ['node']],
     ['htmlelement', ['element']],
+    ['event', []],
     ['cssstyledeclaration', []],
     ['cssrule', []]
 ]);
@@ -8686,6 +8763,7 @@ var distinctivePropertyMap = {
     node:'nodeType',
     element:'id',
     htmlelement:'title',
+    event:'eventPhase',
     cssrule: 'parentStyleSheet'
 };
 
@@ -8988,7 +9066,12 @@ function ClassProperty() {
     that.setValue = function(property, elementJS, value) {
         var valueJS;
         if (TAG(element) === TAG_ATM) {
-            valueJS = getAtomPropertyValue(value);
+            let container = {};
+            if(getAtomPropertyValue(value, container)) {
+                valueJS = container.value;
+            } else {
+                // leave valueJS undefined.
+            }
         } else if (TAG(element) === TAG_LST) {
             valueJS = getClassListPropertyValue(value);
         }
@@ -9213,6 +9296,54 @@ webInterfaces.set('htmlelement',
         methods:htmlElementMethodSpecs
     });
 
+var htmlCanvasElementInterfaceProperties = new Map( [
+    ['height', SimpleProperty('number', 'height', true)],
+    ['width', SimpleProperty('number', 'width', true)]
+]);
+
+var htmlCanvasElementMethodSpecs = new Map([
+    ['getContext',{name:'getContext',arguments:[{type:'string'}],returns:{type:'object'}}], // arg is '2d' or 'webgl'. return is CanvasRenderingContext2D or WebGLRenderingContext
+    ['toDataURL',{name:'toDataURL',arguments:[{type:'string'},{type:'float'}],returns:{type:'string_codes'}}], // 2nd arg is between 0 and 1. Result is a data URL.
+    ['toBlob',{name:'toBlob',arguments:[{type:'goal_function'},{type:'string'},{type:'float'}]}],
+    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+]);
+
+webInterfaces.set('htmlcanvaselement',
+    {name: 'htmlcanvaselement',
+        properties:htmlCanvasElementInterfaceProperties,
+        methods:htmlCanvasElementMethodSpecs
+    });
+
+var eventInterfaceProperties = new Map( [
+    ['bubbles', SimpleProperty('boolean', 'bubbles')],
+    ['cancelable', SimpleProperty('boolean', 'cancelable')],
+    ['cancelBubble', SimpleProperty('boolean', 'cancelBubble', true)],
+    ['composed', SimpleProperty('boolean', 'composed')],
+    ['currentTarget', SimpleProperty('object', 'currentTarget')],
+    ['defaultPrevented', SimpleProperty('boolean', 'defaultPrevented')],
+    ['eventPhase', SimpleProperty('number', 'eventPhase')],
+    ['returnValue', SimpleProperty('boolean', 'returnValue', true)],
+    ['target', SimpleProperty('object', 'target')],
+    ['timeStamp', SimpleProperty('number', 'timeStamp')],
+    ['type', SimpleProperty('string', 'type')],
+    ['isTrusted', SimpleProperty('boolean', 'isTrusted')]
+]);
+
+var eventMethodSpecs = new Map([
+    ['composedPath',{name:'composedPath',arguments:[],returns:{type:'object'}}],
+    ['preventDefault',{name:'preventDefault',arguments:[]}],
+    ['stopImmediatePropagation',{name:'stopImmediatePropagation',arguments:[]}],
+    ['stopPropagation',{name:'stopPropagation',arguments:[]}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+]);
+
+webInterfaces.set('event',
+    {name: 'event',
+        properties:eventInterfaceProperties,
+        methods:eventMethodSpecs
+    });
+
 var cssStyleDeclarationInterfaceProperties = new Map( [
     ['cssText', SimpleProperty('string', 'cssText', true)], // documented as Attribute, but not listed as Property.
     ['length', SimpleProperty('number', 'length')],
@@ -9248,6 +9379,26 @@ webInterfaces.set('cssrule',
         properties:cssRuleInterfaceProperties,
         methods:cssRuleMethodSpecs
     });
+
+var canvasRenderingContext2DInterfaceProperties = new Map( [
+    ['canvas', SimpleProperty('object', 'canvas')],
+    ['fillStyle', SimpleProperty(['string','object'], 'fillStyle')],
+    ['parentRule', SimpleProperty('object', 'parentRule')] // object has a CSSRule interface.
+]);
+
+var canvasRenderingContext2DMethodSpecs = new Map([
+    ['getPropertyPriority',{name:'getPropertyPriority',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['getPropertyValue',{name:'getPropertyValue',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['item',{name:'item',arguments:[{type:'integer'}],returns:{type:'atom'}}],
+    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+]);
+
+webInterfaces.set('canvasrenderingcontext2d',
+    {name: 'canvasrenderingcontext2d',
+        properties:canvasRenderingContext2DInterfaceProperties,
+        methods:canvasRenderingContext2DMethodSpecs
+    });
 // File object_property.js
 
 var dopCursors = new Map();
@@ -9268,8 +9419,12 @@ function predicate_dom_object_property(type, object, property, value) {
 
     }
     else {
+        let container = {};
+        if(!setupObjectsForPropertyValue(type, object, property, value, container)) {
+            return false;
+        }
         cursor = {
-            objects: setupObjectsForPropertyValue(type, object, property, value),
+            objects: container.value,
             property_values: setupPropertyValues(type, object, property, value)
         };
         cursorIDJS = 'crs' + dopCursorCounter++;
@@ -9312,31 +9467,34 @@ function predicate_dom_object_property(type, object, property, value) {
 }
 
 
-function setupObjectsForPropertyValue(type, object, property, value) {
+function setupObjectsForPropertyValue(type, object, property, value, container) {
     if (TAG(property) === TAG_REF) {
-        instantiation_error(property);
+        return instantiation_error(property);
     } else {
         var propertyJS = atable[VAL(property)];
     }
 
     if (TAG(object) !== TAG_REF) {
         if (TAG(object) !== TAG_STR) {
-            instantiation_error(object);
+            return instantiation_error(object);
         }
         var objectContainer = {};
         if (!get_object_container(object, objectContainer)) {
-            return undefined;
+            container.value = undefined;
+        } else {
+            var objectContainers = [];
+            objectContainers.push(objectContainer);
+            container.value = objectContainers;
         }
-        var objectContainers = [];
-        objectContainers.push(objectContainer);
-        return objectContainers;
-    } else if (TAG(value) !== TAG_REF && TAG(type) === TAG_ATM) {
-        return setupObjectsForBoundPropertyValue(atable[VAL(type)], propertyJS, value);
+     } else if (TAG(value) !== TAG_REF && TAG(type) === TAG_ATM) {
+        return setupObjectsForBoundPropertyValue(atable[VAL(type)], propertyJS, value, container);
     } else if (TAG(type) === TAG_ATM && atable[VAL(type)] === 'element') {
-        return objectsToContainers(document.querySelectorAll('*'), 'element');
+        container.value = objectsToContainers(document.querySelectorAll('*'), 'element');
     } else {
-        return undefined;
+        container.value = undefined;
     }
+
+    return true;
 }
 
 function objectsToContainers(objects, typeJS) {
@@ -9392,29 +9550,69 @@ function setupPropertyValues(type, object, property, value) {
     return values;
 }
 
-function propertyValueToJS(type, value) {
-    if(type === 'atom') {
-        return getAtomPropertyValue(value);
+function propertyValueToJS(type, value, container, reportError) {
+    if(! container) {
+        let valueJS;
+        let container = {};
+        if (propertyValueToJS(propertySpec.type, value, container)) {
+            valueJS = container.value;
+        } else {
+            let formatted = format_term(value, {quoted: true});
+            throw 'unable to convert Prolog value "' + formatted + '" to Javascript value of type "' + propertySpec.type + '".';
+        }
+        return valueJS;
+    }
+
+    if(typeof type === 'object') {
+        // union of types
+        for(subtype of type) {
+            if(propertyValueToJS(subtype, value, container, false)) {
+                return true;
+            }
+        }
+
+        if(reportError) {
+            return type_error('union: ' + type, value);
+        } else {
+            return false;
+        }
+    } else if(type === 'atom') {
+        return getAtomPropertyValue(value, container, reportError);
     } else if(type === 'boolean') {
-        return getBooleanPropertyValue(value);
+        return getBooleanPropertyValue(value, container, reportError);
     } else if(type === 'number') {
-        return getNumberPropertyValue(value);
+        return getIntegerPropertyValue(value, container, reportError);
     } else if(type === 'string') {
-        return getStringPropertyValue(value);
+        return getStringPropertyValue(value, container, reportError);
     } else if(type === 'object') {
-        return getObjectPropertyValue(value);
+        return getObjectPropertyValue(value, container, reportError);
+    } else if(reportError){
+        return domain_error(type);
     } else {
-        domain_error(type);
+        return false;
     }
 }
 
-function getAtomPropertyValue(value) {
-    return atable[VAL(value)];
+function getAtomPropertyValue(value, container, reportError) {
+    if(TAG(value) !== TAG_ATM) {
+        return reportError && type_error('atom', value);
+    }
+    container.value = atable[VAL(value)];
+    return true;
 }
 
-function getBooleanPropertyValue(value) {
+function getBooleanPropertyValue(value, container, reportError) {
+    if(TAG(value) !== TAG_ATM) {
+        return reportError && type_error('atom', value);
+    }
+
     var valueJS = atable[VAL(value)];
-    return valueJS === 'true';
+
+    if(valueJS !== 'true' && valueJS !== 'false') {
+        return reportError && domain_error('boolean atom', value);
+    }
+    container.value = (valueJS === 'true');
+    return true;
 }
 
 /**
@@ -9449,25 +9647,26 @@ function getClassListPropertyValue(value) {
     return string;
 }
 
-function getNumberPropertyValue(value) {
+function getIntegerPropertyValue(value, container, reportError) {
+    if(TAG(value) !== TAG_INT) {
+        return reportError && type_error('integer', value);
+    }
+
     let result;
     if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
         result = VAL(value) - (1 << WORD_BITS);
     else
         result = VAL(value);
-    return result;
+    container.value = result;
+    return true;
 }
 
-function getStringPropertyValue(value) {
-    return codes_to_string(value);
+function getStringPropertyValue(value, container, reportError) {
+     return codes_to_string(value, container, reportError);
 }
 
-function getObjectPropertyValue(value) {
-    var valueObjectContainer = {};
-    if (!get_object_container(value, valueObjectContainer)) {
-        return undefined;
-    }
-    return valueObjectContainer.value;
+function getObjectPropertyValue(value, container) {
+    return get_object_container(value, container);
 }
 
 function propertyValueToPL(typeJS, property, valueJS) {
@@ -9507,13 +9706,14 @@ function getObjectPLPropertyValue(valueJS) {
     return create_object_structure(valueJS);
 }
 
-function setupObjectsForBoundPropertyValue(typeJS, propertyJS, value) {
+function setupObjectsForBoundPropertyValue(typeJS, propertyJS, value, container) {
     let propertySpec = getPropertySpecification(typeJS, propertyJS);
     if (propertySpec) {
-        var valueJS = propertyValueToJS(propertySpec.type, value);
-        return objectsToContainers(propertySpec.objects(valueJS), typeJS);
+        let valueJS = propertyValueToJS(propertySpec.type, value);
+        container.value = objectsToContainers(propertySpec.objects(valueJS), typeJS);
+        return true;
     } else {
-        domain_error(propertyJS);
+        return domain_error(propertyJS);
     }
 }
 
@@ -9647,21 +9847,20 @@ function predicate_dom_object_method(object, methodStructure) {
     }
 }
 
-function convert_method_argument(term, spec, resultContainer) {
+function convert_method_argument(term, spec, resultContainer, reportError) {
     if(TAG(term) === TAG_REF) {
         return instantiation_error(term);
-        // error
     }
 
     let arg;
     if(typeof spec.type === 'object') {
         // union of multiple types
         for(let subtype of spec.type) {
-            if(convert_method_argument(term, {type: subtype}, resultContainer)) {
+            if(convert_method_argument(term, {type: subtype}, resultContainer, false)) {
                 return true;
             }
         }
-        return false;
+        return type_error('union: ' + spec.type, term);
     } else if(spec.type === 'string') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
@@ -9669,16 +9868,17 @@ function convert_method_argument(term, spec, resultContainer) {
             arg = format_term(term, {quoted:true});
         }
     } else if(spec.type === 'string_codes') {
-        if (TAG(term) === TAG_LST) {
-            arg = codes_to_string(term);
-        } else {
-            return type_error('list', term);
+        let container = {};
+        if (!codes_to_string(term, container, reportError)) {
+            return false;
         }
+        arg = container.value;
     } else if(spec.type === 'integer') {
-        if (TAG(term) === TAG_INT) {
-            arg = getNumberPropertyValue(term);
+        let container = {};
+        if (getIntegerPropertyValue(term, container, reportError)) {
+            arg = container.value;
         } else {
-            return type_error('integer', term);
+            return false;
         }
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
@@ -9688,35 +9888,35 @@ function convert_method_argument(term, spec, resultContainer) {
             } else if(value === 'false') {
                 arg = false
             } else {
-                return domain_error('boolean', term);
+                return reportError && domain_error('boolean', term);
             }
         } else {
-            // error
+            return reportError && type_error('atom', term);
         }
     } else if(spec.type === 'position') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
             if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(arg.toLowerCase()) === -1) {
-                return domain_error("not_valid_insert_adjacent_mode", term);
-                // error
+                return reportError && domain_error("not_valid_insert_adjacent_mode", term);
             }
         } else  {
-            return type_error('atom', term);
+            return reportError && type_error('atom', term);
         }
     } else if(spec.type === 'goal_function') {
+        // the goal may be specified with one or more arguments using '^': Type-X ^ foo(X)
         let goal;
         if (TAG(term) === TAG_ATM) {
             goal = PL_atom_chars(term);
         } else if (TAG(term) === TAG_STR) {
             goal = format_term(term, {quoted: true});
         } else {
-            return type_error('atom or structure', term);
+            return reportError && type_error('atom or structure', term);
         }
 
         arg = goalFunctions.get(goal);
         if (!arg) {
             arg = function () {
-                proscript(goal)
+                proscript_apply(arguments, goal);
             };
 
             goalFunctions.set(goal, arg);
@@ -9726,7 +9926,7 @@ function convert_method_argument(term, spec, resultContainer) {
         if (TAG(term) === TAG_ATM) {
             eventName = PL_atom_chars(term);
         } else {
-            return type_error('atom', term);
+            return reportError && type_error('atom', term);
         }
         arg = new Event(eventName);
     } else if(spec.type === 'object'){
@@ -9737,7 +9937,7 @@ function convert_method_argument(term, spec, resultContainer) {
             }
             arg = objectContainer.value;
         } else {
-            return type_error('object', term);
+            return reportError && type_error('object', term);
         }
     } else if(spec.type === 'options') {
         // [key-value|_]
@@ -9746,7 +9946,7 @@ function convert_method_argument(term, spec, resultContainer) {
             if(terms_to_options(term, optionsContainer)) {
                 arg = optionsContainer.value;
             } else {
-                return type_error('option list', term);
+                return reportError && type_error('option list', term);
             }
         }
     } else {
@@ -9793,9 +9993,8 @@ function terms_to_options(listRoot, optionsContainer) {
             if(TAG(valuePL) !== TAG_ATM) {
                 return type_error('key - value: value should be an atom.', valuePL);
             }
-            let valueJS = atable[VAL(valuePL)];
 
-            options.put(keyJS, valueJS);
+            options[keyJS] = atable[VAL(valuePL)];
 
             list = memory[VAL(list) + 1];
         }

@@ -72,21 +72,20 @@ function predicate_dom_object_method(object, methodStructure) {
     }
 }
 
-function convert_method_argument(term, spec, resultContainer) {
+function convert_method_argument(term, spec, resultContainer, reportError) {
     if(TAG(term) === TAG_REF) {
         return instantiation_error(term);
-        // error
     }
 
     let arg;
     if(typeof spec.type === 'object') {
         // union of multiple types
         for(let subtype of spec.type) {
-            if(convert_method_argument(term, {type: subtype}, resultContainer)) {
+            if(convert_method_argument(term, {type: subtype}, resultContainer, false)) {
                 return true;
             }
         }
-        return false;
+        return type_error('union: ' + spec.type, term);
     } else if(spec.type === 'string') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
@@ -94,16 +93,17 @@ function convert_method_argument(term, spec, resultContainer) {
             arg = format_term(term, {quoted:true});
         }
     } else if(spec.type === 'string_codes') {
-        if (TAG(term) === TAG_LST) {
-            arg = codes_to_string(term);
-        } else {
-            return type_error('list', term);
+        let container = {};
+        if (!codes_to_string(term, container, reportError)) {
+            return false;
         }
+        arg = container.value;
     } else if(spec.type === 'integer') {
-        if (TAG(term) === TAG_INT) {
-            arg = getNumberPropertyValue(term);
+        let container = {};
+        if (getIntegerPropertyValue(term, container, reportError)) {
+            arg = container.value;
         } else {
-            return type_error('integer', term);
+            return false;
         }
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
@@ -113,35 +113,35 @@ function convert_method_argument(term, spec, resultContainer) {
             } else if(value === 'false') {
                 arg = false
             } else {
-                return domain_error('boolean', term);
+                return reportError && domain_error('boolean', term);
             }
         } else {
-            // error
+            return reportError && type_error('atom', term);
         }
     } else if(spec.type === 'position') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
             if(["afterbegin", "afterend", "beforebegin", "beforeend"].indexOf(arg.toLowerCase()) === -1) {
-                return domain_error("not_valid_insert_adjacent_mode", term);
-                // error
+                return reportError && domain_error("not_valid_insert_adjacent_mode", term);
             }
         } else  {
-            return type_error('atom', term);
+            return reportError && type_error('atom', term);
         }
     } else if(spec.type === 'goal_function') {
+        // the goal may be specified with one or more arguments using '^': Type-X ^ foo(X)
         let goal;
         if (TAG(term) === TAG_ATM) {
             goal = PL_atom_chars(term);
         } else if (TAG(term) === TAG_STR) {
             goal = format_term(term, {quoted: true});
         } else {
-            return type_error('atom or structure', term);
+            return reportError && type_error('atom or structure', term);
         }
 
         arg = goalFunctions.get(goal);
         if (!arg) {
             arg = function () {
-                proscript(goal)
+                proscript_apply(arguments, goal);
             };
 
             goalFunctions.set(goal, arg);
@@ -151,7 +151,7 @@ function convert_method_argument(term, spec, resultContainer) {
         if (TAG(term) === TAG_ATM) {
             eventName = PL_atom_chars(term);
         } else {
-            return type_error('atom', term);
+            return reportError && type_error('atom', term);
         }
         arg = new Event(eventName);
     } else if(spec.type === 'object'){
@@ -162,7 +162,7 @@ function convert_method_argument(term, spec, resultContainer) {
             }
             arg = objectContainer.value;
         } else {
-            return type_error('object', term);
+            return reportError && type_error('object', term);
         }
     } else if(spec.type === 'options') {
         // [key-value|_]
@@ -171,7 +171,7 @@ function convert_method_argument(term, spec, resultContainer) {
             if(terms_to_options(term, optionsContainer)) {
                 arg = optionsContainer.value;
             } else {
-                return type_error('option list', term);
+                return reportError && type_error('option list', term);
             }
         }
     } else {
@@ -218,9 +218,8 @@ function terms_to_options(listRoot, optionsContainer) {
             if(TAG(valuePL) !== TAG_ATM) {
                 return type_error('key - value: value should be an atom.', valuePL);
             }
-            let valueJS = atable[VAL(valuePL)];
 
-            options.put(keyJS, valueJS);
+            options[keyJS] = atable[VAL(valuePL)];
 
             list = memory[VAL(list) + 1];
         }

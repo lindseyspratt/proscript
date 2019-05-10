@@ -18,8 +18,12 @@ function predicate_dom_object_property(type, object, property, value) {
         debug_msg("Is retry! Setting cursor back to " + cursor);
     }
     else {
+        let container = {};
+        if(!setupObjectsForPropertyValue(type, object, property, value, container)) {
+            return false;
+        }
         cursor = {
-            objects: setupObjectsForPropertyValue(type, object, property, value),
+            objects: container.value,
             property_values: setupPropertyValues(type, object, property, value)
         };
         cursorIDJS = 'crs' + dopCursorCounter++;
@@ -63,31 +67,34 @@ function predicate_dom_object_property(type, object, property, value) {
 }
 
 
-function setupObjectsForPropertyValue(type, object, property, value) {
+function setupObjectsForPropertyValue(type, object, property, value, container) {
     if (TAG(property) === TAG_REF) {
-        instantiation_error(property);
+        return instantiation_error(property);
     } else {
         var propertyJS = atable[VAL(property)];
     }
 
     if (TAG(object) !== TAG_REF) {
         if (TAG(object) !== TAG_STR) {
-            instantiation_error(object);
+            return instantiation_error(object);
         }
         var objectContainer = {};
         if (!get_object_container(object, objectContainer)) {
-            return undefined;
+            container.value = undefined;
+        } else {
+            var objectContainers = [];
+            objectContainers.push(objectContainer);
+            container.value = objectContainers;
         }
-        var objectContainers = [];
-        objectContainers.push(objectContainer);
-        return objectContainers;
-    } else if (TAG(value) !== TAG_REF && TAG(type) === TAG_ATM) {
-        return setupObjectsForBoundPropertyValue(atable[VAL(type)], propertyJS, value);
+     } else if (TAG(value) !== TAG_REF && TAG(type) === TAG_ATM) {
+        return setupObjectsForBoundPropertyValue(atable[VAL(type)], propertyJS, value, container);
     } else if (TAG(type) === TAG_ATM && atable[VAL(type)] === 'element') {
-        return objectsToContainers(document.querySelectorAll('*'), 'element');
+        container.value = objectsToContainers(document.querySelectorAll('*'), 'element');
     } else {
-        return undefined;
+        container.value = undefined;
     }
+
+    return true;
 }
 
 function objectsToContainers(objects, typeJS) {
@@ -143,29 +150,69 @@ function setupPropertyValues(type, object, property, value) {
     return values;
 }
 
-function propertyValueToJS(type, value) {
-    if(type === 'atom') {
-        return getAtomPropertyValue(value);
+function propertyValueToJS(type, value, container, reportError) {
+    if(! container) {
+        let valueJS;
+        let container = {};
+        if (propertyValueToJS(propertySpec.type, value, container)) {
+            valueJS = container.value;
+        } else {
+            let formatted = format_term(value, {quoted: true});
+            throw 'unable to convert Prolog value "' + formatted + '" to Javascript value of type "' + propertySpec.type + '".';
+        }
+        return valueJS;
+    }
+
+    if(typeof type === 'object') {
+        // union of types
+        for(subtype of type) {
+            if(propertyValueToJS(subtype, value, container, false)) {
+                return true;
+            }
+        }
+
+        if(reportError) {
+            return type_error('union: ' + type, value);
+        } else {
+            return false;
+        }
+    } else if(type === 'atom') {
+        return getAtomPropertyValue(value, container, reportError);
     } else if(type === 'boolean') {
-        return getBooleanPropertyValue(value);
+        return getBooleanPropertyValue(value, container, reportError);
     } else if(type === 'number') {
-        return getNumberPropertyValue(value);
+        return getIntegerPropertyValue(value, container, reportError);
     } else if(type === 'string') {
-        return getStringPropertyValue(value);
+        return getStringPropertyValue(value, container, reportError);
     } else if(type === 'object') {
-        return getObjectPropertyValue(value);
+        return getObjectPropertyValue(value, container, reportError);
+    } else if(reportError){
+        return domain_error(type);
     } else {
-        domain_error(type);
+        return false;
     }
 }
 
-function getAtomPropertyValue(value) {
-    return atable[VAL(value)];
+function getAtomPropertyValue(value, container, reportError) {
+    if(TAG(value) !== TAG_ATM) {
+        return reportError && type_error('atom', value);
+    }
+    container.value = atable[VAL(value)];
+    return true;
 }
 
-function getBooleanPropertyValue(value) {
+function getBooleanPropertyValue(value, container, reportError) {
+    if(TAG(value) !== TAG_ATM) {
+        return reportError && type_error('atom', value);
+    }
+
     var valueJS = atable[VAL(value)];
-    return valueJS === 'true';
+
+    if(valueJS !== 'true' && valueJS !== 'false') {
+        return reportError && domain_error('boolean atom', value);
+    }
+    container.value = (valueJS === 'true');
+    return true;
 }
 
 /**
@@ -200,25 +247,26 @@ function getClassListPropertyValue(value) {
     return string;
 }
 
-function getNumberPropertyValue(value) {
+function getIntegerPropertyValue(value, container, reportError) {
+    if(TAG(value) !== TAG_INT) {
+        return reportError && type_error('integer', value);
+    }
+
     let result;
     if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
         result = VAL(value) - (1 << WORD_BITS);
     else
         result = VAL(value);
-    return result;
+    container.value = result;
+    return true;
 }
 
-function getStringPropertyValue(value) {
-    return codes_to_string(value);
+function getStringPropertyValue(value, container, reportError) {
+     return codes_to_string(value, container, reportError);
 }
 
-function getObjectPropertyValue(value) {
-    var valueObjectContainer = {};
-    if (!get_object_container(value, valueObjectContainer)) {
-        return undefined;
-    }
-    return valueObjectContainer.value;
+function getObjectPropertyValue(value, container) {
+    return get_object_container(value, container);
 }
 
 function propertyValueToPL(typeJS, property, valueJS) {
@@ -258,13 +306,14 @@ function getObjectPLPropertyValue(valueJS) {
     return create_object_structure(valueJS);
 }
 
-function setupObjectsForBoundPropertyValue(typeJS, propertyJS, value) {
+function setupObjectsForBoundPropertyValue(typeJS, propertyJS, value, container) {
     let propertySpec = getPropertySpecification(typeJS, propertyJS);
     if (propertySpec) {
-        var valueJS = propertyValueToJS(propertySpec.type, value);
-        return objectsToContainers(propertySpec.objects(valueJS), typeJS);
+        let valueJS = propertyValueToJS(propertySpec.type, value);
+        container.value = objectsToContainers(propertySpec.objects(valueJS), typeJS);
+        return true;
     } else {
-        domain_error(propertyJS);
+        return domain_error(propertyJS);
     }
 }
 

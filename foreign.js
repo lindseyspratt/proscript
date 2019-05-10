@@ -2382,7 +2382,11 @@ function predicate_eval_javascript(expression, result)
     if (TAG(expression) === TAG_ATM) {
         expressionJS = PL_atom_chars(expression);
     } else if (TAG(expression) === TAG_LST) {
-        expressionJS = codes_to_string(expression);
+        let container = {};
+        if(!codes_to_string(expression, container)) {
+            return false;
+        }
+        expressionJS = container.value;
     } else {
         instantiation_error(expression);
     }

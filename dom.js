@@ -12,15 +12,15 @@ var desaCursorCounter = 0;
 
 function predicate_set_dom_element_attribute_value(element, attribute, value) {
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(attribute) !== TAG_ATM) {
-        instantiation_error(attribute);
+        return instantiation_error(attribute);
     }
 
     if (TAG(value) !== TAG_ATM) {
-        instantiation_error(value);
+        return instantiation_error(value);
     }
 
     var elementObject = {};
@@ -42,11 +42,11 @@ function predicate_set_dom_element_attribute_value(element, attribute, value) {
 
 function predicate_remove_dom_element_class(element, value) {
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(value) !== TAG_ATM) {
-        instantiation_error(value);
+        return instantiation_error(value);
     }
 
     var elementObject = {};
@@ -63,15 +63,15 @@ function predicate_remove_dom_element_class(element, value) {
 
 function predicate_replace_dom_element_class(element, oldValue, value) {
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(oldValue) !== TAG_ATM) {
-        instantiation_error(oldValue);
+        return instantiation_error(oldValue);
     }
 
     if (TAG(value) !== TAG_ATM) {
-        instantiation_error(value);
+        return instantiation_error(value);
     }
 
     var elementObject = {};
@@ -89,11 +89,11 @@ function predicate_replace_dom_element_class(element, oldValue, value) {
 
 function predicate_toggle_dom_element_class(element, value, action) {
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(value) !== TAG_ATM) {
-        instantiation_error(value);
+        return instantiation_error(value);
     }
 
     var elementObject = {};
@@ -116,7 +116,7 @@ function predicate_toggle_dom_element_class(element, value, action) {
         return bind(action, lookup_atom(actionJS))
     } else {
         if (TAG(action) !== TAG_ATM) {
-            instantiation_error(action);
+            return instantiation_error(action);
         }
 
         actionJS = atable[VAL(action)];
@@ -125,7 +125,7 @@ function predicate_toggle_dom_element_class(element, value, action) {
         } else if(actionJS === 'remove') {
             flag = false;
         } else {
-            domain_error(action);
+            return domain_error(action);
         }
 
         elementJS.classList.toggle(valueJS, flag);
@@ -160,10 +160,14 @@ function predicate_dom_element_attribute_value(element, attribute, value) {
         debug_msg("Is retry! Setting cursor back to " + cursor);
     }
     else {
+        let container = {};
+        if(!setupValues(element, attribute, value, container)) {
+            return false;
+        }
         cursor = {
             elements: setupElements(element, attribute, value),
             attributes: setupAttributes(element, attribute),
-            values: setupValues(element, attribute, value)
+            values: container.value
         };
         cursorIDJS = 'crs' + deavCursorCounter++;
         deavCursors.set(cursorIDJS, cursor);
@@ -223,7 +227,7 @@ function predicate_dom_element_attribute_value(element, attribute, value) {
     }
 }
 
-function setupValues(element, attribute, value) {
+function setupValues(element, attribute, value, container) {
     var values = [];
 
     var valueJS;
@@ -237,16 +241,17 @@ function setupValues(element, attribute, value) {
     // } else
     if (TAG(element) !== TAG_REF && TAG(attribute) !== TAG_REF) {
         if (TAG(element) !== TAG_STR) {
-            instantiation_error(element);
+            return instantiation_error(element);
         }
 
         if (TAG(attribute) !== TAG_ATM) {
-            instantiation_error(attribute);
+            return instantiation_error(attribute);
         }
 
         var elementObject = {};
         if (!get_element_object(element, elementObject)) {
-            return undefined;
+            container.value = undefined;
+            return true;
         }
         var elementJS = elementObject.value;
         var attributeJS = atable[VAL(attribute)];
@@ -264,7 +269,8 @@ function setupValues(element, attribute, value) {
     } else {
         values = undefined;
     }
-    return values;
+    container.value = values;
+    return true;
 }
 
 function setupValuesFromJSElementAndAttribute(elementJS, attributeJS, value) {
@@ -404,25 +410,26 @@ function string_to_codes(string) {
     return tmp;
 }
 
-function codes_to_string(codes) {
+function codes_to_string(codes, container, reportError) {
     var string = '';
 
     var list = codes;
 
     while(list !== NIL) {
         if(TAG(list) !== TAG_LST) {
-            instantiation_error(list);
+            return reportError && instantiation_error(list);
         }
 
         var codePL = memory[VAL(list)];
         if(TAG(codePL) !== TAG_INT) {
-            instantiation_error(codePL);
+            return reportError && instantiation_error(codePL);
         } else {
             string += String.fromCharCode(codePL);
             list = memory[VAL(list) + 1];
         }
     }
-    return string;
+    container.value = string;
+    return true;
 }
 
 function predicate_alert(term) {
@@ -433,11 +440,11 @@ function predicate_alert(term) {
 
 function predicate_create_dom_element(tag, element) {
     if(TAG(tag) !== TAG_ATM) {
-        instantiation_error(tag);
+        return instantiation_error(tag);
     }
 
     if(TAG(element) !== TAG_REF) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     var tagJS = atable[VAL(tag)];
@@ -449,14 +456,19 @@ function predicate_create_dom_element(tag, element) {
 
 function predicate_create_dom_text_node(text, element) {
     if(TAG(text) !== TAG_LST) {
-        instantiation_error(text);
+        return instantiation_error(text);
     }
 
     if(TAG(element) !== TAG_REF) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
-    var textJS = codes_to_string(text);
+    let container = {};
+    if(! codes_to_string(text, container)) {
+        return false;
+    }
+    var textJS = container.value;
+
     var elementJS = document.createTextNode(textJS);
     var elementPL = create_element_structure(elementJS);
 
@@ -466,11 +478,11 @@ function predicate_create_dom_text_node(text, element) {
 
 function predicate_append_dom_node_child(element, child) {
     if(TAG(child) !== TAG_STR) {
-        instantiation_error(child);
+        return instantiation_error(child);
     }
 
     if(TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     var elementObject = {};
@@ -495,32 +507,32 @@ function predicate_append_dom_node_child(element, child) {
 function predicate_insert_before_dom_node(parent, element, before) {
 
     if (TAG(parent) !== TAG_STR) {
-        instantiation_error(parent);
+        return instantiation_error(parent);
     }
 
     if (TAG(before) !== TAG_STR) {
-        instantiation_error(before);
+        return instantiation_error(before);
     }
 
     if (TAG(element) !== TAG_STR) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     var parentObject = {};
     if (!get_element_object(parent, parentObject)) {
-        existence_error("element", parent);
+        return existence_error("element", parent);
     }
     var parentJS = parentObject.value;
 
     var elementObject = {};
     if (!get_element_object(element, elementObject)) {
-        existence_error("element", element);
+        return existence_error("element", element);
     }
     var elementJS = elementObject.value;
 
     var beforeObject = {};
     if (!get_element_object(before, beforeObject)) {
-        existence_error("element", before);
+        return existence_error("element", before);
     }
     var beforeJS = beforeObject.value;
 
@@ -532,14 +544,18 @@ function predicate_insert_before_dom_node(parent, element, before) {
 
 function predicate_dom_select_element(query, element) {
     if (TAG(element) !== TAG_STR && TAG(element) !== TAG_REF) {
-        instantiation_error(element);
+        return instantiation_error(element);
     }
 
     if (TAG(query) !== TAG_LST) {
-        instantiation_error(query);
+        return instantiation_error(query);
     }
 
-    var queryJS = codes_to_string(query);
+    let container = {};
+    if(!codes_to_string(query)) {
+        return false;
+    }
+    var queryJS = container.value;
 
     var elementJS = document.querySelector(queryJS);
     var elementPL = create_element_structure(elementJS);
@@ -559,8 +575,12 @@ function predicate_dom_select_all_elements(query, element) {
         debug_msg("Is retry! Setting cursor back to " + cursor);
     }
     else {
+        let container = {};
+        if(!setupElementsForSelectAll(query, container)) {
+            return false;
+        }
         cursor = {
-            elements: setupElementsForSelectAll(query)
+            elements: container.value
         };
         cursorIDJS = 'crs' + desaCursorCounter++;
         desaCursors.set(cursorIDJS, cursor);
@@ -583,11 +603,15 @@ function predicate_dom_select_all_elements(query, element) {
     }
 }
 
-function setupElementsForSelectAll(query) {
+function setupElementsForSelectAll(query, container) {
 
-    var queryJS = codes_to_string(query);
+    let queryContainer = {};
+    if(!codes_to_string(query, queryContainer, true)) {
+        return false;
+    }
 
-    return document.querySelectorAll(queryJS);
+    container.value = document.querySelectorAll(queryContainer.value);
+    return true;
 }
 
 // proscript_init generally is only used once in a web page to set up the proscript globals.
@@ -682,6 +706,54 @@ function proscript(queryJS) {
         code = saved_code;
         memory = copy_memory(saved_memory);
     }
+}
+
+function proscript_apply(goalArguments, goal) {
+    // goal = '[Tx-X,Ty-Y,...] ^ G' where G is an expression referencing X, Y, ...
+    // goalArguments is an array [a,b, ...] where each item is applied to the corresonding
+    // entry in [X, Y, ...].The combined expression is:
+    //     ParamGoal = Arguments ^ BoundGoal, call(BoundGoal)
+    // proscript();
+    // However, the goalArguments must be converted to their Prolog syntactic representation.
+    // How this is done depends on the expected type, which is encoded in the goal's argument T specification.
+
+    // goal = "[a-B, c-D]^ foo(B, D)" -> ["[a-B, c-D]", "a-B, c-D"]
+    // for each argument[i], create formatted term F[i] of prolog transform(type[i], argument[i].
+    // new goal = "F[i] = A[i], ..., G"
+    let typedArgumentStrings = goal.match(/^ *\[(.*)] *\^/);
+
+    let goalReconstituted;
+    if(typedArgumentStrings) {
+        let typedArgumentPrefix = typedArgumentStrings[0];
+        let goalString = goal.substring(typedArgumentPrefix.length);
+
+        let typedArgumentString = typedArgumentStrings[1];
+        let typedArguments = typedArgumentString.trim().split(",");
+
+        let unificationExpressions = [];
+        let limit = Math.min(typedArguments.length, goalArguments.length);
+
+        for (let ofst = 0; ofst < limit; ofst++) {
+            let typedArgumentString = typedArguments[ofst];
+            let items = typedArgumentString.trim().split('-');
+            let type = items[0].trim();
+            let variable = items[1].trim();
+            let argument = goalArguments[ofst];
+            let resultContainer = {};
+            if (convert_result(argument, {type: type}, resultContainer)) {
+                let argumentPL = resultContainer.value;
+                let argumentReconstituted = format_term(argumentPL, {quoted: true});
+                unificationExpressions.push(variable + " = " + argumentReconstituted);
+            }
+        }
+
+        let argumentUnificationsPrefix = unificationExpressions.join(", ");
+        goalReconstituted = argumentUnificationsPrefix + ", " + goalString;
+    } else {
+        goalReconstituted = goal;
+    }
+
+    proscript(goalReconstituted);
 }
 
 function debug(msg) {

@@ -210,7 +210,12 @@ function ClassProperty() {
     that.setValue = function(property, elementJS, value) {
         var valueJS;
         if (TAG(element) === TAG_ATM) {
-            valueJS = getAtomPropertyValue(value);
+            let container = {};
+            if(getAtomPropertyValue(value, container)) {
+                valueJS = container.value;
+            } else {
+                // leave valueJS undefined.
+            }
         } else if (TAG(element) === TAG_LST) {
             valueJS = getClassListPropertyValue(value);
         }
@@ -435,6 +440,54 @@ webInterfaces.set('htmlelement',
         methods:htmlElementMethodSpecs
     });
 
+var htmlCanvasElementInterfaceProperties = new Map( [
+    ['height', SimpleProperty('number', 'height', true)],
+    ['width', SimpleProperty('number', 'width', true)]
+]);
+
+var htmlCanvasElementMethodSpecs = new Map([
+    ['getContext',{name:'getContext',arguments:[{type:'string'}],returns:{type:'object'}}], // arg is '2d' or 'webgl'. return is CanvasRenderingContext2D or WebGLRenderingContext
+    ['toDataURL',{name:'toDataURL',arguments:[{type:'string'},{type:'float'}],returns:{type:'string_codes'}}], // 2nd arg is between 0 and 1. Result is a data URL.
+    ['toBlob',{name:'toBlob',arguments:[{type:'goal_function'},{type:'string'},{type:'float'}]}],
+    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+]);
+
+webInterfaces.set('htmlcanvaselement',
+    {name: 'htmlcanvaselement',
+        properties:htmlCanvasElementInterfaceProperties,
+        methods:htmlCanvasElementMethodSpecs
+    });
+
+var eventInterfaceProperties = new Map( [
+    ['bubbles', SimpleProperty('boolean', 'bubbles')],
+    ['cancelable', SimpleProperty('boolean', 'cancelable')],
+    ['cancelBubble', SimpleProperty('boolean', 'cancelBubble', true)],
+    ['composed', SimpleProperty('boolean', 'composed')],
+    ['currentTarget', SimpleProperty('object', 'currentTarget')],
+    ['defaultPrevented', SimpleProperty('boolean', 'defaultPrevented')],
+    ['eventPhase', SimpleProperty('number', 'eventPhase')],
+    ['returnValue', SimpleProperty('boolean', 'returnValue', true)],
+    ['target', SimpleProperty('object', 'target')],
+    ['timeStamp', SimpleProperty('number', 'timeStamp')],
+    ['type', SimpleProperty('string', 'type')],
+    ['isTrusted', SimpleProperty('boolean', 'isTrusted')]
+]);
+
+var eventMethodSpecs = new Map([
+    ['composedPath',{name:'composedPath',arguments:[],returns:{type:'object'}}],
+    ['preventDefault',{name:'preventDefault',arguments:[]}],
+    ['stopImmediatePropagation',{name:'stopImmediatePropagation',arguments:[]}],
+    ['stopPropagation',{name:'stopPropagation',arguments:[]}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+]);
+
+webInterfaces.set('event',
+    {name: 'event',
+        properties:eventInterfaceProperties,
+        methods:eventMethodSpecs
+    });
+
 var cssStyleDeclarationInterfaceProperties = new Map( [
     ['cssText', SimpleProperty('string', 'cssText', true)], // documented as Attribute, but not listed as Property.
     ['length', SimpleProperty('number', 'length')],
@@ -469,4 +522,24 @@ webInterfaces.set('cssrule',
     {name: 'cssrule',
         properties:cssRuleInterfaceProperties,
         methods:cssRuleMethodSpecs
+    });
+
+var canvasRenderingContext2DInterfaceProperties = new Map( [
+    ['canvas', SimpleProperty('object', 'canvas')],
+    ['fillStyle', SimpleProperty(['string','object'], 'fillStyle')],
+    ['parentRule', SimpleProperty('object', 'parentRule')] // object has a CSSRule interface.
+]);
+
+var canvasRenderingContext2DMethodSpecs = new Map([
+    ['getPropertyPriority',{name:'getPropertyPriority',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['getPropertyValue',{name:'getPropertyValue',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['item',{name:'item',arguments:[{type:'integer'}],returns:{type:'atom'}}],
+    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+]);
+
+webInterfaces.set('canvasrenderingcontext2d',
+    {name: 'canvasrenderingcontext2d',
+        properties:canvasRenderingContext2DInterfaceProperties,
+        methods:canvasRenderingContext2DMethodSpecs
     });

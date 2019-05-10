@@ -80,6 +80,7 @@ var parentMap = new Map([
     ['document', ['node']],
     ['element', ['node']],
     ['htmlelement', ['element']],
+    ['event', []],
     ['cssstyledeclaration', []],
     ['cssrule', []]
 ]);
@@ -108,6 +109,7 @@ var distinctivePropertyMap = {
     node:'nodeType',
     element:'id',
     htmlelement:'title',
+    event:'eventPhase',
     cssrule: 'parentStyleSheet'
 };
 
