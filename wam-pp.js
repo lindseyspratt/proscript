@@ -8734,9 +8734,12 @@ var parentMap = new Map([
     ['document', ['node']],
     ['element', ['node']],
     ['htmlelement', ['element']],
+    ['htmlcanvaselement', ['htmlelement']],
     ['event', []],
     ['cssstyledeclaration', []],
-    ['cssrule', []]
+    ['cssrule', []],
+    ['canvasrenderingcontext2d', []],
+    ['blob', []]
 ]);
 
 var childMap = new Map();
@@ -8770,7 +8773,10 @@ var distinctivePropertyMap = {
 var distinctiveMethodMap = {
     eventtarget: 'addEventListener',
     document: 'getElementById',
-    cssstyledeclaration:'getPropertyPriority'
+    cssstyledeclaration:'getPropertyPriority',
+    htmlcanvaselement:'getContext',
+    canvasrenderingcontext2d: 'getImageData',
+    blob: 'slice'
 };
 
 function getInterfaceItemSpec(typeJS, itemType, itemName) {
@@ -9303,8 +9309,8 @@ var htmlCanvasElementInterfaceProperties = new Map( [
 
 var htmlCanvasElementMethodSpecs = new Map([
     ['getContext',{name:'getContext',arguments:[{type:'string'}],returns:{type:'object'}}], // arg is '2d' or 'webgl'. return is CanvasRenderingContext2D or WebGLRenderingContext
-    ['toDataURL',{name:'toDataURL',arguments:[{type:'string'},{type:'float'}],returns:{type:'string_codes'}}], // 2nd arg is between 0 and 1. Result is a data URL.
     ['toBlob',{name:'toBlob',arguments:[{type:'goal_function'},{type:'string'},{type:'float'}]}],
+    ['toDataURL',{name:'toDataURL',arguments:[{type:'string'},{type:'float'}],returns:{type:'string_codes'}}], // 2nd arg is between 0 and 1. Result is a data URL.
     ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
     ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
 ]);
@@ -9382,22 +9388,92 @@ webInterfaces.set('cssrule',
 
 var canvasRenderingContext2DInterfaceProperties = new Map( [
     ['canvas', SimpleProperty('object', 'canvas')],
-    ['fillStyle', SimpleProperty(['string','object'], 'fillStyle')],
-    ['parentRule', SimpleProperty('object', 'parentRule')] // object has a CSSRule interface.
+    ['fillStyle', SimpleProperty(['string','object'], 'fillStyle', true)], // fillStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
+    ['font', SimpleProperty('string', 'font', true)],
+    ['globalAlpha', SimpleProperty('number', 'globalAlpha', true)],
+    ['globalCompositeOperation', SimpleProperty('string', 'globalCompositeOperation', true)],
+    ['imageSmoothingEnabled', SimpleProperty('string', 'imageSmoothingEnabled', true)],
+    ['lineCap', SimpleProperty('string', 'lineCap', true)],
+    ['lineDashOffset', SimpleProperty('number', 'lineDashOffset', true)],
+    ['lineJoin', SimpleProperty('string', 'lineJoin', true)],
+    ['lineWidth', SimpleProperty('number', 'lineWidth', true)],
+    ['miterLimit', SimpleProperty('number', 'miterLimit', true)],
+    ['shadowBlur', SimpleProperty('number', 'shadowBlur', true)],
+    ['shadowColor', SimpleProperty('string', 'shadowColor', true)],
+    ['shadowOffsetX', SimpleProperty('number', 'shadowOffsetX', true)],
+    ['shadowOffsetY', SimpleProperty('number', 'shadowOffsetY', true)],
+    ['strokeStyle', SimpleProperty(['string','object'], 'strokeStyle', true)], // strokeStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
+    ['textAlign', SimpleProperty('string', 'textAlign', true)],
+    ['textBaseline', SimpleProperty('string', 'textBaseline', true)]
 ]);
 
 var canvasRenderingContext2DMethodSpecs = new Map([
-    ['getPropertyPriority',{name:'getPropertyPriority',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['getPropertyValue',{name:'getPropertyValue',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['item',{name:'item',arguments:[{type:'integer'}],returns:{type:'atom'}}],
-    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+    ['arc',{name:'arc',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}],
+    // arcTo(x1, y1, x2, y2, radius)
+    ['arcTo',{name:'arcTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['beginPath',{name:'beginPath',arguments:[]}],
+    ['bezierCurveTo',{name:'bezierCurveTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['clearRect',{name:'clearRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['clip',{name:'clip',arguments:[{type:'string'}]}],
+    ['clipPath',{name:'clip',arguments:[{type:'object'},{type:'string'}]}], // object is Path2D
+    ['closePath',{name:'closePath',arguments:[]}],
+    ['createImageData',{name:'createImageData',arguments:[{type:'number'},{type:'number'}],returns:{type:'object'}}],
+    ['createImageDataCopy',{name:'createImageData',arguments:[{type:'object'}],returns:{type:'object'}}], // object is ImageData
+    ['createLinearGradient',{name:'createLinearGradient',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}],returns:{type:'object'}}],
+    ['createPattern',{name:'createPattern',arguments:[{type:'object'},{type:'string'}],returns:{type:'object'}}], // input object is CanvasImageSource, returns CanvasPattern
+    ['createRadialGradient',{name:'createRadialGradient',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}],returns:{type:'object'}}], // returns CanvasGradient
+    ['drawFocusIfNeeded',{name:'drawFocusIfNeeded',arguments:[{type:'object'}]}], // object is Element
+    ['drawFocusIfNeededPath',{name:'drawFocusIfNeeded',arguments:[{type:'object'},{type:'object'}]}], // object is Path2D
+    ['drawImage',{name:'drawImage',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['ellipse',{name:'ellipse',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}],
+    ['fill',{name:'fill',arguments:[{type:'string'}]}],
+    ['fillPath',{name:'fill',arguments:[{type:'object'},{type:'string'}]}], // object is Path2D
+    ['fillRect',{name:'fillRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['fillText',{name:'fillText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['getImageData',{name:'getImageData',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}],returns:{type:'object'}}],
+    ['getLineDash',{name:'getLineDash',arguments:[],returns:{type:'list'}}],
+    ['isPointInPath',{name:'isPointInPath',arguments:[{type:'number'},{type:'number'},{type:'string'}],returns:{type:'boolean'}}],
+    ['isPointInPathX',{name:'isPointInPath',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'string'}],returns:{type:'boolean'}}],
+    ['isPointInStroke',{name:'isPointInStroke',arguments:[{type:'number'},{type:'number'}],returns:{type:'boolean'}}],
+    ['isPointInStrokePath',{name:'isPointInStroke',arguments:[{type:'object'},{type:'number'},{type:'number'}],returns:{type:'boolean'}}],
+    ['lineTo',{name:'lineTo',arguments:[{type:'number'},{type:'number'}]}],
+    ['measureText',{name:'measureText',arguments:[{type:'string'}],returns:{type:'object'}}], // returns TextMetrics
+    ['moveTo',{name:'moveTo',arguments:[{type:'number'},{type:'number'}]}],
+    ['putImageData',{name:'putImageData',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['quadraticCurveTo',{name:'quadraticCurveTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['rect',{name:'rect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['restore',{name:'restore',arguments:[]}],
+    ['rotate',{name:'rotate',arguments:[{type:'number'}]}],
+    ['save',{name:'save',arguments:[]}],
+    ['scale',{name:'l',arguments:[{type:'number'},{type:'number'}]}],
+    ['setLineDash',{name:'setLineDash',arguments:[{type:'list'}]}],
+    ['setTransform',{name:'setTransform',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['stroke',{name:'stroke',arguments:[{type:'object'}]}],
+    ['strokeRect',{name:'strokeRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['strokeText',{name:'strokeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['transform',{name:'transform',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['translate',{name:'translate',arguments:[{type:'number'},{type:'number'}]}]
 ]);
 
 webInterfaces.set('canvasrenderingcontext2d',
     {name: 'canvasrenderingcontext2d',
         properties:canvasRenderingContext2DInterfaceProperties,
         methods:canvasRenderingContext2DMethodSpecs
+    });
+
+var blobInterfaceProperties = new Map( [
+    ['size', SimpleProperty('string', 'size', true)],
+    ['type', SimpleProperty('string', 'type')],
+]);
+
+var blobMethodSpecs = new Map([
+    ['slice',{name:'slice',arguments:[{type:'number'},{type:'number'},{type:'string'}],returns:{type:'object'}}]
+]);
+
+webInterfaces.set('blob',
+    {name: 'blob',
+        properties:blobInterfaceProperties,
+        methods:blobMethodSpecs
     });
 // File object_property.js
 
@@ -9661,6 +9737,26 @@ function getIntegerPropertyValue(value, container, reportError) {
     return true;
 }
 
+function getFloatPropertyValue(value, container, reportError) {
+    if(TAG(value) !== TAG_FLT) {
+        return reportError && type_error('float', value);
+    }
+
+    container.value = floats[VAL(value)];
+    return true;
+}
+
+function getNumberPropertyValue(value, container, reportError) {
+
+    if(getIntegerPropertyValue(value, container, false)) {
+        return true;
+    } else if( getFloatPropertyValue(value, container, false)) {
+        return true;
+    }
+
+    return reportError && type_error('number', value);
+}
+
 function getStringPropertyValue(value, container, reportError) {
      return codes_to_string(value, container, reportError);
 }
@@ -9678,6 +9774,10 @@ function propertyValueToPL(typeJS, property, valueJS) {
             return getAtomPLPropertyValue(valueJS);
         } else if (propertySpec.type === 'number') {
             return getNumberPLPropertyValue(valueJS);
+        } else if (propertySpec.type === 'integer') {
+            return getIntegerPLPropertyValue(valueJS);
+        } else if (propertySpec.type === 'float') {
+            return getFloatPLPropertyValue(valueJS);
         } else if (propertySpec.type === 'string') {
             return getStringPLPropertyValue(valueJS);
         } else if (propertySpec.type === 'object') {
@@ -9694,8 +9794,38 @@ function getAtomPLPropertyValue(valueJS) {
     return lookup_atom(valueJS);
 }
 
+// A number can be either an integer or a float. Javascript is agnostic.
+// Prolog represents these differently.
+
 function getNumberPLPropertyValue(valueJS) {
-    return (valueJS  & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
+    if(isInteger(valueJS)) {
+        return getIntegerPLPropertyValue(valueJS);
+    } else if(isFloat(valueJS)){
+        return getFloatPLPropertyValue(valueJS);
+    }
+}
+
+function getIntegerPLPropertyValue(valueJS) {
+    return (valueJS & ((1 << WORD_BITS) - 1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
+}
+
+function getFloatPLPropertyValue(valueJS) {
+    return lookup_float(valueJS);
+}
+
+// maybe this should just be Number.isInteger
+function isInteger(value) {
+    if(typeof(value) === 'number') {
+        return value === ~~value;
+    }
+}
+
+// there does not appear to be direct Number.isFloat.
+//
+function isFloat(value) {
+    if(typeof(value) === 'number') {
+        return value !== ~~value;
+    }
 }
 
 function getStringPLPropertyValue(valueJS) {
@@ -9880,6 +10010,13 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
         } else {
             return false;
         }
+    } else if(spec.type === 'number') {
+        let container = {};
+        if (getNumberPropertyValue(term, container, reportError)) {
+            arg = container.value;
+        } else {
+            return false;
+        }
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
             let value = PL_atom_chars(term);
@@ -10008,6 +10145,8 @@ function convert_result(resultJS, spec, resultContainer) {
     let resultPL;
     if(spec.type === 'atom') {
         resultPL = lookup_atom(resultJS);
+    } else if(spec.type === 'string_codes') {
+        resultPL = string_to_codes(resultJS);
     } else if(spec.type === 'number') {
         resultPL = PL_put_integer(resultJS);
     } else if(spec.type === 'boolean') {

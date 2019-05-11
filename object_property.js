@@ -261,6 +261,26 @@ function getIntegerPropertyValue(value, container, reportError) {
     return true;
 }
 
+function getFloatPropertyValue(value, container, reportError) {
+    if(TAG(value) !== TAG_FLT) {
+        return reportError && type_error('float', value);
+    }
+
+    container.value = floats[VAL(value)];
+    return true;
+}
+
+function getNumberPropertyValue(value, container, reportError) {
+
+    if(getIntegerPropertyValue(value, container, false)) {
+        return true;
+    } else if( getFloatPropertyValue(value, container, false)) {
+        return true;
+    }
+
+    return reportError && type_error('number', value);
+}
+
 function getStringPropertyValue(value, container, reportError) {
      return codes_to_string(value, container, reportError);
 }
@@ -278,6 +298,10 @@ function propertyValueToPL(typeJS, property, valueJS) {
             return getAtomPLPropertyValue(valueJS);
         } else if (propertySpec.type === 'number') {
             return getNumberPLPropertyValue(valueJS);
+        } else if (propertySpec.type === 'integer') {
+            return getIntegerPLPropertyValue(valueJS);
+        } else if (propertySpec.type === 'float') {
+            return getFloatPLPropertyValue(valueJS);
         } else if (propertySpec.type === 'string') {
             return getStringPLPropertyValue(valueJS);
         } else if (propertySpec.type === 'object') {
@@ -294,8 +318,38 @@ function getAtomPLPropertyValue(valueJS) {
     return lookup_atom(valueJS);
 }
 
+// A number can be either an integer or a float. Javascript is agnostic.
+// Prolog represents these differently.
+
 function getNumberPLPropertyValue(valueJS) {
-    return (valueJS  & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
+    if(isInteger(valueJS)) {
+        return getIntegerPLPropertyValue(valueJS);
+    } else if(isFloat(valueJS)){
+        return getFloatPLPropertyValue(valueJS);
+    }
+}
+
+function getIntegerPLPropertyValue(valueJS) {
+    return (valueJS & ((1 << WORD_BITS) - 1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
+}
+
+function getFloatPLPropertyValue(valueJS) {
+    return lookup_float(valueJS);
+}
+
+// maybe this should just be Number.isInteger
+function isInteger(value) {
+    if(typeof(value) === 'number') {
+        return value === ~~value;
+    }
+}
+
+// there does not appear to be direct Number.isFloat.
+//
+function isFloat(value) {
+    if(typeof(value) === 'number') {
+        return value !== ~~value;
+    }
 }
 
 function getStringPLPropertyValue(valueJS) {

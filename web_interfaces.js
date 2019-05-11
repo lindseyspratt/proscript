@@ -447,8 +447,8 @@ var htmlCanvasElementInterfaceProperties = new Map( [
 
 var htmlCanvasElementMethodSpecs = new Map([
     ['getContext',{name:'getContext',arguments:[{type:'string'}],returns:{type:'object'}}], // arg is '2d' or 'webgl'. return is CanvasRenderingContext2D or WebGLRenderingContext
-    ['toDataURL',{name:'toDataURL',arguments:[{type:'string'},{type:'float'}],returns:{type:'string_codes'}}], // 2nd arg is between 0 and 1. Result is a data URL.
     ['toBlob',{name:'toBlob',arguments:[{type:'goal_function'},{type:'string'},{type:'float'}]}],
+    ['toDataURL',{name:'toDataURL',arguments:[{type:'string'},{type:'float'}],returns:{type:'string_codes'}}], // 2nd arg is between 0 and 1. Result is a data URL.
     ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
     ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
 ]);
@@ -526,20 +526,90 @@ webInterfaces.set('cssrule',
 
 var canvasRenderingContext2DInterfaceProperties = new Map( [
     ['canvas', SimpleProperty('object', 'canvas')],
-    ['fillStyle', SimpleProperty(['string','object'], 'fillStyle')],
-    ['parentRule', SimpleProperty('object', 'parentRule')] // object has a CSSRule interface.
+    ['fillStyle', SimpleProperty(['string','object'], 'fillStyle', true)], // fillStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
+    ['font', SimpleProperty('string', 'font', true)],
+    ['globalAlpha', SimpleProperty('number', 'globalAlpha', true)],
+    ['globalCompositeOperation', SimpleProperty('string', 'globalCompositeOperation', true)],
+    ['imageSmoothingEnabled', SimpleProperty('string', 'imageSmoothingEnabled', true)],
+    ['lineCap', SimpleProperty('string', 'lineCap', true)],
+    ['lineDashOffset', SimpleProperty('number', 'lineDashOffset', true)],
+    ['lineJoin', SimpleProperty('string', 'lineJoin', true)],
+    ['lineWidth', SimpleProperty('number', 'lineWidth', true)],
+    ['miterLimit', SimpleProperty('number', 'miterLimit', true)],
+    ['shadowBlur', SimpleProperty('number', 'shadowBlur', true)],
+    ['shadowColor', SimpleProperty('string', 'shadowColor', true)],
+    ['shadowOffsetX', SimpleProperty('number', 'shadowOffsetX', true)],
+    ['shadowOffsetY', SimpleProperty('number', 'shadowOffsetY', true)],
+    ['strokeStyle', SimpleProperty(['string','object'], 'strokeStyle', true)], // strokeStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
+    ['textAlign', SimpleProperty('string', 'textAlign', true)],
+    ['textBaseline', SimpleProperty('string', 'textBaseline', true)]
 ]);
 
 var canvasRenderingContext2DMethodSpecs = new Map([
-    ['getPropertyPriority',{name:'getPropertyPriority',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['getPropertyValue',{name:'getPropertyValue',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['item',{name:'item',arguments:[{type:'integer'}],returns:{type:'atom'}}],
-    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+    ['arc',{name:'arc',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}],
+    // arcTo(x1, y1, x2, y2, radius)
+    ['arcTo',{name:'arcTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['beginPath',{name:'beginPath',arguments:[]}],
+    ['bezierCurveTo',{name:'bezierCurveTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['clearRect',{name:'clearRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['clip',{name:'clip',arguments:[{type:'string'}]}],
+    ['clipPath',{name:'clip',arguments:[{type:'object'},{type:'string'}]}], // object is Path2D
+    ['closePath',{name:'closePath',arguments:[]}],
+    ['createImageData',{name:'createImageData',arguments:[{type:'number'},{type:'number'}],returns:{type:'object'}}],
+    ['createImageDataCopy',{name:'createImageData',arguments:[{type:'object'}],returns:{type:'object'}}], // object is ImageData
+    ['createLinearGradient',{name:'createLinearGradient',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}],returns:{type:'object'}}],
+    ['createPattern',{name:'createPattern',arguments:[{type:'object'},{type:'string'}],returns:{type:'object'}}], // input object is CanvasImageSource, returns CanvasPattern
+    ['createRadialGradient',{name:'createRadialGradient',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}],returns:{type:'object'}}], // returns CanvasGradient
+    ['drawFocusIfNeeded',{name:'drawFocusIfNeeded',arguments:[{type:'object'}]}], // object is Element
+    ['drawFocusIfNeededPath',{name:'drawFocusIfNeeded',arguments:[{type:'object'},{type:'object'}]}], // object is Path2D
+    ['drawImage',{name:'drawImage',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['ellipse',{name:'ellipse',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}],
+    ['fill',{name:'fill',arguments:[{type:'string'}]}],
+    ['fillPath',{name:'fill',arguments:[{type:'object'},{type:'string'}]}], // object is Path2D
+    ['fillRect',{name:'fillRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['fillText',{name:'fillText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['getImageData',{name:'getImageData',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}],returns:{type:'object'}}],
+    ['getLineDash',{name:'getLineDash',arguments:[],returns:{type:'list'}}],
+    ['isPointInPath',{name:'isPointInPath',arguments:[{type:'number'},{type:'number'},{type:'string'}],returns:{type:'boolean'}}],
+    ['isPointInPathX',{name:'isPointInPath',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'string'}],returns:{type:'boolean'}}],
+    ['isPointInStroke',{name:'isPointInStroke',arguments:[{type:'number'},{type:'number'}],returns:{type:'boolean'}}],
+    ['isPointInStrokePath',{name:'isPointInStroke',arguments:[{type:'object'},{type:'number'},{type:'number'}],returns:{type:'boolean'}}],
+    ['lineTo',{name:'lineTo',arguments:[{type:'number'},{type:'number'}]}],
+    ['measureText',{name:'measureText',arguments:[{type:'string'}],returns:{type:'object'}}], // returns TextMetrics
+    ['moveTo',{name:'moveTo',arguments:[{type:'number'},{type:'number'}]}],
+    ['putImageData',{name:'putImageData',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['quadraticCurveTo',{name:'quadraticCurveTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['rect',{name:'rect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['restore',{name:'restore',arguments:[]}],
+    ['rotate',{name:'rotate',arguments:[{type:'number'}]}],
+    ['save',{name:'save',arguments:[]}],
+    ['scale',{name:'l',arguments:[{type:'number'},{type:'number'}]}],
+    ['setLineDash',{name:'setLineDash',arguments:[{type:'list'}]}],
+    ['setTransform',{name:'setTransform',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['stroke',{name:'stroke',arguments:[{type:'object'}]}],
+    ['strokeRect',{name:'strokeRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['strokeText',{name:'strokeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['transform',{name:'transform',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
+    ['translate',{name:'translate',arguments:[{type:'number'},{type:'number'}]}]
 ]);
 
 webInterfaces.set('canvasrenderingcontext2d',
     {name: 'canvasrenderingcontext2d',
         properties:canvasRenderingContext2DInterfaceProperties,
         methods:canvasRenderingContext2DMethodSpecs
+    });
+
+var blobInterfaceProperties = new Map( [
+    ['size', SimpleProperty('string', 'size', true)],
+    ['type', SimpleProperty('string', 'type')],
+]);
+
+var blobMethodSpecs = new Map([
+    ['slice',{name:'slice',arguments:[{type:'number'},{type:'number'},{type:'string'}],returns:{type:'object'}}]
+]);
+
+webInterfaces.set('blob',
+    {name: 'blob',
+        properties:blobInterfaceProperties,
+        methods:blobMethodSpecs
     });

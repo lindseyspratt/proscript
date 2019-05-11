@@ -80,9 +80,12 @@ var parentMap = new Map([
     ['document', ['node']],
     ['element', ['node']],
     ['htmlelement', ['element']],
+    ['htmlcanvaselement', ['htmlelement']],
     ['event', []],
     ['cssstyledeclaration', []],
-    ['cssrule', []]
+    ['cssrule', []],
+    ['canvasrenderingcontext2d', []],
+    ['blob', []]
 ]);
 
 var childMap = new Map();
@@ -116,7 +119,10 @@ var distinctivePropertyMap = {
 var distinctiveMethodMap = {
     eventtarget: 'addEventListener',
     document: 'getElementById',
-    cssstyledeclaration:'getPropertyPriority'
+    cssstyledeclaration:'getPropertyPriority',
+    htmlcanvaselement:'getContext',
+    canvasrenderingcontext2d: 'getImageData',
+    blob: 'slice'
 };
 
 function getInterfaceItemSpec(typeJS, itemType, itemName) {

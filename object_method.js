@@ -105,6 +105,13 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
         } else {
             return false;
         }
+    } else if(spec.type === 'number') {
+        let container = {};
+        if (getNumberPropertyValue(term, container, reportError)) {
+            arg = container.value;
+        } else {
+            return false;
+        }
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
             let value = PL_atom_chars(term);
@@ -233,6 +240,8 @@ function convert_result(resultJS, spec, resultContainer) {
     let resultPL;
     if(spec.type === 'atom') {
         resultPL = lookup_atom(resultJS);
+    } else if(spec.type === 'string_codes') {
+        resultPL = string_to_codes(resultJS);
     } else if(spec.type === 'number') {
         resultPL = PL_put_integer(resultJS);
     } else if(spec.type === 'boolean') {
