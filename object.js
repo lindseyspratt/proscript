@@ -59,6 +59,16 @@ function get_object_container(term, container) {
     return true;
 }
 
+function release_object(term) {
+    let objectIDContainer = {};
+    if (!get_object_id_container(term, objectIDContainer)) {
+        return false;
+    }
+    idsToObjects.delete(objectIDContainer.value);
+    idsToTypes.delete(objectIDContainer.value);
+    return true;
+}
+
 // For objects of type Foo the 'type' = 'foo' and functor = '$foo'.
 function get_object_id_container(term, idContainer) {
     if (TAG(term) !== TAG_STR)
@@ -85,7 +95,16 @@ var parentMap = new Map([
     ['cssstyledeclaration', []],
     ['cssrule', []],
     ['canvasrenderingcontext2d', []],
-    ['blob', []]
+    ['blob', []],
+    ['imagedata', []],
+    ['uint8clampedarray', []],
+    ['canvasgradient', []],
+    ['canvaspattern', []],
+    ['htmlimageelement', ['htmlelement']],
+    ['path2d', []],
+    ['uievent', ['event']],
+    ['mouseevent', ['uievent']],
+    ['textmetrics', []]
 ]);
 
 var childMap = new Map();
@@ -107,6 +126,20 @@ function calculate_inheritance_children() {
 }
 
 calculate_inheritance_children();
+
+// constructorMap[obj.constructor] is object type.
+
+var constructorMap = {
+    "ImageData" : "imagedata",
+    "Uint8ClampedArray" : 'uint8clampedarray',
+    "CanvasGradient" : 'canvasgradient',
+    "CanvasPattern" : 'canvaspattern',
+    "HTMLImageElement" : 'htmlimageelement',
+    "Path2D" : 'path2d',
+    "UIEvent" : 'uievent',
+    "MouseEvent" : 'mouseevent',
+    "TextMetrics" : 'textmetrics'
+};
 
 var distinctivePropertyMap = {
     node:'nodeType',
@@ -162,6 +195,11 @@ function getInterfaceItemSpec(typeJS, itemType, itemName) {
 }
 
 function object_type_check(object, candidates) {
+    let constructorType = object.constructor && object.constructor.name && constructorMap[object.constructor.name];
+    if(constructorType) {
+        return constructorType;
+    }
+
     if(! candidates) {
         candidates = [];
         for(let candidate of parentMap.keys()) {
@@ -204,4 +242,40 @@ function predicate_dom_object_type(object, type) {
     }
     let typeJS = objectContainer.type;
     return unify(type, lookup_atom(typeJS));
+}
+
+function predicate_dom_create_object(type, object) {
+    if(TAG(type) !== TAG_ATM) {
+        return type_error('atom', type);
+    }
+    let typeJS = atable[VAL(type)];
+
+    if(TAG(object) !== TAG_REF) {
+        return instantiation_error(object);
+    }
+
+    let constructorName;
+    for(let entry of Object.entries(constructorMap)) {
+        if(entry[1] === typeJS) {
+            constructorName = entry[0];
+            break;
+        }
+    }
+
+    if(constructorName) {
+        let objectJS = new window[constructorName]();
+
+        let objectPL = create_object_structure(objectJS, typeJS);
+        return unify(object, objectPL);
+    } else {
+        return domain_error('object type', type);
+    }
+}
+
+function predicate_dom_release_object(object) {
+    if (TAG(object) === TAG_REF) {
+        return instantiation_error(object);
+    }
+
+    return release_object(object);
 }

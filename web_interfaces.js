@@ -526,28 +526,27 @@ webInterfaces.set('cssrule',
 
 var canvasRenderingContext2DInterfaceProperties = new Map( [
     ['canvas', SimpleProperty('object', 'canvas')],
-    ['fillStyle', SimpleProperty(['string','object'], 'fillStyle', true)], // fillStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
-    ['font', SimpleProperty('string', 'font', true)],
+    ['fillStyle', SimpleProperty(['atom','object'], 'fillStyle', true)], // fillStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
+    ['font', SimpleProperty('atom', 'font', true)],
     ['globalAlpha', SimpleProperty('number', 'globalAlpha', true)],
-    ['globalCompositeOperation', SimpleProperty('string', 'globalCompositeOperation', true)],
-    ['imageSmoothingEnabled', SimpleProperty('string', 'imageSmoothingEnabled', true)],
-    ['lineCap', SimpleProperty('string', 'lineCap', true)],
+    ['globalCompositeOperation', SimpleProperty('atom', 'globalCompositeOperation', true)],
+    ['imageSmoothingEnabled', SimpleProperty('atom', 'imageSmoothingEnabled', true)],
+    ['lineCap', SimpleProperty('atom', 'lineCap', true)],
     ['lineDashOffset', SimpleProperty('number', 'lineDashOffset', true)],
-    ['lineJoin', SimpleProperty('string', 'lineJoin', true)],
+    ['lineJoin', SimpleProperty('atom', 'lineJoin', true)],
     ['lineWidth', SimpleProperty('number', 'lineWidth', true)],
     ['miterLimit', SimpleProperty('number', 'miterLimit', true)],
     ['shadowBlur', SimpleProperty('number', 'shadowBlur', true)],
-    ['shadowColor', SimpleProperty('string', 'shadowColor', true)],
+    ['shadowColor', SimpleProperty('atom', 'shadowColor', true)],
     ['shadowOffsetX', SimpleProperty('number', 'shadowOffsetX', true)],
     ['shadowOffsetY', SimpleProperty('number', 'shadowOffsetY', true)],
-    ['strokeStyle', SimpleProperty(['string','object'], 'strokeStyle', true)], // strokeStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
-    ['textAlign', SimpleProperty('string', 'textAlign', true)],
-    ['textBaseline', SimpleProperty('string', 'textBaseline', true)]
+    ['strokeStyle', SimpleProperty(['atom','object'], 'strokeStyle', true)], // strokeStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
+    ['textAlign', SimpleProperty('atom', 'textAlign', true)],
+    ['textBaseline', SimpleProperty('atom', 'textBaseline', true)]
 ]);
 
 var canvasRenderingContext2DMethodSpecs = new Map([
     ['arc',{name:'arc',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}],
-    // arcTo(x1, y1, x2, y2, radius)
     ['arcTo',{name:'arcTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['beginPath',{name:'beginPath',arguments:[]}],
     ['bezierCurveTo',{name:'bezierCurveTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
@@ -569,13 +568,13 @@ var canvasRenderingContext2DMethodSpecs = new Map([
     ['fillRect',{name:'fillRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['fillText',{name:'fillText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['getImageData',{name:'getImageData',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}],returns:{type:'object'}}],
-    ['getLineDash',{name:'getLineDash',arguments:[],returns:{type:'list'}}],
+    ['getLineDash',{name:'getLineDash',arguments:[],returns:{type:{arrayType:'number'}}}],
     ['isPointInPath',{name:'isPointInPath',arguments:[{type:'number'},{type:'number'},{type:'string'}],returns:{type:'boolean'}}],
     ['isPointInPathX',{name:'isPointInPath',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'string'}],returns:{type:'boolean'}}],
     ['isPointInStroke',{name:'isPointInStroke',arguments:[{type:'number'},{type:'number'}],returns:{type:'boolean'}}],
     ['isPointInStrokePath',{name:'isPointInStroke',arguments:[{type:'object'},{type:'number'},{type:'number'}],returns:{type:'boolean'}}],
     ['lineTo',{name:'lineTo',arguments:[{type:'number'},{type:'number'}]}],
-    ['measureText',{name:'measureText',arguments:[{type:'string'}],returns:{type:'object'}}], // returns TextMetrics
+    ['measureText',{name:'measureText',arguments:[{type:'string_codes'}],returns:{type:'object'}}], // returns TextMetrics
     ['moveTo',{name:'moveTo',arguments:[{type:'number'},{type:'number'}]}],
     ['putImageData',{name:'putImageData',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['quadraticCurveTo',{name:'quadraticCurveTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
@@ -583,8 +582,8 @@ var canvasRenderingContext2DMethodSpecs = new Map([
     ['restore',{name:'restore',arguments:[]}],
     ['rotate',{name:'rotate',arguments:[{type:'number'}]}],
     ['save',{name:'save',arguments:[]}],
-    ['scale',{name:'l',arguments:[{type:'number'},{type:'number'}]}],
-    ['setLineDash',{name:'setLineDash',arguments:[{type:'list'}]}],
+    ['scale',{name:'scale',arguments:[{type:'number'},{type:'number'}]}],
+    ['setLineDash',{name:'setLineDash',arguments:[{type:{arrayType:'number'}}]}],
     ['setTransform',{name:'setTransform',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['stroke',{name:'stroke',arguments:[{type:'object'}]}],
     ['strokeRect',{name:'strokeRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
@@ -612,4 +611,125 @@ webInterfaces.set('blob',
     {name: 'blob',
         properties:blobInterfaceProperties,
         methods:blobMethodSpecs
+    });
+
+var imageDataInterfaceProperties = new Map( [
+    ['data', SimpleProperty('object', 'data')]
+]);
+
+var imageDataMethodSpecs = new Map([
+]);
+
+webInterfaces.set('imagedata',
+    {name: 'imagedata',
+        properties:imageDataInterfaceProperties,
+        methods:imageDataMethodSpecs
+    });
+
+var uint8ClampedArrayInterfaceProperties = new Map( [
+    ['length', SimpleProperty('integer', 'length')]
+]);
+
+var uint8ClampedArrayMethodSpecs = new Map([
+    ['set', {name:'set',arguments:[{type:{arrayType:'integer'}},{type:'integer'}]}]
+]);
+
+webInterfaces.set('uint8clampedarray',
+    {name: 'uint8clampedarray',
+        properties:uint8ClampedArrayInterfaceProperties,
+        methods:uint8ClampedArrayMethodSpecs
+    });
+
+var canvasGradientInterfaceProperties = new Map( [
+]);
+
+var canvasGradientMethodSpecs = new Map([
+    ['addColorStop', {name:'addColorStop',arguments:[{type:'number'},{type:'string'}]}]
+]);
+
+webInterfaces.set('canvasgradient',
+    {name: 'canvasgradient',
+        properties:canvasGradientInterfaceProperties,
+        methods:canvasGradientMethodSpecs
+    });
+
+var canvasPatternInterfaceProperties = new Map( [
+]);
+
+var canvasPatternMethodSpecs = new Map([
+]);
+
+webInterfaces.set('canvaspattern',
+    {name: 'canvaspattern',
+        properties:canvasPatternInterfaceProperties,
+        methods:canvasPatternMethodSpecs
+    });
+
+var htmlImageElementInterfaceProperties = new Map( [
+    ['src', SimpleProperty('string', 'src', true)]
+]);
+
+var htmlImageElementMethodSpecs = new Map([
+]);
+
+webInterfaces.set('htmlimageelement',
+    {name: 'htmlimageelement',
+        properties:htmlImageElementInterfaceProperties,
+        methods:htmlImageElementMethodSpecs
+    });
+
+var path2DInterfaceProperties = new Map( [
+]);
+
+var path2DMethodSpecs = new Map([
+    ['arc',{name:'arc',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}],
+    ['ellipse',{name:'ellipse',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}]
+]);
+
+webInterfaces.set('path2d',
+    {name: 'path2d',
+        properties:path2DInterfaceProperties,
+        methods:path2DMethodSpecs
+    });
+
+var uiEventInterfaceProperties = new Map( [
+]);
+
+var uiEventMethodSpecs = new Map([
+]);
+
+webInterfaces.set('uievent',
+    {name: 'uievent',
+        properties:uiEventInterfaceProperties,
+        methods:uiEventMethodSpecs
+    });
+
+var mouseEventInterfaceProperties = new Map( [
+    ['clientX', SimpleProperty('number', 'clientX')],
+    ['clientY', SimpleProperty('number', 'clientY')]
+]);
+
+var mouseEventMethodSpecs = new Map([
+]);
+
+webInterfaces.set('mouseevent',
+    {name: 'mouseevent',
+        properties:mouseEventInterfaceProperties,
+        methods:mouseEventMethodSpecs
+    });
+
+var textMetricsInterfaceProperties = new Map( [
+    ['width', SimpleProperty('number', 'width')],
+    ['actualBoundingBoxLeft', SimpleProperty('number', 'actualBoundingBoxLeft')],
+    ['actualBoundingBoxRight', SimpleProperty('number', 'actualBoundingBoxRight')]
+
+]);
+
+var textMetricsMethodSpecs = new Map([
+]);
+
+webInterfaces.set('textmetrics',
+    {name: 'textmetrics',
+        properties:textMetricsInterfaceProperties,
+        methods:textMetricsMethodSpecs
     });

@@ -61,7 +61,7 @@ var itable = [];
 var stable = [];
 
 /* Constants. Should be auto-generated */
-const HEAP_SIZE = 131070;
+const HEAP_SIZE = 1410700;
 const STACK_SIZE = 65535;
 const TRAIL_SIZE = 1000;
 const READ = 0;

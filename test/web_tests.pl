@@ -6,4 +6,4 @@
 :- ensure_loaded(web_test_html_element).
 :- ensure_loaded(web_test_css_style_declaration).
 :- ensure_loaded(web_test_html_canvas_element).
-
+:- ensure_loaded(web_test_canvas_rendering_context_2d).

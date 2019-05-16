@@ -36,6 +36,11 @@ function evaluate_expression(expression, evaluated)
         evaluated.value = Math.PI;
         return true;
     }
+    else if (TAG(expression) === TAG_ATM && expression === lookup_atom("e"))
+    {
+        evaluated.value = Math.E;
+        return true;
+    }
     else if (TAG(expression) === TAG_STR)
     {
         var indicator;
@@ -2759,7 +2764,7 @@ var itable = [];
 var stable = [];
 
 /* Constants. Should be auto-generated */
-const HEAP_SIZE = 131070;
+const HEAP_SIZE = 1410700;
 const STACK_SIZE = 65535;
 const TRAIL_SIZE = 1000;
 const READ = 0;
@@ -8713,6 +8718,16 @@ function get_object_container(term, container) {
     return true;
 }
 
+function release_object(term) {
+    let objectIDContainer = {};
+    if (!get_object_id_container(term, objectIDContainer)) {
+        return false;
+    }
+    idsToObjects.delete(objectIDContainer.value);
+    idsToTypes.delete(objectIDContainer.value);
+    return true;
+}
+
 // For objects of type Foo the 'type' = 'foo' and functor = '$foo'.
 function get_object_id_container(term, idContainer) {
     if (TAG(term) !== TAG_STR)
@@ -8739,7 +8754,16 @@ var parentMap = new Map([
     ['cssstyledeclaration', []],
     ['cssrule', []],
     ['canvasrenderingcontext2d', []],
-    ['blob', []]
+    ['blob', []],
+    ['imagedata', []],
+    ['uint8clampedarray', []],
+    ['canvasgradient', []],
+    ['canvaspattern', []],
+    ['htmlimageelement', ['htmlelement']],
+    ['path2d', []],
+    ['uievent', ['event']],
+    ['mouseevent', ['uievent']],
+    ['textmetrics', []]
 ]);
 
 var childMap = new Map();
@@ -8761,6 +8785,20 @@ function calculate_inheritance_children() {
 }
 
 calculate_inheritance_children();
+
+// constructorMap[obj.constructor] is object type.
+
+var constructorMap = {
+    "ImageData" : "imagedata",
+    "Uint8ClampedArray" : 'uint8clampedarray',
+    "CanvasGradient" : 'canvasgradient',
+    "CanvasPattern" : 'canvaspattern',
+    "HTMLImageElement" : 'htmlimageelement',
+    "Path2D" : 'path2d',
+    "UIEvent" : 'uievent',
+    "MouseEvent" : 'mouseevent',
+    "TextMetrics" : 'textmetrics'
+};
 
 var distinctivePropertyMap = {
     node:'nodeType',
@@ -8816,6 +8854,11 @@ function getInterfaceItemSpec(typeJS, itemType, itemName) {
 }
 
 function object_type_check(object, candidates) {
+    let constructorType = object.constructor && object.constructor.name && constructorMap[object.constructor.name];
+    if(constructorType) {
+        return constructorType;
+    }
+
     if(! candidates) {
         candidates = [];
         for(let candidate of parentMap.keys()) {
@@ -8858,6 +8901,42 @@ function predicate_dom_object_type(object, type) {
     }
     let typeJS = objectContainer.type;
     return unify(type, lookup_atom(typeJS));
+}
+
+function predicate_dom_create_object(type, object) {
+    if(TAG(type) !== TAG_ATM) {
+        return type_error('atom', type);
+    }
+    let typeJS = atable[VAL(type)];
+
+    if(TAG(object) !== TAG_REF) {
+        return instantiation_error(object);
+    }
+
+    let constructorName;
+    for(let entry of Object.entries(constructorMap)) {
+        if(entry[1] === typeJS) {
+            constructorName = entry[0];
+            break;
+        }
+    }
+
+    if(constructorName) {
+        let objectJS = new window[constructorName]();
+
+        let objectPL = create_object_structure(objectJS, typeJS);
+        return unify(object, objectPL);
+    } else {
+        return domain_error('object type', type);
+    }
+}
+
+function predicate_dom_release_object(object) {
+    if (TAG(object) === TAG_REF) {
+        return instantiation_error(object);
+    }
+
+    return release_object(object);
 }
 // File web_interfaces.js
 /*
@@ -9388,28 +9467,27 @@ webInterfaces.set('cssrule',
 
 var canvasRenderingContext2DInterfaceProperties = new Map( [
     ['canvas', SimpleProperty('object', 'canvas')],
-    ['fillStyle', SimpleProperty(['string','object'], 'fillStyle', true)], // fillStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
-    ['font', SimpleProperty('string', 'font', true)],
+    ['fillStyle', SimpleProperty(['atom','object'], 'fillStyle', true)], // fillStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
+    ['font', SimpleProperty('atom', 'font', true)],
     ['globalAlpha', SimpleProperty('number', 'globalAlpha', true)],
-    ['globalCompositeOperation', SimpleProperty('string', 'globalCompositeOperation', true)],
-    ['imageSmoothingEnabled', SimpleProperty('string', 'imageSmoothingEnabled', true)],
-    ['lineCap', SimpleProperty('string', 'lineCap', true)],
+    ['globalCompositeOperation', SimpleProperty('atom', 'globalCompositeOperation', true)],
+    ['imageSmoothingEnabled', SimpleProperty('atom', 'imageSmoothingEnabled', true)],
+    ['lineCap', SimpleProperty('atom', 'lineCap', true)],
     ['lineDashOffset', SimpleProperty('number', 'lineDashOffset', true)],
-    ['lineJoin', SimpleProperty('string', 'lineJoin', true)],
+    ['lineJoin', SimpleProperty('atom', 'lineJoin', true)],
     ['lineWidth', SimpleProperty('number', 'lineWidth', true)],
     ['miterLimit', SimpleProperty('number', 'miterLimit', true)],
     ['shadowBlur', SimpleProperty('number', 'shadowBlur', true)],
-    ['shadowColor', SimpleProperty('string', 'shadowColor', true)],
+    ['shadowColor', SimpleProperty('atom', 'shadowColor', true)],
     ['shadowOffsetX', SimpleProperty('number', 'shadowOffsetX', true)],
     ['shadowOffsetY', SimpleProperty('number', 'shadowOffsetY', true)],
-    ['strokeStyle', SimpleProperty(['string','object'], 'strokeStyle', true)], // strokeStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
-    ['textAlign', SimpleProperty('string', 'textAlign', true)],
-    ['textBaseline', SimpleProperty('string', 'textBaseline', true)]
+    ['strokeStyle', SimpleProperty(['atom','object'], 'strokeStyle', true)], // strokeStyle is a string naming a color, a CanvasGradient object, or a CanvasPattern object.
+    ['textAlign', SimpleProperty('atom', 'textAlign', true)],
+    ['textBaseline', SimpleProperty('atom', 'textBaseline', true)]
 ]);
 
 var canvasRenderingContext2DMethodSpecs = new Map([
     ['arc',{name:'arc',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}],
-    // arcTo(x1, y1, x2, y2, radius)
     ['arcTo',{name:'arcTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['beginPath',{name:'beginPath',arguments:[]}],
     ['bezierCurveTo',{name:'bezierCurveTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
@@ -9431,13 +9509,13 @@ var canvasRenderingContext2DMethodSpecs = new Map([
     ['fillRect',{name:'fillRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['fillText',{name:'fillText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['getImageData',{name:'getImageData',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}],returns:{type:'object'}}],
-    ['getLineDash',{name:'getLineDash',arguments:[],returns:{type:'list'}}],
+    ['getLineDash',{name:'getLineDash',arguments:[],returns:{type:{arrayType:'number'}}}],
     ['isPointInPath',{name:'isPointInPath',arguments:[{type:'number'},{type:'number'},{type:'string'}],returns:{type:'boolean'}}],
     ['isPointInPathX',{name:'isPointInPath',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'string'}],returns:{type:'boolean'}}],
     ['isPointInStroke',{name:'isPointInStroke',arguments:[{type:'number'},{type:'number'}],returns:{type:'boolean'}}],
     ['isPointInStrokePath',{name:'isPointInStroke',arguments:[{type:'object'},{type:'number'},{type:'number'}],returns:{type:'boolean'}}],
     ['lineTo',{name:'lineTo',arguments:[{type:'number'},{type:'number'}]}],
-    ['measureText',{name:'measureText',arguments:[{type:'string'}],returns:{type:'object'}}], // returns TextMetrics
+    ['measureText',{name:'measureText',arguments:[{type:'string_codes'}],returns:{type:'object'}}], // returns TextMetrics
     ['moveTo',{name:'moveTo',arguments:[{type:'number'},{type:'number'}]}],
     ['putImageData',{name:'putImageData',arguments:[{type:'object'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['quadraticCurveTo',{name:'quadraticCurveTo',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
@@ -9445,8 +9523,8 @@ var canvasRenderingContext2DMethodSpecs = new Map([
     ['restore',{name:'restore',arguments:[]}],
     ['rotate',{name:'rotate',arguments:[{type:'number'}]}],
     ['save',{name:'save',arguments:[]}],
-    ['scale',{name:'l',arguments:[{type:'number'},{type:'number'}]}],
-    ['setLineDash',{name:'setLineDash',arguments:[{type:'list'}]}],
+    ['scale',{name:'scale',arguments:[{type:'number'},{type:'number'}]}],
+    ['setLineDash',{name:'setLineDash',arguments:[{type:{arrayType:'number'}}]}],
     ['setTransform',{name:'setTransform',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
     ['stroke',{name:'stroke',arguments:[{type:'object'}]}],
     ['strokeRect',{name:'strokeRect',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'}]}],
@@ -9474,6 +9552,127 @@ webInterfaces.set('blob',
     {name: 'blob',
         properties:blobInterfaceProperties,
         methods:blobMethodSpecs
+    });
+
+var imageDataInterfaceProperties = new Map( [
+    ['data', SimpleProperty('object', 'data')]
+]);
+
+var imageDataMethodSpecs = new Map([
+]);
+
+webInterfaces.set('imagedata',
+    {name: 'imagedata',
+        properties:imageDataInterfaceProperties,
+        methods:imageDataMethodSpecs
+    });
+
+var uint8ClampedArrayInterfaceProperties = new Map( [
+    ['length', SimpleProperty('integer', 'length')]
+]);
+
+var uint8ClampedArrayMethodSpecs = new Map([
+    ['set', {name:'set',arguments:[{type:{arrayType:'integer'}},{type:'integer'}]}]
+]);
+
+webInterfaces.set('uint8clampedarray',
+    {name: 'uint8clampedarray',
+        properties:uint8ClampedArrayInterfaceProperties,
+        methods:uint8ClampedArrayMethodSpecs
+    });
+
+var canvasGradientInterfaceProperties = new Map( [
+]);
+
+var canvasGradientMethodSpecs = new Map([
+    ['addColorStop', {name:'addColorStop',arguments:[{type:'number'},{type:'string'}]}]
+]);
+
+webInterfaces.set('canvasgradient',
+    {name: 'canvasgradient',
+        properties:canvasGradientInterfaceProperties,
+        methods:canvasGradientMethodSpecs
+    });
+
+var canvasPatternInterfaceProperties = new Map( [
+]);
+
+var canvasPatternMethodSpecs = new Map([
+]);
+
+webInterfaces.set('canvaspattern',
+    {name: 'canvaspattern',
+        properties:canvasPatternInterfaceProperties,
+        methods:canvasPatternMethodSpecs
+    });
+
+var htmlImageElementInterfaceProperties = new Map( [
+    ['src', SimpleProperty('string', 'src', true)]
+]);
+
+var htmlImageElementMethodSpecs = new Map([
+]);
+
+webInterfaces.set('htmlimageelement',
+    {name: 'htmlimageelement',
+        properties:htmlImageElementInterfaceProperties,
+        methods:htmlImageElementMethodSpecs
+    });
+
+var path2DInterfaceProperties = new Map( [
+]);
+
+var path2DMethodSpecs = new Map([
+    ['arc',{name:'arc',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}],
+    ['ellipse',{name:'ellipse',arguments:[{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'number'},{type:'boolean'}]}]
+]);
+
+webInterfaces.set('path2d',
+    {name: 'path2d',
+        properties:path2DInterfaceProperties,
+        methods:path2DMethodSpecs
+    });
+
+var uiEventInterfaceProperties = new Map( [
+]);
+
+var uiEventMethodSpecs = new Map([
+]);
+
+webInterfaces.set('uievent',
+    {name: 'uievent',
+        properties:uiEventInterfaceProperties,
+        methods:uiEventMethodSpecs
+    });
+
+var mouseEventInterfaceProperties = new Map( [
+    ['clientX', SimpleProperty('number', 'clientX')],
+    ['clientY', SimpleProperty('number', 'clientY')]
+]);
+
+var mouseEventMethodSpecs = new Map([
+]);
+
+webInterfaces.set('mouseevent',
+    {name: 'mouseevent',
+        properties:mouseEventInterfaceProperties,
+        methods:mouseEventMethodSpecs
+    });
+
+var textMetricsInterfaceProperties = new Map( [
+    ['width', SimpleProperty('number', 'width')],
+    ['actualBoundingBoxLeft', SimpleProperty('number', 'actualBoundingBoxLeft')],
+    ['actualBoundingBoxRight', SimpleProperty('number', 'actualBoundingBoxRight')]
+
+]);
+
+var textMetricsMethodSpecs = new Map([
+]);
+
+webInterfaces.set('textmetrics',
+    {name: 'textmetrics',
+        properties:textMetricsInterfaceProperties,
+        methods:textMetricsMethodSpecs
     });
 // File object_property.js
 
@@ -9523,10 +9722,14 @@ function predicate_dom_object_property(type, object, property, value) {
 
         if (cursor.property_values && cursor.property_values.length > 0) {
             var valueJS = cursor.property_values.pop();
-            var valuePL = propertyValueToPL(typeJS, property, valueJS);
-            return unify(value, valuePL) &&
-                unify(object, elementPL);
-        }
+            let container = {};
+            if(propertyValueToPL(typeJS, property, valueJS, container)) {
+                return unify(value, container.value) &&
+                    unify(object, elementPL);
+            } else {
+                return false;
+            }
+         }
 
         // All classNames for current elementJS have been processed.
         // Set the cursor.tags to undefined to force recalculation of tags
@@ -9630,11 +9833,11 @@ function propertyValueToJS(type, value, container, reportError) {
     if(! container) {
         let valueJS;
         let container = {};
-        if (propertyValueToJS(propertySpec.type, value, container)) {
+        if (propertyValueToJS(type, value, container)) {
             valueJS = container.value;
         } else {
             let formatted = format_term(value, {quoted: true});
-            throw 'unable to convert Prolog value "' + formatted + '" to Javascript value of type "' + propertySpec.type + '".';
+            throw 'unable to convert Prolog value "' + formatted + '" to Javascript value of type "' + type + '".';
         }
         return valueJS;
     }
@@ -9765,33 +9968,62 @@ function getObjectPropertyValue(value, container) {
     return get_object_container(value, container);
 }
 
-function propertyValueToPL(typeJS, property, valueJS) {
+function propertyValueToPL(typeJS, property, valueJS, container, reportError) {
     let propertyJS = PL_get_atom_chars(property);
     let propertySpec = getPropertySpecification(typeJS, propertyJS);
-
     if (propertySpec) {
-        if (propertySpec.type === 'atom') {
-            return getAtomPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'number') {
-            return getNumberPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'integer') {
-            return getIntegerPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'float') {
-            return getFloatPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'string') {
-            return getStringPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'object') {
-            return getObjectPLPropertyValue(valueJS);
-        } else {
-            domain_error(propertySpec.type);
-        }
+        return propertyValueToPLUtil(propertySpec.type, property, valueJS, container, reportError);
     } else {
-        domain_error(property);
+        return reportError && domain_error(property);
     }
 }
 
+function propertyValueToPLUtil(typeJS, property, valueJS, container, reportError) {
+    let resultPL;
+    if (typeof typeJS === 'object') {
+        for (let subtype of typeJS) {
+            if (propertyValueToPLUtil(subtype, property, valueJS, container, false)) {
+                return true;
+            }
+        }
+
+        return reportError && type_error(typeJS, lookup_atom(valueJS));
+    } else if (typeJS === 'atom') {
+        if(typeof valueJS !== 'object') {
+            resultPL = getAtomPLPropertyValue(valueJS);
+        } else {
+            return reportError && domain_error(typeJS, lookup_atom(valueJS));
+        }
+    } else if (typeJS === 'number') {
+        resultPL = getNumberPLPropertyValue(valueJS);
+    } else if (typeJS === 'integer') {
+        resultPL = getIntegerPLPropertyValue(valueJS);
+    } else if (typeJS === 'float') {
+        resultPL = getFloatPLPropertyValue(valueJS);
+    } else if (typeJS === 'string') {
+        resultPL = getStringPLPropertyValue(valueJS);
+    } else if (typeJS === 'object') {
+        resultPL = getObjectPLPropertyValue(valueJS);
+    } else {
+        return reportError && domain_error(typeJS, lookup_atom(valueJS));
+    }
+
+    container.value = resultPL;
+    return true;
+}
+
 function getAtomPLPropertyValue(valueJS) {
-    return lookup_atom(valueJS);
+    let localValue = valueJS;
+    if(typeof localValue === 'number' || typeof localValue === 'boolean') {
+        // convert number or boolean to strings.
+        // do not invoke JSON.stringify on localValue if it
+        // is 'string' type - this will re-quote the string.
+        // Also, converting a value that is already a string
+        // is wasted effort.
+        localValue = JSON.stringify(localValue);
+    }
+
+    return lookup_atom(localValue);
 }
 
 // A number can be either an integer or a float. Javascript is agnostic.
@@ -9918,10 +10150,10 @@ This file implements access to Javascript object methods.
 
 function predicate_dom_object_method(object, methodStructure) {
     if (TAG(object) !== TAG_STR) {
-        instantiation_error(object);
+        return instantiation_error(object);
     }
     if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
-        instantiation_error(methodStructure);
+        return instantiation_error(methodStructure);
     }
 
     var objectContainer = {};
@@ -9942,6 +10174,9 @@ function predicate_dom_object_method(object, methodStructure) {
     }
 
     let spec = getInterfaceItemSpec(objectType, 'method', methodName);
+    if(!spec) {
+        return domain_error('method for ' + objectType, lookup_atom(methodName));
+    }
     if (spec.returns && spec.returns.type !== 'boolean') {
         arity--; // the last argument to the methodStructure is for the return value.
     }
@@ -9984,13 +10219,27 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
 
     let arg;
     if(typeof spec.type === 'object') {
-        // union of multiple types
-        for(let subtype of spec.type) {
-            if(convert_method_argument(term, {type: subtype}, resultContainer, false)) {
-                return true;
+        if(spec.type.arrayType) {
+            // [X1, X2, ...] for array of arrayType items
+            if(TAG(term) === TAG_LST) {
+                let arrayContainer = {};
+                if(terms_to_array(term, spec.type.arrayType, arrayContainer, reportError)) {
+                    arg = arrayContainer.value;
+                } else {
+                    return false;
+                }
+            } else {
+                return reportError && type_error('list for array of ' + JSON.stringify(spec.type.arrayType), term);
             }
+        } else {
+            // union of multiple types
+            for (let subtype of spec.type) {
+                if (convert_method_argument(term, {type: subtype}, resultContainer, false)) {
+                    return true;
+                }
+            }
+            return type_error('union: ' + spec.type, term);
         }
-        return type_error('union: ' + spec.type, term);
     } else if(spec.type === 'string') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
@@ -10004,18 +10253,35 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
         }
         arg = container.value;
     } else if(spec.type === 'integer') {
-        let container = {};
-        if (getIntegerPropertyValue(term, container, reportError)) {
-            arg = container.value;
+        let evaluatedTerm = term;
+        if(TAG(term) === TAG_STR){
+            let evaluationContainer = {};
+            if(!evaluate_expression(term, evaluationContainer)) {
+                return false;
+            }
+            arg = evaluationContainer.value;
         } else {
-            return false;
+            let container = {};
+            if (getIntegerPropertyValue(term, container, reportError)) {
+                arg = container.value;
+            } else {
+                return false;
+            }
         }
     } else if(spec.type === 'number') {
-        let container = {};
-        if (getNumberPropertyValue(term, container, reportError)) {
-            arg = container.value;
+        if(TAG(term) === TAG_STR){
+            let evaluationContainer = {};
+            if(!evaluate_expression(term, evaluationContainer)) {
+                return false;
+            }
+            arg = evaluationContainer.value;
         } else {
-            return false;
+            let container = {};
+            if (getNumberPropertyValue(term, container, reportError)) {
+                arg = container.value;
+            } else {
+                return false;
+            }
         }
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
@@ -10085,6 +10351,8 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
             } else {
                 return reportError && type_error('option list', term);
             }
+        } else {
+            return reportError && type_error('options', term);
         }
     } else {
         throw 'internal error: spec.type not recognized. ' + spec.type;
@@ -10141,9 +10409,78 @@ function terms_to_options(listRoot, optionsContainer) {
     return true;
 }
 
-function convert_result(resultJS, spec, resultContainer) {
+function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
+    var array = [];
+
+    var list = listRoot;
+
+    while(list !== NIL) {
+        if(TAG(list) !== TAG_LST) {
+            return instantiation_error(list);
+        }
+
+        var itemPL = memory[VAL(list)];
+        let itemContainer = {};
+        if(convert_method_argument(itemPL, {type: itemType}, itemContainer, reportError)) {
+            array.push(itemContainer.value);
+        } else {
+            return false;
+        }
+
+        list = memory[VAL(list) + 1];
+    }
+
+    arrayContainer.value = array;
+    return true;
+}
+
+function result_array_to_terms(arrayJS, itemType, arrayContainer, reportError) {
+    if(arrayJS.length === 0) {
+        arrayContainer.value = NIL;
+    } else {
+
+        arrayContainer.value = state.H ^ (TAG_LST << WORD_BITS);
+        for (var i = 0; i < arrayJS.length; i++) {
+            let itemContainer = {};
+            if(convert_result(arrayJS[i], {type: itemType}, itemContainer, reportError)) {
+                memory[state.H] = itemContainer.value;
+                // If there are no more items we will overwrite the last entry with [] when we exit the loop
+                memory[state.H + 1] = ((state.H + 2) ^ (TAG_LST << WORD_BITS));
+                state.H += 2;
+            } else {
+                return false;
+            }
+        }
+        memory[state.H - 1] = NIL;
+    }
+    return true;
+}
+
+function convert_result(resultJS, spec, resultContainer, reportError) {
     let resultPL;
-    if(spec.type === 'atom') {
+    if(typeof spec.type === 'object') {
+        if(spec.type.arrayType) {
+            // [X1, X2, ...] for array of arrayType items
+            if(Array.isArray(resultJS)) {
+                let arrayContainer = {};
+                if(result_array_to_terms(resultJS, spec.type.arrayType, arrayContainer, reportError)) {
+                    resultPL = arrayContainer.value;
+                } else {
+                    return false;
+                }
+            } else {
+                return reportError && type_error('array of ' + JSON.stringify(spec.type.arrayType), lookup_atom(JSON.stringify(resultJS)));
+            }
+        } else {
+            // union of multiple types
+            for (let subtype of spec.type) {
+                if (convert_method_argument(resultJS, {type: subtype}, resultContainer, false)) {
+                    return true;
+                }
+            }
+            return reportError && type_error('union: ' + spec.type, lookup_atom(JSON.stringify(resultJS)));
+        }
+    } else if(spec.type === 'atom') {
         resultPL = lookup_atom(resultJS);
     } else if(spec.type === 'string_codes') {
         resultPL = string_to_codes(resultJS);
@@ -10156,19 +10493,19 @@ function convert_result(resultJS, spec, resultContainer) {
     } else if(spec.type === 'dom_rect') {
         let ftor = lookup_functor('dom_rect', 8);
         resultPL = alloc_structure(ftor);
-        memory[state.H++] = PL_put_integer(resultJS.left);
-        memory[state.H++] = PL_put_integer(resultJS.top);
-        memory[state.H++] = PL_put_integer(resultJS.right);
-        memory[state.H++] = PL_put_integer(resultJS.bottom);
-        memory[state.H++] = PL_put_integer(resultJS.x);
-        memory[state.H++] = PL_put_integer(resultJS.y);
-        memory[state.H++] = PL_put_integer(resultJS.width);
-        memory[state.H++] = PL_put_integer(resultJS.height);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.left);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.top);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.right);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.bottom);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.x);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.y);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.width);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.height);
     } else {
-        return type_error('method result specification type', lookup_atom(spec.type));
+        return reportError && type_error('method result specification type', lookup_atom(spec.type));
     }
     resultContainer.value = resultPL;
-    return resultPL;
+    return true;
 }
 
 function object_method_no_return() {

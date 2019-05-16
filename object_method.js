@@ -13,10 +13,10 @@ This file implements access to Javascript object methods.
 
 function predicate_dom_object_method(object, methodStructure) {
     if (TAG(object) !== TAG_STR) {
-        instantiation_error(object);
+        return instantiation_error(object);
     }
     if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
-        instantiation_error(methodStructure);
+        return instantiation_error(methodStructure);
     }
 
     var objectContainer = {};
@@ -37,6 +37,9 @@ function predicate_dom_object_method(object, methodStructure) {
     }
 
     let spec = getInterfaceItemSpec(objectType, 'method', methodName);
+    if(!spec) {
+        return domain_error('method for ' + objectType, lookup_atom(methodName));
+    }
     if (spec.returns && spec.returns.type !== 'boolean') {
         arity--; // the last argument to the methodStructure is for the return value.
     }
@@ -79,13 +82,27 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
 
     let arg;
     if(typeof spec.type === 'object') {
-        // union of multiple types
-        for(let subtype of spec.type) {
-            if(convert_method_argument(term, {type: subtype}, resultContainer, false)) {
-                return true;
+        if(spec.type.arrayType) {
+            // [X1, X2, ...] for array of arrayType items
+            if(TAG(term) === TAG_LST) {
+                let arrayContainer = {};
+                if(terms_to_array(term, spec.type.arrayType, arrayContainer, reportError)) {
+                    arg = arrayContainer.value;
+                } else {
+                    return false;
+                }
+            } else {
+                return reportError && type_error('list for array of ' + JSON.stringify(spec.type.arrayType), term);
             }
+        } else {
+            // union of multiple types
+            for (let subtype of spec.type) {
+                if (convert_method_argument(term, {type: subtype}, resultContainer, false)) {
+                    return true;
+                }
+            }
+            return type_error('union: ' + spec.type, term);
         }
-        return type_error('union: ' + spec.type, term);
     } else if(spec.type === 'string') {
         if (TAG(term) === TAG_ATM) {
             arg = PL_atom_chars(term);
@@ -99,18 +116,35 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
         }
         arg = container.value;
     } else if(spec.type === 'integer') {
-        let container = {};
-        if (getIntegerPropertyValue(term, container, reportError)) {
-            arg = container.value;
+        let evaluatedTerm = term;
+        if(TAG(term) === TAG_STR){
+            let evaluationContainer = {};
+            if(!evaluate_expression(term, evaluationContainer)) {
+                return false;
+            }
+            arg = evaluationContainer.value;
         } else {
-            return false;
+            let container = {};
+            if (getIntegerPropertyValue(term, container, reportError)) {
+                arg = container.value;
+            } else {
+                return false;
+            }
         }
     } else if(spec.type === 'number') {
-        let container = {};
-        if (getNumberPropertyValue(term, container, reportError)) {
-            arg = container.value;
+        if(TAG(term) === TAG_STR){
+            let evaluationContainer = {};
+            if(!evaluate_expression(term, evaluationContainer)) {
+                return false;
+            }
+            arg = evaluationContainer.value;
         } else {
-            return false;
+            let container = {};
+            if (getNumberPropertyValue(term, container, reportError)) {
+                arg = container.value;
+            } else {
+                return false;
+            }
         }
     } else if(spec.type === 'boolean') {
         if (TAG(term) === TAG_ATM) {
@@ -180,6 +214,8 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
             } else {
                 return reportError && type_error('option list', term);
             }
+        } else {
+            return reportError && type_error('options', term);
         }
     } else {
         throw 'internal error: spec.type not recognized. ' + spec.type;
@@ -236,9 +272,78 @@ function terms_to_options(listRoot, optionsContainer) {
     return true;
 }
 
-function convert_result(resultJS, spec, resultContainer) {
+function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
+    var array = [];
+
+    var list = listRoot;
+
+    while(list !== NIL) {
+        if(TAG(list) !== TAG_LST) {
+            return instantiation_error(list);
+        }
+
+        var itemPL = memory[VAL(list)];
+        let itemContainer = {};
+        if(convert_method_argument(itemPL, {type: itemType}, itemContainer, reportError)) {
+            array.push(itemContainer.value);
+        } else {
+            return false;
+        }
+
+        list = memory[VAL(list) + 1];
+    }
+
+    arrayContainer.value = array;
+    return true;
+}
+
+function result_array_to_terms(arrayJS, itemType, arrayContainer, reportError) {
+    if(arrayJS.length === 0) {
+        arrayContainer.value = NIL;
+    } else {
+
+        arrayContainer.value = state.H ^ (TAG_LST << WORD_BITS);
+        for (var i = 0; i < arrayJS.length; i++) {
+            let itemContainer = {};
+            if(convert_result(arrayJS[i], {type: itemType}, itemContainer, reportError)) {
+                memory[state.H] = itemContainer.value;
+                // If there are no more items we will overwrite the last entry with [] when we exit the loop
+                memory[state.H + 1] = ((state.H + 2) ^ (TAG_LST << WORD_BITS));
+                state.H += 2;
+            } else {
+                return false;
+            }
+        }
+        memory[state.H - 1] = NIL;
+    }
+    return true;
+}
+
+function convert_result(resultJS, spec, resultContainer, reportError) {
     let resultPL;
-    if(spec.type === 'atom') {
+    if(typeof spec.type === 'object') {
+        if(spec.type.arrayType) {
+            // [X1, X2, ...] for array of arrayType items
+            if(Array.isArray(resultJS)) {
+                let arrayContainer = {};
+                if(result_array_to_terms(resultJS, spec.type.arrayType, arrayContainer, reportError)) {
+                    resultPL = arrayContainer.value;
+                } else {
+                    return false;
+                }
+            } else {
+                return reportError && type_error('array of ' + JSON.stringify(spec.type.arrayType), lookup_atom(JSON.stringify(resultJS)));
+            }
+        } else {
+            // union of multiple types
+            for (let subtype of spec.type) {
+                if (convert_method_argument(resultJS, {type: subtype}, resultContainer, false)) {
+                    return true;
+                }
+            }
+            return reportError && type_error('union: ' + spec.type, lookup_atom(JSON.stringify(resultJS)));
+        }
+    } else if(spec.type === 'atom') {
         resultPL = lookup_atom(resultJS);
     } else if(spec.type === 'string_codes') {
         resultPL = string_to_codes(resultJS);
@@ -251,19 +356,19 @@ function convert_result(resultJS, spec, resultContainer) {
     } else if(spec.type === 'dom_rect') {
         let ftor = lookup_functor('dom_rect', 8);
         resultPL = alloc_structure(ftor);
-        memory[state.H++] = PL_put_integer(resultJS.left);
-        memory[state.H++] = PL_put_integer(resultJS.top);
-        memory[state.H++] = PL_put_integer(resultJS.right);
-        memory[state.H++] = PL_put_integer(resultJS.bottom);
-        memory[state.H++] = PL_put_integer(resultJS.x);
-        memory[state.H++] = PL_put_integer(resultJS.y);
-        memory[state.H++] = PL_put_integer(resultJS.width);
-        memory[state.H++] = PL_put_integer(resultJS.height);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.left);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.top);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.right);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.bottom);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.x);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.y);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.width);
+        memory[state.H++] = getIntegerPLPropertyValue(resultJS.height);
     } else {
-        return type_error('method result specification type', lookup_atom(spec.type));
+        return reportError && type_error('method result specification type', lookup_atom(spec.type));
     }
     resultContainer.value = resultPL;
-    return resultPL;
+    return true;
 }
 
 function object_method_no_return() {

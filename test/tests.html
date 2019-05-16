@@ -13,7 +13,15 @@
     </div>
 </div>
 <div id="test2">
-    <canvas id="canvas" width="300" height="100"></canvas>
+    <canvas id="canvas" width="300" height="300">
+        <label for="button">TestButton</label>
+        <input id="button" type="range" min="1" max="12">
+        <div style="display:none;">
+            <img id="source"
+                 src="https://mdn.mozillademos.org/files/5397/rhino.jpg"
+                 width="300" height="227" alt="rhino">
+        </div>
+    </canvas>
 </div>
 <script type="text/javascript" src="../wam-pp.js"></script>
 <script type="text/javascript" src="../bootstrap.js"></script>

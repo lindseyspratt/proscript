@@ -10,10 +10,10 @@ test('HTMLElement', 'dir of test1 finds ""', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_property(_, E, dir,'').
 
-test('HTMLElement', 'innerText of test1 finds "test 1 child<RET>"', succeeded) :-
+test('HTMLElement', 'innerText of test1 finds "test 1 child[.]"', succeeded) :-
     dom_element_attribute_value(E, id, test1),
-    dom_object_property(_, E, innerText,"test 1 child
-").
+    dom_object_property(_, E, innerText, T),
+    append("test 1 child", _, T). % Safari follows 'child' with a newline, Firefox/mac has no newline.
 
 test('HTMLElement', 'lang of test1 finds empty string', succeeded) :-
     dom_element_attribute_value(E, id, test1),

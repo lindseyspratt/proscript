@@ -47,10 +47,14 @@ function predicate_dom_object_property(type, object, property, value) {
 
         if (cursor.property_values && cursor.property_values.length > 0) {
             var valueJS = cursor.property_values.pop();
-            var valuePL = propertyValueToPL(typeJS, property, valueJS);
-            return unify(value, valuePL) &&
-                unify(object, elementPL);
-        }
+            let container = {};
+            if(propertyValueToPL(typeJS, property, valueJS, container)) {
+                return unify(value, container.value) &&
+                    unify(object, elementPL);
+            } else {
+                return false;
+            }
+         }
 
         // All classNames for current elementJS have been processed.
         // Set the cursor.tags to undefined to force recalculation of tags
@@ -154,11 +158,11 @@ function propertyValueToJS(type, value, container, reportError) {
     if(! container) {
         let valueJS;
         let container = {};
-        if (propertyValueToJS(propertySpec.type, value, container)) {
+        if (propertyValueToJS(type, value, container)) {
             valueJS = container.value;
         } else {
             let formatted = format_term(value, {quoted: true});
-            throw 'unable to convert Prolog value "' + formatted + '" to Javascript value of type "' + propertySpec.type + '".';
+            throw 'unable to convert Prolog value "' + formatted + '" to Javascript value of type "' + type + '".';
         }
         return valueJS;
     }
@@ -289,33 +293,62 @@ function getObjectPropertyValue(value, container) {
     return get_object_container(value, container);
 }
 
-function propertyValueToPL(typeJS, property, valueJS) {
+function propertyValueToPL(typeJS, property, valueJS, container, reportError) {
     let propertyJS = PL_get_atom_chars(property);
     let propertySpec = getPropertySpecification(typeJS, propertyJS);
-
     if (propertySpec) {
-        if (propertySpec.type === 'atom') {
-            return getAtomPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'number') {
-            return getNumberPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'integer') {
-            return getIntegerPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'float') {
-            return getFloatPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'string') {
-            return getStringPLPropertyValue(valueJS);
-        } else if (propertySpec.type === 'object') {
-            return getObjectPLPropertyValue(valueJS);
-        } else {
-            domain_error(propertySpec.type);
-        }
+        return propertyValueToPLUtil(propertySpec.type, property, valueJS, container, reportError);
     } else {
-        domain_error(property);
+        return reportError && domain_error(property);
     }
 }
 
+function propertyValueToPLUtil(typeJS, property, valueJS, container, reportError) {
+    let resultPL;
+    if (typeof typeJS === 'object') {
+        for (let subtype of typeJS) {
+            if (propertyValueToPLUtil(subtype, property, valueJS, container, false)) {
+                return true;
+            }
+        }
+
+        return reportError && type_error(typeJS, lookup_atom(valueJS));
+    } else if (typeJS === 'atom') {
+        if(typeof valueJS !== 'object') {
+            resultPL = getAtomPLPropertyValue(valueJS);
+        } else {
+            return reportError && domain_error(typeJS, lookup_atom(valueJS));
+        }
+    } else if (typeJS === 'number') {
+        resultPL = getNumberPLPropertyValue(valueJS);
+    } else if (typeJS === 'integer') {
+        resultPL = getIntegerPLPropertyValue(valueJS);
+    } else if (typeJS === 'float') {
+        resultPL = getFloatPLPropertyValue(valueJS);
+    } else if (typeJS === 'string') {
+        resultPL = getStringPLPropertyValue(valueJS);
+    } else if (typeJS === 'object') {
+        resultPL = getObjectPLPropertyValue(valueJS);
+    } else {
+        return reportError && domain_error(typeJS, lookup_atom(valueJS));
+    }
+
+    container.value = resultPL;
+    return true;
+}
+
 function getAtomPLPropertyValue(valueJS) {
-    return lookup_atom(valueJS);
+    let localValue = valueJS;
+    if(typeof localValue === 'number' || typeof localValue === 'boolean') {
+        // convert number or boolean to strings.
+        // do not invoke JSON.stringify on localValue if it
+        // is 'string' type - this will re-quote the string.
+        // Also, converting a value that is already a string
+        // is wasted effort.
+        localValue = JSON.stringify(localValue);
+    }
+
+    return lookup_atom(localValue);
 }
 
 // A number can be either an integer or a float. Javascript is agnostic.

@@ -35,6 +35,11 @@ function evaluate_expression(expression, evaluated)
         evaluated.value = Math.PI;
         return true;
     }
+    else if (TAG(expression) === TAG_ATM && expression === lookup_atom("e"))
+    {
+        evaluated.value = Math.E;
+        return true;
+    }
     else if (TAG(expression) === TAG_STR)
     {
         var indicator;

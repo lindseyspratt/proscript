@@ -101,7 +101,10 @@ test('Element', 'tag of test1 is DIV', succeeded) :-
 test('Element', 'getBoundingClientRect of test1 is particular rectangle', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_method(E, getBoundingClientRect(X)),
-    X=dom_rect(8,8,1336,29,8,8,1328,21).
+    X=dom_rect(8, A, B1, B2, 8, A, C1, C2),
+    B1 is C1 + 8.
+    % X=dom_rect(8,-177,1336,-156,8,-177,1328,21). % Safari
+    % X=dom_rect(8,-167,1432,-145,8,-167,1424,21). % Firefox, Mac
 
 test('Element', 'insertAdjacentElement of new div afterEnd of test1', succeeded) :-
     dom_element_attribute_value(E, id, test1),

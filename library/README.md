@@ -3,6 +3,26 @@ The files in the library directory have common useful predicates.
 Some of these files are from the Edinburgh DEC-10 Prolog as found 
 at http://www.j-paine.org/prolog/library.html
 
+## between.pl
+From Edinburgh DEC-10 library.
+* between(+L, +U, ?N): True for all integers N between L (lower) and U (upper).
+If N is unbound on evaluation then it is generated in order from L to U (repeating on failure).
+
+* gen_arg(?N, +Term, ?Arg):
+is exactly like arg(N, Term, Arg), except that it will generate
+solutions for N by backtracking (will work when N is a variable).
+
+### gen_nat/1, gen_nat/2, gen_int/1: generate integers. 
+Originally by R O'Keefe.
+
+* gen_nat(+X): True if X is a natural number, false otherwise
+* gen_nat(-X): Instantiates X to 0, then 1, 2, 3, 4...
+* gen_nat(+L,-N): Instantiates N to L, then L+1, L+2...
+* gen_nat(+L,+N): True if N >= L
+* gen_nat(-L,+N):  ** Succeeds with L = N , then LOOPS **
+
+* gen_int(-X)	 Instantiates X to 0, then 1, -1, 2, -2, 3, -3...
+
 ## dom.pl
 set_dom_name_path_value/2: set the value associated with HTML nodes that 
 satisfy the given node name path. A path is a list of names where each name
