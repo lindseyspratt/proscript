@@ -264,8 +264,7 @@ assert_datas([H|T], J) :-
 
 assert_data(ShadowData, ID) :-
     ShadowData =.. [F|Args],
-    shadow_data_prefix(F, Prefix),
-    data_predicates(Prefix, Suffixes),
+    data_predicates(F, Prefix, Suffixes),
     (length(Suffixes, ArgCount),
      length(Args, ArgCount)
        -> assert_shadow_arguments(Args, Prefix, Suffixes, ID),
@@ -294,7 +293,7 @@ default_asserted_id(Prefix, ID) :-
     assertz(Goal).
 
 data_predicate_dynamics :-
-    findall(Prefix-Suffixes, data_predicates(Prefix, Suffixes), All),
+    findall(Prefix-Suffixes, data_predicates(_, Prefix, Suffixes), All),
     data_predicate_dynamics(All).
 
 data_predicate_dynamics([]).
@@ -323,11 +322,10 @@ data_predicate_default_dynamic(Prefix, Predicate) :-
     BinaryGoal =.. [Predicate, DefaultID, Value],
     asserta((Head :- DefaultGoal, BinaryGoal)).
 
-shadow_data_prefix(ts, tile).
-shadow_data_prefix(g, game).
+:- dynamic data_predicates/3.
 
-data_predicates(tile,[x, y,bx,by,size,colors,container]). % e.g. tile_x(ID, X), tile_y(ID, Y)...
-data_predicates(game,[tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]). % e.g. game_board_left(ID, X)...
+data_predicates(ts, tile,[x, y,bx,by,size,colors,container]). % e.g. tile_x(ID, X), tile_y(ID, Y)...
+data_predicates(g, game,[tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]). % e.g. game_board_left(ID, X)...
 
 construct_data_predicate(Prefix, Suffix, Predicate) :-
     atom_concat(Prefix, '_', PrefixExtended),
