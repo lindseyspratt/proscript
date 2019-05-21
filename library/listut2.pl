@@ -1,3 +1,9 @@
+append_lists([], []).
+append_lists([H|T], R) :-
+    append(H, N, R),
+    append_lists(T, N).
+
+
 %   select_list(X, Xlist, Y, Ylist)
 %
 %   is true when X is a sublist of Xlist and Y is a sublist of Ylist,
@@ -17,7 +23,7 @@ select_list(Old, List, New, NewList) :-
 contains_list([], []).
 contains_list([H|T], [H|U]) :-
     contains_list1(T, U).
-contains_list([H|T], S) :-
+contains_list([_|T], S) :-
     contains_list(T, S).
 
 contains_list1(_, []).
@@ -57,7 +63,7 @@ uppercase([], []).
 
 uppercase1(X, UX) :-
     case_map(Us, Ls),
-    uppercase1(Ls, LX, Us, X).
+    uppercase1(Ls, X, Us, UX).
 
 uppercase1([], X, _, X).
 uppercase1([L|Ls], X, [U|Us], Y) :-

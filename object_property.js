@@ -158,7 +158,7 @@ function propertyValueToJS(type, value, container, reportError) {
     if(! container) {
         let valueJS;
         let container = {};
-        if (propertyValueToJS(type, value, container)) {
+        if (propertyValueToJS(type, value, container, false)) {
             valueJS = container.value;
         } else {
             let formatted = format_term(value, {quoted: true});
@@ -175,25 +175,19 @@ function propertyValueToJS(type, value, container, reportError) {
             }
         }
 
-        if(reportError) {
-            return type_error('union: ' + type, value);
-        } else {
-            return false;
-        }
+        return reportError && type_error('union: ' + type, value);
     } else if(type === 'atom') {
         return getAtomPropertyValue(value, container, reportError);
     } else if(type === 'boolean') {
         return getBooleanPropertyValue(value, container, reportError);
     } else if(type === 'number') {
-        return getIntegerPropertyValue(value, container, reportError);
+        return getNumberPropertyValue(value, container, reportError);
     } else if(type === 'string') {
         return getStringPropertyValue(value, container, reportError);
     } else if(type === 'object') {
         return getObjectPropertyValue(value, container, reportError);
-    } else if(reportError){
-        return domain_error(type);
     } else {
-        return false;
+        return reportError && domain_error(type);
     }
 }
 

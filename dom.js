@@ -464,7 +464,7 @@ function predicate_create_dom_text_node(text, element) {
     }
 
     let container = {};
-    if(! codes_to_string(text, container)) {
+    if(! codes_to_string(text, container, true)) {
         return false;
     }
     var textJS = container.value;
@@ -552,7 +552,7 @@ function predicate_dom_select_element(query, element) {
     }
 
     let container = {};
-    if(!codes_to_string(query)) {
+    if(!codes_to_string(query, container, true)) {
         return false;
     }
     var queryJS = container.value;

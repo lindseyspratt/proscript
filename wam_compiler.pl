@@ -1004,11 +1004,22 @@ compile_stream(Stream):-
 % Originally this used 'forall(retract(delayed_initialization(Goal)), call(Goal))'.
 % However, this caused some tests to perform very poorly. E.g. bench/nrev took almost 3 times longer (speed decreased from 3 Mlips to 1.2Mlips).
 % The slowdown is puzzling since there were no initialization goals defined in the test.
-compile_stream_term(_, end_of_file):- !, findall(Goal, delayed_initialization(Goal), Goals), retractall(delayed_initialization(_)), call_list(Goals).
+compile_stream_term(_, end_of_file):-
+        !,
+        repeat,
+        (retract(delayed_initialization(Goal)),
+         writeln(init(Goal)),
+         call(Goal),
+         fail
+         ;
+         true
+        ).
 compile_stream_term(Stream, Term):-
         compile_clause(Term),
         !,
         compile_stream(Stream).
+
+
 
 call_list([]).
 call_list([H|T]) :-
@@ -1026,6 +1037,8 @@ compile_atom(Atom):-
         writeln('Compiled atom').
 
 compile_and_free_memory_file(MemoryFile) :-
+        memory_file_description(MemoryFile, Description),
+        writeln(cafmf(MemoryFile, Description)),
         compile_memory_file(MemoryFile),
         free_memory_file(MemoryFile).
 
@@ -1138,6 +1151,7 @@ compile_results([]).
 compile_results([URL-Promise|T]) :-
   promise_result(Promise, R),
   push_current_compile_url(URL),
+  writeln(R),
   compile_and_free_memory_file(R),
   pop_current_compile_url(URL),
   retractall('$loaded'(URL)), % clear old loaded fact, if any.

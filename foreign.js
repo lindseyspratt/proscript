@@ -2388,12 +2388,12 @@ function predicate_eval_javascript(expression, result)
         expressionJS = PL_atom_chars(expression);
     } else if (TAG(expression) === TAG_LST) {
         let container = {};
-        if(!codes_to_string(expression, container)) {
+        if(!codes_to_string(expression, container, true)) {
             return false;
         }
         expressionJS = container.value;
     } else {
-        instantiation_error(expression);
+        return instantiation_error(expression);
     }
 
     var resultJS = eval(expressionJS);

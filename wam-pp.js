@@ -2360,12 +2360,12 @@ function predicate_eval_javascript(expression, result)
         expressionJS = PL_atom_chars(expression);
     } else if (TAG(expression) === TAG_LST) {
         let container = {};
-        if(!codes_to_string(expression, container)) {
+        if(!codes_to_string(expression, container, true)) {
             return false;
         }
         expressionJS = container.value;
     } else {
-        instantiation_error(expression);
+        return instantiation_error(expression);
     }
 
     var resultJS = eval(expressionJS);
@@ -2584,18 +2584,62 @@ function text_to_memory_file(text) {
     return index;
 }
 
-function create_memory_file_structure(text) {
+function create_memory_file_structure(text, description) {
     var index = text_to_memory_file(text);
     // '$memory_file'(index)
     var ftor = lookup_functor('$memory_file', 1);
     var memory_file = alloc_structure(ftor);
     memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
-    return memory_file;
+    let idContainer = {};
+    if(get_memory_file_id_container(memory_file, idContainer, true)) {
+        memory_file_description.set(idContainer.value, description);
+        return memory_file;
+    } else {
+        return false;
+    }
+}
+
+function get_memory_file_id_container(term, idContainer, reportError) {
+    if (TAG(term) !== TAG_STR)
+        return reportError && type_error('memory_file', term);
+    var ftor = VAL(memory[VAL(term)]);
+    if (atable[ftable[ftor][0]] === '$memory_file' && ftable_arity(ftor) === 1) {
+        var arg = memory[VAL(term) + 1];
+        if (TAG(arg) !== TAG_INT)
+            return reportError && type_error("memory_file arg integer", arg);
+        return getIntegerPropertyValue(arg, idContainer, reportError);
+    }
+    return reportError && type_error('memory_file', term);
+}
+
+
+function predicate_memory_file_description(memory_file, description) {
+    if(TAG(memory_file) === TAG_REF) {
+        return instantiation_error('memory_file', memory_file);
+    } else if(TAG(memory_file) !== TAG_STR) {
+        return type_error('memory_file', memory_file);
+    } else if(TAG(description) !== TAG_REF && TAG(description) !== TAG_ATM) {
+        return type_error('description', description);
+    }
+
+    let idContainer = {};
+    if(get_memory_file_id_container(memory_file, idContainer, true)) {
+
+        let descriptionJS = memory_file_description.get(idContainer.value);
+        if (descriptionJS) {
+            let descriptionPL = lookup_atom(descriptionJS);
+            return unify(description, descriptionPL);
+        } else {
+            return domain_error('memory_file with description', memory_file);
+        }
+    } else {
+        return false;
+    }
 }
 
 function atom_to_memory_file(atom, memfile)
 {
-    var ref = create_memory_file_structure(atable[VAL(atom)]);
+    var ref = create_memory_file_structure(atable[VAL(atom)], 'atom');
     return unify(memfile, ref);
 }
 
@@ -2614,7 +2658,7 @@ function memory_file_to_atom(memfile, atom)
 
 function new_memory_file(memfile)
 {
-    var ref = create_memory_file_structure('');
+    var ref = create_memory_file_structure('', 'new');
     return unify(memfile, ref);
 }
 
@@ -7729,7 +7773,7 @@ function predicate_create_dom_text_node(text, element) {
     }
 
     let container = {};
-    if(! codes_to_string(text, container)) {
+    if(! codes_to_string(text, container, true)) {
         return false;
     }
     var textJS = container.value;
@@ -7817,7 +7861,7 @@ function predicate_dom_select_element(query, element) {
     }
 
     let container = {};
-    if(!codes_to_string(query)) {
+    if(!codes_to_string(query, container, true)) {
         return false;
     }
     var queryJS = container.value;
@@ -8545,6 +8589,7 @@ async function request_result(promise, promiseJS) {
 
 var promise_requests = new Map();
 var promise_results = new Map();
+var promise_description = new Map();
 
 function promise_callback(promise, result) {
     promise_results.set(promise, result);
@@ -8563,14 +8608,20 @@ function promise_callback(promise, result) {
 }
 
 var promise_results_key_array = [];
+var memory_file_description = new Map();
 
 function predicate_handle_result(promise, result) {
     if (TAG(promise) !== TAG_REF) {
         let text = promise_results.get(promise);
         if (text) {
-            let memory_file = create_memory_file_structure(text);
-
-            return unify(result, memory_file);
+            let promiseIDContainer = {};
+            if(get_object_id_container(promise, promiseIDContainer)) {
+                let description = promise_description.get(promiseIDContainer.value);
+                let memory_file = create_memory_file_structure(text, description);
+                return unify(result, memory_file);
+            } else {
+                return representation_error('promise', promise);
+            }
         } else {
             return false;
         }
@@ -8598,7 +8649,13 @@ function predicate_handle_result(promise, result) {
         let promise_key = promise_results_key_array[result_index];
         text = promise_results.get(promise_key);
         if (text) {
-            memory_file = create_memory_file_structure(text);
+            let promiseIDContainer = {};
+            if(get_object_id_container(promise_key, promiseIDContainer)) {
+                let description = promise_description.get(promiseIDContainer.value);
+                memory_file = create_memory_file_structure(text, description);
+            } else {
+                return representation_error('promise', promise_key);
+            }
         } else {
             result_index++;
         }
@@ -8620,7 +8677,13 @@ function predicate_fetch_promise(url, promise) {
 
     let promiseJS = fetch_promise(atable[VAL(url)]);
     let promisePL = create_promise_structure(promiseJS);
-    return unify(promise, promisePL);
+    let promiseIDContainer = {};
+    if(get_object_id_container(promisePL, promiseIDContainer)) {
+        promise_description.set(promiseIDContainer.value, 'fetch ' + atable[VAL(url)]);
+        return unify(promise, promisePL);
+    } else {
+        return representation_error('promise', promisePL);
+    }
 }
 
 async function fetch_promise(urlJS) {
@@ -9182,9 +9245,15 @@ function SimpleProperty(type, propertyName, settable) {
     };
     that.setValue = function(property, elementJS, value) {
         if(settable) {
-            elementJS[propertyName] = propertyValueToJS(type, value);
+            let container = {};
+            if(propertyValueToJS(type, value, container, true)) {
+                elementJS[propertyName] = container.value;
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            domain_error(property);
+            return domain_error(property);
         }
     };
     return that;
@@ -9833,7 +9902,7 @@ function propertyValueToJS(type, value, container, reportError) {
     if(! container) {
         let valueJS;
         let container = {};
-        if (propertyValueToJS(type, value, container)) {
+        if (propertyValueToJS(type, value, container, false)) {
             valueJS = container.value;
         } else {
             let formatted = format_term(value, {quoted: true});
@@ -9850,25 +9919,19 @@ function propertyValueToJS(type, value, container, reportError) {
             }
         }
 
-        if(reportError) {
-            return type_error('union: ' + type, value);
-        } else {
-            return false;
-        }
+        return reportError && type_error('union: ' + type, value);
     } else if(type === 'atom') {
         return getAtomPropertyValue(value, container, reportError);
     } else if(type === 'boolean') {
         return getBooleanPropertyValue(value, container, reportError);
     } else if(type === 'number') {
-        return getIntegerPropertyValue(value, container, reportError);
+        return getNumberPropertyValue(value, container, reportError);
     } else if(type === 'string') {
         return getStringPropertyValue(value, container, reportError);
     } else if(type === 'object') {
         return getObjectPropertyValue(value, container, reportError);
-    } else if(reportError){
-        return domain_error(type);
     } else {
-        return false;
+        return reportError && domain_error(type);
     }
 }
 

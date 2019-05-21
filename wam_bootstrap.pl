@@ -363,6 +363,7 @@ reset:-
         reserve_predicate(free_memory_file/1, free_memory_file),
         reserve_predicate(format/3, predicate_format),
         reserve_predicate(flag/3, predicate_flag),
+        reserve_predicate(memory_file_description/2, predicate_memory_file_description),
 
         % Stuff related to actually compiling
         reserve_predicate(reset_compile_buffer/0, reset_compile_buffer),

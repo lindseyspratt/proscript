@@ -241,9 +241,15 @@ function SimpleProperty(type, propertyName, settable) {
     };
     that.setValue = function(property, elementJS, value) {
         if(settable) {
-            elementJS[propertyName] = propertyValueToJS(type, value);
+            let container = {};
+            if(propertyValueToJS(type, value, container, true)) {
+                elementJS[propertyName] = container.value;
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            domain_error(property);
+            return domain_error(property);
         }
     };
     return that;

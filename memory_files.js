@@ -107,18 +107,62 @@ function text_to_memory_file(text) {
     return index;
 }
 
-function create_memory_file_structure(text) {
+function create_memory_file_structure(text, description) {
     var index = text_to_memory_file(text);
     // '$memory_file'(index)
     var ftor = lookup_functor('$memory_file', 1);
     var memory_file = alloc_structure(ftor);
     memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
-    return memory_file;
+    let idContainer = {};
+    if(get_memory_file_id_container(memory_file, idContainer, true)) {
+        memory_file_description.set(idContainer.value, description);
+        return memory_file;
+    } else {
+        return false;
+    }
+}
+
+function get_memory_file_id_container(term, idContainer, reportError) {
+    if (TAG(term) !== TAG_STR)
+        return reportError && type_error('memory_file', term);
+    var ftor = VAL(memory[VAL(term)]);
+    if (atable[ftable[ftor][0]] === '$memory_file' && ftable_arity(ftor) === 1) {
+        var arg = memory[VAL(term) + 1];
+        if (TAG(arg) !== TAG_INT)
+            return reportError && type_error("memory_file arg integer", arg);
+        return getIntegerPropertyValue(arg, idContainer, reportError);
+    }
+    return reportError && type_error('memory_file', term);
+}
+
+
+function predicate_memory_file_description(memory_file, description) {
+    if(TAG(memory_file) === TAG_REF) {
+        return instantiation_error('memory_file', memory_file);
+    } else if(TAG(memory_file) !== TAG_STR) {
+        return type_error('memory_file', memory_file);
+    } else if(TAG(description) !== TAG_REF && TAG(description) !== TAG_ATM) {
+        return type_error('description', description);
+    }
+
+    let idContainer = {};
+    if(get_memory_file_id_container(memory_file, idContainer, true)) {
+
+        let descriptionJS = memory_file_description.get(idContainer.value);
+        if (descriptionJS) {
+            let descriptionPL = lookup_atom(descriptionJS);
+            return unify(description, descriptionPL);
+        } else {
+            return domain_error('memory_file with description', memory_file);
+        }
+    } else {
+        return false;
+    }
 }
 
 function atom_to_memory_file(atom, memfile)
 {
-    var ref = create_memory_file_structure(atable[VAL(atom)]);
+    var ref = create_memory_file_structure(atable[VAL(atom)], 'atom');
     return unify(memfile, ref);
 }
 
@@ -137,7 +181,7 @@ function memory_file_to_atom(memfile, atom)
 
 function new_memory_file(memfile)
 {
-    var ref = create_memory_file_structure('');
+    var ref = create_memory_file_structure('', 'new');
     return unify(memfile, ref);
 }
 

@@ -71,6 +71,7 @@ async function request_result(promise, promiseJS) {
 
 var promise_requests = new Map();
 var promise_results = new Map();
+var promise_description = new Map();
 
 function promise_callback(promise, result) {
     promise_results.set(promise, result);
@@ -89,14 +90,20 @@ function promise_callback(promise, result) {
 }
 
 var promise_results_key_array = [];
+var memory_file_description = new Map();
 
 function predicate_handle_result(promise, result) {
     if (TAG(promise) !== TAG_REF) {
         let text = promise_results.get(promise);
         if (text) {
-            let memory_file = create_memory_file_structure(text);
-
-            return unify(result, memory_file);
+            let promiseIDContainer = {};
+            if(get_object_id_container(promise, promiseIDContainer)) {
+                let description = promise_description.get(promiseIDContainer.value);
+                let memory_file = create_memory_file_structure(text, description);
+                return unify(result, memory_file);
+            } else {
+                return representation_error('promise', promise);
+            }
         } else {
             return false;
         }
@@ -125,7 +132,13 @@ function predicate_handle_result(promise, result) {
         let promise_key = promise_results_key_array[result_index];
         text = promise_results.get(promise_key);
         if (text) {
-            memory_file = create_memory_file_structure(text);
+            let promiseIDContainer = {};
+            if(get_object_id_container(promise_key, promiseIDContainer)) {
+                let description = promise_description.get(promiseIDContainer.value);
+                memory_file = create_memory_file_structure(text, description);
+            } else {
+                return representation_error('promise', promise_key);
+            }
         } else {
             result_index++;
         }
@@ -147,7 +160,13 @@ function predicate_fetch_promise(url, promise) {
 
     let promiseJS = fetch_promise(atable[VAL(url)]);
     let promisePL = create_promise_structure(promiseJS);
-    return unify(promise, promisePL);
+    let promiseIDContainer = {};
+    if(get_object_id_container(promisePL, promiseIDContainer)) {
+        promise_description.set(promiseIDContainer.value, 'fetch ' + atable[VAL(url)]);
+        return unify(promise, promisePL);
+    } else {
+        return representation_error('promise', promisePL);
+    }
 }
 
 async function fetch_promise(urlJS) {
