@@ -6,7 +6,7 @@
 
 :- dynamic(is_selected/1).
 
-%:- initialization(data_predicate_dynamics). % BUG: initialization(data_predicate_dynamics) hangs. workaround: put data_predicate_dynamics as proscript_init query.
+:- initialization(data_predicate_dynamics).
 
 draw_tile_test :-
     _ >> [id -:> canvas, getContext('2d') *:> Ctx],

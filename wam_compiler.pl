@@ -1006,10 +1006,8 @@ compile_stream(Stream):-
 % The slowdown is puzzling since there were no initialization goals defined in the test.
 compile_stream_term(_, end_of_file):-
         !,
-        repeat,
         (retract(delayed_initialization(Goal)),
-         writeln(init(Goal)),
-         call(Goal),
+         call_init(Goal),
          fail
          ;
          true
@@ -1019,6 +1017,10 @@ compile_stream_term(Stream, Term):-
         !,
         compile_stream(Stream).
 
+call_init(Goal) :-
+    writeln(init(Goal)),
+    call(Goal),
+    !.
 
 
 call_list([]).
