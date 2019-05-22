@@ -23,6 +23,15 @@ Originally by R O'Keefe.
 
 * gen_int(-X)	 Instantiates X to 0, then 1, -1, 2, -2, 3, -3...
 
+## data_predicate.pl
+
+The data predicate system supports storing instances of a type of data
+where each instance has a collection of attributes. The data is stored
+as assertions of the form <type>_<attribute>(ID, Value). The data_predicate
+file contains predicates to manage creating these dynamic predicates from a 
+specification and predicates to add an instance with attribute values
+to a defined type.
+
 ## dom.pl
 set_dom_name_path_value/2: set the value associated with HTML nodes that 
 satisfy the given node name path. A path is a list of names where each name
@@ -63,6 +72,15 @@ Additional list utility predicates created for Proscript.
 * split_list/4
 * lowercase/2
 * uppercase/2
+
+## object.pl
+Defines a simple syntax for working with the DOM Web API interfaces.
+The main operator is '>>'. The first argument is an object and the second
+argument is a list of property get/set operations, methods, or goals
+to apply to that object.
+For instance to reference the HTMLCanvasElement with id 'canvas' and
+get the 2D context for that element: 
+    Canvas >> [id -:> canvas, getContext('2d') *:> Ctx].
 
 ## setutl.pl
 From Edinburgh DEC-10 library.

@@ -44,10 +44,13 @@ consult_atom(Atom):-
         compile_atom(Atom).
 
 ensure_loaded(URL) :-
-  '$loaded'(URL)
+  canonical_source(URL, CanonicalURL),
+  (
+  '$loaded'(CanonicalURL)
     -> true
   ;
-  consult([URL]).
+  consult([CanonicalURL])
+  ).
 
 format(Format, Args):-
         current_output(Stream), format(Stream, Format, Args).

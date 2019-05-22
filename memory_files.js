@@ -65,16 +65,16 @@ function fromByteArray(byteArray)
     }
     return str;
 }
-
-function predicate_consult(urlsPL, nextGoalPL) {
-    if(TAG(urlsPL) !== TAG_LST) {
-        return type_error("list", urlsPL);
-    }
-    let urlsJS = atom_list_to_array(urlsPL);
-    let nextGoalJS = atable[VAL(nextGoalPL)];
-    consult(urlsJS, nextGoalJS);
-    return true;
-}
+//
+// function predicate_consult(urlsPL, nextGoalPL) {
+//     if(TAG(urlsPL) !== TAG_LST) {
+//         return type_error("list", urlsPL);
+//     }
+//     let urlsJS = atom_list_to_array(urlsPL);
+//     let nextGoalJS = atable[VAL(nextGoalPL)];
+//     consult(urlsJS, nextGoalJS);
+//     return true;
+// }
 
 function atom_list_to_array(listPL) {
 
