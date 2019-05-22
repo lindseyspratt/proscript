@@ -26,3 +26,17 @@ set_dom_name_path_value([H|T], E, V) :-
     dom_object_property(_, E, child, C),
     set_dom_name_path_value([H|T], C, V).
 
+dom_page_offset(Top, Left, HTMLElement) :-
+    dom_page_offset(0, 0, Top, Left, HTMLElement).
+
+dom_page_offset(TopIN, LeftIN, Top, Left, HTMLElement) :-
+    dom_object_property(_, HTMLElement, offsetTop, LTop),
+    dom_object_property(_, HTMLElement, offsetLeft, LLeft),
+    TopNEXT is TopIN + LTop,
+    LeftNEXT is LeftIN + LLeft,
+    (dom_object_property(_, HTMLElement, offsetParent, Parent)
+      -> dom_page_offset(TopNEXT, LeftNEXT, Top, Left, Parent)
+    ;
+    Top = TopNEXT,
+    Left = LeftNEXT
+    ).

@@ -1,4 +1,5 @@
 :- op(200, fx, *).
+:- op(200, fx, @).
 :- op(500, xfy, :>).
 :- op(500, xfx, <:).
 :- op(500, xfy, -:>).
@@ -9,6 +10,7 @@
 :- op(700, xfy, >->).
 :- op(700, xfy, >+>).
 :- op(700, xfy, >*>).
+:- op(700, xfy, >@>).
 
 % The Proscript object language provides a concise way
 % to access object properties, methods and Element
@@ -34,7 +36,7 @@
 %   Obj >+> [X1, ..., Xn]
 %       applies Xi property operation in order to Obj.
 %       Each Xi is either (P :> V) or (P <: V). E.g.
-%       Obj >-> [a :> AV, b <: 1, c:> CV].
+%       Obj >+> [a :> AV, b <: 1, c:> CV].
 %
 % >*>/2 applies a method operation to an object:
 %   Obj >*> M :> V
@@ -44,9 +46,20 @@
 %   Obj >*> [X1, ..., Xn]
 %       applies Xi method operation in order to Obj.
 %       Each Xi is either (M :> V) or (M). E.g.
-%       Obj >-> [a :> AV, b(1, 2) :> BV, c].
+%       Obj >*> [a :> AV, b(1, 2) :> BV, c].
 %   A method may be a single atom such as 'beginPath'
 %   or a structure such as 'moveTo(200, 20)'.
+%
+% >@>/2 applies a Prolog goal to an object where the last argument to the goal is the object:
+%   Obj >@> G
+%       invokes call(G, Obj)
+%   Obj >@> [X1, ..., Xn]
+%       applies Xi goal in order to Obj. E.g.
+%       Obj >@> [a, b(1, 2)].
+%   A goal may be a single atom such as 'foo'
+%   or a structure such as 'bar(200, 20)'. These are evaluated using call/2:
+%   call(foo, Obj) or call(bar(200, 20), Obj).
+%   These calls are the same as evaluating foo(Obj) or bar(200, 20, Obj).
 %
 % >>/2 applies any combination of attribute get/set, property get/set, and method
 % operations.
@@ -56,6 +69,8 @@
 %       applies attribute operation(s) AV to Obj. AV is either (A :> V) or (A <: V).
 %   Obj >> + PV
 %       applies property operation(s) PV to Obj. PV is either (P :> V) or (P <: V).
+%   Obj >> @ G
+%       applies goal(s) G to Obj.
 %   Obj >> A -:> V
 %       applies attribute operation (A :> V) to Obj.
 %   Obj >> A <:- V
@@ -72,7 +87,7 @@
 %       If the X1 operation is an attribute value specification that identifies
 %       an object (such as (id -:> canvas)), then Obj may be unbound initially.
 %       It will be bound by X1, and the bound Obj will be used for subsequent applications of Xi.
-%       The Xi may be any of the above forms: * M, - AV, + PV, A -:> V, A <:- V,
+%       The Xi may be any of the above forms: * M, - AV, + PV, @ G, A -:> V, A <:- V,
 %       P +:> V, P <:+ V, and M *:> V. Xi may also be a list.
 
 >>(_, []) :-
@@ -90,6 +105,9 @@
 >>(Obj, - AV) :-
     !, % attribute/value invocation
     >->(Obj, AV).
+>>(Obj, @ G) :-
+    !, % goal invocation
+    >@>(Obj, G).
 >>(Obj, A -:> V) :-
     !,
     >->(Obj, A :> V).
@@ -146,3 +164,12 @@
     dom_object_method(Obj, MethodX).
 >*>(Obj, Method) :-
     dom_object_method(Obj, Method).
+
+>@>(_, []) :-
+    !.
+>@>(Obj, [H|T]) :-
+    !,
+    >@>(Obj, H),
+    >@>(Obj, T).
+>@>(Obj, Goal) :-
+    call(Goal, Obj).

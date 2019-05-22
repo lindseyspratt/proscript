@@ -1,12 +1,21 @@
 :- ensure_loaded('../library/object'). % for >>/2.
 :- ensure_loaded('../library/listut2'). % for append_lists/2
-
-/*
-*/
+:- ensure_loaded('../library/dom'). % for dom_page_offset/2
+:- ensure_loaded('../library/data_predicates').
 
 :- dynamic(is_selected/1).
 
 :- initialization(data_predicate_dynamics).
+
+% For tiles the shadow tile structure functor is 'ts'
+% and the arguments are 'x', 'y', etc.
+% For the game the shadow game structure functor is 'g'
+% and the arguments are 'board_left', 'turn', etc.
+% (Note that there is currently only one 'game' so the ID is always '1'.)
+
+data_predicates(ts, tile,[x, y,bx,by,size,colors,container]). % e.g. tile_x(ID, X), tile_y(ID, Y)...
+data_predicates(g, game,[tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]). % e.g. game_board_left(ID, X)...
+data_predicates(lp, legal_position, [bx, by]).
 
 draw_tile_test :-
     _ >> [id -:> canvas, getContext('2d') *:> Ctx],
@@ -36,13 +45,177 @@ setup_draw_all_tiles_test(Ctx, W, H, [Tile1, Tile2]) :-
     asserta(is_selected(Tile1)).
 
 draw_legal_moves_test :-
-    setup_legal_moves(Ctx),
-    draw_legal_moves([legal_position(1,1)], [legal_position(1,2)], Ctx).
+    setup_legal_moves(Ctx, LPs1, LPs2),
+    draw_legal_moves(LPs1, LPs2, Ctx).
 
-setup_legal_moves(Ctx) :-
+setup_legal_moves(Ctx, [1],[Tile2]) :-
     _ >> [id -:> canvas, getContext('2d') *:> Ctx],
+    Tile2 = 2,
 % [tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]
-    assert_data(g(50, 10, 10, 200, 200, 1>1, 1, [Tile2]), 1).
+    assert_data(g(50, 10, 10, 200, 200, 1>1, 1, [Tile2]), 1),
+    assert_data(lp(1,1), 1),
+    assert_data(lp(1,2), 2).
+
+display_hands_test :-
+    _ >> [id -:> canvas, getContext('2d') *:> Ctx, width +:> W, height +:> H],
+    assert_data(g(50, 10, 10, 800, 800, 1>1, 1, []), 1),
+    initial_hands_expanded(2, Hands),
+    setup_hands(Hands, TileIDs),
+    draw_all_tiles(TileIDs, Ctx, W, H).
+
+select_test :-
+    Canvas >> [id -:> canvas,
+        getContext('2d') *:> Ctx,
+        width +:> W,
+        height +:> H,
+        @ dom_page_offset(PTop, PLeft),
+        addEventListener(click, [object-E]^select(E, PTop, PLeft))],
+
+    assert_data(g(50, 10, 10, 800, 800, 1>1, 1, []), 1),
+    initial_hands_expanded(2, Hands),
+    setup_hands(Hands, TileIDs),
+    draw_all_tiles(TileIDs, Ctx, W, H).
+
+ % clientX and clientY are coordinates within the containing HTMLCanvasElement
+ % It appears that the rendering coordinates (e.g. moveTo(RX, RY)) are coordinates
+ % within the containing HTMLCanvasElement minus the canvas offset.
+ % RX = clientX - offsetX.
+
+select(Event, PTop, PLeft) :-
+    Event >> [pageX +:> PageX, pageY +:> PageY],
+    dom_release_object(Event),
+    X is PageX - PLeft,
+    Y is PageY - PTop,
+    % writeln(select(PageX, PageY, PLeft, PTop, X, Y)),
+    (point_in_tile(ID, X, Y)
+      -> on_click_tile(ID, X, Y)  % at most one tile contains (X, Y).
+    ;
+     legal_position_bx(ID, BX),
+     legal_position_by(ID, BY),
+     point_in_board_position(BX, BY, X, Y)
+      -> true
+    ;
+     true
+    ).
+
+point_in_tile(ID, MX, MY) :-
+    tile_x(ID, TX),
+    tile_y(ID, TY),
+    tile_size(ID, Size),
+    in_square(MX, MY, TX, TY, Size).
+
+in_square(X, Y, Left, Top, Size) :-
+    in_interval(X, Left, Left+Size),
+    in_interval(Y, Top, Top+Size).
+
+in_interval(V, Low, High) :-
+    V >= Low,
+    V =< High.
+
+point_in_board_position(BX, BY, X, Y) :-
+    game_tile_size(Size),
+    board_position_top_left_coordinates(BX, BY, BCX, BCY),
+    in_square(X, Y, BCX, BCY, Size).
+
+on_click_tile(ID, X, Y) :-
+    %writeln(click(ID, X, Y)),
+    (tile_in_active_hand(ID)
+      -> on_click_active_hand_tile(ID)
+    ;
+    true % writeln(not_active)
+    ).
+
+on_click_active_hand_tile(ID) :-
+    _ >> [id -:> canvas, getContext('2d') *:> Ctx],
+    (retract(is_selected(OldID))
+      -> draw_all_tile(OldID, Ctx) % de-select OldID
+    ;
+    true
+    ),
+    asserta(is_selected(ID)),
+    draw_all_tile(ID, Ctx).
+
+
+setup_hands([], []).
+setup_hands([_+HandTiles|T], IDs) :-
+    setup_hand(HandTiles, IDs, IDTail),
+    setup_hands(T, IDTail).
+
+setup_hand([], Tail, Tail).
+setup_hand([H-ID|T], [ID|OtherIDs], IDTail) :-
+    assert_data(H, ID),
+    setup_hand(T, OtherIDs, IDTail).
+
+hand_origin(1).
+
+initial_hands_expanded(NumberOfPlayers, ExpandedHands) :-
+    initial_hands(NumberOfPlayers, Hands),
+    expand_hands(Hands, ExpandedHands).
+
+expand_hands([], []).
+expand_hands([H|T], [EH|ET]) :-
+    expand_hand(H, EH),
+    expand_hands(T, ET).
+
+expand_hand(ID+BriefTiles, ID+ExpandedTiles) :-
+    game_tile_size(Size),
+    expand_brief_tiles(BriefTiles, ID, Size, ExpandedTiles).
+
+expand_brief_tiles([], _, _, []).
+expand_brief_tiles([H|T], HandID, Size, [EH|ET]) :-
+    expand_brief_tile(H, HandID, Size, EH),
+    expand_brief_tiles(T, HandID, Size, ET).
+
+% [x, y,bx,by,size,colors,container]
+expand_brief_tile(t(BoardX, BoardY, AbstractColors, TileID),
+        HandID,
+        Size,
+        ts(X, Y, BoardX, BoardY, Size, Colors, container(HandID, hand))-TileID) :-
+    X is BoardX * Size,
+    Y is BoardY * Size,
+    abstract_colors(AbstractColors, Colors).
+
+abstract_colors([], []).
+abstract_colors([AH|AT], [CH|CT]) :-
+    abstract_color(AH, CH),
+    abstract_colors(AT, CT).
+
+abstract_color(a, red).
+abstract_color(b, green).
+abstract_color(c, blue).
+abstract_color(d, yellow).
+
+initial_hands(2, [1+Player1Tiles, 2+Player2Tiles]) :-
+   Col1 is 1,
+   Col2 is Col1 + 1,
+   hand_origin(Origin1),
+   Player1Row1 is Origin1,
+   Player1Row2 is Origin1 + 1,
+   Player1Row3 is Origin1 + 2,
+   Player1Row4 is Origin1 + 3,
+   Origin2 is Origin1 + 5,
+   Player2Row1 is Origin2,
+   Player2Row2 is Origin2 + 1,
+   Player2Row3 is Origin2 + 2,
+   Player2Row4 is Origin2 + 3,
+   Player1Tiles = [ t(Col1, Player1Row1,[a,a,a,a], t01),
+                            t(Col1, Player1Row2,[b,a,a,a], t02),
+                            t(Col1, Player1Row3,[b,b,a,a], t03),
+                            t(Col1, Player1Row4,[b,a,b,a], t04),
+                            t(Col2, Player1Row1,[a,a,a,a], t05),
+                            t(Col2, Player1Row2,[b,a,a,a], t06),
+                            t(Col2, Player1Row3,[b,b,a,a], t07),
+                            t(Col2, Player1Row4,[b,a,b,a], t08)
+                           ],
+   Player2Tiles = [t(Col1, Player2Row1,[b,b,b,b], t09),
+                            t(Col1, Player2Row2,[a,b,b,b], t10),
+                            t(Col1, Player2Row3,[a,a,b,b], t11),
+                            t(Col1, Player2Row4,[a,b,a,b], t12),
+                            t(Col2, Player2Row1,[b,b,b,b], t13),
+                            t(Col2, Player2Row2,[a,b,b,b], t14),
+                            t(Col2, Player2Row3,[a,a,b,b], t15),
+                            t(Col2, Player2Row4,[a,b,a,b], t16)
+                           ].
 
 % (X > Y) is a point (X,Y).
 % Web API method arguments of type number or integer accept arithmetic
@@ -121,8 +294,6 @@ draw_all_tile(Tile, Ctx) :-
     draw_replacements(Tile, Ctx).
 
 draw_replacements(Tile, Ctx) :-
-%    tile_id(R, ID),
-%    tile_id(Tile, ID),
     (game_replacements(Rs),
      member(Tile, Rs)
        -> draw_replacement_tile_mark(Tile, Ctx)
@@ -243,94 +414,6 @@ get_top_left_board_tile_coords(BX > BY, TileSize, X > Y) :-
     X  is Left + TX + (W / 2) + (BX - 0.5) * TileSize,
     Y  is Top + TY + (H / 2) + (BY - 0.5) * TileSize.
 
-% ShadowData is in-memory representation of data.
-% where ShadowData is a structure of many arguments and
-% data is stored as a collection of binary relations where
-% each fact shares the same identifier as the first argument.
-% For tiles the shadow tile structure functor is 'ts'
-% and the arguments are 'x', 'y', etc.
-% For the game the shadow game structure functor is 'g'
-% and the arguments are 'board_left', 'turn', etc.
-% (Note that there is currently only one 'game' so the ID is always '1'.)
-
-assert_datas(Datas) :-
-    assert_datas(Datas, 1).
-
-assert_datas([], _).
-assert_datas([H|T], J) :-
-    assert_data(H, J),
-    K is J + 1,
-    assert_datas(T, K).
-
-assert_data(ShadowData, ID) :-
-    ShadowData =.. [F|Args],
-    data_predicates(F, Prefix, Suffixes),
-    (length(Suffixes, ArgCount),
-     length(Args, ArgCount)
-       -> assert_shadow_arguments(Args, Prefix, Suffixes, ID),
-          default_asserted_id(Prefix, ID)
-    ;
-     throw('tile shadow argument count different from count of shadow argument tile_predicates')
-    ).
-
-assert_shadow_arguments([], _, [], _).
-assert_shadow_arguments([H|T], Prefix, [HP|TP], ID) :-
-    assert_shadow_argument(H, Prefix, HP, ID),
-    assert_shadow_arguments(T, Prefix, TP, ID).
-
-assert_shadow_argument(Arg, Prefix, Suffix, ID) :-
-    construct_data_predicate(Prefix, Suffix, Predicate),
-    GoalR =.. [Predicate, ID, _],
-    Goal =.. [Predicate, ID, Arg],
-    retractall(GoalR),
-    assertz(Goal).
-
-default_asserted_id(Prefix, ID) :-
-    atom_concat(Prefix, '_default_id', Predicate),
-    GoalR =.. [Predicate, _],
-    Goal =.. [Predicate, ID],
-    retractall(GoalR),
-    assertz(Goal).
-
-data_predicate_dynamics :-
-    findall(Prefix-Suffixes, data_predicates(_, Prefix, Suffixes), All),
-    data_predicate_dynamics(All).
-
-data_predicate_dynamics([]).
-data_predicate_dynamics([Prefix-Suffixes|T]) :-
-    data_predicate_dynamics(Suffixes, Prefix),
-    atom_concat(Prefix, '_default_id', DefaultPredicate),
-    (dynamic(DefaultPredicate / 1)),
-    data_predicate_dynamics(T).
-
-data_predicate_dynamics([], _).
-data_predicate_dynamics([H|T], Prefix) :-
-    data_predicate_dynamic(H, Prefix),
-    data_predicate_dynamics(T, Prefix).
-
-data_predicate_dynamic(Suffix, Prefix) :-
-    construct_data_predicate(Prefix, Suffix, Predicate),
-    (dynamic(Predicate / 2)), % BUG: 'dynamic(Predicate/2), foo' is being parsed as dynamic (Predicate/2, foo).
-    data_predicate_default_dynamic(Prefix, Predicate).
-
-data_predicate_default_dynamic(Prefix, Predicate) :-
-    (dynamic(Predicate /1)), % BUG: 'dynamic(Predicate/1), foo' is being parsed as dynamic (Predicate/1, foo).
-    Head =.. [Predicate, Value],
-    retractall((Head :- _)),
-    atom_concat(Prefix, '_default_id', DefaultPredicate),
-    DefaultGoal =.. [DefaultPredicate, DefaultID],
-    BinaryGoal =.. [Predicate, DefaultID, Value],
-    asserta((Head :- DefaultGoal, BinaryGoal)).
-
-:- dynamic data_predicates/3.
-
-data_predicates(ts, tile,[x, y,bx,by,size,colors,container]). % e.g. tile_x(ID, X), tile_y(ID, Y)...
-data_predicates(g, game,[tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]). % e.g. game_board_left(ID, X)...
-
-construct_data_predicate(Prefix, Suffix, Predicate) :-
-    atom_concat(Prefix, '_', PrefixExtended),
-    atom_concat(PrefixExtended, Suffix, Predicate).
-
 container_id(container(ID, _Type), ID).
 container_type(container(_ID, Type), Type).
 
@@ -344,13 +427,19 @@ tile_in_inactive_hand(Tile) :-
     tile_container(Tile, Container),
     container_type(Container, hand),
     game_turn(TurnID),
+    \+ container_id(Container, TurnID).
+
+tile_in_active_hand(Tile) :-
+    tile_container(Tile, Container),
+    container_type(Container, hand),
+    game_turn(TurnID),
     container_id(Container, TurnID).
 
 highlight_color(1, '#CCFFCC').
 highlight_color(2, '#CCCCFF').
 
-legal_position_bx(legal_position(BX, _BY), BX).
-legal_position_by(legal_position(_BX, BY), BY).
+%legal_position_bx(legal_position(BX, _BY), BX).
+%legal_position_by(legal_position(_BX, BY), BY).
 
 legal_position_b(T, BX > BY) :-
     legal_position_bx(T, BX),

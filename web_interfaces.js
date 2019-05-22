@@ -712,7 +712,9 @@ webInterfaces.set('uievent',
 
 var mouseEventInterfaceProperties = new Map( [
     ['clientX', SimpleProperty('number', 'clientX')],
-    ['clientY', SimpleProperty('number', 'clientY')]
+    ['clientY', SimpleProperty('number', 'clientY')],
+    ['pageX', SimpleProperty('number', 'pageX')],
+    ['pageY', SimpleProperty('number', 'pageY')]
 ]);
 
 var mouseEventMethodSpecs = new Map([
