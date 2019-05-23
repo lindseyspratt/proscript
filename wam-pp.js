@@ -8880,6 +8880,168 @@ var distinctiveMethodMap = {
     blob: 'slice'
 };
 
+// [createImageData, [number, number], object]
+// [MethodName, ArgTypes, ReturnType] or [MethodName, ArgTypes] if no return.
+//
+// ['createImageData',{name:'createImageData',arguments:[{type:'number'},{type:'number'}],returns:{type:'object'}}]
+
+function convert_method_spec(specTerm, resultContainer) {
+    if (TAG(specTerm) !== TAG_LST) {
+        return type_error("list", specTerm);
+    }
+
+    if (TAG(specTerm) !== TAG_LST) {
+        return type_error("list", specTerm);
+    }
+
+    let methodNamePL = memory[VAL(specTerm)];
+
+    let methodNameContainer = {};
+    let methodNameJS;
+    if (getAtomPropertyValue(methodNamePL, methodNameContainer, true)) {
+        methodNameJS = methodNameContainer.value;
+    } else {
+        return false;
+    }
+
+    let result = {};
+    result.name = methodNameJS;
+
+    let specTermTailPL = memory[VAL(specTerm) + 1];
+    let argList = memory[VAL(specTermTailPL)];
+    let argTypesJS = [];
+    while (argList !== NIL) {
+        if (TAG(argList) !== TAG_LST) {
+            return type_error("list", argList);
+        }
+        let argTypePL = memory[VAL(argList)];
+        let argTypeContainer = {};
+        if(!convert_type_term(argTypePL, argTypeContainer)) {
+            return false;
+        }
+        argTypesJS.push(argTypeContainer.value);
+        argList = memory[VAL(argList) + 1];
+    }
+    result.arguments = argTypesJS;
+
+    let specTermTailTailPL = memory[VAL(specTermTailPL) + 1];
+    if(specTermTailTailPL !== NIL) {
+        let returnTypePL = memory[VAL(specTermTailTailPL)];
+        let returnContainer = {};
+        if (convert_type_term(returnTypePL, returnContainer)) {
+            result.returns = returnContainer.value;
+        } else {
+            return false;
+        }
+    }
+    resultContainer.value = result;
+    return true;
+}
+
+// atom or array(atom)
+// Type = {type: atom} or {type: {array: atom}}
+function convert_type_term(typePL, container) {
+    let result = {};
+    if(TAG(typePL) === TAG_ATM) {
+        let typeContainer = {};
+        if(! getAtomPropertyValue(typePL, typeContainer, true)) {
+            return false;
+        }
+        result.type = typeContainer.value;
+    } else if(TAG(typePL) === TAG_STR) {
+        let functorPL = ftable[VAL(memory[VAL(typePL)])][0];
+        let functor = atable[functorPL];
+        if(functor !== 'array') {
+            return domain_error('type array', functorPL);
+        }
+        let arity = ftable[VAL(memory[VAL(typePL)])][1];
+        if(arity !== 1) {
+            return representation_error('type array arity 1', typePL);
+        }
+        let subContainer = {};
+        if(! convert_type_term(memory[VAL(typePL) + 1], subContainer, true)) {
+            return false;
+        }
+        let extendedType = {};
+        extendedType.array = subContainer.value;
+        result.type = extendedType;
+    } else {
+        return type_error('atom or structure', typePL);
+    }
+
+    container.value = result;
+    return true;
+}
+
+
+// [integer, length]
+// [Property, DataType, settable] or [Property, DataType] if not settable.
+//
+// SimpleProperty('integer', 'length')
+
+function convert_property_spec(specTerm, resultContainer) {
+    if(TAG(specTerm) === TAG_ATM) {
+        return getAtomPropertyValue(specTerm, resultContainer, true);
+    }
+
+    if (TAG(specTerm) !== TAG_LST) {
+        return type_error("list", specTerm);
+    }
+
+    if (TAG(specTerm) !== TAG_LST) {
+        return type_error("list", specTerm);
+    }
+
+    let propertyPL = memory[VAL(specTerm)];
+    if(TAG(propertyPL) !== TAG_ATM) {
+        return type_error("atom", propertyPL);
+    }
+
+    let propertyContainer = {};
+    let propertyJS;
+    if (getAtomPropertyValue(propertyPL, propertyContainer, true)) {
+        propertyJS = propertyContainer.value;
+    } else {
+        return false;
+    }
+
+    let specTermTailPL = memory[VAL(specTerm) + 1];
+    let typePL = memory[VAL(specTermTailPL)];
+    if(TAG(typePL) !== TAG_ATM) {
+        return type_error("atom", typePL);
+    }
+    let typeContainer = {};
+    let typeJS;
+    if (getAtomPropertyValue(typePL, typeContainer, true)) {
+        typeJS = typeContainer.value;
+    } else {
+        return false;
+    }
+
+    let specTermTailTailPL = memory[VAL(specTermTailPL) + 1];
+    let settableFlag = false;
+    if(specTermTailTailPL !== NIL) {
+        let settablePL = memory[VAL(specTermTailTailPL)];
+        if (TAG(settablePL) !== TAG_ATM) {
+            return type_error("atom", typePL);
+        }
+        let settableContainer = {};
+        let settableJS;
+        if (getAtomPropertyValue(settablePL, settableContainer, true)) {
+            settableJS = settableContainer.value;
+            if (settableJS !== 'settable' && settableJS !== 'not_settable') {
+                return domain_error('settable or not_settable', settablePL);
+            }
+            settableFlag = (settableJS === 'settable');
+        } else {
+            return false;
+        }
+    }
+
+    resultContainer.value = SimpleProperty(typeJS, propertyJS, settableFlag);
+    return true;
+}
+
 function getInterfaceItemSpec(typeJS, itemType, itemName) {
     let itemsMember;
     if(itemType === 'method') {
@@ -9833,11 +9995,27 @@ function setupObjectsForPropertyValue(type, object, property, value, container) 
             container.value = undefined;
         } else {
             var objectContainers = [];
+            if(TAG(type) === TAG_LST) {
+                // override the 'type' already assigned to objectContainer.type, if any,
+                // with the type specification (e.g. SimpleProperty('foo', 'number', true)).
+                let typeContainer = {};
+                if (convert_property_spec(type, typeContainer)) {
+                    objectContainer.type = typeContainer.value;
+                } else {
+                    return false;
+                }
+            }
             objectContainers.push(objectContainer);
             container.value = objectContainers;
         }
-     } else if (TAG(value) !== TAG_REF && TAG(type) === TAG_ATM) {
-        return setupObjectsForBoundPropertyValue(atable[VAL(type)], propertyJS, value, container);
+     } else if (TAG(value) !== TAG_REF && TAG(type) !== TAG_REF) {
+        let typeContainer = {};
+        if(convert_property_spec(type, typeContainer)) {
+            let typeJS = typeContainer.value;
+            return setupObjectsForBoundPropertyValue(typeJS, propertyJS, value, container);
+        } else {
+            return false;
+        }
     } else if (TAG(type) === TAG_ATM && atable[VAL(type)] === 'element') {
         container.value = objectsToContainers(document.querySelectorAll('*'), 'element');
     } else {
@@ -9851,7 +10029,7 @@ function objectsToContainers(objects, typeJS) {
     let objectContainers = [];
 
     for(let object of objects) {
-        objectContainers.push({value:object, type:'element'});
+        objectContainers.push({value:object, type:typeJS});
     }
     return objectContainers;
 }
@@ -9872,14 +10050,22 @@ function setupPropertyValuesFromJSElement(typeJS, objectJS, property, value) {
 }
 
 function setupPropertyValues(type, object, property, value) {
+    let typeJS;
+    if(TAG(type) !== TAG_REF) {
+        let typeContainer = {};
+        if (convert_property_spec(type, typeContainer)) {
+            typeJS = typeContainer.value;
+        }
+    }
+
     if (TAG(property) === TAG_REF) {
         instantiation_error(property);
     } else {
         var propertyJS = atable[VAL(property)];
     }
     var values;
-    if (TAG(value) !== TAG_REF && TAG(type) === TAG_ATM) {
-        values = setupPropertyValuesFromBoundValue(atable[VAL(type)], property, propertyJS, value);
+    if (TAG(value) !== TAG_REF && typeJS) {
+        values = setupPropertyValuesFromBoundValue(typeJS, property, propertyJS, value);
     } else if (TAG(object) !== TAG_REF) {
         if (TAG(object) !== TAG_STR) {
             instantiation_error(object);
@@ -9889,9 +10075,12 @@ function setupPropertyValues(type, object, property, value) {
             return undefined;
         }
         let objectJS = objectContainer.value;
-        let typeJS = objectContainer.type;
-        if(type === TAG_ATM && atable[VAL(type)] !== typeJS) {
-            throw 'incompatible object types. Param type is ' + atable[VAL(type)] + ' and object ' + JSON.stringify(objectJS) + ' is tagged with type ' + typeJS;
+        let objectTypeJS = objectContainer.type;
+
+        if(! typeJS) {
+            typeJS = objectTypeJS;
+        } else if(typeof typeJS === 'string' && typeJS !== objectTypeJS) {
+            throw 'incompatible object types. Param type is ' + typeJS + ' and object ' + JSON.stringify(objectJS) + ' is tagged with type ' + objectTypeJS;
         }
         values = setupPropertyValuesFromJSElement1(typeJS, objectJS, property, propertyJS);
     } else {
@@ -9915,7 +10104,7 @@ function propertyValueToJS(type, value, container, reportError) {
 
     if(typeof type === 'object') {
         // union of types
-        for(subtype of type) {
+        for(let subtype of type) {
             if(propertyValueToJS(subtype, value, container, false)) {
                 return true;
             }
@@ -10133,6 +10322,7 @@ function getObjectPLPropertyValue(valueJS) {
     return create_object_structure(valueJS);
 }
 
+// typeJS may be a propertySpec. In this case it short-circuits the lookup.
 function setupObjectsForBoundPropertyValue(typeJS, propertyJS, value, container) {
     let propertySpec = getPropertySpecification(typeJS, propertyJS);
     if (propertySpec) {
@@ -10170,10 +10360,10 @@ function setupPropertyValuesFromJSElement1(typeJS, elementJS, property, property
 // there are multiple parents for a particular interface.
 
 function getPropertySpecification(typeJS, propertyJS) {
-    return getInterfaceItemSpec(typeJS, 'property', propertyJS);
+    return (typeof typeJS === 'object') ? typeJS : getInterfaceItemSpec(typeJS, 'property', propertyJS);
 }
 
-function predicate_set_dom_object_property(object, property, value) {
+function predicate_set_dom_object_property(object, property, value, specTerm) {
     if (TAG(object) !== TAG_STR) {
         instantiation_error(object);
     }
@@ -10184,6 +10374,14 @@ function predicate_set_dom_object_property(object, property, value) {
     }
     let elementJS = objectContainer.value;
     let typeJS = objectContainer.type;
+
+    if(specTerm) {
+        let specContainer = {};
+        if(!convert_property_spec(specTerm, specContainer)) {
+            return false;
+        }
+        typeJS = specContainer.value;
+    }
 
     if (TAG(property) === TAG_REF) {
         instantiation_error(property);
@@ -10213,12 +10411,17 @@ This file implements access to Javascript object methods.
 // method:EventAgent.addEventListener, arguments:[string, goal_function]
 // object_method_no_return(objectJS, EventAgent.addEventListener, [eventJS, handlerFunction]);
 
-function predicate_dom_object_method(object, methodStructure) {
+function predicate_dom_object_method(object, methodStructure, specTerm) {
     if (TAG(object) !== TAG_STR) {
         return instantiation_error(object);
     }
+
     if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
         return instantiation_error(methodStructure);
+    }
+
+    if (specTerm && TAG(specTerm) !== TAG_LST ) {
+        return instantiation_error(specTerm);
     }
 
     var objectContainer = {};
@@ -10238,7 +10441,17 @@ function predicate_dom_object_method(object, methodStructure) {
         arity = ftable[VAL(memory[VAL(methodStructure)])][1];
     }
 
-    let spec = getInterfaceItemSpec(objectType, 'method', methodName);
+    let spec;
+    if(specTerm) {
+        let specContainer = {};
+        if(!convert_method_spec(specTerm, specContainer)) {
+            return false;
+        }
+        spec = specContainer.value;
+    } else {
+        spec = getInterfaceItemSpec(objectType, 'method', methodName);
+    }
+
     if(!spec) {
         return domain_error('method for ' + objectType, lookup_atom(methodName));
     }

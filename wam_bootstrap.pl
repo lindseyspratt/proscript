@@ -448,10 +448,12 @@ reset:-
         reserve_predicate(dom_select_all_elements/2, predicate_dom_select_all_elements),
         reserve_predicate(dom_object_property/4, predicate_dom_object_property),
         reserve_predicate(dom_object_method/2, predicate_dom_object_method),
+        reserve_predicate(dom_object_method/3, predicate_dom_object_method),
         reserve_predicate(dom_object_type/2, predicate_dom_object_type),
         reserve_predicate(dom_create_object/2, predicate_dom_create_object),
         reserve_predicate(dom_release_object/1, predicate_dom_release_object),
         reserve_predicate(set_dom_object_property/3, predicate_set_dom_object_property),
+        reserve_predicate(set_dom_object_property/4, predicate_set_dom_object_property),
         reserve_predicate(alert/1, predicate_alert),
 
         true.

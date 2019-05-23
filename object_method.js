@@ -11,12 +11,17 @@ This file implements access to Javascript object methods.
 // method:EventAgent.addEventListener, arguments:[string, goal_function]
 // object_method_no_return(objectJS, EventAgent.addEventListener, [eventJS, handlerFunction]);
 
-function predicate_dom_object_method(object, methodStructure) {
+function predicate_dom_object_method(object, methodStructure, specTerm) {
     if (TAG(object) !== TAG_STR) {
         return instantiation_error(object);
     }
+
     if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
         return instantiation_error(methodStructure);
+    }
+
+    if (specTerm && TAG(specTerm) !== TAG_LST ) {
+        return instantiation_error(specTerm);
     }
 
     var objectContainer = {};
@@ -36,7 +41,17 @@ function predicate_dom_object_method(object, methodStructure) {
         arity = ftable[VAL(memory[VAL(methodStructure)])][1];
     }
 
-    let spec = getInterfaceItemSpec(objectType, 'method', methodName);
+    let spec;
+    if(specTerm) {
+        let specContainer = {};
+        if(!convert_method_spec(specTerm, specContainer)) {
+            return false;
+        }
+        spec = specContainer.value;
+    } else {
+        spec = getInterfaceItemSpec(objectType, 'method', methodName);
+    }
+
     if(!spec) {
         return domain_error('method for ' + objectType, lookup_atom(methodName));
     }
