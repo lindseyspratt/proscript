@@ -75,7 +75,7 @@ function get_object_id_container(term, idContainer) {
         return type_error('obj', term);
     var ftor = VAL(memory[VAL(term)]);
     if (atable[ftable[ftor][0]] === '$obj' && ftable_arity(ftor) === 1) {
-        var arg = memory[VAL(term) + 1];
+        var arg = deref(memory[VAL(term) + 1]);
         if (TAG(arg) !== TAG_ATM)
             return type_error("obj_arg");
         idContainer.value = atable[VAL(arg)];
@@ -101,6 +101,10 @@ var parentMap = new Map([
     ['canvasgradient', []],
     ['canvaspattern', []],
     ['htmlimageelement', ['htmlelement']],
+    ['htmlinputelement', ['htmlelement']],
+    ['htmltextareaelement', ['htmlelement']],
+    ['htmlselectelement', ['htmlelement']],
+    ['htmloptionelement', ['htmlelement']],
     ['path2d', []],
     ['uievent', ['event']],
     ['mouseevent', ['uievent']],
@@ -135,6 +139,10 @@ var constructorMap = {
     "CanvasGradient" : 'canvasgradient',
     "CanvasPattern" : 'canvaspattern',
     "HTMLImageElement" : 'htmlimageelement',
+    "HTMLTextAreaElement" : 'htmltextareaelement',
+    "HTMLInputElement" : 'htmlinputelement',
+    "HTMLSelectElement" : 'htmlselectelement',
+    "HTMLOptionElement" : 'htmloptionelement',
     "Path2D" : 'path2d',
     "UIEvent" : 'uievent',
     "MouseEvent" : 'mouseevent',
@@ -172,7 +180,7 @@ function convert_method_spec(specTerm, resultContainer) {
         return type_error("list", specTerm);
     }
 
-    let methodNamePL = memory[VAL(specTerm)];
+    let methodNamePL = deref(memory[VAL(specTerm)]);
 
     let methodNameContainer = {};
     let methodNameJS;
@@ -185,26 +193,26 @@ function convert_method_spec(specTerm, resultContainer) {
     let result = {};
     result.name = methodNameJS;
 
-    let specTermTailPL = memory[VAL(specTerm) + 1];
-    let argList = memory[VAL(specTermTailPL)];
+    let specTermTailPL = deref(memory[VAL(specTerm) + 1]);
+    let argList = deref(memory[VAL(specTermTailPL)]);
     let argTypesJS = [];
     while (argList !== NIL) {
         if (TAG(argList) !== TAG_LST) {
             return type_error("list", argList);
         }
-        let argTypePL = memory[VAL(argList)];
+        let argTypePL = deref(memory[VAL(argList)]);
         let argTypeContainer = {};
         if(!convert_type_term(argTypePL, argTypeContainer)) {
             return false;
         }
         argTypesJS.push(argTypeContainer.value);
-        argList = memory[VAL(argList) + 1];
+        argList = deref(memory[VAL(argList) + 1]);
     }
     result.arguments = argTypesJS;
 
-    let specTermTailTailPL = memory[VAL(specTermTailPL) + 1];
+    let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]);
     if(specTermTailTailPL !== NIL) {
-        let returnTypePL = memory[VAL(specTermTailTailPL)];
+        let returnTypePL = deref(memory[VAL(specTermTailTailPL)]);
         let returnContainer = {};
         if (convert_type_term(returnTypePL, returnContainer)) {
             result.returns = returnContainer.value;
@@ -237,7 +245,7 @@ function convert_type_term(typePL, container) {
             return representation_error('type array arity 1', typePL);
         }
         let subContainer = {};
-        if(! convert_type_term(memory[VAL(typePL) + 1], subContainer, true)) {
+        if(! convert_type_term(deref(memory[VAL(typePL) + 1]), subContainer, true)) {
             return false;
         }
         let extendedType = {};
@@ -270,7 +278,7 @@ function convert_property_spec(specTerm, resultContainer) {
         return type_error("list", specTerm);
     }
 
-    let propertyPL = memory[VAL(specTerm)];
+    let propertyPL = deref(memory[VAL(specTerm)]);
     if(TAG(propertyPL) !== TAG_ATM) {
         return type_error("atom", propertyPL);
     }
@@ -283,8 +291,8 @@ function convert_property_spec(specTerm, resultContainer) {
         return false;
     }
 
-    let specTermTailPL = memory[VAL(specTerm) + 1];
-    let typePL = memory[VAL(specTermTailPL)];
+    let specTermTailPL = deref(memory[VAL(specTerm) + 1]);
+    let typePL = deref(memory[VAL(specTermTailPL)]);
     if(TAG(typePL) !== TAG_ATM) {
         return type_error("atom", typePL);
     }
@@ -296,10 +304,10 @@ function convert_property_spec(specTerm, resultContainer) {
         return false;
     }
 
-    let specTermTailTailPL = memory[VAL(specTermTailPL) + 1];
+    let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]);
     let settableFlag = false;
     if(specTermTailTailPL !== NIL) {
-        let settablePL = memory[VAL(specTermTailTailPL)];
+        let settablePL = deref(memory[VAL(specTermTailTailPL)]);
         if (TAG(settablePL) !== TAG_ATM) {
             return type_error("atom", typePL);
         }

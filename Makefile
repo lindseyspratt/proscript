@@ -7,14 +7,14 @@ all:		bootstrap.js wam-pp.js
 clean:		
 		rm -f wam-pp.js bootstrap.js
 
-bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl promise.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'promise.pl'], 'foo'), halt"
+bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl not.pl debugger.pl promise.pl
+		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'not.pl', 'promise.pl'], 'foo'), halt"
 
-tests_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl test/web_tests.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'test/web_tests.pl'], 'foo'), halt"
+tests_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl not.pl debugger.pl test/web_tests.pl
+		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'not.pl', 'test/web_tests.pl'], 'foo'), halt"
 
-nrev_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl debugger.pl bench/nrev.pl bench/common.pl bench/hook.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/nrev.pl', 'bench/common.pl', 'bench/hook.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl'], 'foo'), halt"
+nrev_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl not.pl debugger.pl bench/nrev.pl bench/common.pl bench/hook.pl
+		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/nrev.pl', 'bench/common.pl', 'bench/hook.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'not.pl'], 'foo'), halt"
 
 wam-pp.js:	foreign.js memory_files.js wam.js read.js record.js fli.js stream.js gc.js dom.js\
             debugger.js decode_instruction.js promise.js object.js web_interfaces.js object_property.js object_method.js

@@ -366,6 +366,10 @@ function backtrack()
     var next = memory[state.B + memory[state.B] + CP_Next];
     state.P = next.offset;
     code = next.code;
+    if(! code) {
+        throw 'code is undefined';
+    }
+
     state.current_predicate = next.predicate;
     if(state.trace_call !== 'no_trace') {
         state.trace_call = memory[state.B + memory[state.B] + CP_TC];
@@ -448,7 +452,11 @@ function wam_complete_call_or_execute(predicate) {
         state.num_of_args = ftable[code[state.P + 1]][1];
         state.current_predicate = predicate;
         code = predicate.clauses[predicate.clause_keys[0]].code;
-        state.P = 0;
+       if(! code) {
+           throw 'code is undefined';
+       }
+
+       state.P = 0;
        return true;
     } else {
         return false;
@@ -603,6 +611,10 @@ function wam1()
             }
         } else {
            debugging = false;
+        }
+
+        if(! code) {
+            throw 'code is undefined';
         }
         // Decode an instruction
         switch(code[state.P])
@@ -766,6 +778,10 @@ function wam1()
                     {
                         state.current_predicate = state.CP.predicate;
                         code = state.CP.code;
+                        if(! code) {
+                            throw 'code is undefined';
+                        }
+
                         state.P = state.CP.offset;
                     }
                     else if (!backtrack())
@@ -783,6 +799,10 @@ function wam1()
             state.P = state.CP.offset;
             state.current_predicate = state.CP.predicate;
             code = state.CP.code;
+            if(! code) {
+                throw 'code is undefined';
+            }
+
             continue;
 
         case 6: // put_variable: Initialize a new variable in Yn, and also put it into Ai
@@ -1400,6 +1420,10 @@ function wam1()
             state.foreign_value = memory[state.B+1];
             state.P = memory[state.B+2].offset;
             code = memory[state.B+2].code;
+            if(! code) {
+                throw 'code is undefined';
+            }
+
             state.current_predicate = memory[state.B+2].current_predicate;
             n = memory[state.B];
             debug_msg("State has " + n + " saved args including the two special");

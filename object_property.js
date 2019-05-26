@@ -257,7 +257,7 @@ function getClassListPropertyValue(value) {
             instantiation_error(list);
         }
 
-        var atomPL = memory[VAL(list)];
+        var atomPL = deref(memory[VAL(list)]);
         if(TAG(atomPL) !== TAG_ATM) {
             instantiation_error(atomPL);
         } else {
@@ -265,7 +265,7 @@ function getClassListPropertyValue(value) {
                 string += ' ';
             }
             string += atable[VAL(value)];
-            list = memory[VAL(list) + 1];
+            list = deref(memory[VAL(list) + 1]);
         }
     }
 

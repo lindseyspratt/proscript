@@ -465,6 +465,176 @@ webInterfaces.set('htmlcanvaselement',
         methods:htmlCanvasElementMethodSpecs
     });
 
+var htmlTextAreaElementInterfaceProperties = new Map( [
+    ['autocomplete', SimpleProperty('atom', 'autocomplete', true)],
+    ['autofocus', SimpleProperty('boolean', 'autofocus', true)],
+    ['cols', SimpleProperty('number', 'cols', true)], // not Input
+    ['dirName', SimpleProperty('atom', 'dirName', true)],
+    ['disabled', SimpleProperty('boolean', 'disabled', true)],
+    ['form', SimpleProperty('object', 'form')],
+    ['inputMode', SimpleProperty('atom', 'inputMode', true)],
+    ['maxLength', SimpleProperty('number', 'maxLength', true)],
+    ['minLength', SimpleProperty('number', 'minLength', true)],
+    ['name', SimpleProperty('atom', 'name', true)],
+    ['placeholder', SimpleProperty('atom', 'placeholder', true)],
+    ['readOnly', SimpleProperty('boolean', 'readOnly', true)],
+    ['required', SimpleProperty('boolean', 'required', true)],
+    ['rows', SimpleProperty('number', 'rows', true)], // not Input
+    ['wrap', SimpleProperty('atom', 'wrap', true)], // not Input
+    ['step', SimpleProperty('atom', 'step', true)],
+    ['type', SimpleProperty('atom', 'type', true)],
+    ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
+    ['value', SimpleProperty('atom', 'value', true)],
+    ['textLength', SimpleProperty('number', 'textLength')], // not Input
+    ['willValidate', SimpleProperty('boolean', 'willValidate')],
+    ['validity', SimpleProperty('object', 'validity')], // ValidityState
+    ['validationMessage', SimpleProperty('atom', 'validationMessage')],
+    ['labels', SimpleProperty('object', 'labels')], // NodeList
+    ['selectionStart', SimpleProperty('number', 'selectionStart', true)],
+    ['selectionEnd', SimpleProperty('number', 'selectionEnd', true)],
+    ['selectionDirection', SimpleProperty('atom', 'selectionDirection', true)]
+]);
+
+var htmlTextAreaElementMethodSpecs = new Map([
+    ['checkValidity',{name:'checkValidity',arguments:[],returns:{type:'boolean'}}],
+    ['reportValidity',{name:'reportValidity',arguments:[],returns:{type:'boolean'}}],
+    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}],
+    ['select',{name:'select',arguments:[]}],
+    ['setRangeText',{name:'setRangeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'string'}]}],
+    ['setSelectionRange',{name:'setSelectionRange',arguments:[{type:'number'},{type:'number'},{type:'string'}]}]
+]);
+
+webInterfaces.set('htmltextareaelement',
+    {name: 'htmltextareaelement',
+        properties:htmlTextAreaElementInterfaceProperties,
+        methods:htmlTextAreaElementMethodSpecs
+    });
+
+var htmlInputElementInterfaceProperties = new Map( [
+    ['accept', SimpleProperty('atom', 'accept', true)],
+    ['alt', SimpleProperty('string', 'alt', true)],
+    ['autocomplete', SimpleProperty('atom', 'autocomplete', true)],
+    ['autofocus', SimpleProperty('boolean', 'autofocus', true)],
+    ['defaultChecked', SimpleProperty('boolean', 'defaultChecked', true)],
+    ['checked', SimpleProperty('boolean', 'checked', true)],
+    ['dirName', SimpleProperty('atom', 'dirName', true)],
+    ['disabled', SimpleProperty('boolean', 'disabled', true)],
+    ['form', SimpleProperty('object', 'form')],
+    ['files', SimpleProperty('object', 'files')],
+    ['formAction', SimpleProperty('atom', 'formAction', true)],
+    ['formEnctype', SimpleProperty('atom', 'formEnctype', true)],
+    ['formMethod', SimpleProperty('atom', 'formMethod', true)],
+    ['formNoValidate', SimpleProperty('boolean', 'formNoValidate', true)],
+    ['formTarget', SimpleProperty('atom', 'formTarget', true)],
+    ['height', SimpleProperty('number', 'height', true)],
+    ['indeterminate', SimpleProperty('boolean', 'indeterminate', true)],
+    ['inputMode', SimpleProperty('atom', 'inputMode', true)],
+    ['list', SimpleProperty('object', 'list')],
+    ['max', SimpleProperty('atom', 'max', true)],
+    ['maxLength', SimpleProperty('number', 'maxLength', true)],
+    ['min', SimpleProperty('atom', 'min', true)],
+    ['minLength', SimpleProperty('number', 'minLength', true)],
+    ['multiple', SimpleProperty('boolean', 'multiple', true)],
+    ['name', SimpleProperty('atom', 'name', true)],
+    ['pattern', SimpleProperty('atom', 'pattern', true)],
+    ['placeholder', SimpleProperty('atom', 'placeholder', true)],
+    ['readOnly', SimpleProperty('boolean', 'readOnly', true)],
+    ['required', SimpleProperty('boolean', 'required', true)],
+    ['size', SimpleProperty('number', 'size', true)],
+    ['src', SimpleProperty('atom', 'src', true)],
+    ['step', SimpleProperty('atom', 'step', true)],
+    ['type', SimpleProperty('atom', 'type', true)],
+    ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
+    ['value', SimpleProperty('atom', 'value', true)],
+    ['valueAsDate', SimpleProperty('object', 'valueAsDate', true)],
+    ['valueAsNumber', SimpleProperty('number', 'valueAsNumber', true)],
+    ['width', SimpleProperty('number', 'width', true)],
+    ['willValidate', SimpleProperty('boolean', 'willValidate')],
+    ['validity', SimpleProperty('object', 'validity')], // ValidityState
+    ['validationMessage', SimpleProperty('atom', 'validationMessage')],
+    ['labels', SimpleProperty('object', 'labels')], // NodeList
+    ['selectionStart', SimpleProperty('number', 'selectionStart', true)],
+    ['selectionEnd', SimpleProperty('number', 'selectionEnd', true)],
+    ['selectionDirection', SimpleProperty('atom', 'selectionDirection', true)]
+]);
+
+var htmlInputElementMethodSpecs = new Map([
+    ['stepUp',{name:'stepUp',arguments:[{type:'number'}]}],
+    ['stepDown',{name:'stepDown',arguments:[{type:'number'}]}],
+    ['checkValidity',{name:'checkValidity',arguments:[],returns:{type:'boolean'}}],
+    ['reportValidity',{name:'reportValidity',arguments:[],returns:{type:'boolean'}}],
+    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}],
+    ['select',{name:'select',arguments:[]}],
+    ['setRangeText',{name:'setRangeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'string'}]}],
+    ['setSelectionRange',{name:'setSelectionRange',arguments:[{type:'number'},{type:'number'},{type:'string'}]}]
+]);
+
+webInterfaces.set('htmlinputelement',
+    {name: 'htmlinputelement',
+        properties:htmlInputElementInterfaceProperties,
+        methods:htmlInputElementMethodSpecs
+    });
+
+var htmlSelectElementInterfaceProperties = new Map( [
+    ['defaultChecked', SimpleProperty('boolean', 'defaultChecked', true)],
+    ['disabled', SimpleProperty('boolean', 'disabled', true)],
+    ['form', SimpleProperty('object', 'form')],
+    ['length', SimpleProperty('atom', 'length', true)],
+    ['multiple', SimpleProperty('boolean', 'multiple', true)],
+    ['name', SimpleProperty('atom', 'name', true)],
+    ['options', SimpleProperty('object', 'options')],
+    ['required', SimpleProperty('boolean', 'required', true)],
+    ['selectedIndex', SimpleProperty('number', 'selectedIndex', true)],
+    ['selectedOptions', SimpleProperty('object', 'selectedOptions')],
+    ['size', SimpleProperty('number', 'size', true)],
+    ['type', SimpleProperty('atom', 'type', true)],
+    ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
+    ['value', SimpleProperty('atom', 'value', true)],
+    ['willValidate', SimpleProperty('boolean', 'willValidate')],
+    ['validity', SimpleProperty('object', 'validity')], // ValidityState
+    ['validationMessage', SimpleProperty('atom', 'validationMessage')],
+    ['labels', SimpleProperty('object', 'labels')] // NodeList
+ ]);
+
+var htmlSelectElementMethodSpecs = new Map([
+    ['add',{name:'add',arguments:[{type:'object'},{type:['object','number']}]}],
+    ['checkValidity',{name:'checkValidity',arguments:[],returns:{type:'boolean'}}],
+    ['item',{name:'item',arguments:[{type:'number'}],returns:{type:'object'}}],
+    ['namedItem',{name:'namedItem',arguments:[{type:'string'}],returns:{type:'object'}}],
+    ['remove',{name:'remove',arguments:[{type:'number'}]}],
+    ['reportValidity',{name:'reportValidity',arguments:[],returns:{type:'boolean'}}],
+    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}],
+    ['select',{name:'select',arguments:[]}],
+    ['setRangeText',{name:'setRangeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'string'}]}],
+    ['setSelectionRange',{name:'setSelectionRange',arguments:[{type:'number'},{type:'number'},{type:'string'}]}]
+]);
+
+webInterfaces.set('htmlselectelement',
+    {name: 'htmlselectelement',
+        properties:htmlSelectElementInterfaceProperties,
+        methods:htmlSelectElementMethodSpecs
+    });
+
+var htmlOptionElementInterfaceProperties = new Map( [
+    ['defaultSelected', SimpleProperty('boolean', 'defaultSelected', true)],
+    ['disabled', SimpleProperty('boolean', 'disabled', true)],
+    ['form', SimpleProperty('object', 'form')],
+    ['index', SimpleProperty('number', 'index')],
+    ['label', SimpleProperty('string', 'label', true)],
+    ['selected', SimpleProperty('boolean', 'selected', true)],
+    ['text', SimpleProperty('string', 'text', true)],
+    ['value', SimpleProperty('atom', 'value', true)],
+]);
+
+var htmlOptionElementMethodSpecs = new Map([
+]);
+
+webInterfaces.set('htmloptionelement',
+    {name: 'htmloptionelement',
+        properties:htmlOptionElementInterfaceProperties,
+        methods:htmlOptionElementMethodSpecs
+    });
+
 var eventInterfaceProperties = new Map( [
     ['bubbles', SimpleProperty('boolean', 'bubbles')],
     ['cancelable', SimpleProperty('boolean', 'cancelable')],

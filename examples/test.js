@@ -77,13 +77,13 @@ function debug(e)
 
 function consult_for_test()
 {
-    code_atom = document.getElementById('code').value;
+    let code_atom = document.getElementById('code').value;
     /* Reset the entire WAM */
     load_state();
     call_directives();
     initialize();
-    atom = lookup_atom(code_atom);
-    ftor = VAL(lookup_functor("consult_atom", 1));
+    let atom = lookup_atom(code_atom);
+    let ftor = VAL(lookup_functor("consult_atom", 1));
     allocate_first_frame();
     var pred = predicates[ftor];
     var pi = predicates[ftor].clause_keys[0];

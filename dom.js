@@ -420,12 +420,12 @@ function codes_to_string(codes, container, reportError) {
             return reportError && instantiation_error(list);
         }
 
-        var codePL = memory[VAL(list)];
+        var codePL = deref(memory[VAL(list)]);
         if(TAG(codePL) !== TAG_INT) {
             return reportError && instantiation_error(codePL);
         } else {
             string += String.fromCharCode(codePL);
-            list = memory[VAL(list) + 1];
+            list = deref(memory[VAL(list) + 1]);
         }
     }
     container.value = string;
@@ -617,17 +617,117 @@ function setupElementsForSelectAll(query, container) {
 // proscript_init generally is only used once in a web page to set up the proscript globals.
 // Additional calls of Prolog queries should use proscript to avoid overwriting the global data,
 // particularly the predicates from assertions.
+/*
+       // noinspection JSUnusedLocalSymbols
+        function predicate_flush_stdout()
+        {
+            return true;
+        }
+        // noinspection JSUnusedLocalSymbols
+        function stdout(msg) {
+            alert(msg);
+        }
+
+ */
+
+// These functions may be defined in some other file.
+// If not then they are defined by proscript_init method.
+
+var predicate_flush_stdout;
+var stdout;
 
 function proscript_init(queryJS) {
+    if(! predicate_flush_stdout) {
+        predicate_flush_stdout = function() { return true;};
+    }
+
+    if(! stdout) {
+        stdout = function(msg) {console.log(msg);};
+    }
+
     load_state();
 
-    initialize(); // ensure state is initialized. proscript saves and restores state.
+    initialize();
 
     call_directives();
 
+    consult_scripts();
+
     if(queryJS && queryJS !== '') {
+        initialize(); // ensure state is initialized. proscript saves and restores state.
         proscript(queryJS);
     }
+}
+
+function consult_scripts() {
+    let scripts = document.getElementsByTagName('SCRIPT');
+    // collect script.src URLs to pass to consult/1.
+    // for scripts that have inline text use compile_atom/1.
+
+    let srcs = [];
+    for(let script of scripts) {
+        if(script.type && script.type === 'text/prolog') {
+            if (script.src) {
+                srcs.push(script.src);
+            } else {
+                consult_script_text(script.text);
+            }
+        }
+    }
+
+    consult_script_srcs(srcs);
+}
+
+function consult_script_text(code_atom) {
+//    initialize();
+    let atom = lookup_atom(code_atom);
+    let ftor = VAL(lookup_functor("consult_atom", 1));
+    allocate_first_frame();
+    var pred = predicates[ftor];
+    var pi = predicates[ftor].clause_keys[0];
+    state.current_predicate = pred;
+    code = pred.clauses[pi].code;
+    state.P = 0;
+    register[0] = atom;
+    if (wam())
+        debug("Script consulted");
+    else
+        debug("Failed to consult script");
+}
+
+function consult_script_srcs(srcs) {
+    // set up consult(srcs)
+    // srclist
+    // pred = consultPred
+    // register[0] = srclist
+ //   initialize();
+
+    if(srcs.length === 0) {
+        return;
+    }
+
+    var srcList = state.H ^ (TAG_LST << WORD_BITS);
+    for (var i = 0; i < srcs.length; i++)
+    {
+        memory[state.H] = lookup_atom(srcs[i]);
+        // If there are no more items we will overwrite the last entry with [] when we exit the loop
+        memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+        state.H += 2;
+    }
+    memory[state.H-1] = NIL;
+
+    let ftor = VAL(lookup_functor("consult", 1));
+    allocate_first_frame();
+    var pred = predicates[ftor];
+    var pi = predicates[ftor].clause_keys[0];
+    state.current_predicate = pred;
+    code = pred.clauses[pi].code;
+    state.P = 0;
+    register[0] = srcList;
+    if (wam())
+        debug("Script srcs consulted");
+    else
+        debug("Failed to consult script srcs");
 }
 
 function call_directives() {

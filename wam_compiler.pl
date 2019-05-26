@@ -1134,18 +1134,21 @@ resolve_url(Directory, URL, BaseURL) :-
    ).
 
 % TrimmedDirectory is Directory with the last component
-% removed. Directory = 'X/_Y/' -> TrimmedDirectory = 'X/'.
+% removed. Directory = 'X/Y/' -> TrimmedDirectory = 'X/'.
 
 trim_directory(Directory, TrimmedDirectory) :-
   atom_codes(Directory, DirectoryCodes),
-  append(A, "/", DirectoryCodes), % A = X/_Y
-  append("/", _Y, B),              % B = /_Y
-  append(X, B, A),
-  append(X, "/", C),              % C = X/
+  reverse(DirectoryCodes, ReversedCodes), % '/_RY/RX'
+  append("/", RA, ReversedCodes), % RA = '_RY/RX'
+  append(_RY, "/", RB),              % RB = _RY/
+  append(RB, RX, RA),
+  append("/", RX, RC),              % RC = /RX
+  reverse(RC, C),
   atom_codes(TrimmedDirectory, C).
 
 fetch_promises([], []).
 fetch_promises([H|T], [H-HP|TP]) :-
+    writeln(fetching(H)),
     fetch_promise(H, HP),
     fetch_promises(T, TP).
 

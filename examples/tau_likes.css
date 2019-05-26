@@ -1,0 +1,79 @@
+/************************/
+/***     EXAMPLES     ***/
+/************************/
+
+.example-description {
+    color: #666666;
+    font-size: 22px;
+    margin-bottom: 50px;
+}
+
+.example-textinput {
+    background-color: #ffffff;
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    box-shadow: inset 0 3px 0 #dfdfdf;
+    box-sizing: border-box;
+    color: #222222;
+    font-family: 'Source Sans Pro', arial, verdana, sans-serif;
+    display: block;
+    margin: 10px;
+    padding: 10px;
+}
+
+.example-button {
+    background-color: #dedbc8;
+    border: none;
+    border-radius: 2px;
+    border-bottom: 5px solid #dedbc8;
+    box-sizing: border-box;
+    color: rgba(0, 0, 0, 0.97);
+    cursor: pointer;
+    font-family: 'Source Sans Pro', arial, verdana, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    display: block;
+    margin: 10px;
+    padding: 10px;
+}
+
+.example-button:hover {
+    background-color: #398033;
+    border-bottom: 5px solid #74a770;
+}
+
+.example-button:active {
+    border-bottom: none;
+    margin-top: 15px;
+}
+
+.example-program {
+    font-family: 'Inconsolata', monospace, courier, serif;
+    font-size: 20px;
+    width: 400px;
+    height: 200px;
+}
+
+.example-goal {
+    font-family: 'Inconsolata', monospace, courier, serif;
+    font-size: 20px;
+    width: 400px;
+}
+
+.example-result {
+    background-color: #fafafa;
+    margin: 10px;
+    padding: 10px;
+}
+
+.example-result > div {
+    background-color: #efefef;
+    border-radius: 3px;
+    margin: 10px;
+    padding: 10px;
+}
+
+.example-credit {
+    font-family: arial, verdana, sans-serif;
+    font-size: 12px;
+}

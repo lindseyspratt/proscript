@@ -3106,6 +3106,10 @@ function backtrack()
     var next = memory[state.B + memory[state.B] + CP_Next];
     state.P = next.offset;
     code = next.code;
+    if(! code) {
+        throw 'code is undefined';
+    }
+
     state.current_predicate = next.predicate;
     if(state.trace_call !== 'no_trace') {
         state.trace_call = memory[state.B + memory[state.B] + CP_TC];
@@ -3186,7 +3190,11 @@ function wam_complete_call_or_execute(predicate) {
         state.num_of_args = ftable[code[state.P + 1]][1];
         state.current_predicate = predicate;
         code = predicate.clauses[predicate.clause_keys[0]].code;
-        state.P = 0;
+       if(! code) {
+           throw 'code is undefined';
+       }
+
+       state.P = 0;
        return true;
     } else {
         return false;
@@ -3338,6 +3346,10 @@ function wam1()
         } else {
            debugging = false;
         }
+
+        if(! code) {
+            throw 'code is undefined';
+        }
         // Decode an instruction
         switch(code[state.P])
         {
@@ -3483,6 +3495,10 @@ function wam1()
                     {
                         state.current_predicate = state.CP.predicate;
                         code = state.CP.code;
+                        if(! code) {
+                            throw 'code is undefined';
+                        }
+
                         state.P = state.CP.offset;
                     }
                     else if (!backtrack())
@@ -3500,6 +3516,10 @@ function wam1()
             state.P = state.CP.offset;
             state.current_predicate = state.CP.predicate;
             code = state.CP.code;
+            if(! code) {
+                throw 'code is undefined';
+            }
+
             continue;
 
         case 6: // put_variable: Initialize a new variable in Yn, and also put it into Ai
@@ -4052,6 +4072,10 @@ function wam1()
             state.foreign_value = memory[state.B+1];
             state.P = memory[state.B+2].offset;
             code = memory[state.B+2].code;
+            if(! code) {
+                throw 'code is undefined';
+            }
+
             state.current_predicate = memory[state.B+2].current_predicate;
             n = memory[state.B];
             state.foreign_retry = true;
@@ -4815,7 +4839,7 @@ function parse_term_options(options)
         var ftor = memory[VAL(head)];
         if (ftor === lookup_functor("quoted",1))
         {
-            result.quoted = (memory[VAL(head)+1] === yes)
+            result.quoted = (memory[VAL(head)+1] === yes)  // TODO: Should this (and following) use deref?
         } 
         else if (ftor === lookup_functor("ignore_ops",1))
         {
@@ -6237,12 +6261,12 @@ function PL_next_solution(qid)
 
 function PL_call(term, module)
 {
-    ftor = VAL(memory[VAL(term)]);
+    ftor = VAL(memory[VAL(term)]); // TODO: Should this use deref?
     initialize();
     allocate_first_frame();
     state.P = predicates[ftor];
     for (i = 0; i < ftable_arity(ftor); i++)
-        register[i] = memory[VAL(term) + 1 + i];
+        register[i] = memory[VAL(term) + 1 + i]; // TODO: Should this use deref?
     return wam();    
 }
 
@@ -7729,12 +7753,12 @@ function codes_to_string(codes, container, reportError) {
             return reportError && instantiation_error(list);
         }
 
-        var codePL = memory[VAL(list)];
+        var codePL = deref(memory[VAL(list)]);
         if(TAG(codePL) !== TAG_INT) {
             return reportError && instantiation_error(codePL);
         } else {
             string += String.fromCharCode(codePL);
-            list = memory[VAL(list) + 1];
+            list = deref(memory[VAL(list) + 1]);
         }
     }
     container.value = string;
@@ -7924,17 +7948,117 @@ function setupElementsForSelectAll(query, container) {
 // proscript_init generally is only used once in a web page to set up the proscript globals.
 // Additional calls of Prolog queries should use proscript to avoid overwriting the global data,
 // particularly the predicates from assertions.
+/*
+       // noinspection JSUnusedLocalSymbols
+        function predicate_flush_stdout()
+        {
+            return true;
+        }
+        // noinspection JSUnusedLocalSymbols
+        function stdout(msg) {
+            alert(msg);
+        }
+
+ */
+
+// These functions may be defined in some other file.
+// If not then they are defined by proscript_init method.
+
+var predicate_flush_stdout;
+var stdout;
 
 function proscript_init(queryJS) {
+    if(! predicate_flush_stdout) {
+        predicate_flush_stdout = function() { return true;};
+    }
+
+    if(! stdout) {
+        stdout = function(msg) {console.log(msg);};
+    }
+
     load_state();
 
-    initialize(); // ensure state is initialized. proscript saves and restores state.
+    initialize();
 
     call_directives();
 
+    consult_scripts();
+
     if(queryJS && queryJS !== '') {
+        initialize(); // ensure state is initialized. proscript saves and restores state.
         proscript(queryJS);
     }
+}
+
+function consult_scripts() {
+    let scripts = document.getElementsByTagName('SCRIPT');
+    // collect script.src URLs to pass to consult/1.
+    // for scripts that have inline text use compile_atom/1.
+
+    let srcs = [];
+    for(let script of scripts) {
+        if(script.type && script.type === 'text/prolog') {
+            if (script.src) {
+                srcs.push(script.src);
+            } else {
+                consult_script_text(script.text);
+            }
+        }
+    }
+
+    consult_script_srcs(srcs);
+}
+
+function consult_script_text(code_atom) {
+//    initialize();
+    let atom = lookup_atom(code_atom);
+    let ftor = VAL(lookup_functor("consult_atom", 1));
+    allocate_first_frame();
+    var pred = predicates[ftor];
+    var pi = predicates[ftor].clause_keys[0];
+    state.current_predicate = pred;
+    code = pred.clauses[pi].code;
+    state.P = 0;
+    register[0] = atom;
+    if (wam())
+        debug("Script consulted");
+    else
+        debug("Failed to consult script");
+}
+
+function consult_script_srcs(srcs) {
+    // set up consult(srcs)
+    // srclist
+    // pred = consultPred
+    // register[0] = srclist
+ //   initialize();
+
+    if(srcs.length === 0) {
+        return;
+    }
+
+    var srcList = state.H ^ (TAG_LST << WORD_BITS);
+    for (var i = 0; i < srcs.length; i++)
+    {
+        memory[state.H] = lookup_atom(srcs[i]);
+        // If there are no more items we will overwrite the last entry with [] when we exit the loop
+        memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+        state.H += 2;
+    }
+    memory[state.H-1] = NIL;
+
+    let ftor = VAL(lookup_functor("consult", 1));
+    allocate_first_frame();
+    var pred = predicates[ftor];
+    var pi = predicates[ftor].clause_keys[0];
+    state.current_predicate = pred;
+    code = pred.clauses[pi].code;
+    state.P = 0;
+    register[0] = srcList;
+    if (wam())
+        debug("Script srcs consulted");
+    else
+        debug("Failed to consult script srcs");
 }
 
 function call_directives() {
@@ -8797,7 +8921,7 @@ function get_object_id_container(term, idContainer) {
         return type_error('obj', term);
     var ftor = VAL(memory[VAL(term)]);
     if (atable[ftable[ftor][0]] === '$obj' && ftable_arity(ftor) === 1) {
-        var arg = memory[VAL(term) + 1];
+        var arg = deref(memory[VAL(term) + 1]);
         if (TAG(arg) !== TAG_ATM)
             return type_error("obj_arg");
         idContainer.value = atable[VAL(arg)];
@@ -8823,6 +8947,10 @@ var parentMap = new Map([
     ['canvasgradient', []],
     ['canvaspattern', []],
     ['htmlimageelement', ['htmlelement']],
+    ['htmlinputelement', ['htmlelement']],
+    ['htmltextareaelement', ['htmlelement']],
+    ['htmlselectelement', ['htmlelement']],
+    ['htmloptionelement', ['htmlelement']],
     ['path2d', []],
     ['uievent', ['event']],
     ['mouseevent', ['uievent']],
@@ -8857,6 +8985,10 @@ var constructorMap = {
     "CanvasGradient" : 'canvasgradient',
     "CanvasPattern" : 'canvaspattern',
     "HTMLImageElement" : 'htmlimageelement',
+    "HTMLTextAreaElement" : 'htmltextareaelement',
+    "HTMLInputElement" : 'htmlinputelement',
+    "HTMLSelectElement" : 'htmlselectelement',
+    "HTMLOptionElement" : 'htmloptionelement',
     "Path2D" : 'path2d',
     "UIEvent" : 'uievent',
     "MouseEvent" : 'mouseevent',
@@ -8894,7 +9026,7 @@ function convert_method_spec(specTerm, resultContainer) {
         return type_error("list", specTerm);
     }
 
-    let methodNamePL = memory[VAL(specTerm)];
+    let methodNamePL = deref(memory[VAL(specTerm)]);
 
     let methodNameContainer = {};
     let methodNameJS;
@@ -8907,26 +9039,26 @@ function convert_method_spec(specTerm, resultContainer) {
     let result = {};
     result.name = methodNameJS;
 
-    let specTermTailPL = memory[VAL(specTerm) + 1];
-    let argList = memory[VAL(specTermTailPL)];
+    let specTermTailPL = deref(memory[VAL(specTerm) + 1]);
+    let argList = deref(memory[VAL(specTermTailPL)]);
     let argTypesJS = [];
     while (argList !== NIL) {
         if (TAG(argList) !== TAG_LST) {
             return type_error("list", argList);
         }
-        let argTypePL = memory[VAL(argList)];
+        let argTypePL = deref(memory[VAL(argList)]);
         let argTypeContainer = {};
         if(!convert_type_term(argTypePL, argTypeContainer)) {
             return false;
         }
         argTypesJS.push(argTypeContainer.value);
-        argList = memory[VAL(argList) + 1];
+        argList = deref(memory[VAL(argList) + 1]);
     }
     result.arguments = argTypesJS;
 
-    let specTermTailTailPL = memory[VAL(specTermTailPL) + 1];
+    let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]);
     if(specTermTailTailPL !== NIL) {
-        let returnTypePL = memory[VAL(specTermTailTailPL)];
+        let returnTypePL = deref(memory[VAL(specTermTailTailPL)]);
         let returnContainer = {};
         if (convert_type_term(returnTypePL, returnContainer)) {
             result.returns = returnContainer.value;
@@ -8959,7 +9091,7 @@ function convert_type_term(typePL, container) {
             return representation_error('type array arity 1', typePL);
         }
         let subContainer = {};
-        if(! convert_type_term(memory[VAL(typePL) + 1], subContainer, true)) {
+        if(! convert_type_term(deref(memory[VAL(typePL) + 1]), subContainer, true)) {
             return false;
         }
         let extendedType = {};
@@ -8992,7 +9124,7 @@ function convert_property_spec(specTerm, resultContainer) {
         return type_error("list", specTerm);
     }
 
-    let propertyPL = memory[VAL(specTerm)];
+    let propertyPL = deref(memory[VAL(specTerm)]);
     if(TAG(propertyPL) !== TAG_ATM) {
         return type_error("atom", propertyPL);
     }
@@ -9005,8 +9137,8 @@ function convert_property_spec(specTerm, resultContainer) {
         return false;
     }
 
-    let specTermTailPL = memory[VAL(specTerm) + 1];
-    let typePL = memory[VAL(specTermTailPL)];
+    let specTermTailPL = deref(memory[VAL(specTerm) + 1]);
+    let typePL = deref(memory[VAL(specTermTailPL)]);
     if(TAG(typePL) !== TAG_ATM) {
         return type_error("atom", typePL);
     }
@@ -9018,10 +9150,10 @@ function convert_property_spec(specTerm, resultContainer) {
         return false;
     }
 
-    let specTermTailTailPL = memory[VAL(specTermTailPL) + 1];
+    let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]);
     let settableFlag = false;
     if(specTermTailTailPL !== NIL) {
-        let settablePL = memory[VAL(specTermTailTailPL)];
+        let settablePL = deref(memory[VAL(specTermTailTailPL)]);
         if (TAG(settablePL) !== TAG_ATM) {
             return type_error("atom", typePL);
         }
@@ -9631,6 +9763,176 @@ webInterfaces.set('htmlcanvaselement',
         methods:htmlCanvasElementMethodSpecs
     });
 
+var htmlTextAreaElementInterfaceProperties = new Map( [
+    ['autocomplete', SimpleProperty('atom', 'autocomplete', true)],
+    ['autofocus', SimpleProperty('boolean', 'autofocus', true)],
+    ['cols', SimpleProperty('number', 'cols', true)], // not Input
+    ['dirName', SimpleProperty('atom', 'dirName', true)],
+    ['disabled', SimpleProperty('boolean', 'disabled', true)],
+    ['form', SimpleProperty('object', 'form')],
+    ['inputMode', SimpleProperty('atom', 'inputMode', true)],
+    ['maxLength', SimpleProperty('number', 'maxLength', true)],
+    ['minLength', SimpleProperty('number', 'minLength', true)],
+    ['name', SimpleProperty('atom', 'name', true)],
+    ['placeholder', SimpleProperty('atom', 'placeholder', true)],
+    ['readOnly', SimpleProperty('boolean', 'readOnly', true)],
+    ['required', SimpleProperty('boolean', 'required', true)],
+    ['rows', SimpleProperty('number', 'rows', true)], // not Input
+    ['wrap', SimpleProperty('atom', 'wrap', true)], // not Input
+    ['step', SimpleProperty('atom', 'step', true)],
+    ['type', SimpleProperty('atom', 'type', true)],
+    ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
+    ['value', SimpleProperty('atom', 'value', true)],
+    ['textLength', SimpleProperty('number', 'textLength')], // not Input
+    ['willValidate', SimpleProperty('boolean', 'willValidate')],
+    ['validity', SimpleProperty('object', 'validity')], // ValidityState
+    ['validationMessage', SimpleProperty('atom', 'validationMessage')],
+    ['labels', SimpleProperty('object', 'labels')], // NodeList
+    ['selectionStart', SimpleProperty('number', 'selectionStart', true)],
+    ['selectionEnd', SimpleProperty('number', 'selectionEnd', true)],
+    ['selectionDirection', SimpleProperty('atom', 'selectionDirection', true)]
+]);
+
+var htmlTextAreaElementMethodSpecs = new Map([
+    ['checkValidity',{name:'checkValidity',arguments:[],returns:{type:'boolean'}}],
+    ['reportValidity',{name:'reportValidity',arguments:[],returns:{type:'boolean'}}],
+    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}],
+    ['select',{name:'select',arguments:[]}],
+    ['setRangeText',{name:'setRangeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'string'}]}],
+    ['setSelectionRange',{name:'setSelectionRange',arguments:[{type:'number'},{type:'number'},{type:'string'}]}]
+]);
+
+webInterfaces.set('htmltextareaelement',
+    {name: 'htmltextareaelement',
+        properties:htmlTextAreaElementInterfaceProperties,
+        methods:htmlTextAreaElementMethodSpecs
+    });
+
+var htmlInputElementInterfaceProperties = new Map( [
+    ['accept', SimpleProperty('atom', 'accept', true)],
+    ['alt', SimpleProperty('string', 'alt', true)],
+    ['autocomplete', SimpleProperty('atom', 'autocomplete', true)],
+    ['autofocus', SimpleProperty('boolean', 'autofocus', true)],
+    ['defaultChecked', SimpleProperty('boolean', 'defaultChecked', true)],
+    ['checked', SimpleProperty('boolean', 'checked', true)],
+    ['dirName', SimpleProperty('atom', 'dirName', true)],
+    ['disabled', SimpleProperty('boolean', 'disabled', true)],
+    ['form', SimpleProperty('object', 'form')],
+    ['files', SimpleProperty('object', 'files')],
+    ['formAction', SimpleProperty('atom', 'formAction', true)],
+    ['formEnctype', SimpleProperty('atom', 'formEnctype', true)],
+    ['formMethod', SimpleProperty('atom', 'formMethod', true)],
+    ['formNoValidate', SimpleProperty('boolean', 'formNoValidate', true)],
+    ['formTarget', SimpleProperty('atom', 'formTarget', true)],
+    ['height', SimpleProperty('number', 'height', true)],
+    ['indeterminate', SimpleProperty('boolean', 'indeterminate', true)],
+    ['inputMode', SimpleProperty('atom', 'inputMode', true)],
+    ['list', SimpleProperty('object', 'list')],
+    ['max', SimpleProperty('atom', 'max', true)],
+    ['maxLength', SimpleProperty('number', 'maxLength', true)],
+    ['min', SimpleProperty('atom', 'min', true)],
+    ['minLength', SimpleProperty('number', 'minLength', true)],
+    ['multiple', SimpleProperty('boolean', 'multiple', true)],
+    ['name', SimpleProperty('atom', 'name', true)],
+    ['pattern', SimpleProperty('atom', 'pattern', true)],
+    ['placeholder', SimpleProperty('atom', 'placeholder', true)],
+    ['readOnly', SimpleProperty('boolean', 'readOnly', true)],
+    ['required', SimpleProperty('boolean', 'required', true)],
+    ['size', SimpleProperty('number', 'size', true)],
+    ['src', SimpleProperty('atom', 'src', true)],
+    ['step', SimpleProperty('atom', 'step', true)],
+    ['type', SimpleProperty('atom', 'type', true)],
+    ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
+    ['value', SimpleProperty('atom', 'value', true)],
+    ['valueAsDate', SimpleProperty('object', 'valueAsDate', true)],
+    ['valueAsNumber', SimpleProperty('number', 'valueAsNumber', true)],
+    ['width', SimpleProperty('number', 'width', true)],
+    ['willValidate', SimpleProperty('boolean', 'willValidate')],
+    ['validity', SimpleProperty('object', 'validity')], // ValidityState
+    ['validationMessage', SimpleProperty('atom', 'validationMessage')],
+    ['labels', SimpleProperty('object', 'labels')], // NodeList
+    ['selectionStart', SimpleProperty('number', 'selectionStart', true)],
+    ['selectionEnd', SimpleProperty('number', 'selectionEnd', true)],
+    ['selectionDirection', SimpleProperty('atom', 'selectionDirection', true)]
+]);
+
+var htmlInputElementMethodSpecs = new Map([
+    ['stepUp',{name:'stepUp',arguments:[{type:'number'}]}],
+    ['stepDown',{name:'stepDown',arguments:[{type:'number'}]}],
+    ['checkValidity',{name:'checkValidity',arguments:[],returns:{type:'boolean'}}],
+    ['reportValidity',{name:'reportValidity',arguments:[],returns:{type:'boolean'}}],
+    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}],
+    ['select',{name:'select',arguments:[]}],
+    ['setRangeText',{name:'setRangeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'string'}]}],
+    ['setSelectionRange',{name:'setSelectionRange',arguments:[{type:'number'},{type:'number'},{type:'string'}]}]
+]);
+
+webInterfaces.set('htmlinputelement',
+    {name: 'htmlinputelement',
+        properties:htmlInputElementInterfaceProperties,
+        methods:htmlInputElementMethodSpecs
+    });
+
+var htmlSelectElementInterfaceProperties = new Map( [
+    ['defaultChecked', SimpleProperty('boolean', 'defaultChecked', true)],
+    ['disabled', SimpleProperty('boolean', 'disabled', true)],
+    ['form', SimpleProperty('object', 'form')],
+    ['length', SimpleProperty('atom', 'length', true)],
+    ['multiple', SimpleProperty('boolean', 'multiple', true)],
+    ['name', SimpleProperty('atom', 'name', true)],
+    ['options', SimpleProperty('object', 'options')],
+    ['required', SimpleProperty('boolean', 'required', true)],
+    ['selectedIndex', SimpleProperty('number', 'selectedIndex', true)],
+    ['selectedOptions', SimpleProperty('object', 'selectedOptions')],
+    ['size', SimpleProperty('number', 'size', true)],
+    ['type', SimpleProperty('atom', 'type', true)],
+    ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
+    ['value', SimpleProperty('atom', 'value', true)],
+    ['willValidate', SimpleProperty('boolean', 'willValidate')],
+    ['validity', SimpleProperty('object', 'validity')], // ValidityState
+    ['validationMessage', SimpleProperty('atom', 'validationMessage')],
+    ['labels', SimpleProperty('object', 'labels')] // NodeList
+ ]);
+
+var htmlSelectElementMethodSpecs = new Map([
+    ['add',{name:'add',arguments:[{type:'object'},{type:['object','number']}]}],
+    ['checkValidity',{name:'checkValidity',arguments:[],returns:{type:'boolean'}}],
+    ['item',{name:'item',arguments:[{type:'number'}],returns:{type:'object'}}],
+    ['namedItem',{name:'namedItem',arguments:[{type:'string'}],returns:{type:'object'}}],
+    ['remove',{name:'remove',arguments:[{type:'number'}]}],
+    ['reportValidity',{name:'reportValidity',arguments:[],returns:{type:'boolean'}}],
+    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}],
+    ['select',{name:'select',arguments:[]}],
+    ['setRangeText',{name:'setRangeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'string'}]}],
+    ['setSelectionRange',{name:'setSelectionRange',arguments:[{type:'number'},{type:'number'},{type:'string'}]}]
+]);
+
+webInterfaces.set('htmlselectelement',
+    {name: 'htmlselectelement',
+        properties:htmlSelectElementInterfaceProperties,
+        methods:htmlSelectElementMethodSpecs
+    });
+
+var htmlOptionElementInterfaceProperties = new Map( [
+    ['defaultSelected', SimpleProperty('boolean', 'defaultSelected', true)],
+    ['disabled', SimpleProperty('boolean', 'disabled', true)],
+    ['form', SimpleProperty('object', 'form')],
+    ['index', SimpleProperty('number', 'index')],
+    ['label', SimpleProperty('string', 'label', true)],
+    ['selected', SimpleProperty('boolean', 'selected', true)],
+    ['text', SimpleProperty('string', 'text', true)],
+    ['value', SimpleProperty('atom', 'value', true)],
+]);
+
+var htmlOptionElementMethodSpecs = new Map([
+]);
+
+webInterfaces.set('htmloptionelement',
+    {name: 'htmloptionelement',
+        properties:htmlOptionElementInterfaceProperties,
+        methods:htmlOptionElementMethodSpecs
+    });
+
 var eventInterfaceProperties = new Map( [
     ['bubbles', SimpleProperty('boolean', 'bubbles')],
     ['cancelable', SimpleProperty('boolean', 'cancelable')],
@@ -10165,7 +10467,7 @@ function getClassListPropertyValue(value) {
             instantiation_error(list);
         }
 
-        var atomPL = memory[VAL(list)];
+        var atomPL = deref(memory[VAL(list)]);
         if(TAG(atomPL) !== TAG_ATM) {
             instantiation_error(atomPL);
         } else {
@@ -10173,7 +10475,7 @@ function getClassListPropertyValue(value) {
                 string += ' ';
             }
             string += atable[VAL(value)];
-            list = memory[VAL(list) + 1];
+            list = deref(memory[VAL(list) + 1]);
         }
     }
 
@@ -10464,7 +10766,7 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
     for (var i = 0; i < arity; i++) {
         let specArgument = specArguments[i];
         let applyArgumentContainer = {};
-        if (convert_method_argument(memory[VAL(methodStructure) + i + 1], specArgument, applyArgumentContainer)) {
+        if (convert_method_argument(deref(memory[VAL(methodStructure) + i + 1]), specArgument, applyArgumentContainer)) {
             applyArguments.push(applyArgumentContainer.value);
         } else {
             return false;
@@ -10479,7 +10781,7 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
             if (spec.returns.type === 'boolean') {
                 return resultPL;
             } else {
-                return unify(resultPL, memory[VAL(methodStructure) + arity + 1]);
+                return unify(resultPL, deref(memory[VAL(methodStructure) + arity + 1]));
             }
         } else {
             return false;
@@ -10650,7 +10952,7 @@ function terms_to_options(listRoot, optionsContainer) {
             return instantiation_error(list);
         }
 
-        var keyValuePairPL = memory[VAL(list)];
+        var keyValuePairPL = deref(memory[VAL(list)]);
         if(TAG(keyValuePairPL) !== TAG_STR) {
             return instantiation_error(codePL);
         } else {
@@ -10665,21 +10967,21 @@ function terms_to_options(listRoot, optionsContainer) {
                 return type_error('key - value: term should have two arguments.', arity);
             }
 
-            let keyPL = memory[VAL(keyValuePairPL) + 1];
+            let keyPL = deref(memory[VAL(keyValuePairPL) + 1]);
             if(TAG(keyPL) !== TAG_ATM) {
                 return type_error('key - value: key should be an atom.', keyPL);
             }
             let keyJS = atable[VAL(keyPL)];
 
             // TODO: extend value to allow any JSON-ish type - atom, number, boolean, list/JSON array, or keyValue list/JSON object.
-            let valuePL = memory[VAL(keyValuePairPL) + 2];
+            let valuePL = deref(memory[VAL(keyValuePairPL) + 2]);
             if(TAG(valuePL) !== TAG_ATM) {
                 return type_error('key - value: value should be an atom.', valuePL);
             }
 
             options[keyJS] = atable[VAL(valuePL)];
 
-            list = memory[VAL(list) + 1];
+            list = deref(memory[VAL(list) + 1]);
         }
     }
 
@@ -10697,7 +10999,7 @@ function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
             return instantiation_error(list);
         }
 
-        var itemPL = memory[VAL(list)];
+        var itemPL = deref(memory[VAL(list)]);
         let itemContainer = {};
         if(convert_method_argument(itemPL, {type: itemType}, itemContainer, reportError)) {
             array.push(itemContainer.value);
@@ -10705,7 +11007,7 @@ function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
             return false;
         }
 
-        list = memory[VAL(list) + 1];
+        list = deref(memory[VAL(list) + 1]);
     }
 
     arrayContainer.value = array;

@@ -400,7 +400,7 @@ function parse_term_options(options)
         var ftor = memory[VAL(head)];
         if (ftor === lookup_functor("quoted",1))
         {
-            result.quoted = (memory[VAL(head)+1] === yes)
+            result.quoted = (memory[VAL(head)+1] === yes)  // TODO: Should this (and following) use deref?
         } 
         else if (ftor === lookup_functor("ignore_ops",1))
         {

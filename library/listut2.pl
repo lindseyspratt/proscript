@@ -1,7 +1,8 @@
 append_lists([], []).
-append_lists([H|T], R) :-
-    append(H, N, R),
-    append_lists(T, N).
+append_lists([L], L).
+append_lists([H1, H2|T], R) :-
+    append(H1, N, R),
+    append_lists([H2|T], N).
 
 
 %   select_list(X, Xlist, Y, Ylist)

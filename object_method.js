@@ -64,7 +64,7 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
     for (var i = 0; i < arity; i++) {
         let specArgument = specArguments[i];
         let applyArgumentContainer = {};
-        if (convert_method_argument(memory[VAL(methodStructure) + i + 1], specArgument, applyArgumentContainer)) {
+        if (convert_method_argument(deref(memory[VAL(methodStructure) + i + 1]), specArgument, applyArgumentContainer)) {
             applyArguments.push(applyArgumentContainer.value);
         } else {
             return false;
@@ -79,7 +79,7 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
             if (spec.returns.type === 'boolean') {
                 return resultPL;
             } else {
-                return unify(resultPL, memory[VAL(methodStructure) + arity + 1]);
+                return unify(resultPL, deref(memory[VAL(methodStructure) + arity + 1]));
             }
         } else {
             return false;
@@ -250,7 +250,7 @@ function terms_to_options(listRoot, optionsContainer) {
             return instantiation_error(list);
         }
 
-        var keyValuePairPL = memory[VAL(list)];
+        var keyValuePairPL = deref(memory[VAL(list)]);
         if(TAG(keyValuePairPL) !== TAG_STR) {
             return instantiation_error(codePL);
         } else {
@@ -265,21 +265,21 @@ function terms_to_options(listRoot, optionsContainer) {
                 return type_error('key - value: term should have two arguments.', arity);
             }
 
-            let keyPL = memory[VAL(keyValuePairPL) + 1];
+            let keyPL = deref(memory[VAL(keyValuePairPL) + 1]);
             if(TAG(keyPL) !== TAG_ATM) {
                 return type_error('key - value: key should be an atom.', keyPL);
             }
             let keyJS = atable[VAL(keyPL)];
 
             // TODO: extend value to allow any JSON-ish type - atom, number, boolean, list/JSON array, or keyValue list/JSON object.
-            let valuePL = memory[VAL(keyValuePairPL) + 2];
+            let valuePL = deref(memory[VAL(keyValuePairPL) + 2]);
             if(TAG(valuePL) !== TAG_ATM) {
                 return type_error('key - value: value should be an atom.', valuePL);
             }
 
             options[keyJS] = atable[VAL(valuePL)];
 
-            list = memory[VAL(list) + 1];
+            list = deref(memory[VAL(list) + 1]);
         }
     }
 
@@ -297,7 +297,7 @@ function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
             return instantiation_error(list);
         }
 
-        var itemPL = memory[VAL(list)];
+        var itemPL = deref(memory[VAL(list)]);
         let itemContainer = {};
         if(convert_method_argument(itemPL, {type: itemType}, itemContainer, reportError)) {
             array.push(itemContainer.value);
@@ -305,7 +305,7 @@ function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
             return false;
         }
 
-        list = memory[VAL(list) + 1];
+        list = deref(memory[VAL(list) + 1]);
     }
 
     arrayContainer.value = array;

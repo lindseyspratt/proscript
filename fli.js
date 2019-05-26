@@ -347,12 +347,12 @@ function PL_next_solution(qid)
 
 function PL_call(term, module)
 {
-    ftor = VAL(memory[VAL(term)]);
+    ftor = VAL(memory[VAL(term)]); // TODO: Should this use deref?
     initialize();
     allocate_first_frame();
     state.P = predicates[ftor];
     for (i = 0; i < ftable_arity(ftor); i++)
-        register[i] = memory[VAL(term) + 1 + i];
+        register[i] = memory[VAL(term) + 1 + i]; // TODO: Should this use deref?
     return wam();    
 }
 

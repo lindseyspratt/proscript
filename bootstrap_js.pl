@@ -134,6 +134,7 @@ end_block(_, NewBlock):-
 
 % setof/3, bagof/3, findall/3 and findall/4 as implemented by Richard O'Keefe and David Warren.
 % http://www.j-paine.org/prolog/tools/files/setof.pl
+% free_variables/4 is defined in not.pl, also from dec10 prolog tools.
 
 
 findall(Template, Generator, List) :-
@@ -165,12 +166,17 @@ bag_of(Template, Generator, Bag) :-
 	Bag \== [].
 
 save_instances(Template, Generator) :-
+	existential_variables(Generator, _, Goal),
 	recorda(., -, _),
-	call(Generator),
+	call(Goal),
 	recorda(., Template, _),
 	fail.
 save_instances(_, _).
 
+existential_variables(Var ^ Term, [Var|T], Goal) :-
+    !,
+    existential_variables(Term, T, Goal).
+existential_variables(Goal, [], Goal).
 
 list_instances(SoFar, Total) :-
 	recorded(., Term, Ref),

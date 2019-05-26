@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+    <link rel="StyleSheet" href="tau_likes.css" type="text/css" media="ALL">
+    <title>
+        Likes Example
+    </title>
+</head>
+<body onload="proscript_init();">
+<div class="example-description">
+    <h2>ProscriptLS 'likes' Example</h2>
+    <p>
+        Query a database of Prolog facts.
+    </p>
+    <p>Select the person on the person-dropdown, then click the button below that
+    to run the query.
+    The results are displayed at the bottom.
+    </p>
+    <p>
+    You may edit the set of facts.
+    For example, you may add 'likes(mary, fish).' in the program text area.
+    In this case, the name 'mary' will be added to the person dropdown as an additional option.
+    </p>
+</div>
+<!-- Program -->
+<label for="program">Likes/2 Program</label>
+<textarea class="example-textinput example-program" id="program">
+likes(sam, salad).
+likes(dean, pie).
+likes(sam, apples).
+likes(dean, whiskey).
+</textarea>
+
+<!-- Select -->
+<label for="select">Select Person</label>
+<select id="select" class="example-button">
+    <option value="sam">sam</option>
+    <option value="dean">dean</option>
+</select>
+
+<!-- Button -->
+<input class="example-button" type="button" value="See all likes" id="button" />
+
+<!-- Answers -->
+<div class="example-result" id="result"></div>
+
+<!-- Credit -->
+<div class="exmple-credit" id="credit">
+    This example is based on <a href="http://tau-prolog.org/examples/likes">the 'likes' example of the
+    tau-prolog documentation.</a>
+</div>
+<script type="text/javascript" src="../wam-pp.js"></script>
+<script type="text/javascript" src="../bootstrap.js"></script>
+<script type="text/prolog" src="tau_likes.pl">
+</script>
+</body>
+</html>
