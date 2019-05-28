@@ -1,23 +1,18 @@
 <html lang="en">
 <head>
     <title>Simple Test</title>
-    <script>
-        // noinspection JSUnusedLocalSymbols
-        function predicate_flush_stdout()
-        {
-            return true;
-        }
-        // noinspection JSUnusedLocalSymbols
-        function stdout(msg) {
-            alert(msg);
-        }
-     </script>
+    <link rel="StyleSheet" href="examples.css" type="text/css" media="ALL">
     <script src="../terminal/jquery-3.3.1.js"></script>
     <script src="../terminal/jquery_terminal.js"></script>
     <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
 </head>
 <body onload="proscript_init('consult([simple_test]), simple_button_test.');">
-<script type="text/javascript" src="../wam-pp.js"></script>
+<div class="example-description">
+    <h2>ProscriptLS Alert Example</h2>
+    <p>
+        The button displays an alert dialog containing 'Hello World'
+    </p>
+</div><script type="text/javascript" src="../wam-pp.js"></script>
 <script type="text/javascript" src="../bootstrap.js"></script>
 <div id="simpletest">
 </div>

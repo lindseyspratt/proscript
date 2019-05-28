@@ -567,6 +567,10 @@ function get_arg(term, index)
 
 function lookup_atom(name)
 {
+    if(typeof name !== 'string') {
+        throw 'invalid lookup_atom. name must have type of string, but is ' + typeof name + '. name = ' + name;
+    }
+
     var i;
     for (i = 0; i < atable.length; i++)
     {

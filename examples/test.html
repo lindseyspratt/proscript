@@ -1,15 +1,25 @@
 <html lang="en">
   <head>
     <title>WAM Test</title>
+      <link rel="StyleSheet" href="examples.css" type="text/css" media="ALL">
     <link rel="stylesheet" href="test.css"/>
   </head>
   <body onload="onload(true)" onkeydown="return preventBackspace(event);">
     <script type="text/javascript" src="../wam-pp.js"></script>
     <script type="text/javascript" src="../bootstrap.js"></script>
     <script type="text/javascript" src="test.js"></script>
-    <div style="height: 100%;">
-        <label for="code">Prolog source to consult</label>
-        <textarea id="code" style="border: 1px solid black; height: calc(50% - 20px); width: 100%;">
+    <div >
+        <div class="example-description">
+            <h2>ProscriptLS Custom Console and Consult Example</h2>
+            <p>
+                The custom (non-jquery-terminal) Proscript interpreter console may be used to query programs defined
+                in the 'Prolog source' area.
+            </p>
+        </div>
+
+        <label class='example-description' for="code">Prolog source to consult</label>
+        <textarea class="example-textinput example-program"
+                  id="code" style="border: 1px solid black; height: calc(50% - 20px); width: 100%;">
 factorial(0, 1):- !.
 factorial(1, 1).
 factorial(N, Factorial):-
@@ -17,8 +27,8 @@ factorial(N, Factorial):-
    factorial(NN, F),
    Factorial is N * F.
 </textarea>
-      <button onClick="consult_for_test()" style="margin-left: auto; display: block; margin-right: auto;">Consult</button>
-      <div style="border: 1px solid black; height: 50%; width: 100%; overflow: scroll;" id="stdout" onKeyPress="keypress(event)" onKeyDown="keydown(event)" tabindex="0"></div>
+      <button onClick="consult_for_test()" class="example-button">Consult</button>
+      <div class="example-goal" id="stdout" onKeyPress="keypress(event)" onKeyDown="keydown(event)" tabindex="0"></div>
     </div>
   </body>
 </html>

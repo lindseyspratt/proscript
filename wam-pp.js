@@ -561,6 +561,10 @@ function get_arg(term, index)
 
 function lookup_atom(name)
 {
+    if(typeof name !== 'string') {
+        throw 'invalid lookup_atom. name must have type of string, but is ' + typeof name + '. name = ' + name;
+    }
+    
     var i;
     for (i = 0; i < atable.length; i++)
     {
@@ -9764,7 +9768,7 @@ webInterfaces.set('htmlcanvaselement',
     });
 
 var htmlTextAreaElementInterfaceProperties = new Map( [
-    ['autocomplete', SimpleProperty('atom', 'autocomplete', true)],
+ //   ['autocomplete', SimpleProperty('atom', 'autocomplete', true)], // experimental, according to mozilla
     ['autofocus', SimpleProperty('boolean', 'autofocus', true)],
     ['cols', SimpleProperty('number', 'cols', true)], // not Input
     ['dirName', SimpleProperty('atom', 'dirName', true)],
@@ -10550,6 +10554,12 @@ function propertyValueToPLUtil(typeJS, property, valueJS, container, reportError
         } else {
             return reportError && domain_error(typeJS, lookup_atom(valueJS));
         }
+    } else if (typeJS === 'boolean') {
+        if(typeof valueJS === 'boolean') {
+            resultPL = lookup_atom(valueJS.toString());
+        } else {
+            return reportError && type_error(typeJS, lookup_atom(valueJS));
+        }
     } else if (typeJS === 'number') {
         resultPL = getNumberPLPropertyValue(valueJS);
     } else if (typeJS === 'integer') {
@@ -10570,13 +10580,12 @@ function propertyValueToPLUtil(typeJS, property, valueJS, container, reportError
 
 function getAtomPLPropertyValue(valueJS) {
     let localValue = valueJS;
-    if(typeof localValue === 'number' || typeof localValue === 'boolean') {
-        // convert number or boolean to strings.
-        // do not invoke JSON.stringify on localValue if it
-        // is 'string' type - this will re-quote the string.
-        // Also, converting a value that is already a string
-        // is wasted effort.
-        localValue = JSON.stringify(localValue);
+    if(typeof localValue === 'number') {
+        localValue = localValue.toString();
+    } else if(typeof localValue === 'boolean') {
+        localValue = localValue.toString();
+    } else if(typeof localValue !== 'string') {
+        throw 'invalid data type. "' + JSON.stringify(localValue) + '" must have type "string" but is "' + typeof localValue + "'.";
     }
 
     return lookup_atom(localValue);

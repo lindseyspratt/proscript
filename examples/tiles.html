@@ -1,13 +1,22 @@
 <html lang="en">
 <head>
-    <title>Tiles</title>
+    <title>2D Canvas Example</title>
+    <link rel="StyleSheet" href="examples.css" type="text/css" media="ALL">
     <script src="../terminal/jquery-3.3.1.js"></script>
     <script src="../terminal/jquery_terminal.js"></script>
     <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
 </head>
-<body onload="proscript_init('consult([tiles]).');">
-<div id="tiles" style="position: relative; left:100px;">
-    Canvas
+<body onload="proscript_init('consult([tiles]), select_test.');">
+<div class="example-description">
+    <h2>ProscriptLS 2D Canvas Example</h2>
+    <p>
+        A 2D rendering context for a HTMLCanvasElement is used to display a
+        collection of colored squares. Clicking on the non-grayed-out squares
+        places marker ('+') on the selected square.
+    </p>
+</div>
+<div id="tiles" class="example-label">
+    Tiles
     <canvas id="canvas" width="300" height="600">
     </canvas>
 </div>

@@ -2,10 +2,23 @@
 /***     EXAMPLES     ***/
 /************************/
 
+body {
+    font-family: arial, verdana, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: arial, verdana, sans-serif;
+}
+
 .example-description {
     color: #666666;
     font-size: 22px;
     margin-bottom: 50px;
+}
+
+.example-label {
+    color: #666666;
+    font-size: 22px;
 }
 
 .example-textinput {
@@ -15,7 +28,7 @@
     box-shadow: inset 0 3px 0 #dfdfdf;
     box-sizing: border-box;
     color: #222222;
-    font-family: 'Source Sans Pro', arial, verdana, sans-serif;
+    font-family: arial, verdana, sans-serif;
     display: block;
     margin: 10px;
     padding: 10px;
@@ -29,7 +42,7 @@
     box-sizing: border-box;
     color: rgba(0, 0, 0, 0.97);
     cursor: pointer;
-    font-family: 'Source Sans Pro', arial, verdana, sans-serif;
+    font-family: arial, verdana, sans-serif;
     font-size: 18px;
     font-weight: bold;
     display: block;
@@ -48,14 +61,14 @@
 }
 
 .example-program {
-    font-family: 'Inconsolata', monospace, courier, serif;
+    font-family: monospace, courier, serif;
     font-size: 20px;
     width: 400px;
     height: 200px;
 }
 
 .example-goal {
-    font-family: 'Inconsolata', monospace, courier, serif;
+    font-family: monospace, courier, serif;
     font-size: 20px;
     width: 400px;
 }
@@ -74,6 +87,6 @@
 }
 
 .example-credit {
-    font-family: arial, verdana, sans-serif;
+    color: #b4b4b4;
     font-size: 12px;
 }

@@ -1,90 +1,84 @@
 <html lang="en">
 <head>
-    <title>A simple JavaScript calculator</title>
+    <title>A simple Proscript calculator</title>
+    <link rel="StyleSheet" href="examples.css" type="text/css" media="ALL">
     <!-- Originally from https://www.anaesthetist.com/mnm/javascript/calc.htm -->
-    <script>
-        // noinspection JSUnusedLocalSymbols
-        function predicate_flush_stdout()
-        {
-            return true;
-        }
-        // noinspection JSUnusedLocalSymbols
-        function stdout(msg) {
-            alert(msg);
-        }
-    </script>
     <script src="../terminal/jquery-3.3.1.js"></script>
     <script src="../terminal/jquery_terminal.js"></script>
     <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
 </head>
-<body bgcolor="#F0F0FF" onload="proscript_init('consult([calculator])');">
-<script type="text/javascript" src="../wam-pp.js"></script>
-<script type="text/javascript" src="../bootstrap.js"></script>
+<body onload="proscript_init('consult([calculator])');">
+<div class="example-description">
+<h2>ProscriptLS Calculator Example</h2>
+<p>
+    A simple arithmetic calculator.
+</p>
+</div>
+<div align="center">
+    <FORM name="Calculator">
+        <table bgcolor="#9999CC" border="4" width="45%"><tr>      <!--OUTER MARGIN OF CALCULATOR-->
+            <td align="center" colspan="2">
 
-        <hr>
-        <div align="center">
-        <FORM name="Calculator">
-            <table width="45%" border="4" bgcolor="#9999CC"><tr>      <!--OUTER MARGIN OF CALCULATOR-->
-                <td colspan="2" align="center">
+                <b><span style="font-family: Verdana, Arial, Helvetica,serif; color: #000080; font-size: small; ">
+                    A Simple Proscript Calculator<br></span>
+                    <span style="font-family: Courier,serif; font-size: large; ">
+                        <label>
+                            <input maxlength="40" name="Display" onChange="proscript('fix_current')" size="25" type="text">
+                        </label>
+                    </span></b>
 
-                    <b><span style="font-family: Verdana, Arial, Helvetica,serif; color: #000080; font-size: small; ">
-                        A Simple Proscript Calculator<br></span>
-                        <span style="font-family: Courier,serif; font-size: large; ">
-                            <label>
-                                <input type="text" maxlength="40" size="25" name="Display" onChange="proscript('fix_current')">
-                            </label>
-                        </span></b>
+            </td></tr>
+            <tr><td align="center" width="65%">                   <!--left panel------>
 
-                </td></tr>
-                <tr><td width="65%" align="center">                   <!--left panel------>
+                <table><tr>
+                    <td><input OnClick="proscript('add_digit(7)')" name="seven" type="button" value="   7    "></td>
+                    <td><input OnClick="proscript('add_digit(8)')" name="eight" type="button" value="   8    "></td>
+                    <td><input OnClick="proscript('add_digit(9)')" name="nine" type="button" value="   9    "></td>
+                </tr><tr>
+                    <td><input OnClick="proscript('add_digit(4)')" name="four" type="button" value="   4    "></td>
+                    <td><input OnClick="proscript('add_digit(5)')" name="five" type="button" value="   5    "></td>
+                    <td><input OnClick="proscript('add_digit(6)')" name="six" type="button" value="   6    "></td>
+                </tr><tr>
+                    <td><input OnClick="proscript('add_digit(1)')" name="one" type="button" value="   1    "></td>
+                    <td><input OnClick="proscript('add_digit(2)')" name="two" type="button" value="   2    "></td>
+                    <td><input OnClick="proscript('add_digit(3)')" name="three" type="button" value="   3    "></td>
+                </tr><tr>
+                    <td><input OnClick="proscript('plus_minus')" name="plusmin" type="button" value="  +/-  "></td>
+                    <td><input OnClick="proscript('add_digit(0)')" name="one" type="button" value="   0    "></td>
+                    <td><input OnClick="proscript('dot')" name="two" type="button" value="    .    "></td>
+                </tr>
+                </table>
+
+
+            </td>                                   <!--end left panel-->
+                <td align="center" width="35%">                     <!--right panel----->
 
                     <table><tr>
-                        <td><input type="button" name="seven" value="   7    " OnClick="proscript('add_digit(7)')"></td>
-                        <td><input type="button" name="eight" value="   8    " OnClick="proscript('add_digit(8)')"></td>
-                        <td><input type="button" name="nine" value="   9    " OnClick="proscript('add_digit(9)')"></td>
+                        <td><input OnClick="proscript('clear')" name="clear" type="button" value="    C     "></td>
+                        <td><input OnClick="proscript('all_clear')" name="AC" type="button" value="   AC    "></td>
                     </tr><tr>
-                        <td><input type="button" name="four" value="   4    " OnClick="proscript('add_digit(4)')"></td>
-                        <td><input type="button" name="five" value="   5    " OnClick="proscript('add_digit(5)')"></td>
-                        <td><input type="button" name="six" value="   6    " OnClick="proscript('add_digit(6)')"></td>
+                        <td><input OnClick="proscript('operate(*)')" name="mul" type="button" value="     *     "></td>
+                        <td><input OnClick="proscript('operate(/)')" name="div" type="button" value="     /      "></td>
                     </tr><tr>
-                        <td><input type="button" name="one" value="   1    " OnClick="proscript('add_digit(1)')"></td>
-                        <td><input type="button" name="two" value="   2    " OnClick="proscript('add_digit(2)')"></td>
-                        <td><input type="button" name="three" value="   3    " OnClick="proscript('add_digit(3)')"></td>
+                        <td><input OnClick="proscript('operate(+)')" name="add" type="button" value="    +     "></td>
+                        <td><input OnClick="proscript('operate(-)')" name="sub" type="button" value="     -      "></td>
                     </tr><tr>
-                        <td><input type="button" name="plusmin" value="  +/-  " OnClick="proscript('plus_minus')"></td>
-                        <td><input type="button" name="one" value="   0    " OnClick="proscript('add_digit(0)')"></td>
-                        <td><input type="button" name="two" value="    .    " OnClick="proscript('dot')"></td>
-                    </tr>
-                    </table>
+                        <td><input OnClick="proscript('calculate')" name="result" type="button" value="     =    "></td>
+                        <td align="right"><input OnClick="proscript('do_exponent')" name="exp" type="button" value="  EXP  "></td>
+                    </tr></table>
 
 
-                </td>                                   <!--end left panel-->
-                    <td width="35%" align="center">                     <!--right panel----->
-
-                        <table><tr>
-                            <td><input type="button" name="clear" value="    C     " OnClick="proscript('clear')"></td>
-                            <td><input type="button" name="AC" value="   AC    " OnClick="proscript('all_clear')"></td>
-                        </tr><tr>
-                            <td><input type="button" name="mul" value="     *     " OnClick="proscript('operate(*)')"></td>
-                            <td><input type="button" name="div" value="     /      " OnClick="proscript('operate(/)')"></td>
-                        </tr><tr>
-                            <td><input type="button" name="add" value="    +     " OnClick="proscript('operate(+)')"></td>
-                            <td><input type="button" name="sub" value="     -      " OnClick="proscript('operate(-)')"></td>
-                        </tr><tr>
-                            <td><input type="button" name="result" value="     =    " OnClick="proscript('calculate')"></td>
-                            <td align="right"><input type="button" name="exp" value="  EXP  " OnClick="proscript('do_exponent')"></td>
-                        </tr></table>
-
-
-                    </td>                                   <!--end right panel-->
-                </tr></table>                          <!--END OUTER MARGIN CALC------->
-        </FORM>
-    </div>
-<script type="text/javascript" src="../terminal/proscript_interpreter_terminal.js"></script>
+                </td>                                   <!--end right panel-->
+            </tr></table>                          <!--END OUTER MARGIN CALC------->
+    </FORM>
+</div>
+<script src="../terminal/proscript_interpreter_terminal.js" type="text/javascript"></script>
 <div id="proscriptinterpreter">
 </div>
+<script src="../wam-pp.js" type="text/javascript"></script>
+<script src="../bootstrap.js" type="text/javascript"></script>
 </body>
-<footer>
+<footer class="example-credit">
     The original implementation of the calculator in regular Javascript is
     <a href="https://www.anaesthetist.com/mnm/javascript/calc.htm">here</a>.
 </footer>

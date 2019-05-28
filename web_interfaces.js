@@ -466,7 +466,7 @@ webInterfaces.set('htmlcanvaselement',
     });
 
 var htmlTextAreaElementInterfaceProperties = new Map( [
-    ['autocomplete', SimpleProperty('atom', 'autocomplete', true)],
+ //   ['autocomplete', SimpleProperty('atom', 'autocomplete', true)], // experimental, according to mozilla
     ['autofocus', SimpleProperty('boolean', 'autofocus', true)],
     ['cols', SimpleProperty('number', 'cols', true)], // not Input
     ['dirName', SimpleProperty('atom', 'dirName', true)],

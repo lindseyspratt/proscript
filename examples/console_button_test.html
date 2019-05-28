@@ -1,19 +1,15 @@
 <html lang="en">
 <head>
     <title>Console Button Test</title>
-    <script>
-        // noinspection JSUnusedLocalSymbols
-        function predicate_flush_stdout()
-        {
-            return true;
-        }
-        // noinspection JSUnusedLocalSymbols
-        function stdout(msg) {
-            alert(msg);
-        }
-    </script>
+    <link rel="StyleSheet" href="examples.css" type="text/css" media="ALL">
  </head>
 <body onload="proscript_init('consult([console_button_test])');" >
+<div class="example-description">
+    <h2>ProscriptLS Console Button Example</h2>
+    <p>
+    The button creates a custom (non-jquery-terminal) Proscript interpreter console and removes it.
+    </p>
+</div>
 <script type="text/javascript" src="../wam-pp.js"></script>
 <script type="text/javascript" src="../bootstrap.js"></script>
 <script type="text/javascript" src="test.js"></script>

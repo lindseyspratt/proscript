@@ -1148,7 +1148,7 @@ trim_directory(Directory, TrimmedDirectory) :-
 
 fetch_promises([], []).
 fetch_promises([H|T], [H-HP|TP]) :-
-    writeln(fetching(H)),
+    % writeln(fetching(H)),
     fetch_promise(H, HP),
     fetch_promises(T, TP).
 

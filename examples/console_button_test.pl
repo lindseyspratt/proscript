@@ -13,6 +13,7 @@ console_button_test :-
     dom_element_attribute_value(E, id, simpletest),
     create_dom_element('BUTTON', Button),
     set_dom_element_attribute_value(Button, id, console_button),
+    set_dom_element_attribute_value(Button, class, 'example-button'),
     create_dom_text_node("Create Console", NewContent),
     append_dom_node_child(Button, NewContent),
     dom_object_method(Button, addEventListener(click, setup_div_and_console)),
