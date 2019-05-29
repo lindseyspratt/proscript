@@ -104,11 +104,13 @@ var parentMap = new Map([
     ['htmlinputelement', ['htmlelement']],
     ['htmltextareaelement', ['htmlelement']],
     ['htmlselectelement', ['htmlelement']],
+    ['htmlformelement', ['htmlelement']],
     ['htmloptionelement', ['htmlelement']],
     ['path2d', []],
     ['uievent', ['event']],
     ['mouseevent', ['uievent']],
-    ['textmetrics', []]
+    ['textmetrics', []],
+    ['validitystate', []]
 ]);
 
 var childMap = new Map();
@@ -142,11 +144,13 @@ var constructorMap = {
     "HTMLTextAreaElement" : 'htmltextareaelement',
     "HTMLInputElement" : 'htmlinputelement',
     "HTMLSelectElement" : 'htmlselectelement',
+    "HTMLFormElement" : 'htmlformelement',
     "HTMLOptionElement" : 'htmloptionelement',
     "Path2D" : 'path2d',
     "UIEvent" : 'uievent',
     "MouseEvent" : 'mouseevent',
-    "TextMetrics" : 'textmetrics'
+    "TextMetrics" : 'textmetrics',
+    "ValidityState" : 'validitystate'
 };
 
 var distinctivePropertyMap = {

@@ -235,7 +235,11 @@ function SimpleProperty(type, propertyName, settable) {
         var values = [];
         let value = elementJS[propertyName];
         if(typeof value !== 'undefined' && value !== null) {
-            values.push(value);
+            if(typeof value === 'object' && value.constructor.name === 'NodeList') {
+                values = Array.from(value);
+            } else {
+                values.push(value);
+            }
         }
         return values;
     };
@@ -472,7 +476,7 @@ var htmlTextAreaElementInterfaceProperties = new Map( [
     ['dirName', SimpleProperty('atom', 'dirName', true)],
     ['disabled', SimpleProperty('boolean', 'disabled', true)],
     ['form', SimpleProperty('object', 'form')],
-    ['inputMode', SimpleProperty('atom', 'inputMode', true)],
+//    ['inputMode', SimpleProperty('atom', 'inputMode', true)], // experimental, according to mozilla
     ['maxLength', SimpleProperty('number', 'maxLength', true)],
     ['minLength', SimpleProperty('number', 'minLength', true)],
     ['name', SimpleProperty('atom', 'name', true)],
@@ -481,7 +485,6 @@ var htmlTextAreaElementInterfaceProperties = new Map( [
     ['required', SimpleProperty('boolean', 'required', true)],
     ['rows', SimpleProperty('number', 'rows', true)], // not Input
     ['wrap', SimpleProperty('atom', 'wrap', true)], // not Input
-    ['step', SimpleProperty('atom', 'step', true)],
     ['type', SimpleProperty('atom', 'type', true)],
     ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
     ['value', SimpleProperty('atom', 'value', true)],
@@ -489,7 +492,7 @@ var htmlTextAreaElementInterfaceProperties = new Map( [
     ['willValidate', SimpleProperty('boolean', 'willValidate')],
     ['validity', SimpleProperty('object', 'validity')], // ValidityState
     ['validationMessage', SimpleProperty('atom', 'validationMessage')],
-    ['labels', SimpleProperty('object', 'labels')], // NodeList
+    ['labels', SimpleProperty('object', 'labels')], // NodeList returned item-by-item as objects
     ['selectionStart', SimpleProperty('number', 'selectionStart', true)],
     ['selectionEnd', SimpleProperty('number', 'selectionEnd', true)],
     ['selectionDirection', SimpleProperty('atom', 'selectionDirection', true)]
@@ -633,6 +636,19 @@ webInterfaces.set('htmloptionelement',
     {name: 'htmloptionelement',
         properties:htmlOptionElementInterfaceProperties,
         methods:htmlOptionElementMethodSpecs
+    });
+
+
+var htmlFormElementInterfaceProperties = new Map( [
+]);
+
+var htmlFormElementMethodSpecs = new Map([
+]);
+
+webInterfaces.set('htmlformelement',
+    {name: 'htmlformelement',
+        properties:htmlFormElementInterfaceProperties,
+        methods:htmlFormElementMethodSpecs
     });
 
 var eventInterfaceProperties = new Map( [
@@ -910,4 +926,27 @@ webInterfaces.set('textmetrics',
     {name: 'textmetrics',
         properties:textMetricsInterfaceProperties,
         methods:textMetricsMethodSpecs
+    });
+
+var validityStateInterfaceProperties = new Map( [
+    ['badInput', SimpleProperty('boolean', 'badInput')],
+    ['customError', SimpleProperty('boolean', 'customError')],
+    ['patternMismatch', SimpleProperty('boolean', 'patternMismatch')],
+    ['rangeOverflow', SimpleProperty('boolean', 'rangeOverflow')],
+    ['rangeUnderflow', SimpleProperty('boolean', 'rangeUnderflow')],
+    ['stepMismatch', SimpleProperty('boolean', 'stepMismatch')],
+    ['tooLong', SimpleProperty('boolean', 'tooLong')],
+    ['tooShort', SimpleProperty('boolean', 'tooShort')],
+    ['typeMismatch', SimpleProperty('boolean', 'typeMismatch')],
+    ['valid', SimpleProperty('boolean', 'valid')],
+    ['valueMissing', SimpleProperty('boolean', 'valueMissing')]
+]);
+
+var validityStateMethodSpecs = new Map([
+]);
+
+webInterfaces.set('validitystate',
+    {name: 'validitystate',
+        properties:validityStateInterfaceProperties,
+        methods:validityStateMethodSpecs
     });
