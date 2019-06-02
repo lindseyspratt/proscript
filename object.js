@@ -110,7 +110,8 @@ var parentMap = new Map([
     ['uievent', ['event']],
     ['mouseevent', ['uievent']],
     ['textmetrics', []],
-    ['validitystate', []]
+    ['validitystate', []],
+    ['file', ['blob']]
 ]);
 
 var childMap = new Map();
@@ -150,7 +151,8 @@ var constructorMap = {
     "UIEvent" : 'uievent',
     "MouseEvent" : 'mouseevent',
     "TextMetrics" : 'textmetrics',
-    "ValidityState" : 'validitystate'
+    "ValidityState" : 'validitystate',
+    "File": 'file'
 };
 
 var distinctivePropertyMap = {
@@ -198,7 +200,38 @@ function convert_method_spec(specTerm, resultContainer) {
     result.name = methodNameJS;
 
     let specTermTailPL = deref(memory[VAL(specTerm) + 1]);
-    let argList = deref(memory[VAL(specTermTailPL)]);
+    let argTypesContainer = {};
+    let typeTermsListPL = deref(memory[VAL(specTermTailPL)]); // head of specTermTailPL = [type1, type2, ...]
+    if(! convert_type_terms(typeTermsListPL, argTypesContainer)) {
+        return false;
+    }
+    result.arguments = argTypesContainer.value;
+
+    let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]); // tail of specTermTailPL
+    if(specTermTailTailPL !== NIL) {
+        let returnTypePL = deref(memory[VAL(specTermTailTailPL)]);
+        let returnContainer = {};
+        if (convert_type_term(returnTypePL, returnContainer)) {
+            result.returns = returnContainer.value;
+        } else {
+            return false;
+        }
+    }
+    resultContainer.value = result;
+    return true;
+}
+
+function convert_type_terms(list, container) {
+    if(list === NIL) {
+        container.value = [];
+        return true;
+    }
+
+    if(TAG(list) !== TAG_LST) {
+        return type_error('list', list);
+    }
+
+    let argList = list;
     let argTypesJS = [];
     while (argList !== NIL) {
         if (TAG(argList) !== TAG_LST) {
@@ -212,19 +245,7 @@ function convert_method_spec(specTerm, resultContainer) {
         argTypesJS.push(argTypeContainer.value);
         argList = deref(memory[VAL(argList) + 1]);
     }
-    result.arguments = argTypesJS;
-
-    let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]);
-    if(specTermTailTailPL !== NIL) {
-        let returnTypePL = deref(memory[VAL(specTermTailTailPL)]);
-        let returnContainer = {};
-        if (convert_type_term(returnTypePL, returnContainer)) {
-            result.returns = returnContainer.value;
-        } else {
-            return false;
-        }
-    }
-    resultContainer.value = result;
+    container.value = argTypesJS;
     return true;
 }
 
@@ -418,11 +439,27 @@ function predicate_dom_object_type(object, type) {
     return unify(type, lookup_atom(typeJS));
 }
 
-function predicate_dom_create_object(type, object) {
-    if(TAG(type) !== TAG_ATM) {
-        return type_error('atom', type);
+function predicate_dom_create_object(type, object, spec) {
+    if(TAG(type) !== TAG_ATM && TAG(type) !== TAG_STR) {
+        return type_error('atom or structure', type);
     }
-    let typeJS = atable[VAL(type)];
+
+    let typeJS;
+    let arguments = [];
+    let arity;
+    if(TAG(type) === TAG_ATM) {
+        typeJS = atable[VAL(type)];
+    } else if(TAG(type) === TAG_STR) {
+        let functorPL = ftable[VAL(memory[VAL(type)])][0];
+        arity = ftable[VAL(memory[VAL(type)])][1];
+        typeJS = atable[functorPL];
+        for(let ofst = 0; ofst < arity;ofst++) {
+            let argument = deref(memory[VAL(type) + ofst + 1]);
+            arguments.push(argument);
+        }
+    } else {
+        return type_error('atom or structure', type);
+    }
 
     if(TAG(object) !== TAG_REF) {
         return instantiation_error(object);
@@ -436,14 +473,60 @@ function predicate_dom_create_object(type, object) {
         }
     }
 
-    if(constructorName) {
-        let objectJS = new window[constructorName]();
-
-        let objectPL = create_object_structure(objectJS, typeJS);
-        return unify(object, objectPL);
-    } else {
-        return domain_error('object type', type);
+    if(! constructorName) {
+        constructorName = typeJS;
     }
+
+    let objectJS;
+    if(arguments.length > 0) {
+        let argTypesContainer = {};
+        if(! convert_type_terms(spec, argTypesContainer)) {
+            return false;
+        }
+        let specArguments = argTypesContainer.value;
+
+        let applyArguments = [];
+        for (var i = 0; i < arity; i++) {
+            let applyArgumentContainer = {};
+            if (convert_method_argument(arguments[i], specArguments[i], applyArgumentContainer)) {
+                applyArguments.push(applyArgumentContainer.value);
+            } else {
+                return false;
+            }
+        }
+
+        objectJS = newCall(window[constructorName], applyArguments);
+     } else {
+        objectJS = new window[constructorName]();
+    }
+
+    let derivedConstructorName = objectJS.constructor.name;
+    let derivedTypeJS = constructorMap[derivedConstructorName];
+
+    let recordedTypeJS = (derivedTypeJS) ? derivedTypeJS : typeJS;
+
+    let objectPL = create_object_structure(objectJS, recordedTypeJS);
+    return unify(object, objectPL);
+}
+
+/*
+The newCall function is from
+    https://stackoverflow.com/a/8843181/302650 ,
+an answer to
+    https://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
+
+
+ */
+function newCall(Cls, arguments) {
+    // The first of the bindArguments is the first argument to the bind() function. From bind() doc:
+    // [The first argument is the] value to be passed as the 'this' parameter to the target function when the bound function is called.
+    // This first argument is null because the 'new' operator overrides the 'this' parameter.
+
+    let bindArguments = [null].concat(arguments);
+    return new (Function.prototype.bind.apply(Cls, bindArguments));
+    // or even
+    // return new (Cls.bind.apply(Cls, arguments));
+    // if you know that Cls.bind has not been overwritten
 }
 
 function predicate_dom_release_object(object) {

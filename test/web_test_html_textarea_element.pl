@@ -8,7 +8,6 @@ test('HTMLTextAreaElement', 'autofocus of textarea', succeeded) :-
     set_dom_object_property(E, autofocus,true),
     dom_object_property(_, E, autofocus,true),
     set_dom_object_property(E, autofocus,false).
-%disabled
 
 test('HTMLTextAreaElement', 'cols of textarea', succeeded) :-
     dom_element_attribute_value(E, id, textarea),
@@ -34,7 +33,7 @@ test('HTMLTextAreaElement', 'disabled of textarea', succeeded) :-
 test('HTMLTextAreaElement', 'form of textarea', succeeded) :-
     dom_element_attribute_value(E, id, textarea),
     dom_object_property(_, E, form,X),
-    dom_element_attribute_value(X, id, form).
+    dom_element_attribute_value(X, id, textarea_form).
 
 test('HTMLTextAreaElement', 'maxLength of textarea', succeeded) :-
     dom_element_attribute_value(E, id, textarea),
@@ -96,8 +95,7 @@ test('HTMLTextAreaElement', 'willValidate of textarea', succeeded) :-
 test('HTMLTextAreaElement', 'validity of textarea', succeeded) :-
     dom_element_attribute_value(E, id, textarea),
     dom_object_property(_, E, validity, State),
-    dom_object_type(State, validitystate),
-    dom_release_object(State).
+    dom_object_type(State, validitystate).
 
 test('HTMLTextAreaElement', 'validationMessage of textarea', succeeded) :-
     dom_element_attribute_value(E, id, textarea),

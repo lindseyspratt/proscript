@@ -335,11 +335,7 @@ function propertyValueToPLUtil(typeJS, property, valueJS, container, reportError
 
         return reportError && type_error(typeJS, lookup_atom(valueJS));
     } else if (typeJS === 'atom') {
-        if(typeof valueJS !== 'object') {
-            resultPL = getAtomPLPropertyValue(valueJS);
-        } else {
-            return reportError && domain_error(typeJS, lookup_atom(valueJS));
-        }
+        return getAtomPLPropertyValue(valueJS, container, reportError);
     } else if (typeJS === 'boolean') {
         if(typeof valueJS === 'boolean') {
             resultPL = lookup_atom(valueJS.toString());
@@ -347,53 +343,81 @@ function propertyValueToPLUtil(typeJS, property, valueJS, container, reportError
             return reportError && type_error(typeJS, lookup_atom(valueJS));
         }
     } else if (typeJS === 'number') {
-        resultPL = getNumberPLPropertyValue(valueJS);
+        return getNumberPLPropertyValue(valueJS, container, reportError);
     } else if (typeJS === 'integer') {
-        resultPL = getIntegerPLPropertyValue(valueJS);
+        return getIntegerPLPropertyValue(valueJS, container, reportError);
     } else if (typeJS === 'float') {
-        resultPL = getFloatPLPropertyValue(valueJS);
+        return getFloatPLPropertyValue(valueJS, container, reportError);
     } else if (typeJS === 'string') {
         resultPL = getStringPLPropertyValue(valueJS);
     } else if (typeJS === 'object') {
         resultPL = getObjectPLPropertyValue(valueJS);
     } else {
-        return reportError && domain_error(typeJS, lookup_atom(valueJS));
+        return reportError && domain_error('data type', lookup_atom(typeJS));
     }
 
     container.value = resultPL;
     return true;
 }
 
-function getAtomPLPropertyValue(valueJS) {
+function getAtomPLPropertyValue(valueJS, container, reportError) {
     let localValue = valueJS;
     if(typeof localValue === 'number') {
         localValue = localValue.toString();
     } else if(typeof localValue === 'boolean') {
         localValue = localValue.toString();
     } else if(typeof localValue !== 'string') {
-        throw 'invalid data type. "' + JSON.stringify(localValue) + '" must have type "string" but is "' + typeof localValue + "'.";
+        return reportError && type_error('string', lookup_atom(JSON.stringify(valueJS)));
     }
 
-    return lookup_atom(localValue);
+    container.value = lookup_atom(localValue);
+    return true;
 }
 
 // A number can be either an integer or a float. Javascript is agnostic.
 // Prolog represents these differently.
 
-function getNumberPLPropertyValue(valueJS) {
-    if(isInteger(valueJS)) {
-        return getIntegerPLPropertyValue(valueJS);
-    } else if(isFloat(valueJS)){
-        return getFloatPLPropertyValue(valueJS);
+function getNumberPLPropertyValue(valueJS, container, reportError) {
+    if(getIntegerPLPropertyValue(valueJS, container, false)
+        || getFloatPLPropertyValue(valueJS, container, false)) {
+        return true;
+    } else {
+        return reportError && type_error('number', lookup_atom(JSON.stringify(valueJS)));
     }
 }
 
-function getIntegerPLPropertyValue(valueJS) {
-    return (valueJS & ((1 << WORD_BITS) - 1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
+function getIntegerPLPropertyValue(valueJS, container, reportError) {
+    if(! container) {
+        let localContainer = {};
+        if( getIntegerPLPropertyValue(valueJS, localContainer, false)) {
+            return localContainer.value;
+        } else {
+            throw 'Invalid integer ' + JSON.stringify(valueJS) + '.';
+        }
+    }
+    else if(isInteger(valueJS)) {
+        container.value = (valueJS & ((1 << WORD_BITS) - 1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
+        return true;
+    } else {
+        return reportError && type_error('integer', lookup_atom(JSON.stringify(valueJS)));
+    }
 }
 
-function getFloatPLPropertyValue(valueJS) {
-    return lookup_float(valueJS);
+function getFloatPLPropertyValue(valueJS, container, reportError) {
+    if(! container) {
+        let localContainer = {};
+        if( getFloatPLPropertyValue(valueJS, localContainer, false)) {
+            return localContainer.value;
+        } else {
+            throw 'Invalid float ' + JSON.stringify(valueJS) + '.';
+        }
+    }
+    else if(isFloat(valueJS)) {
+        container.value = lookup_float(valueJS);
+        return true;
+    } else {
+        return reportError && type_error('float', lookup_atom(JSON.stringify(valueJS)));
+    }
 }
 
 // maybe this should just be Number.isInteger

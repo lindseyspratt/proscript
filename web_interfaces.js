@@ -237,6 +237,12 @@ function SimpleProperty(type, propertyName, settable) {
         if(typeof value !== 'undefined' && value !== null) {
             if(typeof value === 'object' && value.constructor.name === 'NodeList') {
                 values = Array.from(value);
+            } else if(typeof value === 'object' && value.constructor.name === 'FileList') {
+                values = Array.from(value);
+            } else if(typeof value === 'object' && value.constructor.name === 'HTMLOptionsCollection') {
+                values = Array.from(value);
+            } else if(typeof value === 'object' && value.constructor.name === 'HTMLCollection') {
+                values = Array.from(value);
             } else {
                 values.push(value);
             }
@@ -312,7 +318,7 @@ webInterfaces.set('node',
 
 var elementInterfaceProperties = new Map([
     ['accessKey', SimpleProperty('atom','accessKey', true)],
-    // attributes
+    // attributes: available using dom_element_attribute_value
     ['child', ChildProperty()], // adapted from children
     ['childElementCount', SimpleProperty('number','childElementCount')],
     ['class', ClassProperty()], // adapted from classList, className
@@ -320,21 +326,21 @@ var elementInterfaceProperties = new Map([
     ['clientLeft', SimpleProperty('number','clientLeft')],
     ['clientTop', SimpleProperty('number','clientTop')],
     ['clientWidth', SimpleProperty('number','clientWidth')],
-    // currentStyle
+    // currentStyle: available using dom_element_attribute_value?
     ['firstElementChild', SimpleChildProperty('firstElementChild')],
     ['id', SimpleProperty('atom','id', true)],
     ['innerHTML', SimpleProperty('string', 'innerHTML', true)],
     ['lastElementChild', SimpleChildProperty('lastElementChild')],
-    // name
+    // name: available using dom_element_attribute_value
     ['namespaceURI', SimpleProperty('string', 'namespaceURI')],
     ['nextElementSibling', SimpleChildProperty('nextElementSibling')],
     ['previousElementSibling', SimpleChildProperty('previousElementSibling')],
-    // runtimeStyle
+    // runtimeStyle: available using dom_element_attribute_value?
     ['scrollHeight', SimpleProperty('number','scrollHeight')],
     ['scrollLeft', SimpleProperty('number','scrollLeft')],
-    // scrollLeftMax
+    // scrollLeftMax: available using dom_element_attribute_value?
     ['scrollTop', SimpleProperty('number','scrollTop')],
-    // scrollTopMax
+    // scrollTopMax: available using dom_element_attribute_value?
     ['scrollWidth', SimpleProperty('number','scrollWidth')],
     ['tag', TagProperty()] // for tagName
 ]);
@@ -531,8 +537,8 @@ var htmlInputElementInterfaceProperties = new Map( [
     ['formTarget', SimpleProperty('atom', 'formTarget', true)],
     ['height', SimpleProperty('number', 'height', true)],
     ['indeterminate', SimpleProperty('boolean', 'indeterminate', true)],
-    ['inputMode', SimpleProperty('atom', 'inputMode', true)],
-    ['list', SimpleProperty('object', 'list')],
+    //['inputMode', SimpleProperty('atom', 'inputMode', true)], // not supported, but is in html 5.1 standard
+    //['list', SimpleProperty('object', 'list')], // not widely supported, but is in html 5.1 standard
     ['max', SimpleProperty('atom', 'max', true)],
     ['maxLength', SimpleProperty('number', 'maxLength', true)],
     ['min', SimpleProperty('atom', 'min', true)],
@@ -549,7 +555,7 @@ var htmlInputElementInterfaceProperties = new Map( [
     ['type', SimpleProperty('atom', 'type', true)],
     ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
     ['value', SimpleProperty('atom', 'value', true)],
-    ['valueAsDate', SimpleProperty('object', 'valueAsDate', true)],
+    //['valueAsDate', SimpleProperty('object', 'valueAsDate', true)], // only applies to type=date and type=date is not supported in Safari.
     ['valueAsNumber', SimpleProperty('number', 'valueAsNumber', true)],
     ['width', SimpleProperty('number', 'width', true)],
     ['willValidate', SimpleProperty('boolean', 'willValidate')],
@@ -579,10 +585,11 @@ webInterfaces.set('htmlinputelement',
     });
 
 var htmlSelectElementInterfaceProperties = new Map( [
-    ['defaultChecked', SimpleProperty('boolean', 'defaultChecked', true)],
+    ['autofocus', SimpleProperty('boolean', 'autofocus', true)],
     ['disabled', SimpleProperty('boolean', 'disabled', true)],
     ['form', SimpleProperty('object', 'form')],
-    ['length', SimpleProperty('atom', 'length', true)],
+    ['labels', SimpleProperty('object', 'labels')], // NodeList returned item-by-item as objects
+    ['length', SimpleProperty('number', 'length', true)],
     ['multiple', SimpleProperty('boolean', 'multiple', true)],
     ['name', SimpleProperty('atom', 'name', true)],
     ['options', SimpleProperty('object', 'options')],
@@ -591,12 +598,10 @@ var htmlSelectElementInterfaceProperties = new Map( [
     ['selectedOptions', SimpleProperty('object', 'selectedOptions')],
     ['size', SimpleProperty('number', 'size', true)],
     ['type', SimpleProperty('atom', 'type', true)],
-    ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
-    ['value', SimpleProperty('atom', 'value', true)],
-    ['willValidate', SimpleProperty('boolean', 'willValidate')],
     ['validity', SimpleProperty('object', 'validity')], // ValidityState
     ['validationMessage', SimpleProperty('atom', 'validationMessage')],
-    ['labels', SimpleProperty('object', 'labels')] // NodeList
+    ['value', SimpleProperty('atom', 'value', true)],
+    ['willValidate', SimpleProperty('boolean', 'willValidate')]
  ]);
 
 var htmlSelectElementMethodSpecs = new Map([
@@ -606,10 +611,7 @@ var htmlSelectElementMethodSpecs = new Map([
     ['namedItem',{name:'namedItem',arguments:[{type:'string'}],returns:{type:'object'}}],
     ['remove',{name:'remove',arguments:[{type:'number'}]}],
     ['reportValidity',{name:'reportValidity',arguments:[],returns:{type:'boolean'}}],
-    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}],
-    ['select',{name:'select',arguments:[]}],
-    ['setRangeText',{name:'setRangeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'string'}]}],
-    ['setSelectionRange',{name:'setSelectionRange',arguments:[{type:'number'},{type:'number'},{type:'string'}]}]
+    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}]
 ]);
 
 webInterfaces.set('htmlselectelement',
@@ -949,4 +951,19 @@ webInterfaces.set('validitystate',
     {name: 'validitystate',
         properties:validityStateInterfaceProperties,
         methods:validityStateMethodSpecs
+    });
+
+var fileInterfaceProperties = new Map( [
+    ['lastModified', SimpleProperty('number', 'lastModified')],
+    ['name', SimpleProperty('atom', 'name')]
+
+]);
+
+var fileMethodSpecs = new Map([
+]);
+
+webInterfaces.set('file',
+    {name: 'file',
+        properties:fileInterfaceProperties,
+        methods:fileMethodSpecs
     });

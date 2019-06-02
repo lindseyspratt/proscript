@@ -8960,7 +8960,8 @@ var parentMap = new Map([
     ['uievent', ['event']],
     ['mouseevent', ['uievent']],
     ['textmetrics', []],
-    ['validitystate', []]
+    ['validitystate', []],
+    ['file', ['blob']]
 ]);
 
 var childMap = new Map();
@@ -9000,7 +9001,8 @@ var constructorMap = {
     "UIEvent" : 'uievent',
     "MouseEvent" : 'mouseevent',
     "TextMetrics" : 'textmetrics',
-    "ValidityState" : 'validitystate'
+    "ValidityState" : 'validitystate',
+    "File": 'file'
 };
 
 var distinctivePropertyMap = {
@@ -9048,7 +9050,38 @@ function convert_method_spec(specTerm, resultContainer) {
     result.name = methodNameJS;
 
     let specTermTailPL = deref(memory[VAL(specTerm) + 1]);
-    let argList = deref(memory[VAL(specTermTailPL)]);
+    let argTypesContainer = {};
+    let typeTermsListPL = deref(memory[VAL(specTermTailPL)]); // head of specTermTailPL = [type1, type2, ...]
+    if(! convert_type_terms(typeTermsListPL, argTypesContainer)) {
+        return false;
+    }
+    result.arguments = argTypesContainer.value;
+
+    let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]); // tail of specTermTailPL
+    if(specTermTailTailPL !== NIL) {
+        let returnTypePL = deref(memory[VAL(specTermTailTailPL)]);
+        let returnContainer = {};
+        if (convert_type_term(returnTypePL, returnContainer)) {
+            result.returns = returnContainer.value;
+        } else {
+            return false;
+        }
+    }
+    resultContainer.value = result;
+    return true;
+}
+
+function convert_type_terms(list, container) {
+    if(list === NIL) {
+        container.value = [];
+        return true;
+    }
+
+    if(TAG(list) !== TAG_LST) {
+        return type_error('list', list);
+    }
+
+    let argList = list;
     let argTypesJS = [];
     while (argList !== NIL) {
         if (TAG(argList) !== TAG_LST) {
@@ -9062,19 +9095,7 @@ function convert_method_spec(specTerm, resultContainer) {
         argTypesJS.push(argTypeContainer.value);
         argList = deref(memory[VAL(argList) + 1]);
     }
-    result.arguments = argTypesJS;
-
-    let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]);
-    if(specTermTailTailPL !== NIL) {
-        let returnTypePL = deref(memory[VAL(specTermTailTailPL)]);
-        let returnContainer = {};
-        if (convert_type_term(returnTypePL, returnContainer)) {
-            result.returns = returnContainer.value;
-        } else {
-            return false;
-        }
-    }
-    resultContainer.value = result;
+    container.value = argTypesJS;
     return true;
 }
 
@@ -9268,11 +9289,27 @@ function predicate_dom_object_type(object, type) {
     return unify(type, lookup_atom(typeJS));
 }
 
-function predicate_dom_create_object(type, object) {
-    if(TAG(type) !== TAG_ATM) {
-        return type_error('atom', type);
+function predicate_dom_create_object(type, object, spec) {
+    if(TAG(type) !== TAG_ATM && TAG(type) !== TAG_STR) {
+        return type_error('atom or structure', type);
     }
-    let typeJS = atable[VAL(type)];
+
+    let typeJS;
+    let arguments = [];
+    let arity;
+    if(TAG(type) === TAG_ATM) {
+        typeJS = atable[VAL(type)];
+    } else if(TAG(type) === TAG_STR) {
+        let functorPL = ftable[VAL(memory[VAL(type)])][0];
+        arity = ftable[VAL(memory[VAL(type)])][1];
+        typeJS = atable[functorPL];
+        for(let ofst = 0; ofst < arity;ofst++) {
+            let argument = deref(memory[VAL(type) + ofst + 1]);
+            arguments.push(argument);
+        }
+    } else {
+        return type_error('atom or structure', type);
+    }
 
     if(TAG(object) !== TAG_REF) {
         return instantiation_error(object);
@@ -9286,14 +9323,60 @@ function predicate_dom_create_object(type, object) {
         }
     }
 
-    if(constructorName) {
-        let objectJS = new window[constructorName]();
-
-        let objectPL = create_object_structure(objectJS, typeJS);
-        return unify(object, objectPL);
-    } else {
-        return domain_error('object type', type);
+    if(! constructorName) {
+        constructorName = typeJS;
     }
+
+    let objectJS;
+    if(arguments.length > 0) {
+        let argTypesContainer = {};
+        if(! convert_type_terms(spec, argTypesContainer)) {
+            return false;
+        }
+        let specArguments = argTypesContainer.value;
+
+        let applyArguments = [];
+        for (var i = 0; i < arity; i++) {
+            let applyArgumentContainer = {};
+            if (convert_method_argument(arguments[i], specArguments[i], applyArgumentContainer)) {
+                applyArguments.push(applyArgumentContainer.value);
+            } else {
+                return false;
+            }
+        }
+
+        objectJS = newCall(window[constructorName], applyArguments);
+     } else {
+        objectJS = new window[constructorName]();
+    }
+
+    let derivedConstructorName = objectJS.constructor.name;
+    let derivedTypeJS = constructorMap[derivedConstructorName];
+
+    let recordedTypeJS = (derivedTypeJS) ? derivedTypeJS : typeJS;
+
+    let objectPL = create_object_structure(objectJS, recordedTypeJS);
+    return unify(object, objectPL);
+}
+
+/*
+The newCall function is from
+    https://stackoverflow.com/a/8843181/302650 ,
+an answer to
+    https://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
+
+
+ */
+function newCall(Cls, arguments) {
+    // The first of the bindArguments is the first argument to the bind() function. From bind() doc:
+    // [The first argument is the] value to be passed as the 'this' parameter to the target function when the bound function is called.
+    // This first argument is null because the 'new' operator overrides the 'this' parameter.
+
+    let bindArguments = [null].concat(arguments);
+    return new (Function.prototype.bind.apply(Cls, bindArguments));
+    // or even
+    // return new (Cls.bind.apply(Cls, arguments));
+    // if you know that Cls.bind has not been overwritten
 }
 
 function predicate_dom_release_object(object) {
@@ -9543,6 +9626,12 @@ function SimpleProperty(type, propertyName, settable) {
         if(typeof value !== 'undefined' && value !== null) {
             if(typeof value === 'object' && value.constructor.name === 'NodeList') {
                 values = Array.from(value);
+            } else if(typeof value === 'object' && value.constructor.name === 'FileList') {
+                values = Array.from(value);
+            } else if(typeof value === 'object' && value.constructor.name === 'HTMLOptionsCollection') {
+                values = Array.from(value);
+            } else if(typeof value === 'object' && value.constructor.name === 'HTMLCollection') {
+                values = Array.from(value);
             } else {
                 values.push(value);
             }
@@ -9618,7 +9707,7 @@ webInterfaces.set('node',
 
 var elementInterfaceProperties = new Map([
     ['accessKey', SimpleProperty('atom','accessKey', true)],
-    // attributes
+    // attributes: available using dom_element_attribute_value
     ['child', ChildProperty()], // adapted from children
     ['childElementCount', SimpleProperty('number','childElementCount')],
     ['class', ClassProperty()], // adapted from classList, className
@@ -9626,21 +9715,21 @@ var elementInterfaceProperties = new Map([
     ['clientLeft', SimpleProperty('number','clientLeft')],
     ['clientTop', SimpleProperty('number','clientTop')],
     ['clientWidth', SimpleProperty('number','clientWidth')],
-    // currentStyle
+    // currentStyle: available using dom_element_attribute_value?
     ['firstElementChild', SimpleChildProperty('firstElementChild')],
     ['id', SimpleProperty('atom','id', true)],
     ['innerHTML', SimpleProperty('string', 'innerHTML', true)],
     ['lastElementChild', SimpleChildProperty('lastElementChild')],
-    // name
+    // name: available using dom_element_attribute_value
     ['namespaceURI', SimpleProperty('string', 'namespaceURI')],
     ['nextElementSibling', SimpleChildProperty('nextElementSibling')],
     ['previousElementSibling', SimpleChildProperty('previousElementSibling')],
-    // runtimeStyle
+    // runtimeStyle: available using dom_element_attribute_value?
     ['scrollHeight', SimpleProperty('number','scrollHeight')],
     ['scrollLeft', SimpleProperty('number','scrollLeft')],
-    // scrollLeftMax
+    // scrollLeftMax: available using dom_element_attribute_value?
     ['scrollTop', SimpleProperty('number','scrollTop')],
-    // scrollTopMax
+    // scrollTopMax: available using dom_element_attribute_value?
     ['scrollWidth', SimpleProperty('number','scrollWidth')],
     ['tag', TagProperty()] // for tagName
 ]);
@@ -9837,8 +9926,8 @@ var htmlInputElementInterfaceProperties = new Map( [
     ['formTarget', SimpleProperty('atom', 'formTarget', true)],
     ['height', SimpleProperty('number', 'height', true)],
     ['indeterminate', SimpleProperty('boolean', 'indeterminate', true)],
-    ['inputMode', SimpleProperty('atom', 'inputMode', true)],
-    ['list', SimpleProperty('object', 'list')],
+    //['inputMode', SimpleProperty('atom', 'inputMode', true)], // not supported, but is in html 5.1 standard
+    //['list', SimpleProperty('object', 'list')], // not widely supported, but is in html 5.1 standard
     ['max', SimpleProperty('atom', 'max', true)],
     ['maxLength', SimpleProperty('number', 'maxLength', true)],
     ['min', SimpleProperty('atom', 'min', true)],
@@ -9855,7 +9944,7 @@ var htmlInputElementInterfaceProperties = new Map( [
     ['type', SimpleProperty('atom', 'type', true)],
     ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
     ['value', SimpleProperty('atom', 'value', true)],
-    ['valueAsDate', SimpleProperty('object', 'valueAsDate', true)],
+    //['valueAsDate', SimpleProperty('object', 'valueAsDate', true)], // only applies to type=date and type=date is not supported in Safari.
     ['valueAsNumber', SimpleProperty('number', 'valueAsNumber', true)],
     ['width', SimpleProperty('number', 'width', true)],
     ['willValidate', SimpleProperty('boolean', 'willValidate')],
@@ -9885,10 +9974,11 @@ webInterfaces.set('htmlinputelement',
     });
 
 var htmlSelectElementInterfaceProperties = new Map( [
-    ['defaultChecked', SimpleProperty('boolean', 'defaultChecked', true)],
+    ['autofocus', SimpleProperty('boolean', 'autofocus', true)],
     ['disabled', SimpleProperty('boolean', 'disabled', true)],
     ['form', SimpleProperty('object', 'form')],
-    ['length', SimpleProperty('atom', 'length', true)],
+    ['labels', SimpleProperty('object', 'labels')], // NodeList returned item-by-item as objects
+    ['length', SimpleProperty('number', 'length', true)],
     ['multiple', SimpleProperty('boolean', 'multiple', true)],
     ['name', SimpleProperty('atom', 'name', true)],
     ['options', SimpleProperty('object', 'options')],
@@ -9897,12 +9987,10 @@ var htmlSelectElementInterfaceProperties = new Map( [
     ['selectedOptions', SimpleProperty('object', 'selectedOptions')],
     ['size', SimpleProperty('number', 'size', true)],
     ['type', SimpleProperty('atom', 'type', true)],
-    ['defaultValue', SimpleProperty('atom', 'defaultValue', true)],
-    ['value', SimpleProperty('atom', 'value', true)],
-    ['willValidate', SimpleProperty('boolean', 'willValidate')],
     ['validity', SimpleProperty('object', 'validity')], // ValidityState
     ['validationMessage', SimpleProperty('atom', 'validationMessage')],
-    ['labels', SimpleProperty('object', 'labels')] // NodeList
+    ['value', SimpleProperty('atom', 'value', true)],
+    ['willValidate', SimpleProperty('boolean', 'willValidate')]
  ]);
 
 var htmlSelectElementMethodSpecs = new Map([
@@ -9912,10 +10000,7 @@ var htmlSelectElementMethodSpecs = new Map([
     ['namedItem',{name:'namedItem',arguments:[{type:'string'}],returns:{type:'object'}}],
     ['remove',{name:'remove',arguments:[{type:'number'}]}],
     ['reportValidity',{name:'reportValidity',arguments:[],returns:{type:'boolean'}}],
-    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}],
-    ['select',{name:'select',arguments:[]}],
-    ['setRangeText',{name:'setRangeText',arguments:[{type:'string'},{type:'number'},{type:'number'},{type:'string'}]}],
-    ['setSelectionRange',{name:'setSelectionRange',arguments:[{type:'number'},{type:'number'},{type:'string'}]}]
+    ['setCustomValidity',{name:'setCustomValidity',arguments:[{type:'string'}]}]
 ]);
 
 webInterfaces.set('htmlselectelement',
@@ -10235,6 +10320,17 @@ webInterfaces.set('textmetrics',
     });
 
 var validityStateInterfaceProperties = new Map( [
+    ['badInput', SimpleProperty('boolean', 'badInput')],
+    ['customError', SimpleProperty('boolean', 'customError')],
+    ['patternMismatch', SimpleProperty('boolean', 'patternMismatch')],
+    ['rangeOverflow', SimpleProperty('boolean', 'rangeOverflow')],
+    ['rangeUnderflow', SimpleProperty('boolean', 'rangeUnderflow')],
+    ['stepMismatch', SimpleProperty('boolean', 'stepMismatch')],
+    ['tooLong', SimpleProperty('boolean', 'tooLong')],
+    ['tooShort', SimpleProperty('boolean', 'tooShort')],
+    ['typeMismatch', SimpleProperty('boolean', 'typeMismatch')],
+    ['valid', SimpleProperty('boolean', 'valid')],
+    ['valueMissing', SimpleProperty('boolean', 'valueMissing')]
 ]);
 
 var validityStateMethodSpecs = new Map([
@@ -10244,6 +10340,21 @@ webInterfaces.set('validitystate',
     {name: 'validitystate',
         properties:validityStateInterfaceProperties,
         methods:validityStateMethodSpecs
+    });
+
+var fileInterfaceProperties = new Map( [
+    ['lastModified', SimpleProperty('number', 'lastModified')],
+    ['name', SimpleProperty('atom', 'name')]
+
+]);
+
+var fileMethodSpecs = new Map([
+]);
+
+webInterfaces.set('file',
+    {name: 'file',
+        properties:fileInterfaceProperties,
+        methods:fileMethodSpecs
     });
 // File object_property.js
 
@@ -10581,11 +10692,7 @@ function propertyValueToPLUtil(typeJS, property, valueJS, container, reportError
 
         return reportError && type_error(typeJS, lookup_atom(valueJS));
     } else if (typeJS === 'atom') {
-        if(typeof valueJS !== 'object') {
-            resultPL = getAtomPLPropertyValue(valueJS);
-        } else {
-            return reportError && domain_error(typeJS, lookup_atom(valueJS));
-        }
+        return getAtomPLPropertyValue(valueJS, container, reportError);
     } else if (typeJS === 'boolean') {
         if(typeof valueJS === 'boolean') {
             resultPL = lookup_atom(valueJS.toString());
@@ -10593,53 +10700,81 @@ function propertyValueToPLUtil(typeJS, property, valueJS, container, reportError
             return reportError && type_error(typeJS, lookup_atom(valueJS));
         }
     } else if (typeJS === 'number') {
-        resultPL = getNumberPLPropertyValue(valueJS);
+        return getNumberPLPropertyValue(valueJS, container, reportError);
     } else if (typeJS === 'integer') {
-        resultPL = getIntegerPLPropertyValue(valueJS);
+        return getIntegerPLPropertyValue(valueJS, container, reportError);
     } else if (typeJS === 'float') {
-        resultPL = getFloatPLPropertyValue(valueJS);
+        return getFloatPLPropertyValue(valueJS, container, reportError);
     } else if (typeJS === 'string') {
         resultPL = getStringPLPropertyValue(valueJS);
     } else if (typeJS === 'object') {
         resultPL = getObjectPLPropertyValue(valueJS);
     } else {
-        return reportError && domain_error(typeJS, lookup_atom(valueJS));
+        return reportError && domain_error('data type', lookup_atom(typeJS));
     }
 
     container.value = resultPL;
     return true;
 }
 
-function getAtomPLPropertyValue(valueJS) {
+function getAtomPLPropertyValue(valueJS, container, reportError) {
     let localValue = valueJS;
     if(typeof localValue === 'number') {
         localValue = localValue.toString();
     } else if(typeof localValue === 'boolean') {
         localValue = localValue.toString();
     } else if(typeof localValue !== 'string') {
-        throw 'invalid data type. "' + JSON.stringify(localValue) + '" must have type "string" but is "' + typeof localValue + "'.";
+        return reportError && type_error('string', lookup_atom(JSON.stringify(valueJS)));
     }
 
-    return lookup_atom(localValue);
+    container.value = lookup_atom(localValue);
+    return true;
 }
 
 // A number can be either an integer or a float. Javascript is agnostic.
 // Prolog represents these differently.
 
-function getNumberPLPropertyValue(valueJS) {
-    if(isInteger(valueJS)) {
-        return getIntegerPLPropertyValue(valueJS);
-    } else if(isFloat(valueJS)){
-        return getFloatPLPropertyValue(valueJS);
+function getNumberPLPropertyValue(valueJS, container, reportError) {
+    if(getIntegerPLPropertyValue(valueJS, container, false)
+        || getFloatPLPropertyValue(valueJS, container, false)) {
+        return true;
+    } else {
+        return reportError && type_error('number', lookup_atom(JSON.stringify(valueJS)));
     }
 }
 
-function getIntegerPLPropertyValue(valueJS) {
-    return (valueJS & ((1 << WORD_BITS) - 1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
+function getIntegerPLPropertyValue(valueJS, container, reportError) {
+    if(! container) {
+        let localContainer = {};
+        if( getIntegerPLPropertyValue(valueJS, localContainer, false)) {
+            return localContainer.value;
+        } else {
+            throw 'Invalid integer ' + JSON.stringify(valueJS) + '.';
+        }
+    }
+    else if(isInteger(valueJS)) {
+        container.value = (valueJS & ((1 << WORD_BITS) - 1)) ^ (TAG_INT << WORD_BITS); // or ((1 << (WORD_BITS-1))-1)  from predicate_get_code (and others) in stream.js?
+        return true;
+    } else {
+        return reportError && type_error('integer', lookup_atom(JSON.stringify(valueJS)));
+    }
 }
 
-function getFloatPLPropertyValue(valueJS) {
-    return lookup_float(valueJS);
+function getFloatPLPropertyValue(valueJS, container, reportError) {
+    if(! container) {
+        let localContainer = {};
+        if( getFloatPLPropertyValue(valueJS, localContainer, false)) {
+            return localContainer.value;
+        } else {
+            throw 'Invalid float ' + JSON.stringify(valueJS) + '.';
+        }
+    }
+    else if(isFloat(valueJS)) {
+        container.value = lookup_float(valueJS);
+        return true;
+    } else {
+        return reportError && type_error('float', lookup_atom(JSON.stringify(valueJS)));
+    }
 }
 
 // maybe this should just be Number.isInteger
