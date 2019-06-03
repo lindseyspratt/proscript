@@ -4379,7 +4379,7 @@ function undefined_predicate(ftor)
 
 // End exceptions code
 
-// /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc foreign.js wam.js bootstrap.js -e "demo()"
+// /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc foreign.js wam.js proscriptls_state.js -e "demo()"
 // noinspection JSUnusedGlobalSymbols
 function demo(d)
 {

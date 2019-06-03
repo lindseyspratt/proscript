@@ -38,13 +38,13 @@ The compiler is itself written in Prolog. We must go deeper.
    * testing.pl: Contains implementations of debugging predicates used for debugging the compiler
 
 Compiling the compiler produces:
-   * bootstrap.js (the saved state)
-   * wam-pp.js    (the executable runtime)
+   * proscriptls_state.js (the saved state)
+   * proscriptls_engine.js    (the executable runtime)
 
 You must include both of these if you want a working system. See test.html for an example.
 
 ### Tidying things up
-   * js_preprocess.pl: This is a minification process that combines several files together to form wam-pp.js, which is the final system used for execution
+   * js_preprocess.pl: This is a minification process that combines several files together to form proscriptls_engine.js, which is the final system used for execution
 
 ### Debugging terminal
 A debugging terminal can be displayed in an HTML page using the 
