@@ -660,6 +660,10 @@ function proscript_init(queryJS) {
 }
 
 function consult_scripts() {
+    if(! document) {
+        return;
+    }
+
     let scripts = document.getElementsByTagName('SCRIPT');
     // collect script.src URLs to pass to consult/1.
     // for scripts that have inline text use compile_atom/1.
@@ -791,8 +795,7 @@ function proscript(queryJS) {
         {
             stdout("Failed " + queryJS + ".\n");
         }
-    }
-    catch (anything)
+    } catch (anything)
     {
         if(console && console.log) {
             console.log(anything);

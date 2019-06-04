@@ -3,9 +3,9 @@ DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 
 
-all:		proscriptls_state.js proscriptls_engine.js
+all:		proscriptls.js
 clean:		
-		rm -f proscriptls_engine.js proscriptls_state.js
+		rm -f proscriptls_engine.js proscriptls_state.js proscriptls.js
 
 proscriptls_state.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl not.pl debugger.pl promise.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'not.pl', 'promise.pl'], 'foo'), halt"
@@ -25,11 +25,14 @@ proscriptls_engine.js:	foreign.js memory_files.js wam.js read.js record.js fli.j
 		                   'proscriptls_engine.js', [debug=$(DEBUG)]),\
 		        halt"
 
-gc:		proscriptls_engine.js proscriptls_state.js standalone.js
-		$(JSC) proscriptls_engine.js proscriptls_state.js standalone.js  -e "gc_test($(DEBUG))"
+proscriptls.js:	proscriptls_engine.js proscriptls_state.js
+		cat proscriptls_engine.js proscriptls_state.js > proscriptls.js
 
-dump-state: proscriptls_engine.js proscriptls_state.js standalone.js dump.js
-		$(JSC) proscriptls_engine.js proscriptls_state.js standalone.js dump.js  -e "dumpPredicate('compile_body_args')"
+gc:		proscriptls.js standalone.js
+		$(JSC) proscriptls.js standalone.js  -e "gc_test($(DEBUG))"
 
-test_proscript:		proscriptls_engine.js proscriptls_state.js standalone.js
-		$(JSC) proscriptls_engine.js proscriptls_state.js standalone.js  -e "proscript(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"
+dump-state: proscriptls.js standalone.js dump.js
+		$(JSC) proscriptls.js standalone.js dump.js  -e "dumpPredicate('compile_body_args')"
+
+test_proscript:		proscriptls.js standalone.js
+		$(JSC) proscriptls.js standalone.js  -e "proscript(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"
