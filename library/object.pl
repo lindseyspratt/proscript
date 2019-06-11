@@ -96,6 +96,8 @@
     !,
     >>(Obj, H),
     >>(Obj, T).
+>>(Obj, {G}) :-
+    call(G).
 >>(Obj, * M) :-
     !, % method invocation
     >*>(Obj, M).
@@ -132,6 +134,9 @@
     !,
     >->(Obj, H),
     >->(Obj, T).
+>->(Obj, {G}) :-
+    !,
+    call(G).
 >->(Obj, :>(Attribute, V)) :-
     dom_element_attribute_value(Obj, Attribute, V).
 >->(Obj, <:(Attribute, V)) :-
@@ -142,6 +147,9 @@
     !,
     >+>(Obj, H),
     >+>(Obj, T).
+>+>(Obj, {G}) :-
+    !,
+    call(G).
 >+>(Type-Obj, :>(Property, V)) :-
     !,
     dom_object_property(Type, Obj, Property, V).
@@ -156,6 +164,9 @@
     !,
     >*>(Obj, H),
     >*>(Obj, T).
+>*>(Obj, {G}) :-
+    !,
+    call(G).
 >*>(Obj, :>(Method, V)) :-
     !,
     Method =.. [F|As],
@@ -171,5 +182,8 @@
     !,
     >@>(Obj, H),
     >@>(Obj, T).
+>@>(Obj, {G}) :-
+    !,
+    call(G).
 >@>(Obj, Goal) :-
     call(Goal, Obj).

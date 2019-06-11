@@ -113,7 +113,7 @@ function predicate_toggle_dom_element_class(element, value, action) {
         } else {
             actionJS = 'remove';
         }
-        return bind(action, lookup_atom(actionJS))
+        bind(action, lookup_atom(actionJS))
     } else {
         if (TAG(action) !== TAG_ATM) {
             return instantiation_error(action);

@@ -1,0 +1,5 @@
+<!-- Side navigation -->
+
+{{template_file('template_test_sub.txt', [home])}}
+
+<!-- Page content -->

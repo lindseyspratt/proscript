@@ -3,12 +3,12 @@ DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 
 
-all:		proscriptls.js
+all:		proscriptls.js all.html
 clean:		
 		rm -f proscriptls_engine.js proscriptls_state.js proscriptls.js
 
-proscriptls_state.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl not.pl debugger.pl promise.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'not.pl', 'promise.pl'], 'foo'), halt"
+proscriptls_state.js:	wam_compiler.pl wam_bootstrap.pl url.pl bootstrap_js.pl not.pl debugger.pl promise.pl
+		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'url.pl', 'bootstrap_js.pl', 'not.pl', 'promise.pl'], 'foo'), halt"
 
 tests_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl not.pl debugger.pl test/web_tests.pl
 		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'not.pl', 'test/web_tests.pl'], 'foo'), halt"
@@ -36,3 +36,21 @@ dump-state: proscriptls.js standalone.js dump.js
 
 test_proscript:		proscriptls.js standalone.js
 		$(JSC) proscriptls.js standalone.js  -e "proscript(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"
+
+index.html: index.html.template index.sidenav.html.template
+		$(SWIPL) -q -f library/template.pl\
+		    -g "substitute_template('index.html.template', 'index.html'), halt"
+
+index_about.html: index_about.html.template index.sidenav.html.template
+		$(SWIPL) -q -f library/template.pl\
+		    -g "substitute_template('index_about.html.template', 'index_about.html'), halt"
+
+index_download.html: index_download.html.template index.sidenav.html.template
+		$(SWIPL) -q -f library/template.pl\
+		    -g "substitute_template('index_download.html.template', 'index_download.html'), halt"
+
+index_doc.html: index_doc.html.template index.sidenav.html.template
+		$(SWIPL) -q -f library/template.pl\
+		    -g "substitute_template('index_doc.html.template', 'index_doc.html'), halt"
+
+all.html: index.html index_about.html index_download.html index_doc.html

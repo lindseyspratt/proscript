@@ -69,7 +69,7 @@ function predicate_peek_char(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, lookup_atom(peek_char(s.value)));
+    return unify(c, lookup_atom(peekch(s.value)));
 }
 
 function predicate_peek_code(stream, c)

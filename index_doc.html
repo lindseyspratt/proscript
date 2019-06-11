@@ -1,0 +1,72 @@
+<html lang="en">
+<head>
+    <title>
+        ProscriptLS Examples
+    </title>
+    <link rel="stylesheet" href="index.css"/>
+    <script type="text/javascript" src="proscriptls.js"></script>
+</head>
+<body onload="proscript_init();">
+<!-- Side navigation -->
+<ul class="sidenav">
+    <li><span class="caret"></span><a  href="index.html#home">Home</a>
+        <ul class='nested'>
+            <li><a href="index.html#prolog-for-the-web">Prolog for the Web</a></li>
+            <li><a href="index.html#running-proscriptls">Running ProscriptLS</a></li>
+            <li><a href="index.html#compiling-proscriptls">Compiling ProscriptLS</a></li>
+            <li><a href="index.html#basic-example">Basic Example</a></li>
+        </ul>
+    </li>
+    <li><span class="caret"></span><a class="active" href="#doc">Documentation</a>
+        <ul class='nested'>
+            <li><a href="#examples">Examples</a></li>
+        </ul>
+    </li>
+    <li><a  href="index_download.html#download">Download</a></li>
+    <li><a  href="index_about.html#about">About</a></li>
+</ul>
+
+<!-- Page content -->
+<div class="content">
+    <div id="doc">
+        <h1>Documentation for ProscriptLS</h1>
+        <div id="examples">
+        <h2>Examples</h2>
+         These examples show uses of the ProscriptLS language.
+    In each case the HTML source consults (compiles) ProscriptLS source and uses the ProscriptlS predicates.
+    The only major uses of Javascript are the JQuery.Terminal library (used to present the ProscriptLS interpreter
+    in some examples) and a custom Prolog interpreter.
+    <br>
+    <br>
+    <a href="examples/calculator.html">A simple calculator.</a>
+    This example demonstrates the use of events in ProscriptLS.
+    <br>
+    The original implementation of the calculator in regular Javascript is
+    <a href="https://www.anaesthetist.com/mnm/javascript/calc.htm">here</a>.
+    <br>
+    <a href="examples/console_button_test.html">Toggle custom ProscriptLS interpreter console.</a>
+    A page that presents a single button which toggles the presence of a ProscriptLS interpreter.
+    The ProscriptLS interpreter console is implemented using a custom 'test.js' file instead of the full
+    JQuery.terminal library.
+    <br>
+    <a href="examples/simple_test.html">Display 'hello world' alert dialog.</a>
+    Clicking on a button causes 'hello world' to be displayed in an alert dialog.
+    <br>
+    <a href="examples/tau_likes.html">Querying a 'likes' predicate.</a>
+    Some interactive elements support a user interface for displaying what a person likes
+    from an editable definition of a likes/2 predicate.
+    (This is adapted from the tau-prolog 'likes' example.)
+    <br>
+    <a href="examples/test.html">Custom Prolog interpreter and text area for Prolog source.</a>
+    The Prolog text area is consulted when the 'consult' button is clicked.
+    The predicates defined in the Prolog text area can be queried in the custom
+    interpreter.
+    <br>
+    <a href="examples/tiles.html">Display a collection of selectable game tiles.</a>
+    Displays a collection of 16 square tiles. 8 of these tiles are selectable.
+    </div>
+    </div>
+</div>
+<script type="text/prolog" src="index.pl"></script>
+</body>
+</html>

@@ -64,7 +64,7 @@ length(List, Length) :-
 	length([_|Tail], SoFar, Length) :-
 		Count is SoFar+1,
 		length(Tail, Count, Length).
-
+*/
 /* end of comment */
 
 
@@ -79,7 +79,7 @@ length(List, Length) :-
 member(Element, [Element|_]).
 member(Element, [_|Rest]) :-
 	member(Element, Rest).
-
+*/
 /* end of comment */
 
 

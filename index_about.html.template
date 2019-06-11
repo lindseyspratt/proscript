@@ -1,0 +1,29 @@
+<html lang="en">
+<head>
+    <title>
+        About ProscriptLS
+    </title>
+    <link rel="stylesheet" href="index.css"/>
+    <script type="text/javascript" src="proscriptls.js"></script>
+</head>
+<body onload="proscript_init();">
+<!-- Side navigation -->
+{{template_file('index.sidenav.html.template', [about])}}
+<!-- Page content -->
+<div class="content">
+    <div id="about">
+        <h1>About ProscriptLS</h1>
+        ProscriptLS is developed by Lindsey Spratt (Lindsey dot Spratt at LogicForSystems dot com).
+        It is a fork of the original <a href="https://github.com/thetrime/proscript">Proscript project by Matt Lilley</a>.
+        <br>
+        There are two major enhancements and many minor changes in ProscriptLS: builtins to work with the DOM (Document Object Model) of HTML and
+        a proper interactive Prolog tracing debugger that can be used in the client web page (using a JQuery Terminal).
+        <br>
+        The original Proscript project implemented the bulk of the system, particularly the WAM, the WAM compiler, and the basic
+        architecture of the system.
+
+    </div>
+</div>
+<script type="text/prolog" src="index.pl"></script>
+</body>
+</html>

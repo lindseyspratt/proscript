@@ -1,0 +1,14 @@
+<ul class="sidenav">
+    <li><span class="caret"></span><a {{template_arg(1, home) => 'class="active"'}} href="#home">Home</a>
+        <ul class='nested'>
+            <li><a href="#prolog-for-the-web">Prolog for the Web</a></li>
+            <li><a href="#running-proscriptls">Running ProscriptLS</a></li>
+            <li><a href="#compiling-proscriptls">Compiling ProscriptLS</a></li>
+            <li><a href="#basic-example">Basic Example</a></li>
+        </ul>
+    </li>
+    <li></li>
+    <li><a {{template_arg(1, doc) => 'class="active"'}} href="examples/examples_main.html">Documentation</a></li>
+    <li><a {{template_arg(1, down) => 'class="active"'}} href="index_download.html">Download</a></li>
+    <li><a {{template_arg(1, about) => 'class="active"'}} href="index_about.html">About</a></li>
+</ul>

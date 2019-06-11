@@ -1,0 +1,30 @@
+<html lang="en">
+<head>
+    <title>ProscriptLS Basic</title>
+ </head>
+<body onload="proscript_init();">
+<div>
+    <h2>ProscriptLS Basic</h2>
+    <p>
+        The button displays an alert dialog
+        containing 'Hello World'
+    </p>
+    <div id="basic"></div>
+</div>
+<script type="text/javascript"
+        src="../proscriptls.js"></script>
+<script type="text/prolog">
+:- initialization(setup_button).
+
+setup_button :-
+    dom_element_attribute_value(E, id, basic),
+    create_dom_element('BUTTON', Button),
+    create_dom_text_node("Click Me", NewContent),
+    append_dom_node_child(Button, NewContent),
+    dom_object_method(Button,
+        addEventListener(click,
+            alert('Hello World!'))),
+    append_dom_node_child(E, Button).
+</script>
+</body>
+</html>

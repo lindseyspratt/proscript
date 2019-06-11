@@ -6364,7 +6364,7 @@ function predicate_peek_char(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, lookup_atom(peek_char(s.value)));
+    return unify(c, lookup_atom(peekch(s.value)));
 }
 
 function predicate_peek_code(stream, c)
@@ -7452,7 +7452,7 @@ function predicate_toggle_dom_element_class(element, value, action) {
         } else {
             actionJS = 'remove';
         }
-        return bind(action, lookup_atom(actionJS))
+        bind(action, lookup_atom(actionJS))
     } else {
         if (TAG(action) !== TAG_ATM) {
             return instantiation_error(action);
