@@ -4,28 +4,11 @@
         About ProscriptLS
     </title>
     <link rel="stylesheet" href="index.css"/>
-    <script type="text/javascript" src="proscriptls.js"></script>
+    <script type="text/javascript" src="../proscriptls.js"></script>
 </head>
 <body onload="proscript_init();">
 <!-- Side navigation -->
-<ul class="sidenav">
-    <li><span class="caret"></span><a  href="index.html#home">Home</a>
-        <ul class='nested'>
-            <li><a href="index.html#prolog-for-the-web">Prolog for the Web</a></li>
-            <li><a href="index.html#running-proscriptls">Running ProscriptLS</a></li>
-            <li><a href="index.html#compiling-proscriptls">Compiling ProscriptLS</a></li>
-            <li><a href="index.html#basic-example">Basic Example</a></li>
-        </ul>
-    </li>
-    <li><span class="caret"></span><a  href="index_doc.html#doc">Documentation</a>
-        <ul class='nested'>
-            <li><a href="index_doc.html#examples">Examples</a></li>
-        </ul>
-    </li>
-    <li><a  href="index_download.html#download">Download</a></li>
-    <li><a class="active" href="#about">About</a></li>
-</ul>
-
+{{template_file('sidenav.index.template', [about])}}
 <!-- Page content -->
 <div class="content">
     <div id="about">

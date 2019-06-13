@@ -1102,6 +1102,7 @@ function peek_raw_char_with_conversion(s, position)
 }
 
 
+// noinspection JSUnusedLocalSymbols
 function parser_test()
 {
     //do_parser_test("test(1,1).\ntest(1:-1).\ntest:- test, test.\ntest((1,1)).");

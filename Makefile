@@ -3,54 +3,30 @@ DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 
 
-all:		proscriptls.js all.html
+all:		dist/proscriptls.js doc
 clean:		
-		rm -f proscriptls_engine.js proscriptls_state.js proscriptls.js
+		cd src/engine && make clean
+		cd src/system && make clean
+		cd src/doc && make clean
+		rm -f dist/proscriptls.js
 
-proscriptls_state.js:	wam_compiler.pl wam_bootstrap.pl url.pl bootstrap_js.pl not.pl debugger.pl promise.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'url.pl', 'bootstrap_js.pl', 'not.pl', 'promise.pl'], 'foo'), halt"
+dist/proscriptls_state.js: src/system/*
+		cd src/system && make
 
-tests_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl not.pl debugger.pl test/web_tests.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'not.pl', 'test/web_tests.pl'], 'foo'), halt"
+dist/proscriptls_engine.js: src/engine/*
+		cd src/engine && make
 
-nrev_bootstrap.js:	wam_compiler.pl wam_bootstrap.pl bootstrap_js.pl not.pl debugger.pl bench/nrev.pl bench/common.pl bench/hook.pl
-		$(SWIPL) -q -f wam_compiler.pl -g "build_saved_state(['bench/nrev.pl', 'bench/common.pl', 'bench/hook.pl', 'debugger.pl', 'wam_compiler.pl', 'bootstrap_js.pl', 'not.pl'], 'foo'), halt"
+dist/proscriptls.js:	dist/proscriptls_engine.js dist/proscriptls_state.js
+		cat dist/proscriptls_engine.js dist/proscriptls_state.js > dist/proscriptls.js
 
-proscriptls_engine.js:	foreign.js memory_files.js wam.js read.js record.js fli.js stream.js gc.js dom.js\
-            debugger.js decode_instruction.js promise.js object.js web_interfaces.js object_property.js object_method.js
-		$(SWIPL) -q -f js_preprocess.pl\
-		    -g "preprocess(['foreign.js', 'memory_files.js', 'wam.js', 'read.js', 'record.js', 'fli.js', 'stream.js',\
-		                    'gc.js', 'dom.js', 'debugger.js',\
-		                    'decode_instruction.js', 'promise.js', 'object.js', 'web_interfaces.js', 'object_property.js', 'object_method.js'],\
-		                   'proscriptls_engine.js', [debug=$(DEBUG)]),\
-		        halt"
+doc:
+		cd src/doc && make
 
-proscriptls.js:	proscriptls_engine.js proscriptls_state.js
-		cat proscriptls_engine.js proscriptls_state.js > proscriptls.js
+gc:		dist/proscriptls.js standalone.js
+		$(JSC) dist/proscriptls.js standalone.js  -e "gc_test($(DEBUG))"
 
-gc:		proscriptls.js standalone.js
-		$(JSC) proscriptls.js standalone.js  -e "gc_test($(DEBUG))"
+dump-state: dist/proscriptls.js standalone.js dump.js
+		$(JSC) dist/proscriptls.js standalone.js dump.js  -e "dumpPredicate('compile_body_args')"
 
-dump-state: proscriptls.js standalone.js dump.js
-		$(JSC) proscriptls.js standalone.js dump.js  -e "dumpPredicate('compile_body_args')"
-
-test_proscript:		proscriptls.js standalone.js
-		$(JSC) proscriptls.js standalone.js  -e "proscript(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"
-
-index.html: index.html.template index.sidenav.html.template
-		$(SWIPL) -q -f library/template.pl\
-		    -g "substitute_template('index.html.template', 'index.html'), halt"
-
-index_about.html: index_about.html.template index.sidenav.html.template
-		$(SWIPL) -q -f library/template.pl\
-		    -g "substitute_template('index_about.html.template', 'index_about.html'), halt"
-
-index_download.html: index_download.html.template index.sidenav.html.template
-		$(SWIPL) -q -f library/template.pl\
-		    -g "substitute_template('index_download.html.template', 'index_download.html'), halt"
-
-index_doc.html: index_doc.html.template index.sidenav.html.template
-		$(SWIPL) -q -f library/template.pl\
-		    -g "substitute_template('index_doc.html.template', 'index_doc.html'), halt"
-
-all.html: index.html index_about.html index_download.html index_doc.html
+test_proscript:		dist/proscriptls.js standalone.js
+		$(JSC) dist/proscriptls.js standalone.js  -e "proscript(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"

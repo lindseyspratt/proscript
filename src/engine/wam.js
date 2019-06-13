@@ -34,9 +34,9 @@ Choicepoint frame where we have tried something but can try 'Next' if it fails l
 
 //const E_CE = 0;
 const E_CP = 1;
-const E_Y0 = 2;
-const E_Y1 = 3;
-const E_Y2 = 4;
+// const E_Y0 = 2;
+// const E_Y1 = 3;
+// const E_Y2 = 4;
 
 //const CP_n = 0;
 const CP_E = 1;
@@ -93,6 +93,12 @@ var state;
 // Stack for managing cleanup handlers needed during a cut
 var cleanups = [];
 
+var bootstrap_code; // 'defined' by load_state() in proscriptls_state.js.
+var retry_foreign_offset;  // 'defined' by load_state() in proscriptls_state.js.
+var foreign_predicates; // 'defined' by load_state() in proscriptls_state.js.
+var system;  // 'defined' by load_state() in proscriptls_state.js.
+var initialization;  // 'defined' by load_state() in proscriptls_state.js.
+
 /* Special purpose machine registers:
 
    P: Pointer to the next opcode to execute (in the code[] array)
@@ -110,6 +116,9 @@ mode: READ or WRITE depending on whether are matching or creating an exemplar on
   It is important to note that B and E do not point to the *next available* place to put an environment frame or choicepoint, but the *current* one.
 */
 var debugging = false;
+
+// debug_msg function may not be called due to js_preprocess.js removing references to it.
+// noinspection JSUnusedLocalSymbols
 function debug_msg(msg)
 {
     if (debugging)
@@ -122,8 +131,8 @@ function initialize()
     var trace_predicate = predicates[trace_ftor];
     var trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
 
-    var call_ftor = VAL(lookup_functor('call', 1));
-    var call_predicate = predicates[call_ftor];
+//    var call_ftor = VAL(lookup_functor('call', 1));
+//    var call_predicate = predicates[call_ftor];
 
     state = {H: 0,
              HB: 0,
@@ -387,7 +396,7 @@ function predicate_get_backtrack_frame(B) {
 }
 
 function predicate_set_backtrack_frame(B) {
-    let type = TAG(B);
+    //let type = TAG(B);
     state.B = VAL(B);
     //stdout('Backtrack frame set to ' + state.B + '\n');
     return true;
@@ -466,7 +475,7 @@ function wam_complete_call_or_execute(predicate) {
 function wam_setup_and_call_foreign() {
     state.num_of_args = ftable[code[state.P+1]][1];
     let fargs = new Array(state.num_of_args);
-    for (i = 0; i < state.num_of_args; i++)
+    for (let i = 0; i < state.num_of_args; i++)
         fargs[i] = deref(register[i]);
     let result = foreign_predicates[code[state.P+1]].apply(null, fargs);
     state.foreign_retry = false;
@@ -547,7 +556,6 @@ function wam() {
 function wam1()
 {
     var predicate;
-    var fargs;
     var source;
     var sym;
     var arg;
@@ -679,7 +687,7 @@ function wam1()
                 state.trace_identifier++;
 
                 let target_ftor_ofst = code[state.P+1];
-                let traceArgArity = wam_setup_trace_call(target_ftor_ofst);
+                wam_setup_trace_call(target_ftor_ofst);
 
                 debug_msg("Calling trace " + atable[ftable[target_ftor_ofst][0]] + "/" + traceArgArity + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
 
@@ -742,7 +750,7 @@ function wam1()
                 state.trace_identifier++;
                 debug_msg("Set state.trace_call to " + state.trace_call);
                 let target_ftor = code[state.P+1];
-                let traceArgArity = wam_setup_trace_call(target_ftor);
+                wam_setup_trace_call(target_ftor);
 
                 debug_msg("Executing trace " + atable[ftable[target_ftor][0]] + "/" + traceArgArity);
                 state.B0 = state.B;
@@ -1738,6 +1746,7 @@ function undefined_predicate(ftor)
 
 // /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc foreign.js wam.js proscriptls_state.js -e "demo()"
 // noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedLocalSymbols
 function demo(d)
 {
     debugging = d;

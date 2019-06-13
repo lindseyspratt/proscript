@@ -460,7 +460,10 @@ reset:-
         true.
 
 
-build_saved_state(SourceFiles, TopLevelQuery):-
+build_saved_state(SourceFiles, TopLevelQuery) :-
+    build_saved_state(SourceFiles, 'proscriptls_state.js', TopLevelQuery).
+
+build_saved_state(SourceFiles, SavedStateFile, TopLevelQuery):-
         reset,
         assemble([call(toplevel/0,0), execute(halt/0), retry_foreign], 2),
         setof(N-Code, ctable(N, Code), SortedBootCodes),
@@ -475,7 +478,7 @@ build_saved_state(SourceFiles, TopLevelQuery):-
             fail
         ),
         !,
-        open('proscriptls_state.js', write, S1),
+        open(SavedStateFile, write, S1),
         format(S1, 'function load_state() {~n', []),
         format(S1, 'bootstrap_code = [0,255,~w];~n', [BootCode]),
         format(S1, 'retry_foreign_offset = 7;~n', []),

@@ -1,4 +1,4 @@
-:-ensure_loaded('../url').
+:-ensure_loaded('../src/system/url').
 :-ensure_loaded(listut).
 
 :-op(300, xfx, =>).

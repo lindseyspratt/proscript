@@ -4,12 +4,11 @@
         ProscriptLS
     </title>
     <link rel="stylesheet" href="index.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script type="text/javascript" src="proscriptls.js"></script>
+    <script type="text/javascript" src="../proscriptls.js"></script>
 </head>
 <body onload="proscript_init();">
 <!-- Side navigation -->
-{{template_file('index.sidenav.html.template', [home])}}
+{{template_file('sidenav.index.template', [home])}}
 <!-- Page content -->
 <div class="content">
 <div id="home">
@@ -92,7 +91,7 @@ More HTML
     &lt;div id="basic">&lt;/div>
 &lt;/div>
 &lt;script type="text/javascript"
-        src="../proscriptls.js">
+        src="../dist/proscriptls.js">
 &lt;/script>
 &lt;script type="text/prolog">
 :- initialization(setup_button).

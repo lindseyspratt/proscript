@@ -54,11 +54,11 @@ function predicate_request_result(promise) {
     if (!get_promise_object(promise, promiseObject)) {
         return representation_error('promise', promise);
     }
-    let promises = [];
     let promiseJS = promiseObject.value;
 
     promise_requests.set(promise, '');
-    request_result(promise, promiseJS);
+    // ignore promiseResultJS?
+    let promiseResultJS = request_result(promise, promiseJS);
     return true;
 }
 

@@ -277,6 +277,9 @@ function into_relocation_chain(j, current)
     memory[j] |= F_BIT;        
 }
 
+/**
+ * @return {boolean}
+ */
 function IS_HEAP_PTR(x)
 {
     var tag = TAG(x);
@@ -456,7 +459,7 @@ function mark_variable(start)
                 //UNDO(current, next);
                 debug_msg("UNDO(" + current + ", " + next + ")");
                 var temp = VAL(memory[current]);
-                var tag = TAG(memory[next]);
+                //var tag = TAG(memory[next]);
                 memory[current] = (memory[current] & NV_MASK) ^ next;
                 next = current;
                 current = temp;

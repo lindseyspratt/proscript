@@ -111,6 +111,7 @@ function ChildNodeProperty() {
         /** @namespace elementJS.children */
         return [...objectJS.childNodes];// This is the spread operator. It creates an array from the NodeList of 'childNodes'.
     };
+    // noinspection JSUnusedLocalSymbols
     that.setValue = function(property, elementJS, value) {
         domain_error(property);
     };
@@ -134,6 +135,7 @@ function SimpleChildNodeProperty(propertyName) {
         }
         return objects;
     };
+    // noinspection JSUnusedLocalSymbols
     that.setValue = function(property, elementJS, value) {
         domain_error(property);
     };
@@ -153,6 +155,7 @@ function ChildProperty() {
         /** @namespace elementJS.children */
         return [...elementJS.children];// This is the spread operator. It creates an array from the HTMLCollection of 'children'.
     };
+    // noinspection JSUnusedLocalSymbols
     that.setValue = function(property, elementJS, value) {
         domain_error(property);
     };
@@ -176,6 +179,7 @@ function SimpleChildProperty(propertyName) {
         }
         return objects;
     };
+    // noinspection JSUnusedLocalSymbols
     that.setValue = function(property, elementJS, value) {
         domain_error(property);
     };
@@ -228,6 +232,7 @@ function SimpleProperty(type, propertyName, settable) {
     var that = {};
     that.name = propertyName;
     that.type = type;
+    // noinspection JSUnusedLocalSymbols
     that.objects = function(valueJS) {
         return Array.from(document.querySelectorAll('*')); // return all objects for later filtering by unification
     };

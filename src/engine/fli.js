@@ -12,6 +12,7 @@
 /**
  * @return {number}
  */
+/*
 function PL_new_term_ref() {
     // FIXME: Should this go on the heap or the stack?
     return alloc_var();
@@ -24,6 +25,7 @@ function PL_new_term_refs(n)
         alloc_var();
         
 }
+*/
 
 /**
  * @return {boolean}
@@ -189,6 +191,9 @@ function PL_get_arg(index, term)
 }
 
 // Returns an object with head and tail keys
+/**
+ * @return {null}
+ */
 function PL_get_list(list)
 {
     if (TAG(list) === TAG_LST)
@@ -197,6 +202,9 @@ function PL_get_list(list)
     return null;
 }
 
+/**
+ * @return {null}
+ */
 function PL_get_head(list)
 {
     if (TAG(list) === TAG_LST)
@@ -204,6 +212,9 @@ function PL_get_head(list)
     return null;
 }
 
+/**
+ * @return {null}
+ */
 function PL_get_tail(list)
 {
     if (TAG(list) === TAG_LST)
@@ -211,11 +222,17 @@ function PL_get_tail(list)
     return null;
 }
 
+/**
+ * @return {null}
+ */
 function PL_get_nil()
 {
     return NIL;
 }
 
+/**
+ * @return {null}
+ */
 function PL_put_variable()
 {
     return alloc_var();
@@ -231,11 +248,15 @@ function PL_put_atom_chars(chars)
     return lookup_atom(chars);
 }
 
+/**
+ * @return {number}
+ */
 function PL_put_integer(integer)
 {
     return integer ^ (TAG_INT << WORD_BITS);
 }
 
+/*
 function PL_put_functor(term, ftor)
 {
     var r = alloc_structure(ftor);
@@ -249,12 +270,20 @@ function PL_put_list()
     alloc_var();
     alloc_var();
 }
+*/
 
+/**
+ * @return {null}
+ */
 function PL_put_nil()
 {
     return NIL;
 }
 
+/**
+ * @return {boolean}
+ */
+/*
 function PL_cons_functor(ftor)
 {
     if (state.H + arguments.length + 1 >= HEAP_SIZE)
@@ -263,6 +292,7 @@ function PL_cons_functor(ftor)
     memory[state.H++] = ftor;
     for (i = 1; i < arguments.length; i++)
         memory[state.H++] = arguments[i];
+    return true;
 }
 
 function PL_cons_list(head, tail)
@@ -274,6 +304,7 @@ function PL_cons_list(head, tail)
     memory[state.H++] = tail;
     return result;
 }
+*/
 
 function PL_unify_integer(term, integer)
 {
@@ -287,7 +318,7 @@ function PL_unify_float(term, float)
 
 function PL_unify_atom_chars(term, chars)
 {
-    return unify(term, lookup_atom(string));
+    return unify(term, lookup_atom(chars));
 }
 
 function PL_unify(t1, t2)
@@ -315,6 +346,7 @@ function PL_unify_list(list, head, tail)
     return (TAG(list) === TAG_LST) && unify(memory[VAL(list)], head) && unify(memory[VAL(list) + 1], tail);
 }
 
+// noinspection JSUnusedLocalSymbols
 function PL_pred(ftor, module)
 {
     if (predicates[ftor] === undefined)
@@ -332,7 +364,7 @@ function PL_open_query(module, debug, predicate, args)
     initialize();
     allocate_first_frame();
     state.P = predicates[predicate];
-    for (i = 0; i < ftable[predicate][1]; i++)
+    for (let i = 0; i < ftable[predicate][1]; i++)
         register[i] = args[i];
     return {fresh:true};
 }
@@ -345,14 +377,15 @@ function PL_next_solution(qid)
     return wam();
 }
 
+// noinspection JSUnusedLocalSymbols
 function PL_call(term, module)
 {
-    ftor = VAL(memory[VAL(term)]); // TODO: Should this use deref?
+    let ftor = VAL(memory[VAL(term)]);
     initialize();
     allocate_first_frame();
     state.P = predicates[ftor];
-    for (i = 0; i < ftable_arity(ftor); i++)
-        register[i] = memory[VAL(term) + 1 + i]; // TODO: Should this use deref?
+    for (let i = 0; i < ftable_arity(ftor); i++)
+        register[i] = memory[VAL(term) + 1 + i];
     return wam();    
 }
 

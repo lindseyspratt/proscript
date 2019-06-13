@@ -131,7 +131,6 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
         }
         arg = container.value;
     } else if(spec.type === 'integer') {
-        let evaluatedTerm = term;
         if(TAG(term) === TAG_STR){
             let evaluationContainer = {};
             if(!evaluate_expression(term, evaluationContainer)) {

@@ -106,13 +106,13 @@ function recorded(key, term, ref)
         return false; 
     }
     // Ok, now we can get the actual array
-    var data = d.data;
+    let data = d.data;
     // We need the first actual key. This may not be [0] if something has been erased
     debug_msg("Keys: " + JSON.stringify(Object.keys(data)));
     var index = d.keys[0];
     debug_msg("Returning reference " + d.data[index].ref);
     // noinspection UnnecessaryLocalVariableJS
-    var result = unify(recall_term(d.data[index].value, {}), term) && unify(d.data[index].ref ^ (TAG_INT << WORD_BITS), ref);
+    var result = unify(recall_term(data[index].value, {}), term) && unify(data[index].ref ^ (TAG_INT << WORD_BITS), ref);
     debug_msg("Result: " + result + " => " + term_to_string(term) + " ====> " + term_to_string(ref));
     return result;
 }

@@ -12,8 +12,11 @@ shares the same predicate assertions as that set up by the proscript_init functi
 As with the original project by Lilley, it still needs a lot of tidying and organization.
 
 ## Organization
-### The WAM implementation
-This is implemented primarily in wam.js. Extra stuff is also present in:
+### The engine implementation: WAM and builtins
+#### src/engine/
+The Warren Abstract Engine (WAM) is implemented primarily in wam.js.
+
+Builtins and support functions are also present in:
    * fli.js: SWI-Prolog-like foreign langauge interface. Allows escaping to Javascript from Prolog, so you can call low(er) level functions. Huge chunks of this (like PL_cut_query!) are not implemented
    * foreign.js: This implements a lot of core WAM building blocks directly in javascript. For example, you will find implemntations for univ, writeln and halt here.
    * memory_files.js: stream IO with memory files.
@@ -22,29 +25,39 @@ This is implemented primarily in wam.js. Extra stuff is also present in:
    * record.js: Handles dynamic adjustment of the state: assert and friends
    * stream.js: Handles reading and writing to streams, and all the ISO predicates (the ones implemented anyway) like get_char/2 and put_code/2.
    * dom.js, object_method.js, object_property.js: Builtins for working with the DOM.
-   * debugger.pl, debugger.js: The interactive Prolog tracing debugger.
+   * debugger.js: The interactive Prolog tracing debugger. (see also debugger.pl)
 
-### Bits you must implement, and the stubs provided
-   * standalone.js: Contains implementations of stdout and flush_stdout/1. You can either include this (in which case you will get output printed to a variable called stdout_buffer), or implement them yourself to do something /with/ the stuff written to stdout.
+### Engine functions that may be customized:
+   * src/engine/standalone.js: Contains implementations of stdout and flush_stdout/1. You can either include this (in which case you will get output printed to a variable called stdout_buffer), or implement them yourself to do something /with/ the stuff written to stdout.
 
-You might think that was all you needed, but then you need some code to run on your WAM, which is where the compiler comes in!
+### The compiler and the rest of the system
+#### src/system/
+The compiler is itself written in Prolog.
 
-### The compiler
-The compiler is itself written in Prolog. We must go deeper.
-
-   * wam_compiler.pl: The guts of the compiler. Exports build_saved_state/2 and bootstrap/2, both actually located in wam_boostrap.pl
-   * wam_boostrap.pl: This is the part of the compiler only executed in the bootstrapping process to generate the boostrapped compiler.
+   * wam_compiler.pl: The guts of the compiler. Exports build_saved_state/2, build_saved_state/3, and bootstrap/2, all actually implemented in wam_boostrap.pl
    * bootstrap_js.pl: This is the part of the compiler compiled by the bootstrapping compiler to generate the saved state for the actual compiled system
+   * debugger.pl: Implements (with debugger.js) interactive Prolog tracing debugger.
+   * url.pl: handles file paths for consulting Prolog source from the client.
+   * not.pl: defines free_variables/4 predicate needed by bag_of/3 in bootstrap_js.pl.
+   * promise.pl: utilities for working with Javascript Promise objects in support of consulting Prolog source.
+   
+#### src/tools/
+Some Prolog predicates are only used during the build. These are in:
+   * wam_boostrap.pl: This is the part of the compiler only executed in the bootstrapping process to generate the boostrapped compiler.
    * testing.pl: Contains implementations of debugging predicates used for debugging the compiler
 
-Compiling the compiler produces:
+### Compiling the compiler produces:
+#### dist/
    * proscriptls_state.js (the saved state)
    * proscriptls_engine.js    (the executable runtime)
 
-You must include both of these if you want a working system. See test.html for an example.
+   * proscriptls.js - combination of proscriptls_state.js and proscriptls_engine.js.
+
+You must include both of proscriptls_state.js and proscriptls_engine.js or their combination in proscriptls.js if you want a working system. See test.html for an example.
+
 
 ### Tidying things up
-   * js_preprocess.pl: This is a minification process that combines several files together to form proscriptls_engine.js, which is the final system used for execution
+   * tools/js_preprocess.pl: This is a minification process that combines several files together to form proscriptls_engine.js, which is the final system used for execution
 
 ### Debugging terminal
 A debugging terminal can be displayed in an HTML page using the 

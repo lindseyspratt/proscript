@@ -67,9 +67,9 @@ Some gotchas:
 
 */
 
-:-module(wam_compiler, [build_saved_state/2, bootstrap/2, bootstrap/3, op(920, fy, ?), op(920, fy, ??)]).
-:-ensure_loaded(testing).
-:-ensure_loaded(wam_bootstrap).
+:-module(wam_compiler, [build_saved_state/2, build_saved_state/3, bootstrap/2, bootstrap/3, op(920, fy, ?), op(920, fy, ??)]).
+:-ensure_loaded('../tools/testing').
+:-ensure_loaded('../tools/wam_bootstrap').
 :-ensure_loaded(url).
 
 :-dynamic(delayed_initialization/1).

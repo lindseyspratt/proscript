@@ -145,7 +145,7 @@ function predicate_set_stream_position(s, position)
 
 /* Actual stream IO */
 var streams = [new_stream(null, stdout_write, null, null, null, "")];
-function predicate_close(stream, options)
+function predicate_close(stream)
 {
     var s = {};
     if (!get_stream(stream, s))

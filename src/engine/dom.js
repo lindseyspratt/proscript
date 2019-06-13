@@ -192,7 +192,7 @@ function predicate_dom_element_attribute_value(element, attribute, value) {
             var attributeJS = cursor.attributes[0];
             var attributePL = lookup_atom(attributeJS);
             if (!cursor.values) {
-                cursor.values = setupValuesFromJSElementAndAttribute(elementJS, attributeJS, value);
+                cursor.values = setupValuesFromJSElementAndAttribute(elementJS, attributeJS);
             }
 
             if (cursor.values && cursor.values.length > 0) {
@@ -273,7 +273,7 @@ function setupValues(element, attribute, value, container) {
     return true;
 }
 
-function setupValuesFromJSElementAndAttribute(elementJS, attributeJS, value) {
+function setupValuesFromJSElementAndAttribute(elementJS, attributeJS) {
     var values = [];
     var valueJS;
 

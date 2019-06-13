@@ -1063,6 +1063,8 @@ function update_choicepoint_data(value)
     return true;
 }
 
+// used in proscript_interpreter_terminal.js
+// noinspection JSUnusedLocalSymbols
 function destroy_all_choicepoints() {
     while(state.B !== 0) {
         destroy_choicepoint();
