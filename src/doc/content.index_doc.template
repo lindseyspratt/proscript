@@ -1,33 +1,3 @@
-<html lang="en">
-<head>
-    <title>
-        ProscriptLS Examples
-    </title>
-    <link rel="stylesheet" href="index.css"/>
-    <script type="text/javascript" src="../proscriptls.js"></script>
-</head>
-<body onload="proscript_init();">
-<!-- Side navigation -->
-<ul class="sidenav">
-    <li><span class="caret"></span><a  href="index.html#home">Home</a>
-        <ul class='nested'>
-            <li><a href="index.html#prolog-for-the-web">Prolog for the Web</a></li>
-            <li><a href="index.html#running-proscriptls">Running ProscriptLS</a></li>
-            <li><a href="index.html#compiling-proscriptls">Compiling ProscriptLS</a></li>
-            <li><a href="index.html#basic-example">Basic Example</a></li>
-        </ul>
-    </li>
-    <li><span class="caret"></span><a class="active" href="#doc">Documentation</a>
-        <ul class='nested'>
-            <li><a href="#examples">Examples</a></li>
-        </ul>
-    </li>
-    <li><a  href="index_download.html#download">Download</a></li>
-    <li><a  href="index_about.html#about">About</a></li>
-</ul>
-
-<!-- Page content -->
-<div class="content">
 <div id="doc">
     <h1>Documentation for ProscriptLS</h1>
     <div id="examples">
@@ -66,8 +36,3 @@ interpreter.
 Displays a collection of 16 square tiles. 8 of these tiles are selectable.
 </div>
 </div>
-
-</div>
-<script type="text/prolog" src="index.pl"></script>
-</body>
-</html>

@@ -10,6 +10,6 @@ all:	$(HTML)
 clean:		
 		rm -f $(HTML)
 
-$(DIST_DOC)/%.html : %.template sidenav.index.template
+$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template framework.index.template
 		$(SWIPL) -q -f ../../library/template.pl\
 		    -g "substitute_template('$<', '$@'), halt"

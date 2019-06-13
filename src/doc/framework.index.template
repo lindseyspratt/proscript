@@ -1,17 +1,17 @@
 <html lang="en">
 <head>
     <title>
-        ProscriptLS Examples
+        {{template_arg(2, Title) => Title}}
     </title>
     <link rel="stylesheet" href="index.css"/>
     <script type="text/javascript" src="../proscriptls.js"></script>
 </head>
 <body onload="proscript_init();">
 <!-- Side navigation -->
-{{template_file('sidenav.index.template', [doc])}}
+{{template_and(template_arg(1, Page), template_file('sidenav.index.template', [Page]))}}
 <!-- Page content -->
 <div class="content">
-{{template_file('content.index_doc.template', [])}}
+    {{template_and(template_arg(3, Content), template_file(Content, []))}}
 </div>
 <script type="text/prolog" src="index.pl"></script>
 </body>

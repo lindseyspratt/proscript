@@ -32,18 +32,35 @@ template_file(FilePath, Args, Info) :-
     member(dir - FileDir, Info),
     member(result - Result, Info),
     member(result_tail - ResultTail, Info),
-     resolve_url(FileDir, FilePath, ResolvedPath),
-     file_to_list(ResolvedPath, SubList),
-     url_directory(ResolvedPath, ResolvedDir),
-     process(ResolvedDir, Args, Result, ResultTail, SubList, []).
+    resolve_url(FileDir, FilePath, ResolvedPath),
+    file_to_list(ResolvedPath, SubList),
+    url_directory(ResolvedPath, ResolvedDir),
+    process(ResolvedDir, Args, Result, ResultTail, SubList, []).
 
 template_arg(ID, Value, Info) :-
     member(args - Args, Info),
-    nth1(ID, Args, Value).
+    nth1(ID, Args, Value),
+    default_result(Info).
 
 template_not_arg(ID, Value, Info) :-
     member(args - Args, Info),
-    \+ nth1(ID, Args, Value).
+    \+ nth1(ID, Args, Value),
+    default_result(Info).
+
+template_and(Goal1, Goal2, Info) :-
+    member(dir - FileDir, Info),
+    member(args - Args, Info),
+    member(result - Result, Info),
+    member(result_tail - ResultTail, Info),
+    process_substitution(Goal1, FileDir, Args, Result, InterimTail),
+    process_substitution(Goal2, FileDir, Args, InterimTail, ResultTail).
+
+default_result(Info) :-
+    member(result - Result, Info),
+    member(result_tail - ResultTail, Info)
+      -> Result = ResultTail
+    ;
+    true.
 
 process(FileDir, Args, ProcessedFileList, ProcessedTail) -->
     "{{",

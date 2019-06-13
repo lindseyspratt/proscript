@@ -1,34 +1,4 @@
-<html lang="en">
-<head>
-    <title>
-        ProscriptLS
-    </title>
-    <link rel="stylesheet" href="index.css"/>
-    <script type="text/javascript" src="../proscriptls.js"></script>
-</head>
-<body onload="proscript_init();">
-<!-- Side navigation -->
-<ul class="sidenav">
-    <li><span class="caret"></span><a class="active" href="#home">Home</a>
-        <ul class='nested'>
-            <li><a href="#prolog-for-the-web">Prolog for the Web</a></li>
-            <li><a href="#running-proscriptls">Running ProscriptLS</a></li>
-            <li><a href="#compiling-proscriptls">Compiling ProscriptLS</a></li>
-            <li><a href="#basic-example">Basic Example</a></li>
-        </ul>
-    </li>
-    <li><span class="caret"></span><a  href="index_doc.html#doc">Documentation</a>
-        <ul class='nested'>
-            <li><a href="index_doc.html#examples">Examples</a></li>
-        </ul>
-    </li>
-    <li><a  href="index_download.html#download">Download</a></li>
-    <li><a  href="index_about.html#about">About</a></li>
-</ul>
-
-<!-- Page content -->
-<div class="content">
-    <div id="home">
+<div id="home">
     <h1>ProscriptLS</h1>
     <div id="prolog-for-the-web">
         <h2>Prolog for the Web</h2>
@@ -131,9 +101,3 @@ setup_button :-
         of the Prolog source in that 'script' element.
     </div>
 </div>
-
-</div>
-<script type="text/prolog" src="index.pl"></script>
-</body>
-</html>
-
