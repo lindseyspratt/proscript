@@ -45,7 +45,7 @@ ul.sidenav {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 12em;
+    width: 14em;
     background-color: #f1f1f1;
     position: fixed;
     height: 100%;
@@ -70,7 +70,7 @@ ul.sidenav li a:hover:not(.active) {
 }
 
 div.content {
-    margin-left: 12em;
+    margin-left: 14em;
     padding: 1px 16px;
     height: 1000px;
 }

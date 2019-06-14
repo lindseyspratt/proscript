@@ -1,17 +1,29 @@
 <ul class="sidenav">
-    <li><span class="caret"></span><a {{template_arg(1, home) => 'class="active"'}} href="{{template_not_arg(1, home) => 'index.html'}}#home">Home</a>
+    <li><span class="caret"></span>
+        <a {{template_arg(1, home)=> 'class="active"'}} href="{{template_not_arg(1, home) => 'index.html'}}#home">Home</a>
         <ul class='nested'>
             <li><a href="{{template_not_arg(1, home) => 'index.html'}}#prolog-for-the-web">Prolog for the Web</a></li>
             <li><a href="{{template_not_arg(1, home) => 'index.html'}}#running-proscriptls">Running ProscriptLS</a></li>
-            <li><a href="{{template_not_arg(1, home) => 'index.html'}}#compiling-proscriptls">Compiling ProscriptLS</a></li>
+            <li><a href="{{template_not_arg(1, home) => 'index.html'}}#compiling-proscriptls">Compiling ProscriptLS</a>
+            </li>
             <li><a href="{{template_not_arg(1, home) => 'index.html'}}#basic-example">Basic Example</a></li>
         </ul>
     </li>
-    <li><span class="caret"></span><a {{template_arg(1, doc) => 'class="active"'}} href="{{template_not_arg(1, doc) => 'index_doc.html'}}#doc">Documentation</a>
+    <li><span class="caret"></span><a {{template_arg(1, doc)=> 'class="active"'}} href="{{template_not_arg(1, doc) =>
+        'index_doc.html'}}#doc">Documentation</a>
         <ul class='nested'>
+            <li><span class="caret"></span><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#reference">Reference</a>
+                <ul class='nested'>
+                    <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#using_proscriptls">Using ProscriptLS</a></li>
+                    <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#library">Library</a></li>
+                    <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#debugger">Debugger</a></li>
+                </ul>
+            </li>
             <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#examples">Examples</a></li>
         </ul>
     </li>
-    <li><a {{template_arg(1, down) => 'class="active"'}} href="{{template_not_arg(1, down) => 'index_download.html'}}#download">Download</a></li>
-    <li><a {{template_arg(1, about) => 'class="active"'}} href="{{template_not_arg(1, about) => 'index_about.html'}}#about">About</a></li>
+    <li><a {{template_arg(1, down)=> 'class="active"'}} href="{{template_not_arg(1, down) =>
+        'index_download.html'}}#download">Download</a></li>
+    <li><a {{template_arg(1, about)=> 'class="active"'}} href="{{template_not_arg(1, about) =>
+        'index_about.html'}}#about">About</a></li>
 </ul>
