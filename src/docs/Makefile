@@ -3,15 +3,20 @@ DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 DIST_DOC=../../docs
 HTML := $(addprefix $(DIST_DOC)/, index.html index_about.html index_download.html index_doc.html)
+DIST_LIB := ../../dist/proscriptls.js
+DOCS_LIB := $(DIST_DOC)/proscriptls.js
 ROOT_ENGINE=dist/proscriptls_engine.js
 ENGINE:=../../$(ROOT_ENGINE)
 SRC_SYSTEM=../system
 
 
-all:	$(HTML)
+all:	$(HTML) $(DOCS_LIB)
 
 clean:		
-		rm -f $(HTML)
+		rm -f $(HTML) $(DOCS_LIB)
+
+$(DOCS_LIB): $(DIST_LIB)
+		cp $(DIST_LIB) $(DOCS_LIB)
 
 $(DIST_DOC)/index_doc.html: type_references.template
 
