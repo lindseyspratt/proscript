@@ -5,18 +5,23 @@ DIST_DOC=../../docs
 HTML := $(addprefix $(DIST_DOC)/, index.html index_about.html index_download.html index_doc.html)
 DIST_LIB := ../../dist/proscriptls.js
 DOCS_LIB := $(DIST_DOC)/proscriptls.js
+DOCS_OBJECT_PL := $(DIST_DOC)/object.pl
+LIB_OBJECT_PL := ../../library/object.pl
 ROOT_ENGINE=dist/proscriptls_engine.js
 ENGINE:=../../$(ROOT_ENGINE)
 SRC_SYSTEM=../system
 
 
-all:	$(HTML) $(DOCS_LIB)
+all:	$(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL)
 
 clean:		
-		rm -f $(HTML) $(DOCS_LIB)
+		rm -f $(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL)
 
 $(DOCS_LIB): $(DIST_LIB)
 		cp $(DIST_LIB) $(DOCS_LIB)
+
+$(DOCS_OBJECT_PL): $(LIB_OBJECT_PL)
+		cp $(LIB_OBJECT_PL) $(DOCS_OBJECT_PL)
 
 $(DIST_DOC)/index_doc.html: type_references.template
 
