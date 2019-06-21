@@ -2480,6 +2480,219 @@ function evaluation_error(message)
     memory[state.H++] = lookup_atom(message);
     return predicate_throw(ref);
 }
+
+function engine_error(message) {
+    var ftor = lookup_functor('engine_error', 1);
+    var ref = state.H ^ (TAG_STR << WORD_BITS);
+    memory[state.H++] = ftor;
+    memory[state.H++] = lookup_atom(message);
+    return predicate_throw(ref);
+
+}
+// File promise.js
+// Promise object in javascript encapsulates asynchronous
+// processing. The functions in this file support the integration
+// of some Promise features with Proscript.
+//
+// The basic integration with Proscript relies on foreign predicates
+// that create Promise objects, Prolog terms of the form
+// '$promise'(N) to map to these Javascript Promise objects,
+// and two foreign predicates to request results from a
+// Promise object and to handle the event (callback) when
+// the requested results are made available to the Javascript
+// runtime environment; request_promise_results/1 and
+// handle_promise_results/2, respectively.
+//
+// There is a utility Proscript predicate promise_result/2
+// that coordinates the use of request_promise_result/1 and
+// handle_promise_result/2 with suspending the WAM and
+// backtracking to restart the WAM:
+//
+// promise_result(Promise, _) :- request_result(Promise), halt.
+// promise_result(Promise, Result) :- handle_result(Promise, Result).
+//
+// The halt/0 goal suspends the WAM (stops running it), leaving
+// its evaluation state intact.
+// When the callback (established by promise_request_results/1 goal) is invoked
+// by the asynchronous request result it:
+// - caches the result value,
+// - uses the backtrack function
+// to reset the WAM instruction pointer to the second clause, and
+// - starts the WAM.
+// This WAM restart then evaluates the promise_handle_results/2 goal
+// which unifies the cached promise identifier and result value
+// with the Promise and Result arguments, respectively.
+//
+// This mechanism can be extended to allow multiple promise_request_results/1
+// goals to be evaluated prior to the halt/0 goal evaluation. In this case
+// the WAM will not be resumed until all of the requested results have
+// been returned or failed. Then promise_handle_results/2 may be used
+// to get all of these results, e.g. setof(P-R, promise_handle_results(P,R), ResultPairs).
+
+function create_promise_structure(promiseJS) {
+    return create_object_structure(promiseJS, 'promise');
+}
+
+function get_promise_object(term, ref) {
+    if(!get_object_container(term, ref)) {
+        return false;
+    }
+
+    return(ref.type === 'promise');
+}
+
+function predicate_request_result(promise) {
+    let promiseObject = {};
+    if (!get_promise_object(promise, promiseObject)) {
+        return representation_error('promise', promise);
+    }
+    let promiseJS = promiseObject.value;
+
+    promise_requests.set(promise, '');
+    // ignore promiseResultJS?
+    let promiseResultJS = request_result(promise, promiseJS);
+    return true;
+}
+
+async function request_result(promise, promiseJS) {
+    await promiseJS.then(
+        (result) => {promise_callback(promise, result);}
+    );
+
+}
+
+var promise_requests = new Map();
+var promise_results = new Map();
+var promise_description = new Map();
+
+function promise_callback(promise, result) {
+    promise_results.set(promise, result);
+    promise_requests.delete(promise);
+    if(promise_requests.size === 0) {
+        if(backtrack()){
+            if(! wam()) {
+                throw 'promise_callback failed: callback ' + promise + ' result ' + result;
+            }
+        } else {
+            throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
+        }
+    } else {
+        // waiting on one or more requests.
+    }
+}
+
+var promise_results_key_array = [];
+const memory_file_description = new Map();
+
+function predicate_handle_result(promise, result) {
+    if (TAG(promise) !== TAG_REF) {
+        let text = promise_results.get(promise);
+        if (text) {
+            let promiseIDContainer = {};
+            if(get_object_id_container(promise, promiseIDContainer)) {
+                let description = promise_description.get(promiseIDContainer.value);
+                let memory_file = create_memory_file_structure(text, description);
+                return unify(result, memory_file);
+            } else {
+                return representation_error('promise', promise);
+            }
+        } else {
+            return false;
+        }
+    }
+
+    let result_index = -1;
+    if (state.foreign_retry) {
+        result_index = state.foreign_value;
+
+    } else {
+        create_choicepoint();
+        let key_iterator = promise_results.keys();
+        promise_results_key_array = [];
+        for (let ofst = 0; ofst < promise_results.size; ofst++) {
+            promise_results_key_array.push(key_iterator.next());
+        }
+
+    }
+
+    result_index++;
+
+    let text;
+    let memory_file;
+    while(! text && result_index < promise_results_key_array.length) {
+        let promise_key = promise_results_key_array[result_index];
+        text = promise_results.get(promise_key);
+        if (text) {
+            let promiseIDContainer = {};
+            if(get_object_id_container(promise_key, promiseIDContainer)) {
+                let description = promise_description.get(promiseIDContainer.value);
+                memory_file = create_memory_file_structure(text, description);
+            } else {
+                return representation_error('promise', promise_key);
+            }
+        } else {
+            result_index++;
+        }
+    }
+
+    if(result_index < promise_results_key_array.length) {
+        update_choicepoint_data(result_index);
+        return unify(promise, promise_key) && unify(result, memory_file);
+     } else {
+        destroy_choicepoint();
+        return false;
+    }
+}
+
+function predicate_fetch_promise(url, promise) {
+    if(TAG(url) !== TAG_ATM) {
+        return type_error('atom', url);
+    }
+
+    let promiseJS = fetch_promise(atable[VAL(url)]);
+    let promisePL = create_promise_structure(promiseJS);
+    let promiseIDContainer = {};
+    if(get_object_id_container(promisePL, promiseIDContainer)) {
+        promise_description.set(promiseIDContainer.value, 'fetch ' + atable[VAL(url)]);
+        return unify(promise, promisePL);
+    } else {
+        return representation_error('promise', promisePL);
+    }
+}
+
+async function fetch_promise(urlJS) {
+    if (!urlJS.includes(".")) {
+        urlJS += ".pl";
+    }
+    const response = await fetch(urlJS);
+    return response.text();
+}
+//
+// async function consult(urls, next_goal) {
+//     // fetch all the URLs in parallel
+//     const textPromises = urls.map(async url => {
+//         if(! url.includes(".")) {
+//             url += ".pl";
+//         }
+//         const response = await fetch(url);
+//         return response.text();
+//     });
+//
+//     // compile them in sequence
+//     for (const textPromise of textPromises) {
+//         await textPromise.then(function(text){
+//             let index = text_to_memory_file(text);
+//             return "'$memory_file'(" + index + ")";
+//         }).then(function(memfile){
+//             proscript("compile_and_free_memory_file(" + memfile + ")");
+//
+//         });
+//     }
+//
+//     if(next_goal && next_goal !== '') {
+//         proscript(next_goal);
+//     }
+// }
 // File memory_files.js
 
 /* Memory files */
@@ -5434,16 +5647,132 @@ function lex(s, t)
         if (c === '\'')
         {
             // Easy. The atom is quoted!
+            //
+            // Escaped characters:
+            // '\\' becomes '\'
+            // '\n' becomes a newline character
+            // '\t' becomes a tab character.
+
             while(true)
             {
                 c = get_raw_char_with_conversion(s);
-                if (c === '\\')
+                if (c === '\\') {
                     state = (state + 1) % 2;
-                if (c === -1)
+                    if(state === 0) {
+                        buffer += c; // an escaped '\'.
+                    }
+                }
+                else if (c === -1) {
                     return syntax_error("end of file in atom");
-                if (c === '\'' && state === 0)
+                }
+                else if (c === '\'' && state === 0) {
                     break;
-                buffer += c;
+                }
+                else {
+                    if(state === 1) {
+                        state = 0; // 'c' is not a '\', so we are finished with a possibly-empty sequence of '\'.
+                        // Value of 'c' is not '\'. It is some escaped character.
+                        switch(c) {
+                            case 'n': c = '\n'; break;
+                            case 't': c = '\t'; break;
+                            case 'b': c = '\b'; break;
+                            case 'f': c = '\f'; break;
+                            case 'r': c = '\r'; break;
+                            case 'v': c = '\v'; break;
+                            case 'x': {
+                                // unicode: '\xXXXX' (legacy Edinburgh) or '\xXXXX\' (ISO spec)
+                                let unicode = '';
+                                for (let i = 0; i < 4; i++) {
+                                    c = get_raw_char_with_conversion(s);
+                                    unicode += c;
+                                }
+                                let x = peek_raw_char_with_conversion(s);
+                                if(x === '\\') {
+                                    // skip the terminating '\'
+                                    get_raw_char_with_conversion(s);
+                                }
+                                c = String.fromCharCode(parseInt(unicode, 16));
+                                break;
+                            }
+                            case 'u': {
+                                // unicode: '\uXXXX'
+                                let unicode = '';
+                                for (let i = 0; i < 4; i++) {
+                                    c = get_raw_char_with_conversion(s);
+                                    unicode += c;
+                                }
+                                c = String.fromCharCode(parseInt(unicode, 16));
+                                break;
+                            }
+                            case 'U': {
+                                // unicode: '\uXXXXXXXX'
+                                let unicode = '';
+                                for (let i = 0; i < 8; i++) {
+                                    c = get_raw_char_with_conversion(s);
+                                    unicode += c;
+                                }
+                                c = String.fromCharCode(parseInt(unicode, 16));
+                                break;
+                            }
+                            default:
+                                // For unspecified characters the escaped char
+                                // represents the char: e.g. '\k' === 'k'.
+                        }
+
+                        /*
+                        \a
+Alert character. Normally the ASCII character 7 (beep).
+\b
+Backspace character.
+\c
+No output. All input characters up to but not including the first non-layout character are skipped. This allows for the specification of pretty-looking long lines. Not supported by ISO. Example:
+format('This is a long line that looks better if it was \c
+       split across multiple physical lines in the input')
+\<NEWLINE>
+When in ISO mode (see the Prolog flag iso), only skip this sequence. In native mode, white space that follows the newline is skipped as well and a warning is printed, indicating that this construct is deprecated and advising to use \c. We advise using \c or putting the layout before the \, as shown below. Using \c is supported by various other Prolog implementations and will remain supported by SWI-Prolog. The style shown below is the most compatible solution.25
+format('This is a long line that looks better if it was \
+split across multiple physical lines in the input')
+instead of
+
+format('This is a long line that looks better if it was\
+ split across multiple physical lines in the input')
+Note that SWI-Prolog also allows unescaped newlines to appear in quoted material. This is not allowed by the ISO standard, but used to be common practice before.
+
+\e
+Escape character (ASCII 27). Not ISO, but widely supported.
+\f
+Form-feed character.
+\n
+Next-line character.
+\r
+Carriage-return only (i.e., go back to the start of the line).
+\s
+Space character. Intended to allow writing 0'\s to get the character code of the space character. Not ISO.
+\t
+Horizontal tab character.
+\v
+Vertical tab character (ASCII 11).
+\xXX..\
+Hexadecimal specification of a character. The closing \ is obligatory according to the ISO standard, but optional in SWI-Prolog to enhance compatibility with the older Edinburgh standard. The code \xa\3 emits the character 10 (hexadecimal `a') followed by `3'. Characters specified this way are interpreted as Unicode characters. See also \u.
+\uXXXX
+Unicode character specification where the character is specified using exactly 4 hexadecimal digits. This is an extension to the ISO standard, fixing two problems. First, where \x defines a numeric character code, it doesn't specify the character set in which the character should be interpreted. Second, it is not needed to use the idiosyncratic closing \ ISO Prolog syntax.
+\UXXXXXXXX
+Same as \uXXXX, but using 8 digits to cover the whole Unicode set.
+\40
+Octal character specification. The rules and remarks for hexadecimal specifications apply to octal specifications as well.
+\\
+Escapes the backslash itself. Thus, '\\' is an atom consisting of a single \.
+\'
+Single quote. Note that '\'' and '''' both describe the atom with a single ', i.e., '\'' == '''' is true.
+\"
+Double quote.
+\`
+Back quote.
+                         */
+
+                    }
+                    buffer += c;
+                }
             }
             
         }
@@ -6787,6 +7116,128 @@ function predicate_current_stream(stream)
     var ref = alloc_structure(ftor);
     memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
     return unify(stream, ref);   
+}
+// File node_files.js
+// This file is for execution under nodejs.
+// The presence of 'require' is used to indicate if the
+// current execution environment is NodeJS or not.
+//
+// Since JavascriptCore and Browser environments do not support
+// file IO, the predicate_open function just raises an exception
+// in those environments.
+
+function predicate_open (file, mode, stream, options) {
+    return engine_error('open/4 is not defined outside of nodejs.');
+}
+
+var has_require = typeof require !== 'undefined';
+if(has_require) {
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    const stream = require('stream');
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    const fs = require('fs');
+
+    function node_write_file(stream, size, count, buffer) {
+        var bytes_written = 0;
+        var records_written;
+        var file = stream.data;
+        if (size === 1) {
+            let record = new Buffer(buffer);
+            file.write(record);
+            records_written = count;
+        } else {
+            for (records_written = 0; records_written < count; records_written++) {
+                let record = new Buffer(buffer.splice(0, size));
+                file.write(record);
+
+            }
+        }
+        return records_written;
+    }
+
+    function node_close_file(stream) {
+        stream.data.end();
+        stream.data = undefined;
+        return true;
+    }
+
+    predicate_open = function (file, mode, stream, options) {
+        var index = streams.length;
+
+        if (TAG(file) === TAG_REF)
+            return instantiation_error(file);
+        if (TAG(file) !== TAG_ATM)
+            return type_error("file_path", file);
+        let fileJS = PL_get_atom_chars(file);
+
+        if (TAG(mode) === TAG_REF)
+            return instantiation_error(mode);
+        else if (TAG(mode) !== TAG_ATM)
+            return type_error("atom", mode);
+        let modeJS = PL_get_atom_chars(mode);
+
+        if (modeJS === 'read') {
+            const fileStream = fs.createReadStream(fileJS);
+            streams[index] = new_stream(node_read_file, null, null, node_close_file, null, fileStream);
+
+        } else if (atable[VAL(mode)] === 'write') {
+            const fileStream = fs.createWriteStream(fileJS);
+            streams[index] = new_stream(null, node_write_file, null, node_close_file, null, fileStream);
+        } else
+            return type_error("io_mode", mode);
+
+        var ftor = lookup_functor('$stream', 1);
+        var ref = alloc_structure(ftor);
+        memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
+        return unify(stream, ref);
+    };
+
+    function test_write_to_file() {
+        const file = fs.createWriteStream('example.txt');
+        const testData = "test data2";
+        const x = toUTF8Array(testData);
+
+        node_write_file({data: file}, 1, x.length, x);
+    }
+
+//    test_write_to_file();
+}
+// else {
+//     predicate_open = function (file, mode, stream, options) {
+//         return engine_error('open/4 is not defined outside of nodejs.');
+//     }
+// }
+
+// from https://gist.github.com/lihnux/2aa4a6f5a9170974f6aa
+
+function toUTF8Array(str) {
+    let utf8 = [];
+    for (let i = 0; i < str.length; i++) {
+        let charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+            utf8.push(0xc0 | (charcode >> 6),
+                0x80 | (charcode & 0x3f));
+        } else if (charcode < 0xd800 || charcode >= 0xe000) {
+            utf8.push(0xe0 | (charcode >> 12),
+                0x80 | ((charcode >> 6) & 0x3f),
+                0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+            i++;
+            // UTF-16 encodes 0x10000-0x10FFFF by
+            // subtracting 0x10000 and splitting the
+            // 20 bits of 0x0-0xFFFFF into two halves
+            charcode = 0x10000 + (((charcode & 0x3ff) << 10)
+                | (str.charCodeAt(i) & 0x3ff));
+            utf8.push(0xf0 | (charcode >> 18),
+                0x80 | ((charcode >> 12) & 0x3f),
+                0x80 | ((charcode >> 6) & 0x3f),
+                0x80 | (charcode & 0x3f));
+        }
+    }
+    return utf8;
 }
 // File gc.js
 function predicate_gc()
@@ -8694,215 +9145,14 @@ function decode_instruction(predicateID, codePosition) {
     return {string: (predicate + ':' + '(' + instruction + ',' + codePosition + ')'), size:instructionSize};
 
 }
-// File promise.js
-// Promise object in javascript encapsulates asynchronous
-// processing. The functions in this file support the integration
-// of some Promise features with Proscript.
-//
-// The basic integration with Proscript relies on foreign predicates
-// that create Promise objects, Prolog terms of the form
-// '$promise'(N) to map to these Javascript Promise objects,
-// and two foreign predicates to request results from a
-// Promise object and to handle the event (callback) when
-// the requested results are made available to the Javascript
-// runtime environment; request_promise_results/1 and
-// handle_promise_results/2, respectively.
-//
-// There is a utility Proscript predicate promise_result/2
-// that coordinates the use of request_promise_result/1 and
-// handle_promise_result/2 with suspending the WAM and
-// backtracking to restart the WAM:
-//
-// promise_result(Promise, _) :- request_result(Promise), halt.
-// promise_result(Promise, Result) :- handle_result(Promise, Result).
-//
-// The halt/0 goal suspends the WAM (stops running it), leaving
-// its evaluation state intact.
-// When the callback (established by promise_request_results/1 goal) is invoked
-// by the asynchronous request result it:
-// - caches the result value,
-// - uses the backtrack function
-// to reset the WAM instruction pointer to the second clause, and
-// - starts the WAM.
-// This WAM restart then evaluates the promise_handle_results/2 goal
-// which unifies the cached promise identifier and result value
-// with the Promise and Result arguments, respectively.
-//
-// This mechanism can be extended to allow multiple promise_request_results/1
-// goals to be evaluated prior to the halt/0 goal evaluation. In this case
-// the WAM will not be resumed until all of the requested results have
-// been returned or failed. Then promise_handle_results/2 may be used
-// to get all of these results, e.g. setof(P-R, promise_handle_results(P,R), ResultPairs).
-
-function create_promise_structure(promiseJS) {
-    return create_object_structure(promiseJS, 'promise');
-}
-
-function get_promise_object(term, ref) {
-    if(!get_object_container(term, ref)) {
-        return false;
-    }
-
-    return(ref.type === 'promise');
-}
-
-function predicate_request_result(promise) {
-    let promiseObject = {};
-    if (!get_promise_object(promise, promiseObject)) {
-        return representation_error('promise', promise);
-    }
-    let promiseJS = promiseObject.value;
-
-    promise_requests.set(promise, '');
-    // ignore promiseResultJS?
-    let promiseResultJS = request_result(promise, promiseJS);
-    return true;
-}
-
-async function request_result(promise, promiseJS) {
-    await promiseJS.then(
-        (result) => {promise_callback(promise, result);}
-    );
-
-}
-
-var promise_requests = new Map();
-var promise_results = new Map();
-var promise_description = new Map();
-
-function promise_callback(promise, result) {
-    promise_results.set(promise, result);
-    promise_requests.delete(promise);
-    if(promise_requests.size === 0) {
-        if(backtrack()){
-            if(! wam()) {
-                throw 'promise_callback failed: callback ' + promise + ' result ' + result;
-            }
-        } else {
-            throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
-        }
-    } else {
-        // waiting on one or more requests.
-    }
-}
-
-var promise_results_key_array = [];
-var memory_file_description = new Map();
-
-function predicate_handle_result(promise, result) {
-    if (TAG(promise) !== TAG_REF) {
-        let text = promise_results.get(promise);
-        if (text) {
-            let promiseIDContainer = {};
-            if(get_object_id_container(promise, promiseIDContainer)) {
-                let description = promise_description.get(promiseIDContainer.value);
-                let memory_file = create_memory_file_structure(text, description);
-                return unify(result, memory_file);
-            } else {
-                return representation_error('promise', promise);
-            }
-        } else {
-            return false;
-        }
-    }
-
-    let result_index = -1;
-    if (state.foreign_retry) {
-        result_index = state.foreign_value;
-
-    } else {
-        create_choicepoint();
-        let key_iterator = promise_results.keys();
-        promise_results_key_array = [];
-        for (let ofst = 0; ofst < promise_results.size; ofst++) {
-            promise_results_key_array.push(key_iterator.next());
-        }
-
-    }
-
-    result_index++;
-
-    let text;
-    let memory_file;
-    while(! text && result_index < promise_results_key_array.length) {
-        let promise_key = promise_results_key_array[result_index];
-        text = promise_results.get(promise_key);
-        if (text) {
-            let promiseIDContainer = {};
-            if(get_object_id_container(promise_key, promiseIDContainer)) {
-                let description = promise_description.get(promiseIDContainer.value);
-                memory_file = create_memory_file_structure(text, description);
-            } else {
-                return representation_error('promise', promise_key);
-            }
-        } else {
-            result_index++;
-        }
-    }
-
-    if(result_index < promise_results_key_array.length) {
-        update_choicepoint_data(result_index);
-        return unify(promise, promise_key) && unify(result, memory_file);
-     } else {
-        destroy_choicepoint();
-        return false;
-    }
-}
-
-function predicate_fetch_promise(url, promise) {
-    if(TAG(url) !== TAG_ATM) {
-        return type_error('atom', url);
-    }
-
-    let promiseJS = fetch_promise(atable[VAL(url)]);
-    let promisePL = create_promise_structure(promiseJS);
-    let promiseIDContainer = {};
-    if(get_object_id_container(promisePL, promiseIDContainer)) {
-        promise_description.set(promiseIDContainer.value, 'fetch ' + atable[VAL(url)]);
-        return unify(promise, promisePL);
-    } else {
-        return representation_error('promise', promisePL);
-    }
-}
-
-async function fetch_promise(urlJS) {
-    if (!urlJS.includes(".")) {
-        urlJS += ".pl";
-    }
-    const response = await fetch(urlJS);
-    return response.text();
-}
-//
-// async function consult(urls, next_goal) {
-//     // fetch all the URLs in parallel
-//     const textPromises = urls.map(async url => {
-//         if(! url.includes(".")) {
-//             url += ".pl";
-//         }
-//         const response = await fetch(url);
-//         return response.text();
-//     });
-//
-//     // compile them in sequence
-//     for (const textPromise of textPromises) {
-//         await textPromise.then(function(text){
-//             let index = text_to_memory_file(text);
-//             return "'$memory_file'(" + index + ")";
-//         }).then(function(memfile){
-//             proscript("compile_and_free_memory_file(" + memfile + ")");
-//
-//         });
-//     }
-//
-//     if(next_goal && next_goal !== '') {
-//         proscript(next_goal);
-//     }
-// }
 // File object.js
 var idsToObjects = new Map();
 var idsToTypes = new Map();
 var objectsToIDs = new Map();
 var goalFunctions = new Map();
+
+var dotrCursors = new Map();
+var dotrCursorCounter = 0;
 
 // create_object_structure interns a Javascript object by creating
 // a unique key string for that object and storing the relationship
@@ -9437,6 +9687,76 @@ function predicate_dom_release_object(object) {
 
     return release_object(object);
 }
+
+function predicate_dom_type_reference(type, name, standard, mdn) {
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = dotrCursors.get(cursorIDJS);
+
+    }
+    else {
+        let container = {};
+        if(!setupReferencesForType(type, container)) {
+            return false;
+        }
+        cursor = {
+            types: container.value
+        };
+        cursorIDJS = 'crs' + dotrCursorCounter++;
+        dotrCursors.set(cursorIDJS, cursor);
+        cursorIDPL = lookup_atom(cursorIDJS);
+
+        create_choicepoint();
+    }
+
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.types && cursor.types.length > 0) {
+        let typeJS = cursor.types[0];
+        cursor.types = cursor.types.slice(1); // set cursor.types to next type for retry.
+        let spec = webInterfaces.get(typeJS);
+        if(spec) {
+            let reference = spec.reference;
+            if(reference) {
+                let nameTest = reference.name;
+                let standardTest = reference.standard;
+                let mdnTest = reference.mdn;
+                if(nameTest && standardTest && mdnTest) {
+                    return unify(type, PL_put_atom_chars(typeJS)) &&
+                        unify(name, PL_put_atom_chars(nameTest)) &&
+                        unify(standard, PL_put_atom_chars(standardTest)) &&
+                        unify(mdn, PL_put_atom_chars(mdnTest));
+                } else {
+                    return engine_error('Web API Interface type ' + typeJS + ' has an incomplete specification reference section : ' + JSON.stringify(spec));
+                }
+            } else {
+                return engine_error('Web API Interface type ' + typeJS + ' has specification without a "reference" section : ' + JSON.stringify(spec));
+            }
+        } else {
+            return domain_error('web api interface type', typeJS);
+        }
+     } else {
+        destroy_choicepoint();
+        return false;
+    }
+}
+
+
+function setupReferencesForType(type, container) {
+    if (TAG(type) !== TAG_REF) {
+        let typeJS = PL_get_atom_chars(type);
+        container.value = [typeJS];
+    } else {
+        container.value = Array.from(webInterfaces.keys());
+    }
+
+    return true;
+}
 // File web_interfaces.js
 /*
 W3C Web API specifies 'APIs', 'webInterfaces', and 'mixins'.
@@ -9721,7 +10041,11 @@ var eventTargetMethodSpecs = new Map([
 webInterfaces.set('eventtarget',
     {
         name: 'eventtarget',
-        methods: eventTargetMethodSpecs
+        methods: eventTargetMethodSpecs,
+        reference: {name:'EventTarget',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#interface-eventtarget',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/EventTarget'
+        }
     });
 
 var nodeInterfaceProperties = new Map([
@@ -9758,7 +10082,11 @@ webInterfaces.set('node',
         name: 'node',
         parent: ['eventtarget'],
         properties:nodeInterfaceProperties,
-        methods:nodeMethodSpecs
+        methods:nodeMethodSpecs,
+        reference: {name:'Node',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#node',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Node'
+        }
     });
 
 var elementInterfaceProperties = new Map([
@@ -9803,7 +10131,11 @@ webInterfaces.set('element',
         name: 'element',
         parent: ['node'],
         properties:elementInterfaceProperties,
-        methods: elementMethodSpecs
+        methods: elementMethodSpecs,
+        reference: {name:'Element',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#element',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Element'
+        }
     });
 
 var htmlElementInterfaceProperties = new Map([
@@ -9898,7 +10230,11 @@ webInterfaces.set('htmlelement',
     {name: 'htmlelement',
         parent: ['element'],
         properties:htmlElementInterfaceProperties,
-        methods:htmlElementMethodSpecs
+        methods:htmlElementMethodSpecs,
+        reference: {name:'HTMLElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/dom.html#htmlelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement'
+        }
     });
 
 var htmlCanvasElementInterfaceProperties = new Map( [
@@ -9917,7 +10253,11 @@ var htmlCanvasElementMethodSpecs = new Map([
 webInterfaces.set('htmlcanvaselement',
     {name: 'htmlcanvaselement',
         properties:htmlCanvasElementInterfaceProperties,
-        methods:htmlCanvasElementMethodSpecs
+        methods:htmlCanvasElementMethodSpecs,
+        reference: {name:'HTMLCanvasElement',
+            standard:'https://www.w3.org/TR/html5/semantics-scripting.html#the-canvas-element',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement'
+        }
     });
 
 var htmlTextAreaElementInterfaceProperties = new Map( [
@@ -9961,7 +10301,11 @@ var htmlTextAreaElementMethodSpecs = new Map([
 webInterfaces.set('htmltextareaelement',
     {name: 'htmltextareaelement',
         properties:htmlTextAreaElementInterfaceProperties,
-        methods:htmlTextAreaElementMethodSpecs
+        methods:htmlTextAreaElementMethodSpecs,
+        reference: {name:'HTMLTextAreaElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmltextareaelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLTextAreaElement'
+        }
     });
 
 var htmlInputElementInterfaceProperties = new Map( [
@@ -10026,7 +10370,11 @@ var htmlInputElementMethodSpecs = new Map([
 webInterfaces.set('htmlinputelement',
     {name: 'htmlinputelement',
         properties:htmlInputElementInterfaceProperties,
-        methods:htmlInputElementMethodSpecs
+        methods:htmlInputElementMethodSpecs,
+        reference: {name:'HTMLInputElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlinputelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement'
+        }
     });
 
 var htmlSelectElementInterfaceProperties = new Map( [
@@ -10062,7 +10410,11 @@ var htmlSelectElementMethodSpecs = new Map([
 webInterfaces.set('htmlselectelement',
     {name: 'htmlselectelement',
         properties:htmlSelectElementInterfaceProperties,
-        methods:htmlSelectElementMethodSpecs
+        methods:htmlSelectElementMethodSpecs,
+        reference: {name:'HTMLSelectElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlselectelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement'
+        }
     });
 
 var htmlOptionElementInterfaceProperties = new Map( [
@@ -10082,7 +10434,11 @@ var htmlOptionElementMethodSpecs = new Map([
 webInterfaces.set('htmloptionelement',
     {name: 'htmloptionelement',
         properties:htmlOptionElementInterfaceProperties,
-        methods:htmlOptionElementMethodSpecs
+        methods:htmlOptionElementMethodSpecs,
+        reference: {name:'HTMLOptionElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmloptionelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLOptionElement'
+        }
     });
 
 
@@ -10095,7 +10451,11 @@ var htmlFormElementMethodSpecs = new Map([
 webInterfaces.set('htmlformelement',
     {name: 'htmlformelement',
         properties:htmlFormElementInterfaceProperties,
-        methods:htmlFormElementMethodSpecs
+        methods:htmlFormElementMethodSpecs,
+        reference: {name:'HTMLFormElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlformelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement'
+        }
     });
 
 var eventInterfaceProperties = new Map( [
@@ -10124,7 +10484,11 @@ var eventMethodSpecs = new Map([
 webInterfaces.set('event',
     {name: 'event',
         properties:eventInterfaceProperties,
-        methods:eventMethodSpecs
+        methods:eventMethodSpecs,
+        reference: {name:'Event',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#interface-event',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Event'
+        }
     });
 
 var cssStyleDeclarationInterfaceProperties = new Map( [
@@ -10145,7 +10509,11 @@ var cssStyleDeclarationMethodSpecs = new Map([
 webInterfaces.set('cssstyledeclaration',
     {name: 'cssstyledeclaration',
         properties:cssStyleDeclarationInterfaceProperties,
-        methods:cssStyleDeclarationMethodSpecs
+        methods:cssStyleDeclarationMethodSpecs,
+        reference: {name:'CSSStyleDeclaration',
+            standard:'https://www.w3.org/TR/cssom-1/#cssstyledeclaration',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleDeclaration'
+        }
     });
 
 var cssRuleInterfaceProperties = new Map( [
@@ -10160,7 +10528,11 @@ var cssRuleMethodSpecs = new Map([]);
 webInterfaces.set('cssrule',
     {name: 'cssrule',
         properties:cssRuleInterfaceProperties,
-        methods:cssRuleMethodSpecs
+        methods:cssRuleMethodSpecs,
+        reference: {name:'CSSRule',
+            standard:'https://www.w3.org/TR/cssom-1/#cssrule',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CSSRule'
+        }
     });
 
 var canvasRenderingContext2DInterfaceProperties = new Map( [
@@ -10234,7 +10606,11 @@ var canvasRenderingContext2DMethodSpecs = new Map([
 webInterfaces.set('canvasrenderingcontext2d',
     {name: 'canvasrenderingcontext2d',
         properties:canvasRenderingContext2DInterfaceProperties,
-        methods:canvasRenderingContext2DMethodSpecs
+        methods:canvasRenderingContext2DMethodSpecs,
+        reference: {name:'CanvasRenderingContext2D',
+            standard:'https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D'
+        }
     });
 
 var blobInterfaceProperties = new Map( [
@@ -10249,7 +10625,11 @@ var blobMethodSpecs = new Map([
 webInterfaces.set('blob',
     {name: 'blob',
         properties:blobInterfaceProperties,
-        methods:blobMethodSpecs
+        methods:blobMethodSpecs,
+        reference: {name:'Blob',
+            standard:'https://www.w3.org/TR/FileAPI/#dfn-Blob',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Blob'
+        }
     });
 
 var imageDataInterfaceProperties = new Map( [
@@ -10262,7 +10642,11 @@ var imageDataMethodSpecs = new Map([
 webInterfaces.set('imagedata',
     {name: 'imagedata',
         properties:imageDataInterfaceProperties,
-        methods:imageDataMethodSpecs
+        methods:imageDataMethodSpecs,
+        reference: {name:'ImageData',
+            standard:'https://www.w3.org/TR/2dcontext/#imagedata',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/ImageData'
+        }
     });
 
 var uint8ClampedArrayInterfaceProperties = new Map( [
@@ -10276,7 +10660,11 @@ var uint8ClampedArrayMethodSpecs = new Map([
 webInterfaces.set('uint8clampedarray',
     {name: 'uint8clampedarray',
         properties:uint8ClampedArrayInterfaceProperties,
-        methods:uint8ClampedArrayMethodSpecs
+        methods:uint8ClampedArrayMethodSpecs,
+        reference: {name:'Uint8ClampedArray',
+            standard:'https://www.ecma-international.org/ecma-262/6.0/#table-49',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Uint8ClampedArray'
+        }
     });
 
 var canvasGradientInterfaceProperties = new Map( [
@@ -10289,7 +10677,11 @@ var canvasGradientMethodSpecs = new Map([
 webInterfaces.set('canvasgradient',
     {name: 'canvasgradient',
         properties:canvasGradientInterfaceProperties,
-        methods:canvasGradientMethodSpecs
+        methods:canvasGradientMethodSpecs,
+        reference: {name:'CanvasGradient',
+            standard:'https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CanvasGradient'
+        }
     });
 
 var canvasPatternInterfaceProperties = new Map( [
@@ -10301,7 +10693,11 @@ var canvasPatternMethodSpecs = new Map([
 webInterfaces.set('canvaspattern',
     {name: 'canvaspattern',
         properties:canvasPatternInterfaceProperties,
-        methods:canvasPatternMethodSpecs
+        methods:canvasPatternMethodSpecs,
+        reference: {name:'CanvasPattern',
+            standard:'https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CanvasPattern'
+        }
     });
 
 var htmlImageElementInterfaceProperties = new Map( [
@@ -10314,7 +10710,11 @@ var htmlImageElementMethodSpecs = new Map([
 webInterfaces.set('htmlimageelement',
     {name: 'htmlimageelement',
         properties:htmlImageElementInterfaceProperties,
-        methods:htmlImageElementMethodSpecs
+        methods:htmlImageElementMethodSpecs,
+        reference: {name:'HTMLImageElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/semantics-embedded-content.html#htmlimageelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement'
+        }
     });
 
 var path2DInterfaceProperties = new Map( [
@@ -10328,7 +10728,11 @@ var path2DMethodSpecs = new Map([
 webInterfaces.set('path2d',
     {name: 'path2d',
         properties:path2DInterfaceProperties,
-        methods:path2DMethodSpecs
+        methods:path2DMethodSpecs,
+        reference: {name:'Path2D',
+            standard:'https://html.spec.whatwg.org/multipage/canvas.html#dom-path2d',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Path2D'
+        }
     });
 
 var uiEventInterfaceProperties = new Map( [
@@ -10340,7 +10744,11 @@ var uiEventMethodSpecs = new Map([
 webInterfaces.set('uievent',
     {name: 'uievent',
         properties:uiEventInterfaceProperties,
-        methods:uiEventMethodSpecs
+        methods:uiEventMethodSpecs,
+        reference: {name:'UIEvent',
+            standard:'https://www.w3.org/TR/2019/WD-uievents-20190530/#idl-uievent',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/UIEvent'
+        }
     });
 
 var mouseEventInterfaceProperties = new Map( [
@@ -10356,7 +10764,11 @@ var mouseEventMethodSpecs = new Map([
 webInterfaces.set('mouseevent',
     {name: 'mouseevent',
         properties:mouseEventInterfaceProperties,
-        methods:mouseEventMethodSpecs
+        methods:mouseEventMethodSpecs,
+        reference: {name:'MouseEvent',
+            standard:'https://www.w3.org/TR/2019/WD-uievents-20190530/#idl-mouseevent',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent'
+        }
     });
 
 var textMetricsInterfaceProperties = new Map( [
@@ -10372,7 +10784,11 @@ var textMetricsMethodSpecs = new Map([
 webInterfaces.set('textmetrics',
     {name: 'textmetrics',
         properties:textMetricsInterfaceProperties,
-        methods:textMetricsMethodSpecs
+        methods:textMetricsMethodSpecs,
+        reference: {name:'TextMetrics',
+            standard:'https://www.w3.org/TR/2dcontext/#textmetrics',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics'
+        }
     });
 
 var validityStateInterfaceProperties = new Map( [
@@ -10395,7 +10811,11 @@ var validityStateMethodSpecs = new Map([
 webInterfaces.set('validitystate',
     {name: 'validitystate',
         properties:validityStateInterfaceProperties,
-        methods:validityStateMethodSpecs
+        methods:validityStateMethodSpecs,
+        reference: {name:'ValidityState',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#validitystate',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/ValidityState'
+        }
     });
 
 var fileInterfaceProperties = new Map( [
@@ -10410,7 +10830,11 @@ var fileMethodSpecs = new Map([
 webInterfaces.set('file',
     {name: 'file',
         properties:fileInterfaceProperties,
-        methods:fileMethodSpecs
+        methods:fileMethodSpecs,
+        reference: {name:'File',
+            standard:'https://www.w3.org/TR/2019/WD-FileAPI-20190531/#dfn-file',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/File'
+        }
     });
 // File object_property.js
 

@@ -90,7 +90,7 @@ function promise_callback(promise, result) {
 }
 
 var promise_results_key_array = [];
-var memory_file_description = new Map();
+const memory_file_description = new Map();
 
 function predicate_handle_result(promise, result) {
     if (TAG(promise) !== TAG_REF) {

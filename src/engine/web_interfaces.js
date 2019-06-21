@@ -281,7 +281,11 @@ var eventTargetMethodSpecs = new Map([
 webInterfaces.set('eventtarget',
     {
         name: 'eventtarget',
-        methods: eventTargetMethodSpecs
+        methods: eventTargetMethodSpecs,
+        reference: {name:'EventTarget',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#interface-eventtarget',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/EventTarget'
+        }
     });
 
 var nodeInterfaceProperties = new Map([
@@ -318,7 +322,11 @@ webInterfaces.set('node',
         name: 'node',
         parent: ['eventtarget'],
         properties:nodeInterfaceProperties,
-        methods:nodeMethodSpecs
+        methods:nodeMethodSpecs,
+        reference: {name:'Node',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#node',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Node'
+        }
     });
 
 var elementInterfaceProperties = new Map([
@@ -363,7 +371,11 @@ webInterfaces.set('element',
         name: 'element',
         parent: ['node'],
         properties:elementInterfaceProperties,
-        methods: elementMethodSpecs
+        methods: elementMethodSpecs,
+        reference: {name:'Element',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#element',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Element'
+        }
     });
 
 var htmlElementInterfaceProperties = new Map([
@@ -458,7 +470,11 @@ webInterfaces.set('htmlelement',
     {name: 'htmlelement',
         parent: ['element'],
         properties:htmlElementInterfaceProperties,
-        methods:htmlElementMethodSpecs
+        methods:htmlElementMethodSpecs,
+        reference: {name:'HTMLElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/dom.html#htmlelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement'
+        }
     });
 
 var htmlCanvasElementInterfaceProperties = new Map( [
@@ -477,7 +493,11 @@ var htmlCanvasElementMethodSpecs = new Map([
 webInterfaces.set('htmlcanvaselement',
     {name: 'htmlcanvaselement',
         properties:htmlCanvasElementInterfaceProperties,
-        methods:htmlCanvasElementMethodSpecs
+        methods:htmlCanvasElementMethodSpecs,
+        reference: {name:'HTMLCanvasElement',
+            standard:'https://www.w3.org/TR/html5/semantics-scripting.html#the-canvas-element',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement'
+        }
     });
 
 var htmlTextAreaElementInterfaceProperties = new Map( [
@@ -521,7 +541,11 @@ var htmlTextAreaElementMethodSpecs = new Map([
 webInterfaces.set('htmltextareaelement',
     {name: 'htmltextareaelement',
         properties:htmlTextAreaElementInterfaceProperties,
-        methods:htmlTextAreaElementMethodSpecs
+        methods:htmlTextAreaElementMethodSpecs,
+        reference: {name:'HTMLTextAreaElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmltextareaelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLTextAreaElement'
+        }
     });
 
 var htmlInputElementInterfaceProperties = new Map( [
@@ -586,7 +610,11 @@ var htmlInputElementMethodSpecs = new Map([
 webInterfaces.set('htmlinputelement',
     {name: 'htmlinputelement',
         properties:htmlInputElementInterfaceProperties,
-        methods:htmlInputElementMethodSpecs
+        methods:htmlInputElementMethodSpecs,
+        reference: {name:'HTMLInputElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlinputelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement'
+        }
     });
 
 var htmlSelectElementInterfaceProperties = new Map( [
@@ -622,7 +650,11 @@ var htmlSelectElementMethodSpecs = new Map([
 webInterfaces.set('htmlselectelement',
     {name: 'htmlselectelement',
         properties:htmlSelectElementInterfaceProperties,
-        methods:htmlSelectElementMethodSpecs
+        methods:htmlSelectElementMethodSpecs,
+        reference: {name:'HTMLSelectElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlselectelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement'
+        }
     });
 
 var htmlOptionElementInterfaceProperties = new Map( [
@@ -642,7 +674,11 @@ var htmlOptionElementMethodSpecs = new Map([
 webInterfaces.set('htmloptionelement',
     {name: 'htmloptionelement',
         properties:htmlOptionElementInterfaceProperties,
-        methods:htmlOptionElementMethodSpecs
+        methods:htmlOptionElementMethodSpecs,
+        reference: {name:'HTMLOptionElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmloptionelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLOptionElement'
+        }
     });
 
 
@@ -655,7 +691,11 @@ var htmlFormElementMethodSpecs = new Map([
 webInterfaces.set('htmlformelement',
     {name: 'htmlformelement',
         properties:htmlFormElementInterfaceProperties,
-        methods:htmlFormElementMethodSpecs
+        methods:htmlFormElementMethodSpecs,
+        reference: {name:'HTMLFormElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlformelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement'
+        }
     });
 
 var eventInterfaceProperties = new Map( [
@@ -684,7 +724,11 @@ var eventMethodSpecs = new Map([
 webInterfaces.set('event',
     {name: 'event',
         properties:eventInterfaceProperties,
-        methods:eventMethodSpecs
+        methods:eventMethodSpecs,
+        reference: {name:'Event',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#interface-event',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Event'
+        }
     });
 
 var cssStyleDeclarationInterfaceProperties = new Map( [
@@ -705,7 +749,11 @@ var cssStyleDeclarationMethodSpecs = new Map([
 webInterfaces.set('cssstyledeclaration',
     {name: 'cssstyledeclaration',
         properties:cssStyleDeclarationInterfaceProperties,
-        methods:cssStyleDeclarationMethodSpecs
+        methods:cssStyleDeclarationMethodSpecs,
+        reference: {name:'CSSStyleDeclaration',
+            standard:'https://www.w3.org/TR/cssom-1/#cssstyledeclaration',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleDeclaration'
+        }
     });
 
 var cssRuleInterfaceProperties = new Map( [
@@ -720,7 +768,11 @@ var cssRuleMethodSpecs = new Map([]);
 webInterfaces.set('cssrule',
     {name: 'cssrule',
         properties:cssRuleInterfaceProperties,
-        methods:cssRuleMethodSpecs
+        methods:cssRuleMethodSpecs,
+        reference: {name:'CSSRule',
+            standard:'https://www.w3.org/TR/cssom-1/#cssrule',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CSSRule'
+        }
     });
 
 var canvasRenderingContext2DInterfaceProperties = new Map( [
@@ -794,7 +846,11 @@ var canvasRenderingContext2DMethodSpecs = new Map([
 webInterfaces.set('canvasrenderingcontext2d',
     {name: 'canvasrenderingcontext2d',
         properties:canvasRenderingContext2DInterfaceProperties,
-        methods:canvasRenderingContext2DMethodSpecs
+        methods:canvasRenderingContext2DMethodSpecs,
+        reference: {name:'CanvasRenderingContext2D',
+            standard:'https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D'
+        }
     });
 
 var blobInterfaceProperties = new Map( [
@@ -809,7 +865,11 @@ var blobMethodSpecs = new Map([
 webInterfaces.set('blob',
     {name: 'blob',
         properties:blobInterfaceProperties,
-        methods:blobMethodSpecs
+        methods:blobMethodSpecs,
+        reference: {name:'Blob',
+            standard:'https://www.w3.org/TR/FileAPI/#dfn-Blob',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Blob'
+        }
     });
 
 var imageDataInterfaceProperties = new Map( [
@@ -822,7 +882,11 @@ var imageDataMethodSpecs = new Map([
 webInterfaces.set('imagedata',
     {name: 'imagedata',
         properties:imageDataInterfaceProperties,
-        methods:imageDataMethodSpecs
+        methods:imageDataMethodSpecs,
+        reference: {name:'ImageData',
+            standard:'https://www.w3.org/TR/2dcontext/#imagedata',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/ImageData'
+        }
     });
 
 var uint8ClampedArrayInterfaceProperties = new Map( [
@@ -836,7 +900,11 @@ var uint8ClampedArrayMethodSpecs = new Map([
 webInterfaces.set('uint8clampedarray',
     {name: 'uint8clampedarray',
         properties:uint8ClampedArrayInterfaceProperties,
-        methods:uint8ClampedArrayMethodSpecs
+        methods:uint8ClampedArrayMethodSpecs,
+        reference: {name:'Uint8ClampedArray',
+            standard:'https://www.ecma-international.org/ecma-262/6.0/#table-49',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Uint8ClampedArray'
+        }
     });
 
 var canvasGradientInterfaceProperties = new Map( [
@@ -849,7 +917,11 @@ var canvasGradientMethodSpecs = new Map([
 webInterfaces.set('canvasgradient',
     {name: 'canvasgradient',
         properties:canvasGradientInterfaceProperties,
-        methods:canvasGradientMethodSpecs
+        methods:canvasGradientMethodSpecs,
+        reference: {name:'CanvasGradient',
+            standard:'https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CanvasGradient'
+        }
     });
 
 var canvasPatternInterfaceProperties = new Map( [
@@ -861,7 +933,11 @@ var canvasPatternMethodSpecs = new Map([
 webInterfaces.set('canvaspattern',
     {name: 'canvaspattern',
         properties:canvasPatternInterfaceProperties,
-        methods:canvasPatternMethodSpecs
+        methods:canvasPatternMethodSpecs,
+        reference: {name:'CanvasPattern',
+            standard:'https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CanvasPattern'
+        }
     });
 
 var htmlImageElementInterfaceProperties = new Map( [
@@ -874,7 +950,11 @@ var htmlImageElementMethodSpecs = new Map([
 webInterfaces.set('htmlimageelement',
     {name: 'htmlimageelement',
         properties:htmlImageElementInterfaceProperties,
-        methods:htmlImageElementMethodSpecs
+        methods:htmlImageElementMethodSpecs,
+        reference: {name:'HTMLImageElement',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/semantics-embedded-content.html#htmlimageelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement'
+        }
     });
 
 var path2DInterfaceProperties = new Map( [
@@ -888,7 +968,11 @@ var path2DMethodSpecs = new Map([
 webInterfaces.set('path2d',
     {name: 'path2d',
         properties:path2DInterfaceProperties,
-        methods:path2DMethodSpecs
+        methods:path2DMethodSpecs,
+        reference: {name:'Path2D',
+            standard:'https://html.spec.whatwg.org/multipage/canvas.html#dom-path2d',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Path2D'
+        }
     });
 
 var uiEventInterfaceProperties = new Map( [
@@ -900,7 +984,11 @@ var uiEventMethodSpecs = new Map([
 webInterfaces.set('uievent',
     {name: 'uievent',
         properties:uiEventInterfaceProperties,
-        methods:uiEventMethodSpecs
+        methods:uiEventMethodSpecs,
+        reference: {name:'UIEvent',
+            standard:'https://www.w3.org/TR/2019/WD-uievents-20190530/#idl-uievent',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/UIEvent'
+        }
     });
 
 var mouseEventInterfaceProperties = new Map( [
@@ -916,7 +1004,11 @@ var mouseEventMethodSpecs = new Map([
 webInterfaces.set('mouseevent',
     {name: 'mouseevent',
         properties:mouseEventInterfaceProperties,
-        methods:mouseEventMethodSpecs
+        methods:mouseEventMethodSpecs,
+        reference: {name:'MouseEvent',
+            standard:'https://www.w3.org/TR/2019/WD-uievents-20190530/#idl-mouseevent',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent'
+        }
     });
 
 var textMetricsInterfaceProperties = new Map( [
@@ -932,7 +1024,11 @@ var textMetricsMethodSpecs = new Map([
 webInterfaces.set('textmetrics',
     {name: 'textmetrics',
         properties:textMetricsInterfaceProperties,
-        methods:textMetricsMethodSpecs
+        methods:textMetricsMethodSpecs,
+        reference: {name:'TextMetrics',
+            standard:'https://www.w3.org/TR/2dcontext/#textmetrics',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics'
+        }
     });
 
 var validityStateInterfaceProperties = new Map( [
@@ -955,7 +1051,11 @@ var validityStateMethodSpecs = new Map([
 webInterfaces.set('validitystate',
     {name: 'validitystate',
         properties:validityStateInterfaceProperties,
-        methods:validityStateMethodSpecs
+        methods:validityStateMethodSpecs,
+        reference: {name:'ValidityState',
+            standard:'https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#validitystate',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/ValidityState'
+        }
     });
 
 var fileInterfaceProperties = new Map( [
@@ -970,5 +1070,9 @@ var fileMethodSpecs = new Map([
 webInterfaces.set('file',
     {name: 'file',
         properties:fileInterfaceProperties,
-        methods:fileMethodSpecs
+        methods:fileMethodSpecs,
+        reference: {name:'File',
+            standard:'https://www.w3.org/TR/2019/WD-FileAPI-20190531/#dfn-file',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/File'
+        }
     });

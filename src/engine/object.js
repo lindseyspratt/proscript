@@ -3,6 +3,9 @@ var idsToTypes = new Map();
 var objectsToIDs = new Map();
 var goalFunctions = new Map();
 
+var dotrCursors = new Map();
+var dotrCursorCounter = 0;
+
 // create_object_structure interns a Javascript object by creating
 // a unique key string for that object and storing the relationship
 // between that key and the object in two global static Map objects.
@@ -535,4 +538,76 @@ function predicate_dom_release_object(object) {
     }
 
     return release_object(object);
+}
+
+function predicate_dom_type_reference(type, name, standard, mdn) {
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = dotrCursors.get(cursorIDJS);
+
+        debug_msg("Is retry! Setting cursor back to " + cursor);
+    }
+    else {
+        let container = {};
+        if(!setupReferencesForType(type, container)) {
+            return false;
+        }
+        cursor = {
+            types: container.value
+        };
+        cursorIDJS = 'crs' + dotrCursorCounter++;
+        dotrCursors.set(cursorIDJS, cursor);
+        cursorIDPL = lookup_atom(cursorIDJS);
+
+        debug_msg("Not a retry");
+        create_choicepoint();
+    }
+
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.types && cursor.types.length > 0) {
+        let typeJS = cursor.types[0];
+        cursor.types = cursor.types.slice(1); // set cursor.types to next type for retry.
+        let spec = webInterfaces.get(typeJS);
+        if(spec) {
+            let reference = spec.reference;
+            if(reference) {
+                let nameTest = reference.name;
+                let standardTest = reference.standard;
+                let mdnTest = reference.mdn;
+                if(nameTest && standardTest && mdnTest) {
+                    return unify(type, PL_put_atom_chars(typeJS)) &&
+                        unify(name, PL_put_atom_chars(nameTest)) &&
+                        unify(standard, PL_put_atom_chars(standardTest)) &&
+                        unify(mdn, PL_put_atom_chars(mdnTest));
+                } else {
+                    return engine_error('Web API Interface type ' + typeJS + ' has an incomplete specification reference section : ' + JSON.stringify(spec));
+                }
+            } else {
+                return engine_error('Web API Interface type ' + typeJS + ' has specification without a "reference" section : ' + JSON.stringify(spec));
+            }
+        } else {
+            return domain_error('web api interface type', typeJS);
+        }
+     } else {
+        destroy_choicepoint();
+        return false;
+    }
+}
+
+
+function setupReferencesForType(type, container) {
+    if (TAG(type) !== TAG_REF) {
+        let typeJS = PL_get_atom_chars(type);
+        container.value = [typeJS];
+    } else {
+        container.value = Array.from(webInterfaces.keys());
+    }
+
+    return true;
 }

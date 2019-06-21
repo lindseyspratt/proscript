@@ -67,7 +67,7 @@ Some gotchas:
 
 */
 
-:-module(wam_compiler, [build_saved_state/2, build_saved_state/3, bootstrap/2, bootstrap/3, op(920, fy, ?), op(920, fy, ??)]).
+:-module(wam_compiler, [build_saved_state/2, build_saved_state/3, bootstrap/2, bootstrap/3, bootstrap/4, op(920, fy, ?), op(920, fy, ??)]).
 :-ensure_loaded('../tools/testing').
 :-ensure_loaded('../tools/wam_bootstrap').
 :-ensure_loaded(url).
@@ -1144,17 +1144,20 @@ repl_1(Atom):-
         write_list(['(', Duration, 'ms)'], ''),
         writeln('').
 
+write_list(List, Separator) :-
+    current_output(Stream),
+    write_list(List, Separator, Stream).
 
-write_list([], _).
-write_list([H|T], Separator) :-
-        write(H),
-        write_list1(T, Separator).
+write_list([], _, _).
+write_list([H|T], Separator, Stream) :-
+        write(Stream, H),
+        write_list1(T, Separator, Stream).
 
-write_list1([], _).
-write_list1([H|T], Separator) :-
-        write(Separator),
-        write(H),
-        write_list1(T, Separator).
+write_list1([], _, _).
+write_list1([H|T], Separator, Stream) :-
+        write(Stream, Separator),
+        write(Stream, H),
+        write_list1(T, Separator, Stream).
 
 call_atom(QueryAtom, Bindings) :-
     atom_to_term(QueryAtom, Query, Bindings),

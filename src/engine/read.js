@@ -982,16 +982,132 @@ function lex(s, t)
         if (c === '\'')
         {
             // Easy. The atom is quoted!
+            //
+            // Escaped characters:
+            // '\\' becomes '\'
+            // '\n' becomes a newline character
+            // '\t' becomes a tab character.
+
             while(true)
             {
                 c = get_raw_char_with_conversion(s);
-                if (c === '\\')
+                if (c === '\\') {
                     state = (state + 1) % 2;
-                if (c === -1)
+                    if(state === 0) {
+                        buffer += c; // an escaped '\'.
+                    }
+                }
+                else if (c === -1) {
                     return syntax_error("end of file in atom");
-                if (c === '\'' && state === 0)
+                }
+                else if (c === '\'' && state === 0) {
                     break;
-                buffer += c;
+                }
+                else {
+                    if(state === 1) {
+                        state = 0; // 'c' is not a '\', so we are finished with a possibly-empty sequence of '\'.
+                        // Value of 'c' is not '\'. It is some escaped character.
+                        switch(c) {
+                            case 'n': c = '\n'; break;
+                            case 't': c = '\t'; break;
+                            case 'b': c = '\b'; break;
+                            case 'f': c = '\f'; break;
+                            case 'r': c = '\r'; break;
+                            case 'v': c = '\v'; break;
+                            case 'x': {
+                                // unicode: '\xXXXX' (legacy Edinburgh) or '\xXXXX\' (ISO spec)
+                                let unicode = '';
+                                for (let i = 0; i < 4; i++) {
+                                    c = get_raw_char_with_conversion(s);
+                                    unicode += c;
+                                }
+                                let x = peek_raw_char_with_conversion(s);
+                                if(x === '\\') {
+                                    // skip the terminating '\'
+                                    get_raw_char_with_conversion(s);
+                                }
+                                c = String.fromCharCode(parseInt(unicode, 16));
+                                break;
+                            }
+                            case 'u': {
+                                // unicode: '\uXXXX'
+                                let unicode = '';
+                                for (let i = 0; i < 4; i++) {
+                                    c = get_raw_char_with_conversion(s);
+                                    unicode += c;
+                                }
+                                c = String.fromCharCode(parseInt(unicode, 16));
+                                break;
+                            }
+                            case 'U': {
+                                // unicode: '\uXXXXXXXX'
+                                let unicode = '';
+                                for (let i = 0; i < 8; i++) {
+                                    c = get_raw_char_with_conversion(s);
+                                    unicode += c;
+                                }
+                                c = String.fromCharCode(parseInt(unicode, 16));
+                                break;
+                            }
+                            default:
+                                // For unspecified characters the escaped char
+                                // represents the char: e.g. '\k' === 'k'.
+                        }
+
+                        /*
+                        \a
+Alert character. Normally the ASCII character 7 (beep).
+\b
+Backspace character.
+\c
+No output. All input characters up to but not including the first non-layout character are skipped. This allows for the specification of pretty-looking long lines. Not supported by ISO. Example:
+format('This is a long line that looks better if it was \c
+       split across multiple physical lines in the input')
+\<NEWLINE>
+When in ISO mode (see the Prolog flag iso), only skip this sequence. In native mode, white space that follows the newline is skipped as well and a warning is printed, indicating that this construct is deprecated and advising to use \c. We advise using \c or putting the layout before the \, as shown below. Using \c is supported by various other Prolog implementations and will remain supported by SWI-Prolog. The style shown below is the most compatible solution.25
+format('This is a long line that looks better if it was \
+split across multiple physical lines in the input')
+instead of
+
+format('This is a long line that looks better if it was\
+ split across multiple physical lines in the input')
+Note that SWI-Prolog also allows unescaped newlines to appear in quoted material. This is not allowed by the ISO standard, but used to be common practice before.
+
+\e
+Escape character (ASCII 27). Not ISO, but widely supported.
+\f
+Form-feed character.
+\n
+Next-line character.
+\r
+Carriage-return only (i.e., go back to the start of the line).
+\s
+Space character. Intended to allow writing 0'\s to get the character code of the space character. Not ISO.
+\t
+Horizontal tab character.
+\v
+Vertical tab character (ASCII 11).
+\xXX..\
+Hexadecimal specification of a character. The closing \ is obligatory according to the ISO standard, but optional in SWI-Prolog to enhance compatibility with the older Edinburgh standard. The code \xa\3 emits the character 10 (hexadecimal `a') followed by `3'. Characters specified this way are interpreted as Unicode characters. See also \u.
+\uXXXX
+Unicode character specification where the character is specified using exactly 4 hexadecimal digits. This is an extension to the ISO standard, fixing two problems. First, where \x defines a numeric character code, it doesn't specify the character set in which the character should be interpreted. Second, it is not needed to use the idiosyncratic closing \ ISO Prolog syntax.
+\UXXXXXXXX
+Same as \uXXXX, but using 8 digits to cover the whole Unicode set.
+\40
+Octal character specification. The rules and remarks for hexadecimal specifications apply to octal specifications as well.
+\\
+Escapes the backslash itself. Thus, '\\' is an atom consisting of a single \.
+\'
+Single quote. Note that '\'' and '''' both describe the atom with a single ', i.e., '\'' == '''' is true.
+\"
+Double quote.
+\`
+Back quote.
+                         */
+
+                    }
+                    buffer += c;
+                }
             }
             
         }

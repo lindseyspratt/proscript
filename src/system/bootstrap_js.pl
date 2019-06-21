@@ -290,7 +290,7 @@ bagof(A,B,C):- bag_of(A,B,C).
 % set_input/1 (foreign)
 % set_output/1 (foreign)
 open(Resource, Mode, Stream):- open(Resource, Mode, Stream, []).
-open(_,_,_,_):- throw(no_files_in_javascript). % FIXME
+%open(_,_,_,_):- throw(no_files_in_javascript). % defined as foreign predicate for nodejs, undefined for browser.
 % close/2 (foreign)
 close(Stream):- close(Stream, []).
 flush_output:- current_output(S), flush_output(S).

@@ -1,0 +1,417 @@
+<div id="doc">
+    <h1>Documentation for ProscriptLS</h1>
+    <div id="reference">
+        <h2>Reference</h2>
+        This reference documentation is for the aspects of ProscriptLS that differ from ISO Prolog.
+        <ul>
+            <li id="using_proscriptls">
+                <h3>Using ProscriptLS programs in a web browser:</h3>
+                There are three parts to using a Prolog predicate in a browser.
+                <ul>
+                    <li>
+                        Load the proscriptls.js library:
+                        <pre class="html"><code>
+&lt;script type="text/javascript" src="PROSCRIPTLS_git/dist/proscriptls.js"> &lt;/script></code></pre>
+                        This library includes the ProscriptLS compiler.
+                    </li>
+                    <li>
+                        Define ProscriptLS/Prolog program:
+                        <pre class="html"><code>
+&lt;script type="text/prolog">PROLOG_SOURCE&lt;/script> </code></pre>
+                        or
+                        <pre class="html"><code>
+&lt;script type="text/prolog" src="PATH_TO_PROLOG_SOURCE"&lt;/script></code></pre>
+                        This PROLOG_SOURCE will be compiled to WAM (Warren Abstract Machine) byte codes when the
+                        proscript_init
+                        function is evaluated.
+                        These byte codes are interpreted by the WAM engine in the procriptls.js library.
+                    </li>
+                    <li>
+                        Run proscript_init() function:
+                        <pre class="html"><code>
+&lt;body onload="proscript_init();"> BODY &lt;/body></code></pre>
+                        proscript_init() sets up the Prolog state including the core system predicates.
+                        Also it finds all of the script elements with type 'text/prolog' and compiles the
+                        associated sources.
+                    </li>
+                </ul>
+                There appears to be an order-sensitivity in the layout of the HTML:
+                the prolog script element should be at the end of the body element.
+            </li>
+            <li id="library">
+                <h3>Library:</h3> there is a collection of ProscriptLS source files that provide a library of programs.
+                These are in PROSCRIPTLS_git/library.
+
+                Some of these files are from the Edinburgh DEC-10 Prolog as found
+                at <a href="http://www.j-paine.org/prolog/library.html">http://www.j-paine.org/prolog/library.html</a>
+                <ul>
+                    <li>between.pl:
+                        From Edinburgh DEC-10 library.
+                        <ul>
+                            <li> between(+L, +U, ?N): True for all integers N between L (lower) and U (upper).
+                                If N is unbound on evaluation then it is generated in order from L to U (repeating on
+                                failure).
+                            </li>
+                            <li> gen_arg(?N, +Term, ?Arg):
+                                is exactly like arg(N, Term, Arg), except that it will generate
+                                solutions for N by backtracking (will work when N is a variable).
+                            </li>
+                            <li> gen_nat/1, gen_nat/2, gen_int/1: generate integers.
+                                Originally by R O'Keefe.
+                                <ul>
+                                    <li>gen_nat(+X): True if X is a natural number, false otherwise</li>
+                                    <li>gen_nat(-X): Instantiates X to 0, then 1, 2, 3, 4...</li>
+                                    <li>gen_nat(+L,-N): Instantiates N to L, then L+1, L+2...</li>
+                                    <li>gen_nat(+L,+N): True if N >= L</li>
+                                    <li>gen_nat(-L,+N): ** Succeeds with L = N , then LOOPS **</li>
+
+                                    <li>gen_int(-X) Instantiates X to 0, then 1, -1, 2, -2, 3, -3...</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>data_predicate.pl:
+
+                        The data predicate system supports storing instances of a type of data
+                        where each instance has a collection of attributes. The data is stored
+                        as assertions of the form &lt;type>_&lt;attribute>(ID, Value). The data_predicate
+                        file contains predicates to manage creating these dynamic predicates from a
+                        specification and predicates to add an instance with attribute values
+                        to a defined type.
+                    </li>
+                    <li>dom.pl:
+                        <ul>
+                            <li>
+                                set_dom_name_path_value/2: set the value associated with HTML nodes that
+                                satisfy the given node name path. A path is a list of names where each name
+                                is a list of character codes. The nodes on the path may not be sequential
+                                (i.e. have a direct parent-child relationship).
+                            </li>
+                        </ul>
+                    </li>
+                    <li>listut.pl:
+                        From Edinburgh DEC-10 library.
+                        <ul>
+                            <li>correspond/4</li>
+                            <li>delete/3</li>
+                            <li>last/2</li>
+                            <li>nextto/3</li>
+                            <li>nmember/3</li>
+                            <li>nmembers/3</li>
+                            <li>nth0/3</li>
+                            <li>nth0/4</li>
+                            <li>nth1/3</li>
+                            <li>nth1/4</li>
+                            <li>numlist/3</li>
+                            <li>perm/2</li>
+                            <li>perm2/4</li>
+                            <li>remove_dups/2</li>
+                            <li>rev/2</li>
+                            <li>reverse/2</li>
+                            <li>same_length/2</li>
+                            <li>select/4</li>
+                            <li>shorter_list/2</li>
+                            <li>subseq/3</li>
+                            <li>subseq0/2</li>
+                            <li>subseq1/2</li>
+                            <li>sumlist/2</li>
+                        </ul>
+                    </li>
+                    <li>listut2.pl:
+                        Additional list utility predicates created for Proscript.
+                        <ul>
+                            <li>select_list/4</li>
+                            <li>contains_list/2</li>
+                            <li>split_list/4</li>
+                            <li>lowercase/2</li>
+                            <li>uppercase/2</li>
+                        </ul>
+                    </li>
+                    <li id="object.pl">object.pl:
+                        Defines a simple syntax for working with the DOM Web API interfaces.
+                        The main operator is '>>'. The first argument is an object and the second
+                        argument is a list of property get/set operations, methods, or goals
+                        to apply to that object.
+                        For instance to reference the HTMLCanvasElement with id 'canvas' and
+                        get the 2D context for that element:
+                        <pre class="html"><code>
+Canvas >> [id -:> canvas, getContext('2d') *:> Ctx]. </code></pre>
+                    </li>
+                    <li>setutl.pl
+                        From Edinburgh DEC-10 library.
+                        <ul>
+                            <li>add_element/3</li>
+                            <li>del_element/3</li>
+                            <li>disjoint/1</li>
+                            <li>disjoint/2</li>
+                            <li>intersect/2</li>
+                            <li>intersect/3</li>
+                            <li>listtoset/2</li>
+                            <li>memberchk/2</li>
+                            <li>nonmember/2</li>
+                            <li>pairfrom/4</li>
+                            <li>select/3</li>
+                            <li>seteq/2</li>
+                            <li>subset/2</li>
+                            <li>subtract/3</li>
+                            <li>symdiff/3</li>
+                            <li>union/3</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li id="debugger">
+                <h3>Debugger:</h3> There is a command-line debugger that supports stepping through the evaluation of a
+                ProscriptLS program.
+                This debugger is run from a browser. It uses JQuery.terminal to provide the command line environment.
+                <br>
+                The debugger files are in PROSCRIPTLS_git/terminal.
+                The HTML page must be set up as described above with the proscriptls.js library and an invocation of the
+                proscript_init() Javascript method.
+                <br>
+                There are three more steps specific to setting up the terminal as a ProscriptLS interpreter:
+                <ul>
+                    <li>
+                        Get the JQuery terminal files:
+                        <pre ><code class="html">
+&lt;script src="jquery-3.3.1.js">&lt;/script>
+&lt;script src="jquery_terminal.js">&lt;/script>
+&lt;link href="jquery_terminal.css" rel="stylesheet"/></code></pre>
+                        (These elements may be in the HTML header element.)
+                    </li>
+                    <li>
+                        Get the ProscriptLS interpreter library:
+                        <pre><code class="html">
+&lt;script type="text/javascript" src="proscript_interpreter_terminal.js">&lt;/script></code></pre>
+                    </li>
+                    <li>
+                        Create a DIV element with ID 'proscriptinterpreter'.
+                        This element will display the command line console of the interpreter.
+                        <pre><code class="html">
+&lt;div id="proscriptinterpreter">&lt;/div></code></pre>
+                    </li>
+                </ul>
+            </li>
+            <li id="objects">
+                <h3>Javascript and HTML objects</h3>
+                There are a number of types of Javascript objects that are supported by ProscriptLS.
+                Most of the supported types of objects implement W3C HTML Web API interfaces.
+                In addition there is the Promise object used in supporting asynchronous evaluations.
+                <br>
+                The ProscriptLS support for Javascript objects is exposed through a collection of builtin predicates.
+                In addition there is a convenience syntax defined in the <a href="#object.pl">object.pl</a> library file
+                to simplify working with objects.
+                <div id="web_api">
+                    <h4>W3C Web API</h4>
+                    The HTML Web API defined by W3C specifies many interfaces.
+                    These interfaces are implemented in Javascript in web browsers as Javascript objects.
+                    The primary reference is <a href="https://www.w3.org/TR/2017/REC-html52-20171214/">HTML 5.2</a>.
+                    Other references include:
+                    <a href="https://www.w3.org/TR/2015/REC-dom-20151119/">W3C DOM4</a>,
+                    <a href="https://www.w3.org/TR/2dcontext/">HTML Canvas 2D Context</a> for
+                    the Canvas2DRenderingContext interface,
+                    <a href=https://www.w3.org/TR/cssom-1">CSS Object Model</a>,
+                    <a href="https://fetch.spec.whatwg.org">Fetch API</a> that defines the semantics for the Javascript
+                    window.fetch() method, and
+                    <a href="https://www.w3.org/TR/2019/WD-FileAPI-20190531/">FileAPI</a> for accessing files.
+                    <p>
+                    Several Web API Interfaces are implemented as ProscriptLS object types.
+                    Each interface has a corresonding ProscriptLS type that is the lowercase version of the interface name.
+                    </p>
+                    <ul>
+                        {{template_file('type_references.template', [])}}
+                    </ul>
+                </div>
+                <div id="object_language">
+                    <h4>Object Language</h4>
+                    The Proscript object language provides a concise way
+                    to access object properties, methods and Element
+                    object attributes.
+                    There are operators for accessing these things individually
+                    and for accessing sequences of these things.
+                    <ul>
+                        <li>
+                            <code class="prolog inline">>->/2</code> applies an <span style="font-style: italic">attribute</span> operation to
+                            an object:
+                            <ul>
+                                <li><code class="prolog inline">Obj >-> A :> V</code>
+                                    gets value V for attribute A of object Obj.
+                                </li>
+                                <li><code class="prolog inline">Obj >-> A &lt;: V </code>
+                                    sets value V for attribute A of object Obj.
+                                </li>
+                                <li><code class="prolog inline">Obj >-> [X1, ..., Xn]</code>
+                                    applies Xi attribute operation in order to Obj.
+                                    Each Xi is either <code>(A :> V)</code> or <code>(A &lt;: V)</code>. E.g.
+                                    <code>Obj >-> [a :> AV, b &lt;: 1, c:> CV].</code>
+                            </ul>
+                        </li>
+                        <li>
+                            <code class="prolog inline">>+>/2</code> applies a <span style="font-style: italic">property</span> operation to
+                            an object:
+                            <ul>
+                                <li><code class="prolog inline">Obj >+> P :> V</code>
+                                    gets value V for property P of object Obj.
+                                </li>
+                                <li><code class="prolog inline">Obj >+> P &lt;: V</code>
+                                    sets value V for property P of object Obj.
+                                </li>
+                                <li><code class="prolog inline">Obj >+> [X1, ..., Xn]</code>
+                                    applies Xi property operation in order to Obj.
+                                    Each Xi is either <code>(P :> V)</code> or <code>(P &lt;: V)</code>. E.g.
+                                    <code class="prolog inline">Obj >+> [a :> AV, b &lt;: 1, c:> CV].</code>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <code class="prolog inline">>*>/2</code> applies a <span style="font-style: italic">method</span> operation to an
+                            object:
+                            <ul>
+                                <li><code class="prolog inline">Obj >*> M :> V</code>
+                                    gets value V for method M of object Obj.
+                                </li>
+                                <li><code class="prolog inline">Obj >*> M</code>
+                                    evaluates method M of object Obj. There is no result value.
+                                </li>
+                                <li><code class="prolog inline">Obj >*> [X1, ..., Xn]</code>
+                                    applies Xi method operation in order to Obj.
+                                    Each Xi is either <code>(M :> V)</code> or <code>(M)</code>. E.g.
+                                    <code class="prolog inline">Obj >*> [a :> AV, b(1, 2) :> BV, c].</code>
+                                </li>
+                                A method may be a single atom such as 'beginPath'
+                                or a structure such as 'moveTo(200, 20)'.
+                            </ul>
+                        </li>
+                        <li>
+                            <code  class="prolog inline">>@>/2</code> applies a <span style="font-style: italic">Prolog goal</span> to an object
+                            where the last argument to the goal is the object:
+                            <ul>
+                                <li><code class="prolog inline">Obj >@> G</code>
+                                    invokes call(G, Obj)
+                                </li>
+
+                                <li><code class="prolog inline">Obj >@> [X1, ..., Xn]</code>
+                                    applies Xi goal in order to Obj. E.g.
+                                    <code class="prolog inline">Obj >@> [a, b(1, 2)].</code>
+                                </li>
+                            </ul>
+                            A goal may be a single atom such as 'foo'
+                            or a structure such as 'bar(200, 20)'. These are evaluated using call/2:
+                            <code class="prolog inline">call(foo, Obj)</code> or <code>call(bar(200, 20), Obj)</code>.
+                            These calls are the same as evaluating <code>foo(Obj)</code> or <code>bar(200, 20,
+                            Obj)</code>.
+                        </li>
+                        <li><code class="prolog inline">>>/2</code> applies <span style="font-style: italic">any combination</span> of
+                            attribute get/set, property get/set, and method operations.
+                            <ul>
+                                <li>
+                                    <code class="prolog inline">Obj >> * M</code>
+                                    applies method(s) M to Obj.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> - AV</code>
+                                    applies attribute operation(s) AV to Obj. AV is either <code class="prolog inline">(A :> V)</code> or
+                                    <code class="prolog inline">(A &lt;: V)</code>.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> + PV</code>
+                                    applies property operation(s) PV to Obj. PV is either <code class="prolog inline">(P :> V)</code> or
+                                    <code class="prolog inline">(P &lt;: V)</code>.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> @ G</code>
+                                    applies goal(s) G to Obj.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> A -:> V</code>
+                                    applies attribute operation <code class="prolog inline">(A :> V)</code> to Obj.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> A &lt;:- V</code>
+                                    applies attribute operation <code class="prolog inline">(A &lt;: V)</code> to Obj.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> P +:> V</code>
+                                    applies property operation <code class="prolog inline">(P :> V)</code> to Obj.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> P &lt;:+ V</code>
+                                    applies property operation <code class="prolog inline">(P &lt;: V)</code> to Obj.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> M *:> V</code>
+                                    applies method operation <code class="prolog inline">(M :> V)</code> to Obj.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> M</code> (where M is none of the above, is not = (_ :> _), and is not a
+                                    list)
+                                    applies method Operation M to Obj.
+                                </li>
+                                <li>
+                                    <code class="prolog inline">Obj >> [X1, X2,...]</code> applies X1 to Obj, then X2 to Obj, and so on.
+                                    If the X1 operation is an attribute value specification that identifies
+                                    an object (such as (id -:> canvas)), then Obj may be unbound initially.
+                                    It will be bound by X1, and the bound Obj will be used for subsequent applications
+                                    of Xi.
+                                    The Xi may be any of the above forms: * M, - AV, + PV, @ G, A -:> V, A &lt;:- V,
+                                    P +:> V, P &lt;:+ V, and M *:> V. Xi may also be a list.
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    An example:
+                    <pre><code class="prolog">
+on_click :-
+    _ >> [id -:> select, selectedIndex +:> Index, item(Index) *:> Option],
+    Option >+> value :> Name,
+    show_likes(Name). </code></pre>
+                    The use of '>>' finds an object with id = 'select', then gets the selectedIndex property of this
+                    object as Index, and finally
+                    gets the item at Index of this object as Option.
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div id="examples">
+        <h2>Examples</h2>
+        These examples show uses of the ProscriptLS language.
+        In each case the HTML source consults (compiles) ProscriptLS source and uses the ProscriptlS predicates.
+        The only major uses of Javascript are the JQuery.Terminal library (used to present the ProscriptLS interpreter
+        in some examples) and a custom Prolog interpreter.
+        <ul>
+            <li>
+                <a href="../examples/calculator.html">A simple calculator.</a>
+                This example demonstrates the use of events in ProscriptLS.
+                <br>
+                The original implementation of the calculator in regular Javascript is
+                <a href="https://www.anaesthetist.com/mnm/javascript/calc.htm">here</a>.
+            </li>
+            <li>
+                <a href="../examples/console_button_test.html">Toggle custom ProscriptLS interpreter console.</a>
+                A page that presents a single button which toggles the presence of a ProscriptLS interpreter.
+                The ProscriptLS interpreter console is implemented using a custom 'test.js' file instead of the full
+                JQuery.terminal library.
+            </li>
+            <li>
+                <a href="../examples/simple_test.html">Display 'hello world' alert dialog.</a>
+                Clicking on a button causes 'hello world' to be displayed in an alert dialog.
+            </li>
+            <li>
+                <a href="../examples/tau_likes.html">Querying a 'likes' predicate.</a>
+                Some interactive elements support a user interface for displaying what a person likes
+                from an editable definition of a likes/2 predicate.
+                (This is adapted from the tau-prolog 'likes' example.)
+            </li>
+            <li>
+                <a href="../examples/test.html">Custom Prolog interpreter and text area for Prolog source.</a>
+                The Prolog text area is consulted when the 'consult' button is clicked.
+                The predicates defined in the Prolog text area can be queried in the custom
+                interpreter.
+            </li>
+            <li>
+                <a href="../examples/tiles.html">Display a collection of selectable game tiles.</a>
+                Displays a collection of 16 square tiles. 8 of these tiles are selectable.
+            </li>
+        </ul>
+    </div>
+</div>

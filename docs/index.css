@@ -1,9 +1,22 @@
 body {margin: 0;}
 
+code.html {
+    background: #CCC;
+}
+code.prolog {
+    background: #dedede;
+}
+code.inline {
+    padding: 1px 5px;
+                   font-size: 15px;
+                   border: 1px solid #e8e8e8;
+                   border-radius: 3px;
+                   background: #eef;
+               }
 /* xmp formatting from https://stackoverflow.com/a/32935618/302650 */
 
-pre.html { margin: 5px 0; padding: 0 5px 5px 5px; background: #CCC; white-space:pre-wrap; word-wrap:break-word; }
-pre.html:before { content: ""; display: block; height: 1em; margin: 0 -5px -2em -5px; }
+pre { margin: 5px 0; padding: 0 5px 5px 5px; white-space:pre-wrap; word-wrap:break-word; }
+pre:before { content: ""; display: block; height: 1em; margin: 0 -5px -2em -5px; }
 
 .caret {
     cursor: pointer;

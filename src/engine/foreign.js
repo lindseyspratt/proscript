@@ -2508,3 +2508,12 @@ function evaluation_error(message)
     memory[state.H++] = lookup_atom(message);
     return predicate_throw(ref);
 }
+
+function engine_error(message) {
+    var ftor = lookup_functor('engine_error', 1);
+    var ref = state.H ^ (TAG_STR << WORD_BITS);
+    memory[state.H++] = ftor;
+    memory[state.H++] = lookup_atom(message);
+    return predicate_throw(ref);
+
+}

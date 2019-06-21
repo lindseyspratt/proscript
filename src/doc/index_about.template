@@ -1,1 +1,0 @@
-{{template_file('framework.index.template', [about, 'About Foo ProscriptLS', 'content.index_about.template'])}}

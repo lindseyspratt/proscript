@@ -277,3 +277,9 @@ nsvtop :-
 
 test(nested_structure_vars, exit) :-
         nsvtop.
+
+test(escapes, exit) :-
+        atom_codes('\n', [10]),
+        atom_codes('\t', [9]),
+        atom_codes('\u000a', [10]),
+        atom_codes('\t\x000a\foo', [9, 10, 102, 111, 111]).

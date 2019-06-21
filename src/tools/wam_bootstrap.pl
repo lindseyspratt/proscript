@@ -352,6 +352,7 @@ reset:-
         reserve_predicate(abolish/1, predicate_abolish),
         reserve_predicate(retract_clause/2, predicate_retract_clause),
         reserve_predicate(read_term/3, read_term),
+        reserve_predicate(open/4, predicate_open),
         reserve_predicate(close/2, predicate_close),
         reserve_predicate(op/3, predicate_op),
 
@@ -452,6 +453,7 @@ reset:-
         reserve_predicate(dom_object_type/2, predicate_dom_object_type),
         reserve_predicate(dom_create_object/2, predicate_dom_create_object),
         reserve_predicate(dom_create_object/3, predicate_dom_create_object),
+        reserve_predicate(dom_type_reference/4, predicate_dom_type_reference),
         reserve_predicate(dom_release_object/1, predicate_dom_release_object),
         reserve_predicate(set_dom_object_property/3, predicate_set_dom_object_property),
         reserve_predicate(set_dom_object_property/4, predicate_set_dom_object_property),
@@ -495,6 +497,9 @@ bootstrap(Source, Query):-
         bootstrap('', [Source], Query).
 
 bootstrap(CorePrefix, Sources, Query):-
+        bootstrap(CorePrefix, Sources, 'proscriptls_state.js', Query).
+
+bootstrap(CorePrefix, Sources, SavedStateFile, Query):-
         current_prolog_flag(version_data, swi(Mj, Mn, P, E)),
         (Mj >= 7 -> true;throw(wrong_swi_version('expected >= 7', swi(Mj, Mn, P, E)))),
         % Since javascript will not support open/3, we must load it into an atom and pass it.
@@ -503,9 +508,16 @@ bootstrap(CorePrefix, Sources, Query):-
         atom_concat(CorePrefix, 'wam_compiler.pl', WAM),
         atom_concat(CorePrefix, 'debugger.pl', Debugger),
         atom_concat(CorePrefix, 'bootstrap_js.pl', Bootstrap),
+        atom_concat(CorePrefix, 'url.pl', URL),
+        atom_concat(CorePrefix, 'not.pl', Not),
+        atom_concat(CorePrefix, 'promise.pl', Promise),
         build_saved_state([WAM,
                            Debugger,
-                           Bootstrap],
+                           Bootstrap,
+                           URL,
+                           Not,
+                           Promise],
+                          SavedStateFile,
                           ( writeln(toplevel),
                             compile_clause(bootstrap:-Query),
                             statistics,

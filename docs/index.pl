@@ -1,4 +1,4 @@
-:- ensure_loaded('../../library/object').
+:- ensure_loaded('../library/object').
 :- initialization(init).
 
 init :-
