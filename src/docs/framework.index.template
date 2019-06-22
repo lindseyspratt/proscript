@@ -12,7 +12,17 @@
 {{template_and(template_arg(1, Page), template_file('sidenav.index.template', [Page]))}}
 <!-- Page content -->
 <div class="content">
+    <header>
+        <h1>{{template_arg(2, Title) => Title}}</h1>
+        <hr>
+    </header>
+
     {{template_and(template_arg(3, Content), template_file(Content, []))}}
+
+    <footer>
+        <hr>
+        Version 1, June 2019.
+    </footer>
 </div>
 <script type="text/prolog" src="index.pl"></script>
 </body>

@@ -17,7 +17,7 @@
                     <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#using_proscriptls">Using ProscriptLS</a></li>
                     <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#library">Library</a></li>
                     <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#debugger">Debugger</a></li>
-                    <li><span class="caret"></span><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#objects">Javascript and HTML objects</a>
+                    <li><span class="caret"></span><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#objects">Javascript objects</a>
                         <ul class='nested'>
                             <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#web_api">Web API</a></li>
                             <li><a href="{{template_not_arg(1, doc) => 'index_doc.html'}}#object_language">Object Language</a></li>

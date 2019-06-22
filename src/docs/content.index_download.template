@@ -1,5 +1,4 @@
-<div  id="download">
-    <h1>Downloading ProscriptLS</h1>
+<div class="body" id="download">
     The main ProscriptLS library is
     <br>
     <a href="https://github.com/lindseyspratt/proscript/blob/master/dist/proscriptls.js">

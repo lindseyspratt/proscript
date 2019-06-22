@@ -1,5 +1,4 @@
-<div id="doc">
-    <h1>Documentation for ProscriptLS</h1>
+<div class="body" id="doc">
     <div id="reference">
         <h2>Reference</h2>
         This reference documentation is for the aspects of ProscriptLS that differ from ISO Prolog.

@@ -1,4 +1,34 @@
-body {margin: 0;}
+body {
+    margin: 0;
+    font-family: arial, verdana, sans-serif;
+    font-size: 22px;
+    color: #666666;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: arial, verdana, sans-serif;
+}
+
+header {
+    height: 4em;
+    flex-shrink: 0;
+}
+.body{
+    flex-grow: 1;
+    overflow: auto;
+    height: 100%;
+    min-height: 2em;
+}
+footer{
+    height: 3em;
+    flex-shrink: 0;
+    font-size: 12px;
+}
+
+code {
+    font-family: monospace, courier, serif;
+    font-size: 20px;
+}
 
 code.html {
     background: #CCC;
@@ -58,8 +88,9 @@ ul.sidenav {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 14em;
-    background-color: #f1f1f1;
+    width: 18em;
+    font-size: 16px;
+    background-color: #dedbc8;
     position: fixed;
     height: 100%;
     overflow: auto;
@@ -85,7 +116,10 @@ ul.sidenav li a:hover:not(.active) {
 div.content {
     margin-left: 14em;
     padding: 1px 16px;
-    height: 1000px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
 }
 
 @media screen and (max-width: 900px) {

@@ -27,7 +27,7 @@
                     <li><a href="index_doc.html#using_proscriptls">Using ProscriptLS</a></li>
                     <li><a href="index_doc.html#library">Library</a></li>
                     <li><a href="index_doc.html#debugger">Debugger</a></li>
-                    <li><span class="caret"></span><a href="index_doc.html#objects">Javascript and HTML objects</a>
+                    <li><span class="caret"></span><a href="index_doc.html#objects">Javascript objects</a>
                         <ul class='nested'>
                             <li><a href="index_doc.html#web_api">Web API</a></li>
                             <li><a href="index_doc.html#object_language">Object Language</a></li>
@@ -45,18 +45,28 @@
 
 <!-- Page content -->
 <div class="content">
-    <div id="home">
-    <h1>ProscriptLS</h1>
+    <header>
+        <h1>ProscriptLS</h1>
+        <hr>
+    </header>
+
+    <div class="body" id="home">
     <div id="prolog-for-the-web">
         <h2>Prolog for the Web</h2>
-        The ProscriptLS language is a version of Prolog that runs in web browsers.
-        It supports interaction with the HTML Document Object Model (DOM) through builtin predicates.
+        <p>The ProscriptLS language is a version of Prolog that runs in web browsers.
+        It aspires to be a superset of ISO Prolog that is a complete alternative to
+        Javascript for implementing web sites.
+        (This site is implemented using ProscriptLS instead of Javascript.)
+        </p>
+        <p>It supports interaction with the HTML Document Object Model (DOM) through builtin predicates.
         There is a full source-level Prolog debugger based on the Byrd Box Model
         available through an in-client command-line ProscriptLS interpreter.
-        <br>
+        </p>
+        <p>
         The implementation uses a runtime engine that interprets byte codes.
         This engine is implemented in Javascript and is
         a version of the Warren Abstract Machine (WAM).
+        </p>
     </div>
     <div id="running-proscriptls">
         <h3>Running ProscriptLS</h3>
@@ -149,6 +159,11 @@ setup_button :-
     </div>
 </div>
 
+
+    <footer>
+        <hr>
+        Version 1, June 2019.
+    </footer>
 </div>
 <script type="text/prolog" src="index.pl"></script>
 </body>

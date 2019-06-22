@@ -1,15 +1,20 @@
-<div id="home">
-    <h1>ProscriptLS</h1>
+<div class="body" id="home">
     <div id="prolog-for-the-web">
         <h2>Prolog for the Web</h2>
-        The ProscriptLS language is a version of Prolog that runs in web browsers.
-        It supports interaction with the HTML Document Object Model (DOM) through builtin predicates.
+        <p>The ProscriptLS language is a version of Prolog that runs in web browsers.
+        It aspires to be a superset of ISO Prolog that is a complete alternative to
+        Javascript for implementing web sites.
+        (This site is implemented using ProscriptLS instead of Javascript.)
+        </p>
+        <p>It supports interaction with the HTML Document Object Model (DOM) through builtin predicates.
         There is a full source-level Prolog debugger based on the Byrd Box Model
         available through an in-client command-line ProscriptLS interpreter.
-        <br>
+        </p>
+        <p>
         The implementation uses a runtime engine that interprets byte codes.
         This engine is implemented in Javascript and is
         a version of the Warren Abstract Machine (WAM).
+        </p>
     </div>
     <div id="running-proscriptls">
         <h3>Running ProscriptLS</h3>
