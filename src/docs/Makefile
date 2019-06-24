@@ -23,7 +23,7 @@ $(DOCS_LIB): $(DIST_LIB)
 $(DOCS_OBJECT_PL): $(LIB_OBJECT_PL)
 		cp $(LIB_OBJECT_PL) $(DOCS_OBJECT_PL)
 
-$(DIST_DOC)/index_doc.html: type_references.template
+$(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template
 
 $(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template framework.index.template
 		$(SWIPL) -q -f ../../library/template.pl\

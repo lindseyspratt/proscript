@@ -1,0 +1,176 @@
+<h3>Javascript and HTML objects</h3>
+There are a number of types of Javascript objects that are supported by ProscriptLS.
+Most of the supported types of objects implement W3C HTML Web API interfaces.
+In addition there is the Promise object used in supporting asynchronous evaluations.
+<br>
+The ProscriptLS support for Javascript objects is exposed through a collection of builtin predicates.
+In addition there is a convenience syntax defined in the <a href="#object.pl">object.pl</a> library file
+to simplify working with objects.
+<div id="web_api">
+    <h4>W3C Web API</h4>
+    The HTML Web API defined by W3C specifies many interfaces.
+    These interfaces are implemented in Javascript in web browsers as Javascript objects.
+    The primary reference is <a href="https://www.w3.org/TR/2017/REC-html52-20171214/">HTML 5.2</a>.
+    Other references include:
+    <a href="https://www.w3.org/TR/2015/REC-dom-20151119/">W3C DOM4</a>,
+    <a href="https://www.w3.org/TR/2dcontext/">HTML Canvas 2D Context</a> for
+    the Canvas2DRenderingContext interface,
+    <a href=https://www.w3.org/TR/cssom-1">CSS Object Model</a>,
+    <a href="https://fetch.spec.whatwg.org">Fetch API</a> that defines the semantics for the Javascript
+    window.fetch() method, and
+    <a href="https://www.w3.org/TR/2019/WD-FileAPI-20190531/">FileAPI</a> for accessing files.
+    <p>
+        Several Web API Interfaces are implemented as ProscriptLS object types.
+        Each interface has a corresonding ProscriptLS type that is the lowercase version of the interface name.
+    </p>
+    <ul>
+        {{template_file('type_references.template', [])}}
+    </ul>
+</div>
+<div id="object_language">
+    <h4>Object Language</h4>
+    The Proscript object language provides a concise way
+    to access object properties, methods and Element
+    object attributes.
+    There are operators for accessing these things individually
+    and for accessing sequences of these things.
+    <ul>
+        <li>
+            <code class="prolog inline">>->/2</code> applies an <span style="font-style: italic">attribute</span> operation to
+            an object:
+            <ul>
+                <li><code class="prolog inline">Obj >-> A :> V</code>
+                    gets value V for attribute A of object Obj.
+                </li>
+                <li><code class="prolog inline">Obj >-> A &lt;: V </code>
+                    sets value V for attribute A of object Obj.
+                </li>
+                <li><code class="prolog inline">Obj >-> [X1, ..., Xn]</code>
+                    applies Xi attribute operation in order to Obj.
+                    Each Xi is either <code>(A :> V)</code> or <code>(A &lt;: V)</code>. E.g.
+                    <code>Obj >-> [a :> AV, b &lt;: 1, c:> CV].</code>
+            </ul>
+        </li>
+        <li>
+            <code class="prolog inline">>+>/2</code> applies a <span style="font-style: italic">property</span> operation to
+            an object:
+            <ul>
+                <li><code class="prolog inline">Obj >+> P :> V</code>
+                    gets value V for property P of object Obj.
+                </li>
+                <li><code class="prolog inline">Obj >+> P &lt;: V</code>
+                    sets value V for property P of object Obj.
+                </li>
+                <li><code class="prolog inline">Obj >+> [X1, ..., Xn]</code>
+                    applies Xi property operation in order to Obj.
+                    Each Xi is either <code>(P :> V)</code> or <code>(P &lt;: V)</code>. E.g.
+                    <code class="prolog inline">Obj >+> [a :> AV, b &lt;: 1, c:> CV].</code>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <code class="prolog inline">>*>/2</code> applies a <span style="font-style: italic">method</span> operation to an
+            object:
+            <ul>
+                <li><code class="prolog inline">Obj >*> M :> V</code>
+                    gets value V for method M of object Obj.
+                </li>
+                <li><code class="prolog inline">Obj >*> M</code>
+                    evaluates method M of object Obj. There is no result value.
+                </li>
+                <li><code class="prolog inline">Obj >*> [X1, ..., Xn]</code>
+                    applies Xi method operation in order to Obj.
+                    Each Xi is either <code>(M :> V)</code> or <code>(M)</code>. E.g.
+                    <code class="prolog inline">Obj >*> [a :> AV, b(1, 2) :> BV, c].</code>
+                </li>
+                A method may be a single atom such as 'beginPath'
+                or a structure such as 'moveTo(200, 20)'.
+            </ul>
+        </li>
+        <li>
+            <code  class="prolog inline">>@>/2</code> applies a <span style="font-style: italic">Prolog goal</span> to an object
+            where the last argument to the goal is the object:
+            <ul>
+                <li><code class="prolog inline">Obj >@> G</code>
+                    invokes call(G, Obj)
+                </li>
+
+                <li><code class="prolog inline">Obj >@> [X1, ..., Xn]</code>
+                    applies Xi goal in order to Obj. E.g.
+                    <code class="prolog inline">Obj >@> [a, b(1, 2)].</code>
+                </li>
+            </ul>
+            A goal may be a single atom such as 'foo'
+            or a structure such as 'bar(200, 20)'. These are evaluated using call/2:
+            <code class="prolog inline">call(foo, Obj)</code> or <code>call(bar(200, 20), Obj)</code>.
+            These calls are the same as evaluating <code>foo(Obj)</code> or <code>bar(200, 20,
+            Obj)</code>.
+        </li>
+        <li><code class="prolog inline">>>/2</code> applies <span style="font-style: italic">any combination</span> of
+            attribute get/set, property get/set, and method operations.
+            <ul>
+                <li>
+                    <code class="prolog inline">Obj >> * M</code>
+                    applies method(s) M to Obj.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> - AV</code>
+                    applies attribute operation(s) AV to Obj. AV is either <code class="prolog inline">(A :> V)</code> or
+                    <code class="prolog inline">(A &lt;: V)</code>.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> + PV</code>
+                    applies property operation(s) PV to Obj. PV is either <code class="prolog inline">(P :> V)</code> or
+                    <code class="prolog inline">(P &lt;: V)</code>.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> @ G</code>
+                    applies goal(s) G to Obj.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> A -:> V</code>
+                    applies attribute operation <code class="prolog inline">(A :> V)</code> to Obj.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> A &lt;:- V</code>
+                    applies attribute operation <code class="prolog inline">(A &lt;: V)</code> to Obj.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> P +:> V</code>
+                    applies property operation <code class="prolog inline">(P :> V)</code> to Obj.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> P &lt;:+ V</code>
+                    applies property operation <code class="prolog inline">(P &lt;: V)</code> to Obj.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> M *:> V</code>
+                    applies method operation <code class="prolog inline">(M :> V)</code> to Obj.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> M</code> (where M is none of the above, is not = (_ :> _), and is not a
+                    list)
+                    applies method Operation M to Obj.
+                </li>
+                <li>
+                    <code class="prolog inline">Obj >> [X1, X2,...]</code> applies X1 to Obj, then X2 to Obj, and so on.
+                    If the X1 operation is an attribute value specification that identifies
+                    an object (such as (id -:> canvas)), then Obj may be unbound initially.
+                    It will be bound by X1, and the bound Obj will be used for subsequent applications
+                    of Xi.
+                    The Xi may be any of the above forms: * M, - AV, + PV, @ G, A -:> V, A &lt;:- V,
+                    P +:> V, P &lt;:+ V, and M *:> V. Xi may also be a list.
+                </li>
+            </ul>
+        </li>
+    </ul>
+    An example:
+    <pre><code class="prolog">
+on_click :-
+    _ >> [id -:> select, selectedIndex +:> Index, item(Index) *:> Option],
+    Option >+> value :> Name,
+    show_likes(Name). </code></pre>
+    The use of '>>' finds an object with id = 'select', then gets the selectedIndex property of this
+    object as Index, and finally
+    gets the item at Index of this object as Option.
+</div>

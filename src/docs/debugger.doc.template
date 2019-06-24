@@ -1,0 +1,30 @@
+<h3>Debugger:</h3> There is a command-line debugger that supports stepping through the evaluation of a
+ProscriptLS program.
+This debugger is run from a browser. It uses JQuery.terminal to provide the command line environment.
+<br>
+The debugger files are in PROSCRIPTLS_git/terminal.
+The HTML page must be set up as described above with the proscriptls.js library and an invocation of the
+proscript_init() Javascript method.
+<br>
+There are three more steps specific to setting up the terminal as a ProscriptLS interpreter:
+<ul>
+    <li>
+        Get the JQuery terminal files:
+        <pre ><code class="html">
+&lt;script src="jquery-3.3.1.js">&lt;/script>
+&lt;script src="jquery_terminal.js">&lt;/script>
+&lt;link href="jquery_terminal.css" rel="stylesheet"/></code></pre>
+        (These elements may be in the HTML header element.)
+    </li>
+    <li>
+        Get the ProscriptLS interpreter library:
+        <pre><code class="html">
+&lt;script type="text/javascript" src="proscript_interpreter_terminal.js">&lt;/script></code></pre>
+    </li>
+    <li>
+        Create a DIV element with ID 'proscriptinterpreter'.
+        This element will display the command line console of the interpreter.
+        <pre><code class="html">
+&lt;div id="proscriptinterpreter">&lt;/div></code></pre>
+    </li>
+</ul>

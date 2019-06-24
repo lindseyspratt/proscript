@@ -17,7 +17,7 @@
         <hr>
     </header>
 
-    {{template_and(template_arg(3, Content), template_file(Content, []))}}
+    {{template_and(template_arg(3, Content), template_file(Content, [Title]))}}
 
     <footer>
         <hr>
