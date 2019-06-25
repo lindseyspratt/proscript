@@ -8471,6 +8471,10 @@ var predicate_flush_stdout;
 var stdout;
 
 function proscript_init(queryJS) {
+    proscriptls_init(queryJS);
+}
+
+function proscriptls_init(queryJS) {
     if(! predicate_flush_stdout) {
         predicate_flush_stdout = function() { return true;};
     }
@@ -8489,7 +8493,7 @@ function proscript_init(queryJS) {
 
     if(queryJS && queryJS !== '') {
         initialize(); // ensure state is initialized. proscript saves and restores state.
-        proscript(queryJS);
+        proscriptls(queryJS);
     }
 }
 
@@ -8591,15 +8595,19 @@ function call_directives() {
     }
 
     if(extended_query !== "") {
-        proscript(extended_query);
+        proscriptls(extended_query);
     }
 }
 
-// proscript calls the given query using the current predicates definitions.
+// proscriptls calls the given query using the current predicates definitions.
 // All other global runtime data is saved and restored.
-// This allows the asserta/assertz clauses to persist across calls of proscript.
+// This allows the asserta/assertz clauses to persist across calls of proscriptls.
 
 function proscript(queryJS) {
+    proscriptls(queryJS);
+}
+
+function proscriptls(queryJS) {
     let saved_state;
     let saved_registers;
     let saved_code;
@@ -8646,6 +8654,10 @@ function proscript(queryJS) {
 }
 
 function proscript_apply(goalArguments, goal) {
+    proscriptls_apply(goalArguments, goal);
+}
+
+function proscriptls_apply(goalArguments, goal) {
     // goal = '[Tx-X,Ty-Y,...] ^ G' where G is an expression referencing X, Y, ...
     // goalArguments is an array [a,b, ...] where each item is applied to the corresonding
     // entry in [X, Y, ...].The combined expression is:
@@ -8690,7 +8702,7 @@ function proscript_apply(goalArguments, goal) {
         goalReconstituted = goal;
     }
 
-    proscript(goalReconstituted);
+    proscriptls(goalReconstituted);
 }
 
 function debug(msg) {
