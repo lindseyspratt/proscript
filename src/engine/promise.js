@@ -193,12 +193,12 @@ async function fetch_promise(urlJS) {
 //             let index = text_to_memory_file(text);
 //             return "'$memory_file'(" + index + ")";
 //         }).then(function(memfile){
-//             proscript("compile_and_free_memory_file(" + memfile + ")");
+//             proscriptls("compile_and_free_memory_file(" + memfile + ")");
 //
 //         });
 //     }
 //
 //     if(next_goal && next_goal !== '') {
-//         proscript(next_goal);
+//         proscriptls(next_goal);
 //     }
 // }

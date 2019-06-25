@@ -6,7 +6,7 @@ There are two major enhancements in this fork: builtins to work with the DOM (Do
 a proper interactive Prolog tracing debugger that can be used in the client web page (using a JQuery Terminal).
 For the DOM enhancements there is a javascript function proscript_init("goal") that can be 
 called in <body> onload to run a Prolog query to initialize the HTML environment.
-proscript("goal") can be used in handlers in the HTML page where the evaluation
+proscriptls("goal") can be used in handlers in the HTML page where the evaluation
 shares the same predicate assertions as that set up by the proscript_init function.
 
 The primary documentation is in docs/index.html.

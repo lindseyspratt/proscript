@@ -2684,13 +2684,13 @@ async function fetch_promise(urlJS) {
 //             let index = text_to_memory_file(text);
 //             return "'$memory_file'(" + index + ")";
 //         }).then(function(memfile){
-//             proscript("compile_and_free_memory_file(" + memfile + ")");
+//             proscriptls("compile_and_free_memory_file(" + memfile + ")");
 //
 //         });
 //     }
 //
 //     if(next_goal && next_goal !== '') {
-//         proscript(next_goal);
+//         proscriptls(next_goal);
 //     }
 // }
 // File memory_files.js
@@ -8603,10 +8603,6 @@ function call_directives() {
 // All other global runtime data is saved and restored.
 // This allows the asserta/assertz clauses to persist across calls of proscriptls.
 
-function proscript(queryJS) {
-    proscriptls(queryJS);
-}
-
 function proscriptls(queryJS) {
     let saved_state;
     let saved_registers;
@@ -8662,7 +8658,7 @@ function proscriptls_apply(goalArguments, goal) {
     // goalArguments is an array [a,b, ...] where each item is applied to the corresonding
     // entry in [X, Y, ...].The combined expression is:
     //     ParamGoal = Arguments ^ BoundGoal, call(BoundGoal)
-    // proscript();
+    // proscriptls();
     // However, the goalArguments must be converted to their Prolog syntactic representation.
     // How this is done depends on the expected type, which is encoded in the goal's argument T specification.
 

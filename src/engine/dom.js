@@ -769,10 +769,6 @@ function call_directives() {
 // All other global runtime data is saved and restored.
 // This allows the asserta/assertz clauses to persist across calls of proscriptls.
 
-function proscript(queryJS) {
-    proscriptls(queryJS);
-}
-
 function proscriptls(queryJS) {
     let saved_state;
     let saved_registers;
@@ -828,7 +824,7 @@ function proscriptls_apply(goalArguments, goal) {
     // goalArguments is an array [a,b, ...] where each item is applied to the corresonding
     // entry in [X, Y, ...].The combined expression is:
     //     ParamGoal = Arguments ^ BoundGoal, call(BoundGoal)
-    // proscript();
+    // proscriptls();
     // However, the goalArguments must be converted to their Prolog syntactic representation.
     // How this is done depends on the expected type, which is encoded in the goal's argument T specification.
 

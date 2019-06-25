@@ -20,7 +20,7 @@ simple_button_test2 :-
     create_dom_element('BUTTON', Button),
     create_dom_text_node("Click Me", NewContent),
     append_dom_node_child(Button, NewContent),
-    set_dom_element_attribute_value(Button, onclick, ''), % 'proscript(\'alert(\\\'Hello World!\\\')\')'),
+    set_dom_element_attribute_value(Button, onclick, ''), % 'proscriptls(\'alert(\\\'Hello World!\\\')\')'),
     append_dom_node_child(E, Button).
 
 add_element_test :-
