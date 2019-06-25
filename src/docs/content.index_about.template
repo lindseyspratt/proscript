@@ -1,4 +1,4 @@
-<div class="body" id="about">
+<div class="indexed body" id="about">
     ProscriptLS is developed by Lindsey Spratt (Lindsey dot Spratt at LogicForSystems dot com).
     It is a fork of the original <a href="https://github.com/thetrime/proscript">Proscript project by Matt Lilley</a>.
     <br>

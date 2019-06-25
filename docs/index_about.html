@@ -5,41 +5,45 @@
     </title>
     <link rel="stylesheet" href="index.css"/>
     <script type="text/javascript" src="proscriptls.js"></script>
+    <!-- proscript interpreter
+    <script src="../terminal/jquery-3.3.1.js"></script>
+    <script src="../terminal/jquery_terminal.js"></script>
+    <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
+    -->
 </head>
 
 <body onload="proscript_init();">
 <!-- Side navigation -->
 <ul class="sidenav">
     <li><span class="caret"></span>
-        <a  href="index.html#home">Home</a>
+        <a   id="home_index" href="index.html#home"> Home </a>
         <ul class='nested'>
-            <li><a href="index.html#prolog-for-the-web">Prolog for the Web</a></li>
-            <li><a href="index.html#running-proscriptls">Running ProscriptLS</a></li>
-            <li><a href="index.html#compiling-proscriptls">Compiling ProscriptLS</a>
-            </li>
-            <li><a href="index.html#basic-example">Basic Example</a></li>
+            <li><a   id="prolog-for-the-web_index" href="index.html#prolog-for-the-web"> Prolog for the Web </a></li>
+            <li><a   id="running-proscriptls_index" href="index.html#running-proscriptls"> Running ProscriptLS </a></li>
+            <li><a   id="compiling-proscriptls_index" href="index.html#compiling-proscriptls"> Compiling ProscriptLS </a></li>
+            <li><a   id="basic-example_index" href="index.html#basic-example"> Basic Example </a></li>
         </ul>
     </li>
-    <li><span class="caret"></span><a  href="index_doc.html#doc">Documentation</a>
+    <li><span class="caret"></span><a   id="doc_index" href="index_doc.html#doc"> Documentation </a>
         <ul class='nested'>
-            <li><span class="caret"></span><a href="index_doc.html#reference">Reference</a>
+            <li><span class="caret"></span><a   id="reference_index" href="index_doc.html#reference"> Reference </a>
                 <ul class='nested'>
-                    <li><a href="index_doc.html#using_proscriptls">Using ProscriptLS</a></li>
-                    <li><a href="index_doc.html#debugger">Debugger</a></li>
-                    <li><span class="caret"></span><a href="index_doc.html#objects">Javascript objects</a>
+                    <li><a   id="using_proscriptls_index" href="index_doc.html#using_proscriptls"> Using ProscriptLS </a></li>
+                    <li><a   id="debugger_index" href="index_doc.html#debugger"> Debugger </a></li>
+                    <li><span class="caret"></span><a   id="objects_index" href="index_doc.html#objects"> Javascript objects </a>
                         <ul class='nested'>
-                            <li><a href="index_doc.html#web_api">Web API</a></li>
-                            <li><a href="index_doc.html#object_language">Object Language</a></li>
+                            <li><a   id="web_api_index" href="index_doc.html#web_api"> Web API </a></li>
+                            <li><a   id="object_language_index" href="index_doc.html#object_language"> Object Language </a></li>
                         </ul>
                     </li>
-                    <li><a href="index_doc.html#library">Library</a></li>
+                    <li><a   id="library_index" href="index_doc.html#library"> Library </a></li>
                 </ul>
             </li>
-            <li><a href="index_doc.html#examples">Examples</a></li>
+            <li><a   id="examples_index" href="index_doc.html#examples"> Examples </a></li>
         </ul>
     </li>
-    <li><a  href="index_download.html#download">Download</a></li>
-    <li><a class="active" href="#about">About</a></li>
+    <li><a   id="download_index" href="index_download.html#download"> Download </a></li>
+    <li><a class="active index"  id="about_index" href="#about"> About </a></li>
 </ul>
 
 <!-- Page content -->
@@ -49,7 +53,7 @@
         <hr>
     </header>
 
-    <div class="body" id="about">
+    <div class="indexed body" id="about">
     ProscriptLS is developed by Lindsey Spratt (Lindsey dot Spratt at LogicForSystems dot com).
     It is a fork of the original <a href="https://github.com/thetrime/proscript">Proscript project by Matt Lilley</a>.
     <br>
@@ -66,6 +70,11 @@
         Version 1, June 2019.
     </footer>
 </div>
+<!-- proscript interpreter
+<script src="../terminal/proscript_interpreter_terminal.js" type="text/javascript"></script>
+<div id="proscriptinterpreter">
+</div>
+-->
 <script type="text/prolog" src="index.pl"></script>
 </body>
 </html>

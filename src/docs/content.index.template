@@ -1,5 +1,5 @@
-<div class="body" id="home">
-    <div id="prolog-for-the-web">
+<div class="indexed body" id="home">
+    <div class="indexed" id="prolog-for-the-web">
         <h2>Prolog for the Web</h2>
         <p>The ProscriptLS language is a version of Prolog that runs in web browsers.
         It aspires to be a superset of ISO Prolog that is a complete alternative to
@@ -16,7 +16,7 @@
         a version of the Warren Abstract Machine (WAM).
         </p>
     </div>
-    <div id="running-proscriptls">
+    <div class="indexed" id="running-proscriptls">
         <h3>Running ProscriptLS</h3>
         ProscriptLS is started by the proscript_init function (implemented in the proscriptls.js library).
         This function is typically invoked once per load of the web page in an onload handler for the 'body'
@@ -28,7 +28,7 @@ Body stuff
 &lt;/body>
 </code></pre>
     </div>
-    <div id="compiling-proscriptls">
+    <div class="indexed" id="compiling-proscriptls">
         <h3>Compiling ProscriptLS programs in the web client</h3>
         The proscript_init function supports compilation of ProscriptLS programs in the client
         using the 'script' tag with the 'type' attribute of 'text/prolog'
@@ -63,7 +63,7 @@ More HTML
             </li>
         </ul>
     </div>
-    <div id="basic-example">
+    <div class="indexed" id="basic-example">
         <h3>Basic Example</h3>
         The following HTML source is a basic example showing the use of a ProscriptLS program to create
         a 'click me' button that when clicked displays a 'Hello World' alert dialog.

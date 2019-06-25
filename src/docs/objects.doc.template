@@ -6,7 +6,7 @@ In addition there is the Promise object used in supporting asynchronous evaluati
 The ProscriptLS support for Javascript objects is exposed through a collection of builtin predicates.
 In addition there is a convenience syntax defined in the <a href="#object.pl">object.pl</a> library file
 to simplify working with objects.
-<div id="web_api">
+<div class="indexed" id="web_api">
     <h4>W3C Web API</h4>
     The HTML Web API defined by W3C specifies many interfaces.
     These interfaces are implemented in Javascript in web browsers as Javascript objects.
@@ -27,7 +27,7 @@ to simplify working with objects.
         {{template_file('type_references.template', [])}}
     </ul>
 </div>
-<div id="object_language">
+<div class="indexed" id="object_language">
     <h4>Object Language</h4>
     The Proscript object language provides a concise way
     to access object properties, methods and Element

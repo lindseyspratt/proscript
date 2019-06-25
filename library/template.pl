@@ -52,8 +52,11 @@ template_and(Goal1, Goal2, Info) :-
     member(args - Args, Info),
     member(result - Result, Info),
     member(result_tail - ResultTail, Info),
-    process_substitution(Goal1, FileDir, Args, Result, InterimTail),
-    process_substitution(Goal2, FileDir, Args, InterimTail, ResultTail).
+    (process_substitution(Goal1, FileDir, Args, stop_on_fail, Result, InterimTail)
+      -> process_substitution(Goal2, FileDir, Args, continue_on_fail, InterimTail, ResultTail)
+    ;
+     default_result(Info)
+    ).
 
 default_result(Info) :-
     member(result - Result, Info),
@@ -68,7 +71,7 @@ process(FileDir, Args, ProcessedFileList, ProcessedTail) -->
     !,
     {atom_codes(FilePath, FilePathCodes),
      term_to_atom(Term, FilePath),
-     process_substitution(Term, FileDir, Args, ProcessedFileList, SubProcessedTail)
+     process_substitution(Term, FileDir, Args, continue_on_fail, ProcessedFileList, SubProcessedTail)
     },
     process(FileDir, Args, SubProcessedTail, ProcessedTail).
 process(FileDir, Args, [Code|ProcessedFileList], ProcessedTail) -->
@@ -84,23 +87,25 @@ file_path([H|T]) -->
     [H],
     file_path(T).
 
-process_substitution(Term, FileDir, Args, ProcessedFileList, ProcessedTail) :-
-    process_substitution1(Term, FileDir, Args, ProcessedFileList, ProcessedTail),
+process_substitution(Term, FileDir, Args, FailMode, ProcessedFileList, ProcessedTail) :-
+    process_substitution1(Term, FileDir, Args, FailMode, ProcessedFileList, ProcessedTail),
     !.
 
-process_substitution1((Goal => Result), FileDir, Args, ProcessedFileList, ProcessedTail) :-
+process_substitution1((Goal => Result), FileDir, Args, FailMode, ProcessedFileList, ProcessedTail) :-
     !,
     (
     call(Goal, [dir - FileDir, args - Args])
       -> append_result(Result, ProcessedTail, ProcessedFileList)
     ;
-    ProcessedTail = ProcessedFileList
+    FailMode = continue_on_fail
+      -> ProcessedTail = ProcessedFileList
     ).
-process_substitution1(Goal, FileDir, Args, ProcessedFileList, ProcessedTail) :-
+process_substitution1(Goal, FileDir, Args, FailMode, ProcessedFileList, ProcessedTail) :-
     call(Goal, [dir - FileDir, args - Args, result - ProcessedFileList, result_tail - ProcessedTail])
       -> true
     ;
-    ProcessedTail = ProcessedFileList.
+    FailMode = continue_on_fail
+      -> ProcessedTail = ProcessedFileList.
 
 append_result(Term, Tail, List) :-
     (

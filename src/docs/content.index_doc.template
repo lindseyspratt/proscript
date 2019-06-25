@@ -1,9 +1,9 @@
-<div class="body" id="doc">
-    <div id="reference">
+<div class="indexed body" id="doc">
+    <div class="indexed" id="reference">
         <h2>Reference</h2>
         This reference documentation is for the aspects of ProscriptLS that differ from ISO Prolog.
         <ul>
-            <li id="using_proscriptls">
+            <li class="indexed" id="using_proscriptls">
                 <h3>Using ProscriptLS programs in a web browser:</h3>
                 There are three parts to using a Prolog predicate in a browser.
                 <ul>
@@ -37,18 +37,18 @@
                 There appears to be an order-sensitivity in the layout of the HTML:
                 the prolog script element should be at the end of the body element.
             </li>
-            <li id="debugger">
+            <li class="indexed" id="debugger">
                 {{template_file('debugger.doc.template', [])}}
             </li>
-            <li id="objects">
+            <li class="indexed" id="objects">
                 {{template_file('objects.doc.template', [])}}
             </li>
-            <li id="library">
+            <li class="indexed" id="library">
                 {{template_file('library.doc.template', [])}}
             </li>
         </ul>
     </div>
-    <div id="examples">
+    <div class="indexed" id="examples">
         <h2>Examples</h2>
         These examples show uses of the ProscriptLS language.
         In each case the HTML source consults (compiles) ProscriptLS source and uses the ProscriptlS predicates.

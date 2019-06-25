@@ -104,9 +104,14 @@ ul.sidenav li a {
 }
 
 ul.sidenav li a.active {
-    background-color: #4CAF50;
+    background-color: rgba(95, 185, 95, 0.4);
     color: white;
 }
+
+ul.sidenav li a.visible {
+    font-style: italic;
+}
+
 
 ul.sidenav li a:hover:not(.active) {
     background-color: #555;

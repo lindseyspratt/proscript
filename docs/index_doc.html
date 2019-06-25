@@ -5,44 +5,45 @@
     </title>
     <link rel="stylesheet" href="index.css"/>
     <script type="text/javascript" src="proscriptls.js"></script>
+    <!-- proscript interpreter
     <script src="../terminal/jquery-3.3.1.js"></script>
     <script src="../terminal/jquery_terminal.js"></script>
     <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
+    -->
 </head>
 
 <body onload="proscript_init();">
 <!-- Side navigation -->
 <ul class="sidenav">
     <li><span class="caret"></span>
-        <a  href="index.html#home">Home</a>
+        <a   id="home_index" href="index.html#home"> Home </a>
         <ul class='nested'>
-            <li><a href="index.html#prolog-for-the-web">Prolog for the Web</a></li>
-            <li><a href="index.html#running-proscriptls">Running ProscriptLS</a></li>
-            <li><a href="index.html#compiling-proscriptls">Compiling ProscriptLS</a>
-            </li>
-            <li><a href="index.html#basic-example">Basic Example</a></li>
+            <li><a   id="prolog-for-the-web_index" href="index.html#prolog-for-the-web"> Prolog for the Web </a></li>
+            <li><a   id="running-proscriptls_index" href="index.html#running-proscriptls"> Running ProscriptLS </a></li>
+            <li><a   id="compiling-proscriptls_index" href="index.html#compiling-proscriptls"> Compiling ProscriptLS </a></li>
+            <li><a   id="basic-example_index" href="index.html#basic-example"> Basic Example </a></li>
         </ul>
     </li>
-    <li><span class="caret"></span><a class="active" href="#doc">Documentation</a>
+    <li><span class="caret"></span><a class="active index"  id="doc_index" href="#doc"> Documentation </a>
         <ul class='nested'>
-            <li><span class="caret"></span><a href="#reference">Reference</a>
+            <li><span class="caret"></span><a  class="index" id="reference_index" href="#reference"> Reference </a>
                 <ul class='nested'>
-                    <li><a href="#using_proscriptls">Using ProscriptLS</a></li>
-                    <li><a href="#debugger">Debugger</a></li>
-                    <li><span class="caret"></span><a href="#objects">Javascript objects</a>
+                    <li><a  class="index" id="using_proscriptls_index" href="#using_proscriptls"> Using ProscriptLS </a></li>
+                    <li><a  class="index" id="debugger_index" href="#debugger"> Debugger </a></li>
+                    <li><span class="caret"></span><a  class="index" id="objects_index" href="#objects"> Javascript objects </a>
                         <ul class='nested'>
-                            <li><a href="#web_api">Web API</a></li>
-                            <li><a href="#object_language">Object Language</a></li>
+                            <li><a  class="index" id="web_api_index" href="#web_api"> Web API </a></li>
+                            <li><a  class="index" id="object_language_index" href="#object_language"> Object Language </a></li>
                         </ul>
                     </li>
-                    <li><a href="#library">Library</a></li>
+                    <li><a  class="index" id="library_index" href="#library"> Library </a></li>
                 </ul>
             </li>
-            <li><a href="#examples">Examples</a></li>
+            <li><a  class="index" id="examples_index" href="#examples"> Examples </a></li>
         </ul>
     </li>
-    <li><a  href="index_download.html#download">Download</a></li>
-    <li><a  href="index_about.html#about">About</a></li>
+    <li><a   id="download_index" href="index_download.html#download"> Download </a></li>
+    <li><a   id="about_index" href="index_about.html#about"> About </a></li>
 </ul>
 
 <!-- Page content -->
@@ -52,12 +53,12 @@
         <hr>
     </header>
 
-    <div class="body" id="doc">
-    <div id="reference">
+    <div class="indexed body" id="doc">
+    <div class="indexed" id="reference">
         <h2>Reference</h2>
         This reference documentation is for the aspects of ProscriptLS that differ from ISO Prolog.
         <ul>
-            <li id="using_proscriptls">
+            <li class="indexed" id="using_proscriptls">
                 <h3>Using ProscriptLS programs in a web browser:</h3>
                 There are three parts to using a Prolog predicate in a browser.
                 <ul>
@@ -91,7 +92,7 @@
                 There appears to be an order-sensitivity in the layout of the HTML:
                 the prolog script element should be at the end of the body element.
             </li>
-            <li id="debugger">
+            <li class="indexed" id="debugger">
                 <h3>Debugger:</h3> There is a command-line debugger that supports stepping through the evaluation of a
 ProscriptLS program.
 This debugger is run from a browser. It uses JQuery.terminal to provide the command line environment.
@@ -124,7 +125,7 @@ There are three more steps specific to setting up the terminal as a ProscriptLS 
 </ul>
 
             </li>
-            <li id="objects">
+            <li class="indexed" id="objects">
                 <h3>Javascript and HTML objects</h3>
 There are a number of types of Javascript objects that are supported by ProscriptLS.
 Most of the supported types of objects implement W3C HTML Web API interfaces.
@@ -133,7 +134,7 @@ In addition there is the Promise object used in supporting asynchronous evaluati
 The ProscriptLS support for Javascript objects is exposed through a collection of builtin predicates.
 In addition there is a convenience syntax defined in the <a href="#object.pl">object.pl</a> library file
 to simplify working with objects.
-<div id="web_api">
+<div class="indexed" id="web_api">
     <h4>W3C Web API</h4>
     The HTML Web API defined by W3C specifies many interfaces.
     These interfaces are implemented in Javascript in web browsers as Javascript objects.
@@ -180,7 +181,7 @@ to simplify working with objects.
 
     </ul>
 </div>
-<div id="object_language">
+<div class="indexed" id="object_language">
     <h4>Object Language</h4>
     The Proscript object language provides a concise way
     to access object properties, methods and Element
@@ -329,7 +330,7 @@ on_click :-
 </div>
 
             </li>
-            <li id="library">
+            <li class="indexed" id="library">
                 <h3>Library:</h3> there is a collection of ProscriptLS source files that provide a library of programs.
 These are in PROSCRIPTLS_git/library.
 
@@ -454,7 +455,7 @@ Canvas >> [id -:> canvas, getContext('2d') *:> Ctx]. </code></pre>
             </li>
         </ul>
     </div>
-    <div id="examples">
+    <div class="indexed" id="examples">
         <h2>Examples</h2>
         These examples show uses of the ProscriptLS language.
         In each case the HTML source consults (compiles) ProscriptLS source and uses the ProscriptlS predicates.
@@ -504,9 +505,11 @@ Canvas >> [id -:> canvas, getContext('2d') *:> Ctx]. </code></pre>
         Version 1, June 2019.
     </footer>
 </div>
+<!-- proscript interpreter
 <script src="../terminal/proscript_interpreter_terminal.js" type="text/javascript"></script>
 <div id="proscriptinterpreter">
 </div>
+-->
 <script type="text/prolog" src="index.pl"></script>
 </body>
 </html>

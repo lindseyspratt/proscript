@@ -25,7 +25,7 @@ $(DOCS_OBJECT_PL): $(LIB_OBJECT_PL)
 
 $(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template
 
-$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template framework.index.template
+$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template anchor.sidenav.template framework.index.template
 		$(SWIPL) -q -f ../../library/template.pl\
 		    -g "substitute_template('$<', '$@'), halt"
 
