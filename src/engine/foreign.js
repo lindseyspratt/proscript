@@ -652,7 +652,9 @@ function predicate_generate_system_goal(Sys) {
     let n = stable.length;
     let functor = lookup_functor('$sys_' + n, 0);
     stable.push(functor);
-    return unify(functor, Sys);
+    let nameID = ftable[VAL(functor)][0];
+    let namePL = PL_put_atom(nameID);
+    return unify(namePL, Sys);
 }
 
 function predicate_generate_initialization_goal(Init) {
@@ -662,7 +664,9 @@ function predicate_generate_initialization_goal(Init) {
     let n = itable.length;
     let functor = lookup_functor('$init_' + n, 0);
     itable.push(functor);
-    return unify(functor, Init);
+    let nameID = ftable[VAL(functor)][0];
+    let namePL = PL_put_atom(nameID);
+    return unify(namePL, Init);
  }
 
 // dynamic implies public. In proscript, public also implies dynamic.
@@ -883,6 +887,10 @@ function check_compile_buffer(head, body)
 }
 function add_clause_to_predicate(predicateP, head, body)
 {
+    if(atable[VAL(deref(memory[VAL(predicateP)+1]))] === 'select_test') {
+        console.log(JSON.stringify(record_term(head)) + " : " + JSON.stringify(record_term(body)));
+    }
+
     var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
     if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))
     {

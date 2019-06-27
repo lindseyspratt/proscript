@@ -238,9 +238,12 @@ function PL_put_variable()
     return alloc_var();
 }
 
-function PL_put_atom(atom)
+/**
+ * @return {null}
+ */
+function PL_put_atom(atomID)
 {
-    return atom;
+    return atomID ^ (TAG_ATM << WORD_BITS);
 }
 
 function PL_put_atom_chars(chars)
