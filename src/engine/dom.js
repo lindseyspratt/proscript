@@ -614,8 +614,8 @@ function setupElementsForSelectAll(query, container) {
     return true;
 }
 
-// proscript_init generally is only used once in a web page to set up the proscript globals.
-// Additional calls of Prolog queries should use proscript to avoid overwriting the global data,
+// proscript_init generally is only used once in a web page to set up the proscriptls globals.
+// Additional calls of Prolog queries should use proscriptls to avoid overwriting the global data,
 // particularly the predicates from assertions.
 /*
        // noinspection JSUnusedLocalSymbols
@@ -658,7 +658,7 @@ function proscriptls_init(queryJS) {
     consult_scripts();
 
     if(queryJS && queryJS !== '') {
-        initialize(); // ensure state is initialized. proscript saves and restores state.
+        initialize(); // ensure state is initialized. proscriptls saves and restores state.
         proscriptls(queryJS);
     }
 }

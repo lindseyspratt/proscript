@@ -8,7 +8,7 @@
 %   (modified January 1987 by Herve' Touati)
 % Modified for GNU Prolog by Daniel Diaz.
 
-% This test fails in proscript due to very large terms.
+% This test fails in proscriptls due to very large terms.
 
 
 

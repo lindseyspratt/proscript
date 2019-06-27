@@ -54,7 +54,7 @@ my_program :-
 </code></pre>
             </li>
             <li>
-                Consulting a source file using the proscript function:
+                Consulting a source file using the proscriptls function:
                 <pre class="html"><code>
 &lt;body onLoad= "proscriptls( 'consult([my_program])');">
 More HTML
