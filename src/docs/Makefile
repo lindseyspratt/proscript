@@ -19,7 +19,7 @@ clean:
 		rm -f $(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL)
 
 $(TOP_HTML): $(DIST_DOC)/index.html
-		mv $(DIST_DOC)/index.html $(TOP_HTML)
+		cp $(DIST_DOC)/index.html $(TOP_HTML)
 
 $(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template
 
