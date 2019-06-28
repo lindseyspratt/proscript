@@ -1,6 +1,7 @@
-<a {{template_and(template_arg(1, Type), template_and(template_arg(6, main), template_arg(2, Type)=> 'class="active index"'))
-}} {{template_and(template_arg(1, Type), template_and(template_not_arg(6, main), template_arg(2, Type)=> 'class="index"'))
-}} id="{{template_arg(3, ID) => ID}}_index" href="{{template_and(template_arg(1, Type),
-template_and(template_arg(4, File), template_not_arg(2, Type) => File))
-}}#{{template_arg(3, ID) => ID}}"> {{template_arg(5, Title) => Title
+<a {{1 @ Type & 6 @ main & 2 @ Type => 'class="active index"'
+}} {{1 @ Type & 6 @\+ main & 2 @ Type => 'class="index"'
+}} id="{{3 @ ID => ID}}_index" href="{{1 @ home & 2 @\+ home => 'docs/'
+}}{{1 @\+ home & 2 @ home => '../'
+}}{{1 @ Type & 4 @ File & 2 @\+ Type => File
+}}#{{3 @ ID => ID}}"> {{5 @ Title => Title
 }} </a>

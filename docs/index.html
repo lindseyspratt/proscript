@@ -1,14 +1,15 @@
+<!--suppress ALL -->
 <html lang="en">
 <head>
     <title>
         ProscriptLS
     </title>
-    <link rel="stylesheet" href="index.css"/>
-    <script type="text/javascript" src="proscriptls.js"></script>
+    <link rel="stylesheet" href="docs/index.css"/>
+    <script type="text/javascript" src="dist/proscriptls.js"></script>
     <!-- proscriptls interpreter
-    <script src="../terminal/jquery-3.3.1.js"></script>
-    <script src="../terminal/jquery_terminal.js"></script>
-    <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
+    <script src="terminal/jquery-3.3.1.js"></script>
+    <script src="terminal/jquery_terminal.js"></script>
+    <link href="terminal/jquery_terminal.css" rel="stylesheet"/>
     -->
 </head>
 
@@ -24,26 +25,26 @@
             <li><a  class="index" id="basic-example_index" href="#basic-example"> Basic Example </a></li>
         </ul>
     </li>
-    <li><span class="caret"></span><a   id="doc_index" href="index_doc.html#doc"> Documentation </a>
+    <li><span class="caret"></span><a   id="doc_index" href="docs/index_doc.html#doc"> Documentation </a>
         <ul class='nested'>
-            <li><span class="caret"></span><a   id="reference_index" href="index_doc.html#reference"> Reference </a>
+            <li><span class="caret"></span><a   id="reference_index" href="docs/index_doc.html#reference"> Reference </a>
                 <ul class='nested'>
-                    <li><a   id="using_proscriptls_index" href="index_doc.html#using_proscriptls"> Using ProscriptLS </a></li>
-                    <li><a   id="debugger_index" href="index_doc.html#debugger"> Debugger </a></li>
-                    <li><span class="caret"></span><a   id="objects_index" href="index_doc.html#objects"> Javascript objects </a>
+                    <li><a   id="using_proscriptls_index" href="docs/index_doc.html#using_proscriptls"> Using ProscriptLS </a></li>
+                    <li><a   id="debugger_index" href="docs/index_doc.html#debugger"> Debugger </a></li>
+                    <li><span class="caret"></span><a   id="objects_index" href="docs/index_doc.html#objects"> Javascript objects </a>
                         <ul class='nested'>
-                            <li><a   id="web_api_index" href="index_doc.html#web_api"> Web API </a></li>
-                            <li><a   id="object_language_index" href="index_doc.html#object_language"> Object Language </a></li>
+                            <li><a   id="web_api_index" href="docs/index_doc.html#web_api"> Web API </a></li>
+                            <li><a   id="object_language_index" href="docs/index_doc.html#object_language"> Object Language </a></li>
                         </ul>
                     </li>
-                    <li><a   id="library_index" href="index_doc.html#library"> Library </a></li>
+                    <li><a   id="library_index" href="docs/index_doc.html#library"> Library </a></li>
                 </ul>
             </li>
-            <li><a   id="examples_index" href="index_doc.html#examples"> Examples </a></li>
+            <li><a   id="examples_index" href="docs/index_doc.html#examples"> Examples </a></li>
         </ul>
     </li>
-    <li><a   id="download_index" href="index_download.html#download"> Download </a></li>
-    <li><a   id="about_index" href="index_about.html#about"> About </a></li>
+    <li><a   id="download_index" href="docs/index_download.html#download"> Download </a></li>
+    <li><a   id="about_index" href="docs/index_about.html#about"> About </a></li>
 </ul>
 
 <!-- Page content -->
@@ -53,7 +54,12 @@
         <hr>
     </header>
 
-    <div class="indexed body" id="home">
+    <!-- The index.html file is handled specially: it is intended to be accessed from the
+root of the proscriptls project where all of the other index*.html files are intended to be
+accessed from the proscriptls/docs directory.
+There is an index.html file generated in proscriptls/doc - it is copied to proscriptls by the Makefile.
+-->
+<div class="indexed body" id="home">
     <div class="indexed" id="prolog-for-the-web">
         <h2>Prolog for the Web</h2>
         <p>The ProscriptLS language is a version of Prolog that runs in web browsers.
@@ -169,11 +175,11 @@ setup_button :-
     </footer>
 </div>
 <!-- proscriptls interpreter
-<script src="../terminal/proscript_interpreter_terminal.js" type="text/javascript"></script>
+<script src="terminal/proscript_interpreter_terminal.js" type="text/javascript"></script>
 <div id="proscriptinterpreter">
 </div>
 -->
-<script type="text/prolog" src="index.pl"></script>
+<script type="text/prolog" src="docs/index.pl"></script>
 </body>
 </html>
 

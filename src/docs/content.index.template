@@ -1,3 +1,8 @@
+<!-- The index.html file is handled specially: it is intended to be accessed from the
+root of the proscriptls project where all of the other index*.html files are intended to be
+accessed from the proscriptls/docs directory.
+There is an index.html file generated in proscriptls/doc - it is copied to proscriptls by the Makefile.
+-->
 <div class="indexed body" id="home">
     <div class="indexed" id="prolog-for-the-web">
         <h2>Prolog for the Web</h2>

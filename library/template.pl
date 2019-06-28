@@ -2,6 +2,11 @@
 :-ensure_loaded(listut).
 
 :-op(300, xfx, =>).
+:-op(250, xfx, @).
+:-op(250, xfx, @\+ ).
+:-op(250, xfx, #).
+:-op(350, xfy, &).
+
 
 substitute_template(InputFilePath, OutputFilePath) :-
     substitute_template1(InputFilePath, OutputCodes),
@@ -24,6 +29,12 @@ file_to_list1(-1, _, []) :- !.
 file_to_list1(C, Stream, [C|T]) :-
     get_code(Stream, NextC),
     file_to_list1(NextC, Stream, T).
+
+transform_template_goal(@(ID, Value), template_arg(ID, Value)) :- !.
+transform_template_goal(@\+(ID, Value), template_not_arg(ID, Value)) :- !.
+transform_template_goal(#(File, Args), template_file(File, Args)) :- !.
+transform_template_goal(&(Goal1, Goal2), template_and(Goal1, Goal2)) :- !.
+transform_template_goal(Goal, Goal).
 
 % Info = [dir - Dir, args - Args]. template_file(Path, [home]). template_arg(1, home) => 'class="active"'.
 % Path : [home]. 1 : home => 'class="active"'.
@@ -94,14 +105,16 @@ process_substitution(Term, FileDir, Args, FailMode, ProcessedFileList, Processed
 process_substitution1((Goal => Result), FileDir, Args, FailMode, ProcessedFileList, ProcessedTail) :-
     !,
     (
-    call(Goal, [dir - FileDir, args - Args])
+    transform_template_goal(Goal, TGoal),
+    call(TGoal, [dir - FileDir, args - Args])
       -> append_result(Result, ProcessedTail, ProcessedFileList)
     ;
     FailMode = continue_on_fail
       -> ProcessedTail = ProcessedFileList
     ).
 process_substitution1(Goal, FileDir, Args, FailMode, ProcessedFileList, ProcessedTail) :-
-    call(Goal, [dir - FileDir, args - Args, result - ProcessedFileList, result_tail - ProcessedTail])
+    transform_template_goal(Goal, TGoal),
+    call(TGoal, [dir - FileDir, args - Args, result - ProcessedFileList, result_tail - ProcessedTail])
       -> true
     ;
     FailMode = continue_on_fail

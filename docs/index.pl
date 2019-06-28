@@ -1,4 +1,4 @@
-:- ensure_loaded('object').
+:- ensure_loaded('../library/object').
 :- dynamic(item/2).
 :- initialization(init).
 
