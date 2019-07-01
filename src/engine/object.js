@@ -1,3 +1,5 @@
+'use strict';
+
 var idsToObjects = new Map();
 var idsToTypes = new Map();
 var objectsToIDs = new Map();
@@ -448,7 +450,7 @@ function predicate_dom_create_object(type, object, spec) {
     }
 
     let typeJS;
-    let arguments = [];
+    let structureArguments = [];
     let arity;
     if(TAG(type) === TAG_ATM) {
         typeJS = atable[VAL(type)];
@@ -458,7 +460,7 @@ function predicate_dom_create_object(type, object, spec) {
         typeJS = atable[functorPL];
         for(let ofst = 0; ofst < arity;ofst++) {
             let argument = deref(memory[VAL(type) + ofst + 1]);
-            arguments.push(argument);
+            structureArguments.push(argument);
         }
     } else {
         return type_error('atom or structure', type);
@@ -481,7 +483,7 @@ function predicate_dom_create_object(type, object, spec) {
     }
 
     let objectJS;
-    if(arguments.length > 0) {
+    if(structureArguments.length > 0) {
         let argTypesContainer = {};
         if(! convert_type_terms(spec, argTypesContainer)) {
             return false;
@@ -491,7 +493,7 @@ function predicate_dom_create_object(type, object, spec) {
         let applyArguments = [];
         for (var i = 0; i < arity; i++) {
             let applyArgumentContainer = {};
-            if (convert_method_argument(arguments[i], specArguments[i], applyArgumentContainer)) {
+            if (convert_method_argument(structureArguments[i], specArguments[i], applyArgumentContainer)) {
                 applyArguments.push(applyArgumentContainer.value);
             } else {
                 return false;
@@ -520,12 +522,12 @@ an answer to
 
 
  */
-function newCall(Cls, arguments) {
+function newCall(Cls, structureArguments) {
     // The first of the bindArguments is the first argument to the bind() function. From bind() doc:
     // [The first argument is the] value to be passed as the 'this' parameter to the target function when the bound function is called.
     // This first argument is null because the 'new' operator overrides the 'this' parameter.
 
-    let bindArguments = [null].concat(arguments);
+    let bindArguments = [null].concat(structureArguments);
     return new (Function.prototype.bind.apply(Cls, bindArguments));
     // or even
     // return new (Cls.bind.apply(Cls, arguments));

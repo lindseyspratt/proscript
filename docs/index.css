@@ -25,6 +25,9 @@ footer{
     font-size: 12px;
 }
 
+footer td{
+    font-size: 12px;
+}
 code {
     font-family: monospace, courier, serif;
     font-size: 20px;

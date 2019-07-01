@@ -1,3 +1,5 @@
+'use strict';
+
 /*
 predicates to read and modify the javascript DOM for HTML
  */

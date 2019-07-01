@@ -1,3 +1,5 @@
+'use strict';
+
 // This file is for execution under nodejs.
 // The presence of 'require' is used to indicate if the
 // current execution environment is NodeJS or not.
@@ -11,12 +13,6 @@ function predicate_open (file, mode, stream, options) {
 }
 
 var has_require = typeof require !== 'undefined';
-if(has_require) {
-    // noinspection NodeJsCodingAssistanceForCoreModules
-    const stream = require('stream');
-    // noinspection NodeJsCodingAssistanceForCoreModules
-    const fs = require('fs');
-
     function node_write_file(stream, size, count, buffer) {
         var bytes_written = 0;
         var records_written;
@@ -40,6 +36,22 @@ if(has_require) {
         stream.data = undefined;
         return true;
     }
+
+function test_write_to_file() {
+    const file = fs.createWriteStream('example.txt');
+    const testData = "test data2";
+    const x = toUTF8Array(testData);
+
+    node_write_file({data: file}, 1, x.length, x);
+}
+
+//    test_write_to_file();
+
+if(has_require) {
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    const stream = require('stream');
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    const fs = require('fs');
 
     predicate_open = function (file, mode, stream, options) {
         var index = streams.length;
@@ -72,16 +84,6 @@ if(has_require) {
         debug_msg("Allocated stream " + index + " from file " + fileJS);
         return unify(stream, ref);
     };
-
-    function test_write_to_file() {
-        const file = fs.createWriteStream('example.txt');
-        const testData = "test data2";
-        const x = toUTF8Array(testData);
-
-        node_write_file({data: file}, 1, x.length, x);
-    }
-
-//    test_write_to_file();
 }
 // else {
 //     predicate_open = function (file, mode, stream, options) {
