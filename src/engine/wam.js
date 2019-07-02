@@ -1777,27 +1777,29 @@ function demo(d)
 function unit_tests(d)
 {
     debugging = d;
-    load_state();
-    stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
-    stdout("Loaded " + atable.length + " atoms\n");
-    stdout("Loaded " + ftable.length + " functors\n");
+    proscriptls_init('toplevel.');
 
-    initialize();
-    call_directives();
-    allocate_first_frame();
-
-    var ftor = VAL(lookup_functor("toplevel", 0));
-    state.P = 0;
-    var pred = predicates[ftor];
-    var pi = predicates[ftor].clause_keys[0];
-    state.current_predicate = pred;
-    code = pred.clauses[pi].code;
-    if (wam())
-        stdout("Succeeded\n");
-    else if (exception == null)
-        stdout("Failed\n");
-    else
-        stdout("Uncaught exception: " + term_to_string(recall_term(exception, {})) +"\n");
+    // load_state();
+    // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
+    // stdout("Loaded " + atable.length + " atoms\n");
+    // stdout("Loaded " + ftable.length + " functors\n");
+    //
+    // initialize();
+    // call_directives();
+    // allocate_first_frame();
+    //
+    // var ftor = VAL(lookup_functor("toplevel", 0));
+    // state.P = 0;
+    // var pred = predicates[ftor];
+    // var pi = predicates[ftor].clause_keys[0];
+    // state.current_predicate = pred;
+    // code = pred.clauses[pi].code;
+    // if (wam())
+    //     stdout("Succeeded\n");
+    // else if (exception == null)
+    //     stdout("Failed\n");
+    // else
+    //     stdout("Uncaught exception: " + term_to_string(recall_term(exception, {})) +"\n");
 }
 
 

@@ -666,7 +666,9 @@ function proscriptls_init(queryJS) {
 }
 
 function consult_scripts() {
-    if(! document) {
+    // skip this function if it is invoked in JavaScriptCore or nodejs, where
+    // 'document' is not a defined global var.
+    if(typeof document === 'undefined' || document === undefined) {
         return;
     }
 
