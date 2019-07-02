@@ -1749,8 +1749,8 @@ function undefined_predicate(ftor)
 // noinspection JSUnusedLocalSymbols
 function demo(d)
 {
-    debugging = d;
-    proscriptls_init('toplevel.', true, true);
+   // debugging = d;
+    proscriptls_init('toplevel.', d, true, true);
 
     // load_state();
     // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
@@ -1778,8 +1778,8 @@ function demo(d)
 // noinspection JSUnusedGlobalSymbols
 function unit_tests(d)
 {
-    debugging = d;
-    proscriptls_init('toplevel.', true, true);
+    //debugging = d;
+    proscriptls_init('toplevel.', d, true, true);
 
     // load_state();
     // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");

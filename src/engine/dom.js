@@ -642,7 +642,9 @@ function proscript_init(queryJS) {
     proscriptls_init(queryJS);
 }
 
-function proscriptls_init(queryJS, displayLoadInfo, displaySucceededMsg) {
+function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) {
+    debugging = debug;
+
     if(! predicate_flush_stdout) {
         predicate_flush_stdout = function() { return true;};
     }
