@@ -4616,7 +4616,7 @@ function undefined_predicate(ftor)
 function demo(d)
 {
    // debugging = d;
-    proscriptls_init('toplevel.', d, true, true);
+    proscriptls_toplevel(d);
 
     // load_state();
     // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
@@ -4645,7 +4645,7 @@ function demo(d)
 function unit_tests(d)
 {
     //debugging = d;
-    proscriptls_init('toplevel.', d, true, true);
+    proscriptls_toplevel(d);
 
     // load_state();
     // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
@@ -8489,10 +8489,10 @@ function setupElementsForSelectAll(query, container) {
 var predicate_flush_stdout;
 var stdout;
 
-// function proscript_init(queryJS) {
-//     proscriptls_init(queryJS);
-// }
-//
+function proscriptls_toplevel(debug) {
+    proscriptls_init('toplevel.', debug, true, true);
+}
+
 function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) {
     debugging = debug;
 

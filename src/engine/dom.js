@@ -638,10 +638,10 @@ function setupElementsForSelectAll(query, container) {
 var predicate_flush_stdout;
 var stdout;
 
-// function proscript_init(queryJS) {
-//     proscriptls_init(queryJS);
-// }
-//
+function proscriptls_toplevel(debug) {
+    proscriptls_init('toplevel.', debug, true, true);
+}
+
 function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) {
     debugging = debug;
 

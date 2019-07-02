@@ -1750,7 +1750,7 @@ function undefined_predicate(ftor)
 function demo(d)
 {
    // debugging = d;
-    proscriptls_init('toplevel.', d, true, true);
+    proscriptls_toplevel(d);
 
     // load_state();
     // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
@@ -1779,7 +1779,7 @@ function demo(d)
 function unit_tests(d)
 {
     //debugging = d;
-    proscriptls_init('toplevel.', d, true, true);
+    proscriptls_toplevel(d);
 
     // load_state();
     // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
