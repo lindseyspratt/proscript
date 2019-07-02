@@ -504,25 +504,23 @@ bootstrap(CorePrefix, Sources, SavedStateFile, Query):-
         (Mj >= 7 -> true;throw(wrong_swi_version('expected >= 7', swi(Mj, Mn, P, E)))),
         % Since javascript will not support open/3, we must load it into an atom and pass it.
         % Ultimately we could use XmlHTTPRequest, but probably that is less useful anyway
-        files_to_atoms(Sources, Atoms),
         atom_concat(CorePrefix, 'wam_compiler.pl', WAM),
         atom_concat(CorePrefix, 'debugger.pl', Debugger),
         atom_concat(CorePrefix, 'bootstrap_js.pl', Bootstrap),
         atom_concat(CorePrefix, 'url.pl', URL),
         atom_concat(CorePrefix, 'not.pl', Not),
         atom_concat(CorePrefix, 'promise.pl', Promise),
-        build_saved_state([WAM,
-                           Debugger,
-                           Bootstrap,
-                           URL,
-                           Not,
-                           Promise],
+        append([WAM,
+              Debugger,
+              Bootstrap,
+              URL,
+              Not,
+              Promise], Sources, AllFiles),
+
+        build_saved_state(AllFiles,
                           SavedStateFile,
                           ( writeln(toplevel),
                             compile_clause(bootstrap:-Query),
-                            statistics,
-                            compile_atoms(Atoms),
-                            statistics,
                             !,
                             bootstrap
                             )).

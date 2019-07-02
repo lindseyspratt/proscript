@@ -4620,8 +4620,8 @@ function demo(d)
     stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
     stdout("Loaded " + atable.length + " atoms\n");
     stdout("Loaded " + ftable.length + " functors\n");
-    call_directives();
     initialize();
+    call_directives();
     allocate_first_frame();
 
     var ftor = VAL(lookup_functor("toplevel", 0));
@@ -4647,9 +4647,9 @@ function unit_tests(d)
     stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
     stdout("Loaded " + atable.length + " atoms\n");
     stdout("Loaded " + ftable.length + " functors\n");
-    call_directives();
 
     initialize();
+    call_directives();
     allocate_first_frame();
 
     var ftor = VAL(lookup_functor("toplevel", 0));
@@ -7129,6 +7129,8 @@ function predicate_current_stream(stream)
     return unify(stream, ref);   
 }
 // File node_files.js
+'use strict';
+
 // This file is for execution under nodejs.
 // The presence of 'require' is used to indicate if the
 // current execution environment is NodeJS or not.
@@ -7142,12 +7144,6 @@ function predicate_open (file, mode, stream, options) {
 }
 
 var has_require = typeof require !== 'undefined';
-if(has_require) {
-    // noinspection NodeJsCodingAssistanceForCoreModules
-    const stream = require('stream');
-    // noinspection NodeJsCodingAssistanceForCoreModules
-    const fs = require('fs');
-
     function node_write_file(stream, size, count, buffer) {
         var bytes_written = 0;
         var records_written;
@@ -7171,6 +7167,22 @@ if(has_require) {
         stream.data = undefined;
         return true;
     }
+
+function test_write_to_file() {
+    const file = fs.createWriteStream('example.txt');
+    const testData = "test data2";
+    const x = toUTF8Array(testData);
+
+    node_write_file({data: file}, 1, x.length, x);
+}
+
+//    test_write_to_file();
+
+if(has_require) {
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    const stream = require('stream');
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    const fs = require('fs');
 
     predicate_open = function (file, mode, stream, options) {
         var index = streams.length;
@@ -7202,16 +7214,6 @@ if(has_require) {
         memory[state.H++] = index ^ (TAG_INT << WORD_BITS);
         return unify(stream, ref);
     };
-
-    function test_write_to_file() {
-        const file = fs.createWriteStream('example.txt');
-        const testData = "test data2";
-        const x = toUTF8Array(testData);
-
-        node_write_file({data: file}, 1, x.length, x);
-    }
-
-//    test_write_to_file();
 }
 // else {
 //     predicate_open = function (file, mode, stream, options) {
@@ -7847,6 +7849,8 @@ function check_term(t, m)
     // Everything else we assume is OK
 }
 // File dom.js
+'use strict';
+
 /*
 predicates to read and modify the javascript DOM for HTML
  */
@@ -9165,6 +9169,8 @@ function decode_instruction(predicateID, codePosition) {
 
 }
 // File object.js
+'use strict';
+
 var idsToObjects = new Map();
 var idsToTypes = new Map();
 var objectsToIDs = new Map();
@@ -9615,7 +9621,7 @@ function predicate_dom_create_object(type, object, spec) {
     }
 
     let typeJS;
-    let arguments = [];
+    let structureArguments = [];
     let arity;
     if(TAG(type) === TAG_ATM) {
         typeJS = atable[VAL(type)];
@@ -9625,7 +9631,7 @@ function predicate_dom_create_object(type, object, spec) {
         typeJS = atable[functorPL];
         for(let ofst = 0; ofst < arity;ofst++) {
             let argument = deref(memory[VAL(type) + ofst + 1]);
-            arguments.push(argument);
+            structureArguments.push(argument);
         }
     } else {
         return type_error('atom or structure', type);
@@ -9648,7 +9654,7 @@ function predicate_dom_create_object(type, object, spec) {
     }
 
     let objectJS;
-    if(arguments.length > 0) {
+    if(structureArguments.length > 0) {
         let argTypesContainer = {};
         if(! convert_type_terms(spec, argTypesContainer)) {
             return false;
@@ -9658,7 +9664,7 @@ function predicate_dom_create_object(type, object, spec) {
         let applyArguments = [];
         for (var i = 0; i < arity; i++) {
             let applyArgumentContainer = {};
-            if (convert_method_argument(arguments[i], specArguments[i], applyArgumentContainer)) {
+            if (convert_method_argument(structureArguments[i], specArguments[i], applyArgumentContainer)) {
                 applyArguments.push(applyArgumentContainer.value);
             } else {
                 return false;
@@ -9687,12 +9693,12 @@ an answer to
 
 
  */
-function newCall(Cls, arguments) {
+function newCall(Cls, structureArguments) {
     // The first of the bindArguments is the first argument to the bind() function. From bind() doc:
     // [The first argument is the] value to be passed as the 'this' parameter to the target function when the bound function is called.
     // This first argument is null because the 'new' operator overrides the 'this' parameter.
 
-    let bindArguments = [null].concat(arguments);
+    let bindArguments = [null].concat(structureArguments);
     return new (Function.prototype.bind.apply(Cls, bindArguments));
     // or even
     // return new (Cls.bind.apply(Cls, arguments));

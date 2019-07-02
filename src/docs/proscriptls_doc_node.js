@@ -4620,8 +4620,8 @@ function demo(d)
     stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
     stdout("Loaded " + atable.length + " atoms\n");
     stdout("Loaded " + ftable.length + " functors\n");
-    call_directives();
     initialize();
+    call_directives();
     allocate_first_frame();
 
     var ftor = VAL(lookup_functor("toplevel", 0));
@@ -4647,9 +4647,9 @@ function unit_tests(d)
     stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
     stdout("Loaded " + atable.length + " atoms\n");
     stdout("Loaded " + ftable.length + " functors\n");
-    call_directives();
 
     initialize();
+    call_directives();
     allocate_first_frame();
 
     var ftor = VAL(lookup_functor("toplevel", 0));
