@@ -642,7 +642,7 @@ function proscript_init(queryJS) {
     proscriptls_init(queryJS);
 }
 
-function proscriptls_init(queryJS) {
+function proscriptls_init(queryJS, displayLoadInfo) {
     if(! predicate_flush_stdout) {
         predicate_flush_stdout = function() { return true;};
     }
@@ -652,6 +652,12 @@ function proscriptls_init(queryJS) {
     }
 
     load_state();
+
+    if(displayLoadInfo) {
+        stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
+        stdout("Loaded " + atable.length + " atoms\n");
+        stdout("Loaded " + ftable.length + " functors\n");
+    }
 
     initialize();
 
