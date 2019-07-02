@@ -1,1 +1,2 @@
+<!--suppress ALL -->
 {{template_file('framework.index.template', [home, 'ProscriptLS', 'content.index.template'])}}

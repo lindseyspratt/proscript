@@ -18,8 +18,15 @@ all:	$(HTML) $(TOP_HTML)
 clean:		
 		rm -f $(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL)
 
+# create /index.html with '<!--suppress ALL -->' removed from $(DIST_DOC)/index.html.
+# The 'suppress ALL' directive is used by webstorm inspection to suppress quality checks
+# of $(DIST_DOC)/index.html. This version of index.html is in the wrong place (hence the copy
+# to /index.html) so the inspection's href src checks spuriously indicate an problem.
+# The 'sed' command both removes the 'suppress ALL' directive and creates a copy
+# in the root of the project.
+
 $(TOP_HTML): $(DIST_DOC)/index.html
-		cp $(DIST_DOC)/index.html $(TOP_HTML)
+		sed '1d' $(DIST_DOC)/index.html > $(TOP_HTML)
 
 $(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template
 
