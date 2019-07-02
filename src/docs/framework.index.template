@@ -12,7 +12,7 @@
     -->
 </head>
 
-<body onload="proscript_init();">
+<body onload="proscriptls_init ();">
 <!-- Side navigation -->
 {{template_and(template_arg(1, Page), template_file('sidenav.index.template', [Page]))}}
 <!-- Page content -->

@@ -23,19 +23,19 @@ There is an index.html file generated in proscriptls/doc - it is copied to prosc
     </div>
     <div class="indexed" id="running-proscriptls">
         <h3>Running ProscriptLS</h3>
-        ProscriptLS is started by the proscript_init function (implemented in the proscriptls.js library).
+        ProscriptLS is started by the proscriptls_init  function (implemented in the proscriptls.js library).
         This function is typically invoked once per load of the web page in an onload handler for the 'body'
         element:
         <pre class="html"><code>
 &lt;body onload=
-        "proscript_init();">
+        "proscriptls_init ();">
 Body stuff
 &lt;/body>
 </code></pre>
     </div>
     <div class="indexed" id="compiling-proscriptls">
         <h3>Compiling ProscriptLS programs in the web client</h3>
-        The proscript_init function supports compilation of ProscriptLS programs in the client
+        The proscriptls_init  function supports compilation of ProscriptLS programs in the client
         using the 'script' tag with the 'type' attribute of 'text/prolog'
         or using the ProscriptLS 'consult/1' predicate.
         <h4>Compilation Examples</h4>
@@ -77,7 +77,7 @@ More HTML
 &lt;head>
     &lt;title>ProscriptLS Basic&lt;/title>
 &lt;/head>
-&lt;body onload="proscript_init();">
+&lt;body onload="proscriptls_init ();">
 &lt;div>
     &lt;h2>ProscriptLS Basic&lt;/h2>
     &lt;p>

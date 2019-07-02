@@ -4,10 +4,10 @@ A Javascript implementation of Prolog
 ProscriptLS (Proscript Logic for Systems) is a fork of the original Proscript project by Matt Lilley.
 There are two major enhancements in this fork: builtins to work with the DOM (Document Object Model) of HTML and
 a proper interactive Prolog tracing debugger that can be used in the client web page (using a JQuery Terminal).
-For the DOM enhancements there is a javascript function proscript_init("goal") that can be 
+For the DOM enhancements there is a javascript function proscriptls_init("goal") that can be 
 called in <body> onload to run a Prolog query to initialize the HTML environment.
 proscriptls("goal") can be used in handlers in the HTML page where the evaluation
-shares the same predicate assertions as that set up by the proscript_init function.
+shares the same predicate assertions as that set up by the proscriptls_init ls function.
 
 The primary documentation is in docs/index.html.
 

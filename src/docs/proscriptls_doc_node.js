@@ -8467,7 +8467,7 @@ function setupElementsForSelectAll(query, container) {
     return true;
 }
 
-// proscript_init generally is only used once in a web page to set up the proscriptls globals.
+// proscriptls_init  generally is only used once in a web page to set up the proscriptls globals.
 // Additional calls of Prolog queries should use proscriptls to avoid overwriting the global data,
 // particularly the predicates from assertions.
 /*
@@ -8484,15 +8484,15 @@ function setupElementsForSelectAll(query, container) {
  */
 
 // These functions may be defined in some other file.
-// If not then they are defined by proscript_init method.
+// If not then they are defined by proscriptls_init  method.
 
 var predicate_flush_stdout;
 var stdout;
 
-function proscript_init(queryJS) {
-    proscriptls_init(queryJS);
-}
-
+// function proscript_init(queryJS) {
+//     proscriptls_init(queryJS);
+// }
+//
 function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) {
     debugging = debug;
 

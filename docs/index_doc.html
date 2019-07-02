@@ -12,7 +12,7 @@
     -->
 </head>
 
-<body onload="proscript_init();">
+<body onload="proscriptls_init ();">
 <!-- Side navigation -->
 <ul class="sidenav">
     <li><span class="caret"></span>
@@ -76,15 +76,15 @@
                         <pre class="html"><code>
 &lt;script type="text/prolog" src="PATH_TO_PROLOG_SOURCE"&lt;/script></code></pre>
                         This PROLOG_SOURCE will be compiled to WAM (Warren Abstract Machine) byte codes when the
-                        proscript_init
+                        proscriptls_init
                         function is evaluated.
                         These byte codes are interpreted by the WAM engine in the procriptls.js library.
                     </li>
                     <li>
-                        Run proscript_init() function:
+                        Run proscriptls_init () function:
                         <pre class="html"><code>
-&lt;body onload="proscript_init();"> BODY &lt;/body></code></pre>
-                        proscript_init() sets up the Prolog state including the core system predicates.
+&lt;body onload="proscriptls_init ();"> BODY &lt;/body></code></pre>
+                        proscriptls_init () sets up the Prolog state including the core system predicates.
                         Also it finds all of the script elements with type 'text/prolog' and compiles the
                         associated sources.
                     </li>
@@ -99,7 +99,7 @@ This debugger is run from a browser. It uses JQuery.terminal to provide the comm
 <br>
 The debugger files are in PROSCRIPTLS_git/terminal.
 The HTML page must be set up as described above with the proscriptls.js library and an invocation of the
-proscript_init() Javascript method.
+proscriptls_init () Javascript method.
 <br>
 There are three more steps specific to setting up the terminal as a ProscriptLS interpreter:
 <ul>

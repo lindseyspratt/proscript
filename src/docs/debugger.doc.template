@@ -4,7 +4,7 @@ This debugger is run from a browser. It uses JQuery.terminal to provide the comm
 <br>
 The debugger files are in PROSCRIPTLS_git/terminal.
 The HTML page must be set up as described above with the proscriptls.js library and an invocation of the
-proscript_init() Javascript method.
+proscriptls_init () Javascript method.
 <br>
 There are three more steps specific to setting up the terminal as a ProscriptLS interpreter:
 <ul>
