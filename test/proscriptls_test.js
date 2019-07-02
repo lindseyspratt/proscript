@@ -4643,7 +4643,7 @@ function demo(d)
 function unit_tests(d)
 {
     debugging = d;
-    proscriptls_init('toplevel.', true);
+    proscriptls_init('toplevel.', true, true);
 
     // load_state();
     // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
@@ -8491,7 +8491,7 @@ function proscript_init(queryJS) {
     proscriptls_init(queryJS);
 }
 
-function proscriptls_init(queryJS, displayLoadInfo) {
+function proscriptls_init(queryJS, displayLoadInfo, displaySucceededMsg) {
     if(! predicate_flush_stdout) {
         predicate_flush_stdout = function() { return true;};
     }
@@ -8516,7 +8516,7 @@ function proscriptls_init(queryJS, displayLoadInfo) {
 
     if(queryJS && queryJS !== '') {
         initialize(); // ensure state is initialized. proscriptls saves and restores state.
-        proscriptls(queryJS);
+        proscriptls(queryJS, displaySucceededMsg);
     }
 }
 
@@ -8628,7 +8628,7 @@ function call_directives() {
 // All other global runtime data is saved and restored.
 // This allows the asserta/assertz clauses to persist across calls of proscriptls.
 
-function proscriptls(queryJS) {
+function proscriptls(queryJS, displaySucceededMsg) {
     let saved_state;
     let saved_registers;
     let saved_code;
@@ -8656,7 +8656,12 @@ function proscriptls(queryJS) {
     {
         if (!wam())
         {
-            stdout("Failed " + queryJS + ".\n");
+            if (exception == null)
+                stdout("Failed " + queryJS + "\n");
+            else
+                stdout("Uncaught exception: " + term_to_string(recall_term(exception, {})) +"\n");
+        } else if(displaySucceededMsg) {
+            stdout("Succeeded " + queryJS + "\n");
         }
     } catch (anything)
     {

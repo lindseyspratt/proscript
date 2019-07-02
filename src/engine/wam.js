@@ -1777,7 +1777,7 @@ function demo(d)
 function unit_tests(d)
 {
     debugging = d;
-    proscriptls_init('toplevel.', true);
+    proscriptls_init('toplevel.', true, true);
 
     // load_state();
     // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
