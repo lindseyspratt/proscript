@@ -1,3 +1,3 @@
 const pls = require('../docs/proscriptls_doc_node');
 
-pls.demo(true);
+pls.proscriptls_toplevel(true);

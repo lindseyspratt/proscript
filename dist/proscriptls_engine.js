@@ -4610,37 +4610,6 @@ function undefined_predicate(ftor)
 
 // End exceptions code
 
-// /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc foreign.js wam.js proscriptls_state.js -e "demo()"
-// noinspection JSUnusedGlobalSymbols
-// noinspection JSUnusedLocalSymbols
-function demo(d)
-{
-   // debugging = d;
-    proscriptls_toplevel(d);
-
-    // load_state();
-    // stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
-    // stdout("Loaded " + atable.length + " atoms\n");
-    // stdout("Loaded " + ftable.length + " functors\n");
-    // initialize();
-    // call_directives();
-    // allocate_first_frame();
-    //
-    // var ftor = VAL(lookup_functor("toplevel", 0));
-    // state.P = 0;
-    // var pred = predicates[ftor];
-    // var pi = predicates[ftor].clause_keys[0];
-    // state.current_predicate = pred;
-    // code = pred.clauses[pi].code;
-    // if (wam())
-    //     stdout("Succeeded\n");
-    // else if (exception == null)
-    //     stdout("Failed\n");
-    // else
-    //     stdout("Uncaught exception: " + term_to_string(recall_term(exception, {})) +"\n");
-}
-
-
 // noinspection JSUnusedGlobalSymbols
 function unit_tests(d)
 {
@@ -8488,6 +8457,8 @@ function setupElementsForSelectAll(query, container) {
 
 var predicate_flush_stdout;
 var stdout;
+
+// JavaScriptCore proscriptls.js standalone.js  -e "proscriptls_toplevel(true)"
 
 function proscriptls_toplevel(debug) {
     proscriptls_init('toplevel.', debug, true, true);

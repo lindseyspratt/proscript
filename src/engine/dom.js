@@ -638,6 +638,8 @@ function setupElementsForSelectAll(query, container) {
 var predicate_flush_stdout;
 var stdout;
 
+// JavaScriptCore proscriptls.js standalone.js  -e "proscriptls_toplevel(true)"
+
 function proscriptls_toplevel(debug) {
     proscriptls_init('toplevel.', debug, true, true);
 }

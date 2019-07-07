@@ -1,1 +1,1 @@
-module.exports = {demo};
+module.exports = {proscriptls_toplevel};

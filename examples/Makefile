@@ -1,14 +1,21 @@
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
-DEBUG=false
-SWIPL=/opt/local/bin/swipl
+DEBUG=true
+SWIPL=/usr/local/bin/swipl --traditional
 ENGINE=../dist/proscriptls_engine.js
+SRC_SYSTEM=../src/system
+SRC_ENGINE=../src/engine
+SRC_TOOLS=../src/tools
+
+all:	demo
 
 clean:
-		rm -f proscriptls_state.js
+		rm -f proscriptls_state_demo.js
 
-demo:	../wam_compiler.pl ../wam_bootstrap.pl ../bootstrap_js.pl ../debugger.pl demo.pl $(ENGINE) ../standalone.js
-		$(SWIPL) -q -f ../wam_compiler.pl -g "build_saved_state(['demo.pl', '../debugger.pl', '../wam_compiler.pl', '../bootstrap_js.pl'], 'foo'), halt"
-		$(JSC) $(ENGINE) proscriptls_state.js ../standalone.js  -e "demo($(DEBUG))"
+demo:	$(ENGINE) ../test/standalone.js proscriptls_state_demo.js
+		$(JSC) $(ENGINE) proscriptls_state_demo.js ../test/standalone.js  -e "proscriptls_toplevel($(DEBUG))"
 
-dump-state: $(ENGINE) proscriptls_state.js ../standalone.js ../dump.js
-		$(JSC) $(ENGINE) proscriptls_state.js ../standalone.js ../dump.js  -e "dump()"
+proscriptls_state_demo.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/wam_compiler.pl demo.pl
+		$(SWIPL) -q -f $(SRC_SYSTEM)/wam_compiler.pl -g "bootstrap('$(SRC_SYSTEM)/', ['demo.pl'], 'proscriptls_state_demo.js', 'foo'), halt"
+
+dump-state: $(ENGINE) proscriptls_state_demo.js ../test/standalone.js $(SRC_TOOLS)/dump.js
+		$(JSC) $(ENGINE) proscriptls_state_demo.js ../test/standalone.js $(SRC_TOOLS)/dump.js  -e "dump()"
