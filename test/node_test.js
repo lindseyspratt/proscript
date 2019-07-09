@@ -1,3 +1,3 @@
 const pls = require('./proscriptls_test');
 
-pls.unit_tests(true);
+pls.proscriptls_toplevel(true);

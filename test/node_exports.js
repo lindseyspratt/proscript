@@ -1,1 +1,1 @@
-module.exports = {unit_tests};
+module.exports = {proscriptls_toplevel};

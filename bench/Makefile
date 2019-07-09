@@ -9,7 +9,7 @@ all: cal.test chat_parser.test crypt.test ham.test meta_qsort.test nand.test nre
 
 %.test: %.pl $(ENGINE) standalone.js $(SRC_SYSTEM)/wam_compiler.pl
 		$(SWIPL) -q -f $(SRC_SYSTEM)/wam_compiler.pl -g "bootstrap('$(SRC_SYSTEM)/', ['common.pl', 'hook.pl', '$<'], main_test(1)), halt"
-		$(JSC) $(ENGINE) proscriptls_state.js standalone.js  -e "unit_tests($(DEBUG))"
+		$(JSC) $(ENGINE) proscriptls_state.js standalone.js  -e "proscriptls_toplevel($(DEBUG))"
 
 
 # boyer.test fails due to a heap overflow. It builds huge terms.
