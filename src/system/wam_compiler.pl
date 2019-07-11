@@ -994,9 +994,11 @@ compile_files([File|Files]):-
 
 
 compile_file(Source):-
+        %writeln(start_compile_file(Source)),
         open(Source, read, S),
         compile_stream(S),
         close(S).
+        %writeln(end_compile_file(Source)).
 
 compile_stream(Stream):-
         read_term(Stream, Term, []),
@@ -1017,6 +1019,21 @@ compile_stream_term(Stream, Term):-
         compile_clause(Term),
         !,
         compile_stream(Stream).
+
+save_compiled_state(SavedStateFile) :-
+        compiled_state_boot_code(BootCode),
+        save_compiled_state(BootCode, SavedStateFile).
+
+save_compiled_state(BootCode, SavedStateFile) :-
+        open(SavedStateFile, write, S1),
+        format(S1, 'function load_state() {~n', []),
+        format(S1, 'bootstrap_code = ~w;~n', [BootCode]),
+        format(S1, 'retry_foreign_offset = 7;~n', []),
+%        format(S1, 'retry_foreign = {code: bootstrap_code, offset:7};~n', []),
+        dump_tables(S1),
+        format(S1, '}~n', []),
+        close(S1),
+        !.
 
 call_init(Goal) :-
     %writeln(init(Goal)),
@@ -1040,10 +1057,11 @@ compile_atom(Atom):-
         writeln('Compiled atom').
 
 compile_and_free_memory_file(MemoryFile) :-
-        % memory_file_description(MemoryFile, Description),
-        % writeln(cafmf(MemoryFile, Description)),
+        %memory_file_description(MemoryFile, Description),
+        %writeln(start_compile_memfile(Description)),
         compile_memory_file(MemoryFile),
         free_memory_file(MemoryFile).
+        %writeln(end_compile_memfile(Description)).
 
 compile_memory_file(MemoryFile) :-
 %        wam_duration(D1),

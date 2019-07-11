@@ -1749,3 +1749,31 @@ function reset_compile_buffer()
     compile_buffer = [];
     return true;
 }
+
+function predicate_compiled_state_boot_code(bootCode)
+{
+    if(TAG(bootCode) !== TAG_REF && TAG(bootCode) !== TAG_LST) {
+        return type_error('var or list', bootCode);
+    }
+    let list = integers_to_list(bootstrap_code);
+    return unify(bootCode, list);
+}
+
+
+function integers_to_list(integers) {
+    if(integers.length === 0) {
+        return NIL;
+    }
+
+    var tmp = state.H ^ (TAG_LST << WORD_BITS);
+    for (var i = 0; i < integers.length; i++)
+    {
+        memory[state.H] = integers[i] ^ (TAG_INT << WORD_BITS);
+        // If there are no more items we will overwrite the last entry with [] when we exit the loop
+        memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+        state.H += 2;
+    }
+    memory[state.H-1] = NIL;
+    return tmp;
+}
+

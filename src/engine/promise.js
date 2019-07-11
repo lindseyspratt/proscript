@@ -173,8 +173,20 @@ async function fetch_promise(urlJS) {
     if (!urlJS.includes(".")) {
         urlJS += ".pl";
     }
-    const response = await fetch(urlJS);
-    return response.text();
+    if(typeof document !== 'undefined') {
+        const response = await fetch(urlJS);
+        return response.text();
+    } else if(typeof fs !== 'undefined') {
+        return node_fetch(urlJS);
+    } else {
+        throw 'invalid environment: no "document" and no "fs" (file system module for node).';
+    }
+}
+
+async function node_fetch(urlJS) {
+    var options = {encoding: 'utf-8', flag: 'r'};
+
+    return await fs.promises.readFile(urlJS, options);
 }
 //
 // async function consult(urls, next_goal) {

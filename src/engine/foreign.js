@@ -710,6 +710,37 @@ function predicate_define_dynamic_predicate(indicator) {
         return type_error("predicate_indicator", indicator);
 }
 
+function predicate_dump_tables(streamPL) {
+    /*
+            format(S, 'atable = [~w];~n', [AtomAtom]),
+        format(S, 'floats = [~w];~n', [FloatAtom]),
+       format(S, 'ftable = [~w];~n', [FunctorAtom]),
+        format(S, 'dtable = [~w];~n', [DynamicFunctorAtom]),
+         format(S, 'predicates = {~w};~n', [PredicatesAtom]),
+        format(S, 'foreign_predicates = {~w};~n', [FPredicatesAtom]),
+        format(S, 'system = [~w];~n', [SystemAtom]),
+        format(S, 'initialization = [~w];~n', [InitializationAtom]).
+     */
+    let streamContainer = {};
+    if (!get_stream(streamPL, streamContainer))
+        return false;
+    let streamValue = streamContainer.value;
+    write_to_stream(streamValue, 'atable =' + JSON.stringify(atable) + ';\n');
+    write_to_stream(streamValue, 'floats =' + JSON.stringify(floats) + ';\n');
+    write_to_stream(streamValue, 'ftable =' + JSON.stringify(ftable) + ';\n');
+    write_to_stream(streamValue, 'dtable =' + JSON.stringify(dtable) + ';\n');
+    write_to_stream(streamValue, 'predicates =' + JSON.stringify(predicates) + ';\n');
+    write_to_stream(streamValue, 'foreign_predicates =' + JSON.stringify(foreign_predicates) + ';\n');
+    write_to_stream(streamValue, 'system =' + JSON.stringify(system) + ';\n');
+    write_to_stream(streamValue, 'initialization =' + JSON.stringify(initialization) + ';\n');
+
+    return true;
+}
+
+function write_to_stream(streamValue, string) {
+    let bytes = toByteArray(string);
+    return streamValue.write(streamValue, 1, bytes.length, bytes);
+}
 function predicate_trace_unify(a, b)
 {
     stdout("tracing unification of " + hex(a) + " and " + hex(b) + "\n");
@@ -887,9 +918,9 @@ function check_compile_buffer(head, body)
 }
 function add_clause_to_predicate(predicateP, head, body)
 {
-    if(atable[VAL(deref(memory[VAL(predicateP)+1]))] === 'select_test') {
-        console.log(JSON.stringify(record_term(head)) + " : " + JSON.stringify(record_term(body)));
-    }
+    // if(atable[VAL(deref(memory[VAL(predicateP)+1]))] === 'select_test') {
+    //     console.log(JSON.stringify(record_term(head)) + " : " + JSON.stringify(record_term(body)));
+    // }
 
     var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
     if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))

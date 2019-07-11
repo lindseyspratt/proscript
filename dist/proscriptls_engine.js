@@ -704,6 +704,37 @@ function predicate_define_dynamic_predicate(indicator) {
         return type_error("predicate_indicator", indicator);
 }
 
+function predicate_dump_tables(streamPL) {
+    /*
+            format(S, 'atable = [~w];~n', [AtomAtom]),
+        format(S, 'floats = [~w];~n', [FloatAtom]),
+       format(S, 'ftable = [~w];~n', [FunctorAtom]),
+        format(S, 'dtable = [~w];~n', [DynamicFunctorAtom]),
+         format(S, 'predicates = {~w};~n', [PredicatesAtom]),
+        format(S, 'foreign_predicates = {~w};~n', [FPredicatesAtom]),
+        format(S, 'system = [~w];~n', [SystemAtom]),
+        format(S, 'initialization = [~w];~n', [InitializationAtom]).
+     */
+    let streamContainer = {};
+    if (!get_stream(streamPL, streamContainer))
+        return false;
+    let streamValue = streamContainer.value;
+    write_to_stream(streamValue, 'atable =' + JSON.stringify(atable) + ';\n');
+    write_to_stream(streamValue, 'floats =' + JSON.stringify(floats) + ';\n');
+    write_to_stream(streamValue, 'ftable =' + JSON.stringify(ftable) + ';\n');
+    write_to_stream(streamValue, 'dtable =' + JSON.stringify(dtable) + ';\n');
+    write_to_stream(streamValue, 'predicates =' + JSON.stringify(predicates) + ';\n');
+    write_to_stream(streamValue, 'foreign_predicates =' + JSON.stringify(foreign_predicates) + ';\n');
+    write_to_stream(streamValue, 'system =' + JSON.stringify(system) + ';\n');
+    write_to_stream(streamValue, 'initialization =' + JSON.stringify(initialization) + ';\n');
+
+    return true;
+}
+
+function write_to_stream(streamValue, string) {
+    let bytes = toByteArray(string);
+    return streamValue.write(streamValue, 1, bytes.length, bytes);
+}
 function predicate_trace_unify(a, b)
 {
     stdout("tracing unification of " + hex(a) + " and " + hex(b) + "\n");
@@ -881,9 +912,9 @@ function check_compile_buffer(head, body)
 }
 function add_clause_to_predicate(predicateP, head, body)
 {
-    if(atable[VAL(deref(memory[VAL(predicateP)+1]))] === 'select_test') {
-        console.log(JSON.stringify(record_term(head)) + " : " + JSON.stringify(record_term(body)));
-    }
+    // if(atable[VAL(deref(memory[VAL(predicateP)+1]))] === 'select_test') {
+    //     console.log(JSON.stringify(record_term(head)) + " : " + JSON.stringify(record_term(body)));
+    // }
 
     var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
     if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))
@@ -2672,8 +2703,20 @@ async function fetch_promise(urlJS) {
     if (!urlJS.includes(".")) {
         urlJS += ".pl";
     }
-    const response = await fetch(urlJS);
-    return response.text();
+    if(typeof document !== 'undefined') {
+        const response = await fetch(urlJS);
+        return response.text();
+    } else if(typeof fs !== 'undefined') {
+        return node_fetch(urlJS);
+    } else {
+        throw 'invalid environment: no "document" and no "fs" (file system module for node).';
+    }
+}
+
+async function node_fetch(urlJS) {
+    var options = {encoding: 'utf-8', flag: 'r'};
+
+    return await fs.promises.readFile(urlJS, options);
 }
 //
 // async function consult(urls, next_goal) {
@@ -4615,6 +4658,34 @@ function reset_compile_buffer()
     compile_buffer = [];
     return true;
 }
+
+function predicate_compiled_state_boot_code(bootCode)
+{
+    if(TAG(bootCode) !== TAG_REF && TAG(bootCode) !== TAG_LST) {
+        return type_error('var or list', bootCode);
+    }
+    let list = integers_to_list(bootstrap_code);
+    return unify(bootCode, list);
+}
+
+
+function integers_to_list(integers) {
+    if(integers.length === 0) {
+        return NIL;
+    }
+
+    var tmp = state.H ^ (TAG_LST << WORD_BITS);
+    for (var i = 0; i < integers.length; i++)
+    {
+        memory[state.H] = integers[i] ^ (TAG_INT << WORD_BITS);
+        // If there are no more items we will overwrite the last entry with [] when we exit the loop
+        memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+        state.H += 2;
+    }
+    memory[state.H-1] = NIL;
+    return tmp;
+}
+
 // File read.js
 /* Term reading */
 // See http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
@@ -7073,6 +7144,15 @@ function predicate_current_stream(stream)
 }
 // File node_files.js
 'use strict';
+var stream;
+var fs;
+var has_require = typeof require !== 'undefined';
+if(has_require) {
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    stream = require('stream');
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    fs = require('fs');
+}
 
 // This file is for execution under nodejs.
 // The presence of 'require' is used to indicate if the
@@ -7086,30 +7166,73 @@ function predicate_open (file, mode, stream, options) {
     return engine_error('open/4 is not defined outside of nodejs.');
 }
 
-var has_require = typeof require !== 'undefined';
-    function node_write_file(stream, size, count, buffer) {
-        var bytes_written = 0;
-        var records_written;
-        var file = stream.data;
-        if (size === 1) {
-            let record = new Buffer(buffer);
+function node_write_file(stream, size, count, buffer) {
+    var bytes_written = 0;
+    var records_written;
+    var file = stream.data;
+    if (size === 1) {
+        let record = Buffer.from(buffer);
+        file.write(record);
+        records_written = count;
+    } else {
+        for (records_written = 0; records_written < count; records_written++) {
+            let record = new Buffer(buffer.splice(0, size));
             file.write(record);
-            records_written = count;
-        } else {
-            for (records_written = 0; records_written < count; records_written++) {
-                let record = new Buffer(buffer.splice(0, size));
-                file.write(record);
 
-            }
         }
-        return records_written;
+    }
+    return records_written;
+}
+
+
+// function node_read_file(stream, size, count, buffer) {
+//     var bytes_read = 0;
+//     var records_read;
+//     var file = stream.data;
+//     let resultBuffer = file.read(count * size);
+//     let position = 0;
+//     for (records_read = 0; records_read < count; records_read++) {
+//         for (var b = 0; b < size; b++) {
+//             var t = resultBuffer[position++];
+//             if (t === undefined)
+//                 return records_read;
+//             buffer[bytes_read++] = t;
+//         }
+//     }
+//     return records_read;
+// }
+
+function node_read_file(stream, size, count, buffer) {
+    var bytes_read = 0;
+    var records_read;
+    var fileDescriptor = stream.data;
+    var resultBuffer = Buffer.allocUnsafe(count * size);
+
+    resultBuffer.fill(0);
+
+    var readCount = fs.readSync(fileDescriptor, resultBuffer, null, count * size);
+    let position = 0;
+    for (records_read = 0; records_read < count && position < readCount; records_read++) {
+        for (var b = 0; b < size && position < readCount; b++) {
+            var t = resultBuffer[position++];
+            if (t === undefined)
+                return records_read;
+            buffer[bytes_read++] = t;
+        }
     }
 
-    function node_close_file(stream) {
+    return records_read;
+}
+
+function node_close_file(stream) {
+    if(typeof stream.data === 'object' && 'end' in stream.data) {
         stream.data.end();
-        stream.data = undefined;
-        return true;
+    } else {
+        fs.closeSync(stream.data);
     }
+    stream.data = undefined;
+    return true;
+}
 
 function test_write_to_file() {
     const file = fs.createWriteStream('example.txt');
@@ -7122,10 +7245,6 @@ function test_write_to_file() {
 //    test_write_to_file();
 
 if(has_require) {
-    // noinspection NodeJsCodingAssistanceForCoreModules
-    const stream = require('stream');
-    // noinspection NodeJsCodingAssistanceForCoreModules
-    const fs = require('fs');
 
     predicate_open = function (file, mode, stream, options) {
         var index = streams.length;
@@ -7143,8 +7262,9 @@ if(has_require) {
         let modeJS = PL_get_atom_chars(mode);
 
         if (modeJS === 'read') {
-            const fileStream = fs.createReadStream(fileJS);
-            streams[index] = new_stream(node_read_file, null, null, node_close_file, null, fileStream);
+            //const fileStream = fs.createReadStream(fileJS);
+            const fileDescriptor = fs.openSync(fileJS, 'r');
+            streams[index] = new_stream(node_read_file, null, null, node_close_file, null, fileDescriptor);
 
         } else if (atable[VAL(mode)] === 'write') {
             const fileStream = fs.createWriteStream(fileJS);

@@ -1,4 +1,13 @@
 'use strict';
+var stream;
+var fs;
+var has_require = typeof require !== 'undefined';
+if(has_require) {
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    stream = require('stream');
+    // noinspection NodeJsCodingAssistanceForCoreModules
+    fs = require('fs');
+}
 
 // This file is for execution under nodejs.
 // The presence of 'require' is used to indicate if the
@@ -12,30 +21,73 @@ function predicate_open (file, mode, stream, options) {
     return engine_error('open/4 is not defined outside of nodejs.');
 }
 
-var has_require = typeof require !== 'undefined';
-    function node_write_file(stream, size, count, buffer) {
-        var bytes_written = 0;
-        var records_written;
-        var file = stream.data;
-        if (size === 1) {
-            let record = new Buffer(buffer);
+function node_write_file(stream, size, count, buffer) {
+    var bytes_written = 0;
+    var records_written;
+    var file = stream.data;
+    if (size === 1) {
+        let record = Buffer.from(buffer);
+        file.write(record);
+        records_written = count;
+    } else {
+        for (records_written = 0; records_written < count; records_written++) {
+            let record = new Buffer(buffer.splice(0, size));
             file.write(record);
-            records_written = count;
-        } else {
-            for (records_written = 0; records_written < count; records_written++) {
-                let record = new Buffer(buffer.splice(0, size));
-                file.write(record);
 
-            }
         }
-        return records_written;
+    }
+    return records_written;
+}
+
+
+// function node_read_file(stream, size, count, buffer) {
+//     var bytes_read = 0;
+//     var records_read;
+//     var file = stream.data;
+//     let resultBuffer = file.read(count * size);
+//     let position = 0;
+//     for (records_read = 0; records_read < count; records_read++) {
+//         for (var b = 0; b < size; b++) {
+//             var t = resultBuffer[position++];
+//             if (t === undefined)
+//                 return records_read;
+//             buffer[bytes_read++] = t;
+//         }
+//     }
+//     return records_read;
+// }
+
+function node_read_file(stream, size, count, buffer) {
+    var bytes_read = 0;
+    var records_read;
+    var fileDescriptor = stream.data;
+    var resultBuffer = Buffer.allocUnsafe(count * size);
+
+    resultBuffer.fill(0);
+
+    var readCount = fs.readSync(fileDescriptor, resultBuffer, null, count * size);
+    let position = 0;
+    for (records_read = 0; records_read < count && position < readCount; records_read++) {
+        for (var b = 0; b < size && position < readCount; b++) {
+            var t = resultBuffer[position++];
+            if (t === undefined)
+                return records_read;
+            buffer[bytes_read++] = t;
+        }
     }
 
-    function node_close_file(stream) {
+    return records_read;
+}
+
+function node_close_file(stream) {
+    if(typeof stream.data === 'object' && 'end' in stream.data) {
         stream.data.end();
-        stream.data = undefined;
-        return true;
+    } else {
+        fs.closeSync(stream.data);
     }
+    stream.data = undefined;
+    return true;
+}
 
 function test_write_to_file() {
     const file = fs.createWriteStream('example.txt');
@@ -48,10 +100,6 @@ function test_write_to_file() {
 //    test_write_to_file();
 
 if(has_require) {
-    // noinspection NodeJsCodingAssistanceForCoreModules
-    const stream = require('stream');
-    // noinspection NodeJsCodingAssistanceForCoreModules
-    const fs = require('fs');
 
     predicate_open = function (file, mode, stream, options) {
         var index = streams.length;
@@ -69,8 +117,9 @@ if(has_require) {
         let modeJS = PL_get_atom_chars(mode);
 
         if (modeJS === 'read') {
-            const fileStream = fs.createReadStream(fileJS);
-            streams[index] = new_stream(node_read_file, null, null, node_close_file, null, fileStream);
+            //const fileStream = fs.createReadStream(fileJS);
+            const fileDescriptor = fs.openSync(fileJS, 'r');
+            streams[index] = new_stream(node_read_file, null, null, node_close_file, null, fileDescriptor);
 
         } else if (atable[VAL(mode)] === 'write') {
             const fileStream = fs.createWriteStream(fileJS);

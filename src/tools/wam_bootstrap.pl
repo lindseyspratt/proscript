@@ -382,6 +382,8 @@ reset:-
         reserve_predicate(generate_initialization_goal/1, predicate_generate_initialization_goal),
         reserve_predicate(generate_system_goal/1, predicate_generate_system_goal),
         reserve_predicate(define_dynamic_predicate/1, predicate_define_dynamic_predicate),
+        reserve_predicate(compiled_state_boot_code/1, predicate_compiled_state_boot_code),
+        reserve_predicate(dump_tables/1, predicate_dump_tables),
 
         % Promises
         reserve_predicate(request_result/1, predicate_request_result),
@@ -466,11 +468,7 @@ build_saved_state(SourceFiles, TopLevelQuery) :-
     build_saved_state(SourceFiles, 'proscriptls_state.js', TopLevelQuery).
 
 build_saved_state(SourceFiles, SavedStateFile, TopLevelQuery):-
-        reset,
-        assemble([call(toplevel/0,0), execute(halt/0), retry_foreign], 2),
-        setof(N-Code, ctable(N, Code), SortedBootCodes),
-        findall(Code, member(_-Code, SortedBootCodes), BootCodes),
-        atomic_list_concat(BootCodes, ',', BootCode),
+        reset_and_build_boot_code(BootCode),
         compile_clause(toplevel:-TopLevelQuery),
         ( compile_files(SourceFiles)->
             true
@@ -480,15 +478,13 @@ build_saved_state(SourceFiles, SavedStateFile, TopLevelQuery):-
             fail
         ),
         !,
-        open(SavedStateFile, write, S1),
-        format(S1, 'function load_state() {~n', []),
-        format(S1, 'bootstrap_code = [0,255,~w];~n', [BootCode]),
-        format(S1, 'retry_foreign_offset = 7;~n', []),
-%        format(S1, 'retry_foreign = {code: bootstrap_code, offset:7};~n', []),
-        dump_tables(S1),
-        format(S1, '}~n', []),
-        close(S1),
-        !.
+        save_compiled_state(BootCode, SavedStateFile).
+
+reset_and_build_boot_code([0,255|MainBootCodes]) :-
+        reset,
+        assemble([call(toplevel/0,0), execute(halt/0), retry_foreign], 2),
+        setof(N-Code, ctable(N, Code), SortedBootCodes),
+        findall(Code, member(_-Code, SortedBootCodes), MainBootCodes).
 
 
 % eg bootstrap('demo.pl', (factorial(5, X), writeln(X))).
