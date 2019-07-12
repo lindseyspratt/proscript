@@ -1,3 +1,5 @@
+:- dynamic(test/1).
+
 term_expansion((test(Label, ExpectedPort):- Body), (test(Label):- (catch(setup_call_catcher_cleanup(format('~w: ', [Label]),
                                                                                                     Body,
                                                                                                     Port,

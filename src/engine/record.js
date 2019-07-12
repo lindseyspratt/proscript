@@ -144,6 +144,10 @@ function erase(ref)
     return true;
 }
 
+function predicate_record_term(term, string) {
+    return unify(string, JSON.stringify(record_term(term)));
+}
+
 // record_term returns a new object which is a javascript representation of the term
 function record_term(t)
 {

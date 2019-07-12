@@ -719,6 +719,11 @@ function predicate_trace_unify(a, b)
     return false;
 }
 
+function predicate_term_expansion(source, expanded) {
+    // add pair to termExpansion map
+
+}
+
 function predicate_op(precedence, fixity, name)
 {
     var op_name;
@@ -6111,6 +6116,10 @@ function erase(ref)
     return true;
 }
 
+function predicate_record_term(term, string) {
+    return unify(string, JSON.stringify(record_term(term)));
+}
+
 // record_term returns a new object which is a javascript representation of the term
 function record_term(t)
 {
@@ -6334,7 +6343,7 @@ function PL_is_functor(term, ftor)
  */
 function PL_is_list(term)
 {
-    return TAG(term) === TAG_LST;
+    return TAG(term) === TAG_LST || term === NIL;
 }
 
 /**
@@ -6342,7 +6351,7 @@ function PL_is_list(term)
  */
 function PL_is_atomic(term)
 {
-    return TAG(term) !== TAG_STR && TAG(term) !== TAG_REF;
+    return TAG(term) !== TAG_STR && TAG(term) !== TAG_LST && TAG(term) !== TAG_REF;
 }
 
 /**
@@ -6350,7 +6359,7 @@ function PL_is_atomic(term)
  */
 function PL_is_number(term)
 {
-    return TAG(term) === TAG_INT; // At the moment
+    return TAG(term) === TAG_INT || TAG(term) === TAG_FLT;
 }
 
 function PL_get_atom(term)
