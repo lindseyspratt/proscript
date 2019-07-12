@@ -198,13 +198,23 @@ compile_clause_2(Head :- Body):-
         compile_auxiliary_goals(ExtraClauses, O2, []),
         reset_compile_buffer,
         !,
-        assemble(Opcodes, 2).
+        assemble(Opcodes, 2),
+        (Head = term_expansion(_,_)
+          -> handle_term_expansion(Head :- Body) % assert term_expansion(_,_) if compiler is being run by SWI-Prolog.
+        ;
+        true
+        ).
 
 
 compile_clause_2(Head):-
         compile_head(Head, 0, no_cut, [], none, _State, Opcodes, [proceed]),
         reset_compile_buffer,
-        assemble(Opcodes, 2).
+        assemble(Opcodes, 2),
+        (Head = term_expansion(_,_)
+          -> handle_term_expansion(Head) % assert term_expansion(_,_) if compiler is being run by SWI-Prolog.
+        ;
+        true
+        ).
 
 
 next_free_variable([next(A)|_], A):- !.

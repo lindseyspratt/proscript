@@ -14,7 +14,7 @@
 :-dynamic(ftable/2). % functors
 :-dynamic(fltable/2). % floats
 :-dynamic(atable/2). % atoms
-:-dynamic(clause_table/3). % clauses
+:-dynamic(clause_table/5). % clauses
 :-dynamic(fptable/2). % foreign predicates
 :-dynamic(ctable/2). % code
 :-dynamic(itable/1). % initialization directive predicates
@@ -80,33 +80,36 @@ emit_code(N, Code):-
 
 define_dynamic_predicate(Name/Arity) :-
         lookup_dynamic_functor(Name, Arity, Predicate),
-        (clause_table(Predicate, _, _)
+        (clause_table(Predicate, _, _, _, _)
           -> true
         ;
-         assertz(clause_table(Predicate, 0, []))
+         assertz(clause_table(Predicate, 0, [], none, none))
         ).
 
-add_clause_to_predicate(Name/Arity, _, _):-
+handle_term_expansion(Clause) :-
+    assertz(Clause).
+
+add_clause_to_predicate(Name/Arity, Head, Body):-
         setof(N-Code, T^(ctable(T, Code), N is T /\ 0x7fffffff), SortedCodes),
         findall(Code, member(_-Code, SortedCodes), Codes),
         lookup_functor(Name, Arity, Predicate),
-        ( retract(clause_table(Predicate, I, [254,0|PreviousCodes]))->
+        ( retract(clause_table(Predicate, I, [254,0|PreviousCodes], HeadP, BodyP))->
             % If there is a NOP clause, then we have only one clause. Make it try_me_else, then add our new one as trust_me.
             II is I+1,
-            assertz(clause_table(Predicate, I, [28, II|PreviousCodes])),
-            assertz(clause_table(Predicate, II, [30, 0|Codes]))
-        ; retract(clause_table(Predicate, I, [30,0|PreviousCodes]))->
+            assertz(clause_table(Predicate, I, [28, II|PreviousCodes], HeadP, BodyP)),
+            assertz(clause_table(Predicate, II, [30, 0|Codes], Head, Body))
+        ; retract(clause_table(Predicate, I, [30,0|PreviousCodes], HeadP, BodyP))->
             II is I+1,
             % If we have a trust_me, then make it retry_me_else (since there must have been another clause to try first, if we then have to trust_me)
-            assertz(clause_table(Predicate, I, [29, II|PreviousCodes])),
-            assertz(clause_table(Predicate, II, [30, 0|Codes]))
-        ; retract(clause_table(Predicate, 0, []))->
+            assertz(clause_table(Predicate, I, [29, II|PreviousCodes], HeadP, BodyP)),
+            assertz(clause_table(Predicate, II, [30, 0|Codes], Head, Body))
+        ; retract(clause_table(Predicate, 0, [], _HeadP, _BodyP))->
             % Predicate defined with no clauses, possibly due to dynamic directive defining Predicate.
             % add ours as a <NOP,0>
-            assertz(clause_table(Predicate, 0, [254, 0|Codes]))
+            assertz(clause_table(Predicate, 0, [254, 0|Codes], Head, Body))
         ; otherwise->
             % Otherwise Predicate not defined so there are no clauses yet. So just add ours as a <NOP,0>
-            assertz(clause_table(Predicate, 0, [254, 0|Codes]))
+            assertz(clause_table(Predicate, 0, [254, 0|Codes], Head, Body))
         ).
 
 add_clause_to_aux(AuxLabel, N, L, LT):-
@@ -229,18 +232,24 @@ dump_tables(S):-
         format(S, 'initialization = [~w];~n', [InitializationAtom]).
 
 dump_predicate(PredicateAtom) :-
-       bagof(Clause-Index,
-            clause_table(Functor, Index, Clause), % Clause = [] only holds for dynamic predicate pseudo-clause.
+       bagof(c(Clause, Index, Head, Body),
+            clause_table(Functor, Index, Clause, Head, Body), % Clause = [] only holds for dynamic predicate pseudo-clause.
             Clauses),
-       (Clauses = [[]-0]
+       (Clauses = [c([], 0, _, _)]
          -> ClauseAtom = '', IndexAtom = '', I = 0
        ;
-       delete(Clauses, []-0, RealClauses),
+       delete(Clauses, c([], 0, _, _), RealClauses),
        Clauses = RealClauses,
        aggregate_all(r(bag(ClauseAtom),
                       bag(I)),
-                    ( member(Clause-I, RealClauses),
-                      format(atom(ClauseAtom), '~w:{code:~w, key:~w}', [I, Clause, I])
+                    ( member(c(Clause, I, Head, Body), RealClauses),
+                      (dtable(Functor)
+                        -> record_term(Head, HeadString),
+                           record_term(Body, BodyString),
+                           format(atom(ClauseAtom), '~w:{code:~w, key:~w, head:~w, body:~w}', [I, Clause, I, HeadString, BodyString])
+                       ;
+                       format(atom(ClauseAtom), '~w:{code:~w, key:~w}', [I, Clause, I])
+                      )
                     ),
                     r(ClauseAtoms, IndexAtoms)),
        atomic_list_concat(IndexAtoms, ', ', IndexAtom),
@@ -255,12 +264,66 @@ reserve_predicate(Functor/Arity, Foreign):-
         lookup_functor(Functor, Arity, F),
         assert(fptable(F, Foreign)).
 
+% record_term returns a string which is a javascript representation of the term
+record_term(Term, String) :-
+    (var(Term) -> JSON = var(Term)
+    ; atom(Term) -> JSON = atom(Term)
+    ; float(Term) -> JSON = float(Term)
+    ; integer(Term) -> JSON = integer(Term)
+    ; Term = [_|_]
+       -> record_terms(Term, Terms, FinalTail),
+          JSON = list(Terms, FinalTail)
+    ; Term =.. [_,_|_]
+       -> JSON = structure(Name, ArgsJSON),
+          Term =.. [Name|Args],
+          record_terms(Args, ArgsJSON, _)
+    ; throw(unrecognized_term_type(Term))
+    ),
+    json_string(JSON, String).
+
+record_terms(X, [], XR) :-
+    (var(X) ; X \= [_|_]),
+    !,
+    record_term(X, XR).
+record_terms([H|T], [HR|TR], FinalTail) :-
+    record_term(H, HR),
+    record_terms(T, TR, FinalTail).
+
+json_string(JSON, String) :-
+    JSON =.. [Type|Values],
+    json_type(Type, TypeInteger, Format),
+    format(atom(ValueString), Format, Values),
+    escape_newlines(ValueString, EscapedValueString),
+    format(atom(String), '{type: ~w, ~w}', [TypeInteger, EscapedValueString]).
+
+json_type(var, 0, 'key: "~w"').
+json_type(atom, 4, 'value: "~w"').
+json_type(float, 5, 'value: ~w').
+json_type(integer, 3, 'value: ~w').
+json_type(list, 2, 'value: ~w, tail: ~w').
+json_type(structure, 1, 'name: "~w",  args: ~w').
+
+escape_newlines(ValueString, EscapedValueString) :-
+    atom_codes(ValueString, Codes),
+    escape_newlines1(Codes, EscapedCodes),
+    atom_codes(EscapedValueString, EscapedCodes).
+
+escape_newlines1([], []).
+escape_newlines1([H|T], EscapedCodes) :-
+    escape_newline([H], EscapedCodes, Tail),
+    escape_newlines1(T, Tail).
+
+escape_newline("\n", EscapedCodes, Tail) :-
+    !,
+    append("\\n", Tail, EscapedCodes).
+escape_newline([C], [C|Tail], Tail).
+
 reset_compile_buffer:-
         retractall(ctable(_, _)).
 
 reset:-
         retractall(ctable(_, _)),
-        retractall(clause_table(_,_,_)),
+        retractall(clause_table(_,_,_,_,_)),
         retractall(atable(_,_)),
         retractall(ftable(_,_)),
         retractall(fptable(_,_)),
@@ -427,6 +490,7 @@ reset:-
         reserve_predicate(recordz/3, recordz),
         reserve_predicate(recorded/3, recorded),
         reserve_predicate(erase/1, erase),
+        reserve_predicate(record_term/2, record_term),
 
         % GC
         reserve_predicate(gc/0, predicate_gc),

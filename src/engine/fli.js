@@ -124,7 +124,7 @@ function PL_is_functor(term, ftor)
  */
 function PL_is_list(term)
 {
-    return TAG(term) === TAG_LST;
+    return TAG(term) === TAG_LST || term === NIL;
 }
 
 /**
@@ -132,7 +132,7 @@ function PL_is_list(term)
  */
 function PL_is_atomic(term)
 {
-    return TAG(term) !== TAG_STR && TAG(term) !== TAG_REF;
+    return TAG(term) !== TAG_STR && TAG(term) !== TAG_LST && TAG(term) !== TAG_REF;
 }
 
 /**
@@ -140,7 +140,7 @@ function PL_is_atomic(term)
  */
 function PL_is_number(term)
 {
-    return TAG(term) === TAG_INT; // At the moment
+    return TAG(term) === TAG_INT || TAG(term) === TAG_FLT;
 }
 
 function PL_get_atom(term)

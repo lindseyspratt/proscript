@@ -1,7 +1,8 @@
 assert(Term):-
         assertz(Term).
 
-save_clausea(Head:-Body):- 
+save_clausea(Head:-Body):-
+       !,
        functor(Head, Name, Arity),
        prepend_clause_to_predicate(Name/Arity, Head, Body).
 
@@ -9,6 +10,8 @@ save_clausea(Fact):-
         !,
         functor(Fact, Name, Arity),
         prepend_clause_to_predicate(Name/Arity, Fact, true).
+
+handle_term_expansion(_Clause).
 
 include(_).
 
