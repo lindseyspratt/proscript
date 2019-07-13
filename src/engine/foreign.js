@@ -730,7 +730,20 @@ function predicate_dump_tables(streamPL) {
     write_to_stream(streamValue, 'ftable =' + JSON.stringify(ftable) + ';\n');
     write_to_stream(streamValue, 'dtable =' + JSON.stringify(dtable) + ';\n');
     write_to_stream(streamValue, 'predicates =' + JSON.stringify(predicates) + ';\n');
-    write_to_stream(streamValue, 'foreign_predicates =' + JSON.stringify(foreign_predicates) + ';\n');
+    write_to_stream(streamValue, 'foreign_predicates ={' );
+    let isFirst = true;
+    for(let predKey of Object.keys(foreign_predicates)) {
+        let predFunc = foreign_predicates[predKey];
+        if(! isFirst) {
+            write_to_stream(streamValue, ', ')
+        } else {
+            isFirst = false;
+        }
+        //0: predicate_acyclic_term
+        write_to_stream(streamValue, predKey + ': ' + predFunc.name);
+    }
+    write_to_stream(streamValue, '};\n' );
+
     write_to_stream(streamValue, 'system =' + JSON.stringify(system) + ';\n');
     write_to_stream(streamValue, 'initialization =' + JSON.stringify(initialization) + ';\n');
 
