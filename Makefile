@@ -3,12 +3,16 @@ DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 
 
-all:		dist/proscriptls.js doc
+all:		dist/proscriptls.js doc examples
+
+.PHONY: doc examples gc dump-state test_proscript
+
 clean:		
 		cd src/engine && make clean
 		cd src/system && make clean
 		cd src/docs && make clean
-		rm -f dist/proscriptls.js
+		cd examples && make clean
+		rm -f dist/proscriptls.js dist/proscriptls_state.js dist/proscriptls_engine.js
 
 dist/proscriptls_state.js: src/system/* src/tools/wam_bootstrap.pl
 		cd src/system && make
@@ -21,6 +25,9 @@ dist/proscriptls.js:	dist/proscriptls_engine.js dist/proscriptls_state.js
 
 doc:
 		cd src/docs && make
+
+examples:
+		cd examples && make
 
 gc:		dist/proscriptls.js standalone.js
 		$(JSC) dist/proscriptls.js standalone.js  -e "gc_test($(DEBUG))"
