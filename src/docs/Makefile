@@ -16,7 +16,9 @@ SRC_SYSTEM=../system
 all:	$(HTML) $(TOP_HTML)
 
 clean:		
-		rm -f $(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL)
+		rm -f $(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL) proscriptls_state_doc.js proscriptls_doc_node.js type_references.template
+
+.PHONY: all clean dump-state
 
 # create /index.html with '<!--suppress ALL -->' removed from $(DIST_DOC)/index.html.
 # The 'suppress ALL' directive is used by webstorm inspection to suppress quality checks
@@ -45,8 +47,8 @@ proscriptls_state_doc.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.p
 dump-state: $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js
 		$(JSC) $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js  -e "dump()"
 
-proscriptls_doc_node.js:    $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports.js
-		cat $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports.js > proscriptls_doc_node.js
+proscriptls_doc_node.js:    $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_toplevel.js
+		cat $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_toplevel.js > proscriptls_doc_node.js
 
-type_references.template:  proscriptls_doc_node.js
-		node ../tools/node_test.js
+type_references.template:  proscriptls_doc_node.js ../tools/node_toplevel.js
+		node ../tools/node_toplevel.js ../docs/proscriptls_doc_node
