@@ -3,16 +3,16 @@ DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 
 
-all:		dist/proscriptls.js doc examples
+all:		dist/proscriptls.js dist/proscriptls_for_compile.js dist/node_compile.js doc examples
 
-.PHONY: doc examples gc dump-state test_proscript
+.PHONY: all clean doc examples gc dump-state test_proscript
 
 clean:		
 		cd src/engine && make clean
 		cd src/system && make clean
 		cd src/docs && make clean
 		cd examples && make clean
-		rm -f dist/proscriptls.js dist/proscriptls_state.js dist/proscriptls_engine.js
+		rm -f dist/proscriptls.js dist/proscriptls_state.js dist/proscriptls_engine.js dist/proscriptls_for_compile.js dist/node_compile.js
 
 dist/proscriptls_state.js: src/system/* src/tools/wam_bootstrap.pl
 		cd src/system && make
@@ -22,6 +22,12 @@ dist/proscriptls_engine.js: src/engine/* src/tools/js_preprocess.pl
 
 dist/proscriptls.js:	dist/proscriptls_engine.js dist/proscriptls_state.js
 		cat dist/proscriptls_engine.js dist/proscriptls_state.js > dist/proscriptls.js
+
+dist/proscriptls_for_compile.js:    dist/proscriptls.js src/tools/node_standalone.js src/tools/node_exports_init.js
+		cat dist/proscriptls.js src/tools/node_standalone.js src/tools/node_exports_init.js > dist/proscriptls_for_compile.js
+
+dist/node_compile.js: src/tools/node_compile.js
+		cp src/tools/node_compile.js dist/node_compile.js
 
 doc:
 		cd src/docs && make

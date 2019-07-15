@@ -37,6 +37,7 @@
                         </ul>
                     </li>
                     <li><a  class="index" id="library_index" href="#library"> Library </a></li>
+                    <li><a  class="index" id="compilation_index" href="#compilation"> Compilation </a></li>
                 </ul>
             </li>
             <li><a  class="index" id="examples_index" href="#examples"> Examples </a></li>
@@ -453,6 +454,22 @@ Canvas >> [id -:> canvas, getContext('2d') *:> Ctx]. </code></pre>
 </ul>
 
             </li>
+            <li class="indexed" id="compilation">
+                <h3>Compilation:</h3> When a web page loads a Prolog program it compiles that program.
+The program can be compiled into a 'state' file that combines the
+standard proscriptls_state.js file and the compiled form of the program
+and the web page can load that state file instead of the standard proscriptls_state.js
+or the program source.
+<br>
+This compilation can substantially improve performance of a web page that uses a long Prolog script.
+<br>
+Compiling a program MYPROGRAM is done by
+<code class="javascript inline">node node_compile.js MYPROGRAM proscriptls_state_tiles.js</code>
+where node_compile.js and proscriptls_state_tiles.js are in /dist.
+The node_compile.js script expects the proscriptls_state_tiles.js file to be in the same
+directory as the node_compile.js script.
+
+            </li>
         </ul>
     </div>
     <div class="indexed" id="examples">
@@ -502,7 +519,7 @@ Canvas >> [id -:> canvas, getContext('2d') *:> Ctx]. </code></pre>
 
     <footer>
         <hr>
-        <table width="100%">
+        <table style="width:100%">
         <tr>
         <td>Version 1, June 2019.</td>
         <td style="text-align:right">Powered by ProscriptLS Prolog - Logic at Your Service.</td>

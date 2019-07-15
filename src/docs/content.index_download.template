@@ -9,4 +9,22 @@
     <a href="https://github.com/lindseyspratt/proscriptls/blob/master/dist/proscriptls.js">
         https://github.com/lindseyspratt/proscriptls/blob/master/dist/proscriptls.js
     </a>.
+    <br>
+    This library is available in two pieces,
+        <a href="https://github.com/lindseyspratt/proscriptls/blob/master/dist/proscriptls_engine.js">
+            proscriptls_engine.js
+        </a>
+         and
+       <a href="https://github.com/lindseyspratt/proscriptls/blob/master/dist/proscriptls_state.js">
+            proscriptls_state.js
+        </a>.
+    <br>
+    There is a specialized form of the main library for compiling source to create custom state,
+        <a href="https://github.com/lindseyspratt/proscriptls/blob/master/dist/proscriptls_for_compile.js">
+            proscriptls_for_compile.js
+        </a>,
+    and a node script to run the compilation,
+        <a href="https://github.com/lindseyspratt/proscriptls/blob/master/dist/node_compile.js">
+            node_compile.js
+        </a>.
 </div>

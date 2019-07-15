@@ -46,6 +46,9 @@
             <li class="indexed" id="library">
                 {{template_file('library.doc.template', [])}}
             </li>
+            <li class="indexed" id="compilation">
+                {{template_file('compilation.doc.template', [])}}
+            </li>
         </ul>
     </div>
     <div class="indexed" id="examples">

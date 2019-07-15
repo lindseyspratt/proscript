@@ -21,6 +21,7 @@
                         </ul>
                     </li>
                     <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, library, 'index_doc.html', 'Library']))}}</li>
+                    <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, compilation, 'index_doc.html', 'Compilation']))}}</li>
                 </ul>
             </li>
             <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, examples, 'index_doc.html', 'Examples']))}}</li>
