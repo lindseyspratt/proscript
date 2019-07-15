@@ -1,4 +1,4 @@
-# proscriptls
+# ProscriptLS
 A Javascript implementation of Prolog
 
 ProscriptLS (Proscript Logic for Systems) is a fork of the original Proscript project by Matt Lilley.

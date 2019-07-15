@@ -14,21 +14,21 @@
 
 <body onload="proscriptls_init ();">
 <!-- Side navigation -->
-{{template_and(template_arg(1, Page), template_file('sidenav.index.template', [Page]))}}
+{{1 @ Page & 'sidenav.index.template' # [Page]}}
 <!-- Page content -->
 <div class="content">
     <header>
-        <h1>{{template_arg(2, Title) => Title}}</h1>
+        <h1>{{2 @ Title => Title}}</h1>
         <hr>
     </header>
 
-    {{template_and(template_arg(3, Content), template_file(Content, [Title]))}}
+    {{3 @ Content & Content # [Title]}}
 
     <footer>
         <hr>
         <table style="width:100%">
         <tr>
-        <td>Version 1, July 2019.</td>
+        <td>Version 0.2.0, July 2019.</td>
         <td style="text-align:right">Powered by ProscriptLS Prolog - Logic at Your Service.</td>
         </tr>
         </table>

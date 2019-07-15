@@ -37,7 +37,7 @@ transform_template_goal(&(Goal1, Goal2), template_and(Goal1, Goal2)) :- !.
 transform_template_goal(Goal, Goal).
 
 % Info = [dir - Dir, args - Args]. template_file(Path, [home]). template_arg(1, home) => 'class="active"'.
-% Path : [home]. 1 : home => 'class="active"'.
+% Path # [home]. 1 @ home => 'class="active"'.
 
 template_file(FilePath, Args, Info) :-
     member(dir - FileDir, Info),
