@@ -1,0 +1,1 @@
+{{template_file('framework.index.template', [consult_console_example_source, 'Consult console source', 'content.consult_console_source.template'])}}

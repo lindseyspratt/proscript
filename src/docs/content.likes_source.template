@@ -1,0 +1,17 @@
+<div class="body" id="likes_example_source">
+    <p>
+        The ProscriptLS source used in the Likes example.
+        Links to these source files are:
+        <a href="../examples/tau_likes.pl">tau_likes.pl</a>
+        .
+        This program uses the object.pl and listut2.pl library files.
+    </p>
+    <div id="prolog" style='white-space:nowrap;width:100%;height:100%;background-color:#eee;overflow:auto;float:left'>
+    <div id="likes_pl" >
+        <h2 id='likes_pl_header'>tau_likes.pl</h2>
+        <code class='content'>
+        {{template_file('../../examples/tau_likes.pl', [language-prolog,html_escape-true])}}
+        </code>
+    </div>
+    </div>
+</div>

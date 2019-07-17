@@ -15,7 +15,7 @@ to simplify working with objects.
     <a href="https://www.w3.org/TR/2015/REC-dom-20151119/">W3C DOM4</a>,
     <a href="https://www.w3.org/TR/2dcontext/">HTML Canvas 2D Context</a> for
     the Canvas2DRenderingContext interface,
-    <a href=https://www.w3.org/TR/cssom-1">CSS Object Model</a>,
+    <a href="https://www.w3.org/TR/cssom-1">CSS Object Model</a>,
     <a href="https://fetch.spec.whatwg.org">Fetch API</a> that defines the semantics for the Javascript
     window.fetch() method, and
     <a href="https://www.w3.org/TR/2019/WD-FileAPI-20190531/">FileAPI</a> for accessing files.

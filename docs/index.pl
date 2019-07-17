@@ -3,10 +3,36 @@
 :- initialization(init).
 
 init :-
+    activate_parents,
     setof(Toggler, Toggler >-> class :> caret, Togglers),
     init(Togglers),
     register_items,
     _ >> [class -:> body, addEventListener(scroll, update_index_visibility_emphasis)].
+
+activate_parents :-
+    C >-> class :> active,
+    activate_parents(C).
+
+
+activate_parents(C) :-
+    C >+> parentElement :> P
+      -> activate_element(P),
+         activate_parents(P)
+    ;
+     true.
+
+activate_element(P) :-
+    P >-> class :> nested
+      -> toggle_dom_element_class(P, active, add),
+         (P >+> parentElement :> PP
+           -> PP >+> child :> C,
+              C >-> class :> caret,
+              toggle_dom_element_class(C, 'caret-down', add)
+          ;
+          true
+         )
+    ;
+    true.
 
 init([]).
 init([H|T]) :-

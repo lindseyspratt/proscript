@@ -22,7 +22,7 @@
         <hr>
     </header>
 
-    {{3 @ Content & Content # [Title]}}
+    {{3 @ Content & 2 @ Title & Content # [Title]}}
 
     <footer>
         <hr>

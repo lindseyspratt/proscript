@@ -1,0 +1,1 @@
+{{template_file('framework.index.template', [simple_example_source, 'Simple source', 'content.simple_source.template'])}}

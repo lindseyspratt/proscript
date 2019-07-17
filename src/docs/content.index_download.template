@@ -28,5 +28,5 @@
     there is a specialized form of the main library for compiling source to create custom state,
     proscriptls_for_compile.js, and a node script to run the compilation, node_compile.js.
     </li>
-    <ul>
+    </ul>
 </div>

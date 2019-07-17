@@ -1,0 +1,16 @@
+<div class="body" id="simple_example_source">
+    <p>
+        The ProscriptLS source used in the Simple example.
+        Links to these source files are:
+        <a href="../examples/simple_test.pl">simple_test.pl</a>
+        .
+    </p>
+    <div id="prolog" style='white-space:nowrap;width:100%;height:100%;background-color:#eee;overflow:auto;float:left'>
+    <div id="simple_pl" >
+        <h2 id='simple_pl_header'>simple_test.pl</h2>
+        <code class='content'>
+        {{template_file('../../examples/simple_test.pl', [language-prolog,html_escape-true])}}
+        </code>
+    </div>
+    </div>
+</div>

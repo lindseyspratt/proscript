@@ -1,0 +1,1 @@
+{{template_file('framework.index.template', [console_example_source, 'Console button test source', 'content.console_source.template'])}}

@@ -1,0 +1,35 @@
+<div class="body" id="calculator_example_source">
+    <p>
+        The ProscriptLS source used in the Calculator example.
+        Links to these source files are:
+        <a href="../examples/calculator.pl">calculator.pl</a>
+        and
+        <a href="../examples/calculator.pl">calculator_data.pl</a>
+        .
+        There are three library packages used in the ProscriptLS source: dom.pl, listut.pl, and listut2.pl.
+    </p>
+    <p>
+        Javascript source for a similar web page is shown in the calculator.js file.
+    </p>
+    <div id="prolog" style='white-space:nowrap;width:48%;height:100%;background-color:#eee;overflow:auto;float:left'>
+    <div id="calculator_pl" >
+        <h2 id='calculator_pl_header'>calculator.pl</h2>
+        <code class='content'>
+        {{template_file('../../examples/calculator.pl', [language-prolog,html_escape-true])}}
+        </code>
+    </div>
+    <br>
+    <div id="calculator_data_pl">
+        <h2>calculator_data.pl</h2>
+        <code>
+        {{template_file('../../examples/calculator_data.pl', [language-prolog,html_escape-true])}}
+        </code>
+    </div>
+    </div>
+    <div id="calculator_js" style='vertical-align:top;white-space:nowrap;width:48%;height:100%;background-color:#ddd;overflow:auto;float:right'>
+        <h2>calculator.js</h2>
+        <code>
+        {{template_file('../../examples/calculator.js', [language-javascript,html_escape-true])}}
+        </code>
+    </div>
+</div>

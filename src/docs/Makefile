@@ -2,7 +2,8 @@ JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
 DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 DIST_DOC=../../docs
-HTML := $(addprefix $(DIST_DOC)/, index.html index_about.html index_download.html index_doc.html)
+HTML := $(addprefix $(DIST_DOC)/, index.html index_about.html index_download.html index_doc.html calculator_source.html\
+    console_source.html simple_source.html likes_source.html consult_console_source.html tiles_source.html)
 TOP_HTML := ../../index.html
 DIST_LIB := ../../dist/proscriptls.js
 DOCS_LIB := $(DIST_DOC)/proscriptls.js
@@ -32,7 +33,7 @@ $(TOP_HTML): $(DIST_DOC)/index.html
 
 $(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template compilation.doc.template
 
-$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template anchor.sidenav.template framework.index.template
+$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template anchor.sidenav.template framework.index.template ../../library/template.pl
 		$(SWIPL) -q -f ../../library/template.pl\
 		    -g "substitute_template('$<', '$@'), halt"
 

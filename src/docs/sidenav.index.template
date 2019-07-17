@@ -24,7 +24,40 @@
                     <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, compilation, 'index_doc.html', 'Compilation']))}}</li>
                 </ul>
             </li>
-            <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, examples, 'index_doc.html', 'Examples']))}}</li>
+            <li><span class="caret"></span>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, examples, 'index_doc.html', 'Examples']))}}
+                <ul class="nested">
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, calculator_example, 'index_doc.html', 'Calculator']}}
+                        <ul class="nested">
+                            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, calculator_example_source, calculator_example_source, 'calculator_source.html', 'Calculator Example Source', main]}}</li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, console_example, 'index_doc.html', 'Console Button']}}
+                        <ul class="nested">
+                            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, console_example_source, console_example_source, 'console_source.html', 'Console Example Source', main]}}</li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, simple_example, 'index_doc.html', 'Simple']}}
+                        <ul class="nested">
+                            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, simple_example_source, simple_example_source, 'simple_source.html', 'Simple Example Source', main]}}</li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, likes_example, 'index_doc.html', 'Likes']}}
+                        <ul class="nested">
+                            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, likes_example_source, likes_example_source, 'likes_source.html', 'Likes Example Source', main]}}</li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, consult_console_example, 'index_doc.html', 'Consult console']}}
+                        <ul class="nested">
+                            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, consult_console_example_source, consult_console_example_source, 'consult_console_source.html', 'Consult Console Example Source', main]}}</li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, tiles_example, 'index_doc.html', 'Consult console']}}
+                        <ul class="nested">
+                            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, tiles_example_source, tiles_example_source, 'tiles_source.html', 'Tiles Example Source', main]}}</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
         </ul>
     </li>
     <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, down, download, 'index_download.html', 'Download', main]))}}</li>

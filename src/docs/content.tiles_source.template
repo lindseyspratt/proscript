@@ -1,0 +1,17 @@
+<div class="body" id="tiles_example_source">
+    <p>
+        The ProscriptLS source used in the Likes example.
+        Links to these source files are:
+        <a href="../examples/tiles.pl">tiles.pl</a>
+        .
+        This program uses the object.pl, listut2.pl, dom.pl, and data_predicates.pl library files.
+    </p>
+    <div id="prolog" style='white-space:nowrap;width:100%;height:100%;background-color:#eee;overflow:auto;float:left'>
+    <div id="tiles_pl" >
+        <h2 id='tiles_pl_header'>tiles.pl</h2>
+        <code class='content'>
+        {{template_file('../../examples/tiles.pl', [language-prolog,html_escape-true])}}
+        </code>
+    </div>
+    </div>
+</div>

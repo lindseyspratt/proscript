@@ -1,5 +1,6 @@
 :-ensure_loaded('../src/system/url').
 :-ensure_loaded(listut).
+:-ensure_loaded(listut2).
 
 :-op(300, xfx, =>).
 :-op(250, xfx, @).
@@ -77,6 +78,7 @@ default_result(Info) :-
     true.
 
 process(FileDir, Args, ProcessedFileList, ProcessedTail) -->
+    {\+ member(expand_templates-false, Args)},
     "{{",
     file_path(FilePathCodes),
     !,
@@ -85,9 +87,40 @@ process(FileDir, Args, ProcessedFileList, ProcessedTail) -->
      process_substitution(Term, FileDir, Args, continue_on_fail, ProcessedFileList, SubProcessedTail)
     },
     process(FileDir, Args, SubProcessedTail, ProcessedTail).
-process(FileDir, Args, [Code|ProcessedFileList], ProcessedTail) -->
+
+process(FileDir, Args, ProcessedFileList, ProcessedTail) -->
+    { member(language-prolog, Args)
+      -> Start = "%"
+      ;
+      member(language-javascript, Args)
+      -> Start = "//"},
+    Start,
+    rest_of_line(LineCodes),
+    !,
+    {
+     append(Start, LineCodes, CommentLineCodes),
+     append_lists(["<span style='color:green'>", CommentLineCodes, "</span><br>\n"], Prefix),
+     append(Prefix, SubProcessedTail, ProcessedFileList)
+    },
+    process(FileDir, Args, SubProcessedTail, ProcessedTail).
+
+process(FileDir, Args, NewList, ProcessedTail) -->
+    {member(Keyword-Color, ["function"-"blue", ":-"-"blue"])},
+    Keyword,
+    !,
+    {append_lists(["<span style='color:", Color, "'>", Keyword, "</span>"], AnnotatedKeyword),
+     append(AnnotatedKeyword, ProcessedFileList, NewList)
+    },
+    process(FileDir, Args, ProcessedFileList, ProcessedTail).
+process(FileDir, Args, NewList, ProcessedTail) -->
     [Code],
     !,
+    {(member(html_escape-true, Args)
+      -> html_escape([Code], OutCodes),
+         append(OutCodes, ProcessedFileList, NewList)
+    ;
+     NewList = [Code|ProcessedFileList]
+    )},
     process(FileDir, Args, ProcessedFileList, ProcessedTail).
 process(_, _, T, T) -->
     [].
@@ -136,3 +169,16 @@ write_codes([], _).
 write_codes([H|T], Stream) :-
     put_code(Stream, H),
     write_codes(T, Stream).
+
+html_escape("<", "&lt;") :- !.
+html_escape("\n", "<br>\n") :- !.
+html_escape(" ", "&nbsp;") :- !.
+html_escape(X, X).
+
+rest_of_line(LineCodes) -->
+    "\n"
+      -> []
+    ; [Code],
+      {html_escape([Code], OutCodes),
+       append(OutCodes, OtherCodes, LineCodes)},
+      rest_of_line(OtherCodes).

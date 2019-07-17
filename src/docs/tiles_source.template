@@ -1,0 +1,1 @@
+{{template_file('framework.index.template', [tiles_example_source, 'Tiles source', 'content.tiles_source.template'])}}

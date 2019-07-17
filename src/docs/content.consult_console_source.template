@@ -1,0 +1,20 @@
+<div class="body" id="consult_console_example_source">
+    <p>
+        The source used in the Consult console example.
+        This is the same source as used in the 'Console Button Test' example.
+        Link to this source file is:
+        <a href="../examples/test.js">test.js</a>.
+        Eventually test.js may be implemented using Prolog, but there are complications with having ProscriptLS
+        run the HTML for an interpreter that evaluates ProscriptLS queries and keeping the two levels of ProscriptLS evaluation
+        separated.
+    </p>
+    <p>
+        Javascript source for the 'terminal' is shown in the test.js file.
+    </p>
+    <div id="test_js" style='vertical-align:top;white-space:nowrap;width:100%;height:100%;background-color:#ddd;overflow:auto;float:right'>
+        <h2>test.js</h2>
+        <code>
+        {{template_file('../../examples/test.js', [language-javascript,html_escape-true])}}
+        </code>
+    </div>
+</div>

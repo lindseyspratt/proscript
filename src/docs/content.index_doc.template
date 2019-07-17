@@ -58,38 +58,62 @@
         The only major uses of Javascript are the JQuery.Terminal library (used to present the ProscriptLS interpreter
         in some examples) and a custom Prolog interpreter.
         <ul>
-            <li>
+            <li class="indexed" id="calculator_example">
                 <a href="../examples/calculator.html">A simple calculator.</a>
                 This example demonstrates the use of events in ProscriptLS.
                 <br>
                 The original implementation of the calculator in regular Javascript is
                 <a href="https://www.anaesthetist.com/mnm/javascript/calc.htm">here</a>.
+                <p>
+                The ProscriptLS source used in this example is
+                    <a href="calculator_source.html">here</a>.
+                </p>
             </li>
-            <li>
+            <li class="indexed" id="console_example">
                 <a href="../examples/console_button_test.html">Toggle custom ProscriptLS interpreter console.</a>
                 A page that presents a single button which toggles the presence of a ProscriptLS interpreter.
                 The ProscriptLS interpreter console is implemented using a custom 'test.js' file instead of the full
                 JQuery.terminal library.
+                <p>
+                    The source used in this example is
+                    <a href="console_source.html">here</a>.
+                </p>
             </li>
-            <li>
+            <li class="indexed" id="simple_example">
                 <a href="../examples/simple_test.html">Display 'hello world' alert dialog.</a>
                 Clicking on a button causes 'hello world' to be displayed in an alert dialog.
+                <p>
+                    The source used in this example is
+                    <a href="simple_source.html">here</a>.
+                </p>
             </li>
-            <li>
+            <li class="indexed" id="likes_example">
                 <a href="../examples/tau_likes.html">Querying a 'likes' predicate.</a>
                 Some interactive elements support a user interface for displaying what a person likes
                 from an editable definition of a likes/2 predicate.
                 (This is adapted from the tau-prolog 'likes' example.)
+                <p>
+                    The source used in this example is
+                    <a href="likes_source.html">here</a>.
+                </p>
             </li>
-            <li>
+            <li class="indexed" id="consult_console_example">
                 <a href="../examples/test.html">Custom Prolog interpreter and text area for Prolog source.</a>
                 The Prolog text area is consulted when the 'consult' button is clicked.
                 The predicates defined in the Prolog text area can be queried in the custom
                 interpreter.
+                <p>
+                    The source used in this example is
+                    <a href="consult_console_source.html">here</a>.
+                </p>
             </li>
-            <li>
+            <li class="indexed" id="tiles_example">
                 <a href="../examples/tiles.html">Display a collection of selectable game tiles.</a>
                 Displays a collection of 16 square tiles. 8 of these tiles are selectable.
+                <p>
+                    The source used in this example is
+                    <a href="tiles_source.html">here</a>.
+                </p>
             </li>
         </ul>
     </div>

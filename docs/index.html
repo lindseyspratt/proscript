@@ -41,7 +41,40 @@
                     <li><a   id="compilation_index" href="docs/index_doc.html#compilation"> Compilation </a></li>
                 </ul>
             </li>
-            <li><a   id="examples_index" href="docs/index_doc.html#examples"> Examples </a></li>
+            <li><span class="caret"></span><a   id="examples_index" href="docs/index_doc.html#examples"> Examples </a>
+                <ul class="nested">
+                    <li><span class="caret"></span><a   id="calculator_example_index" href="docs/index_doc.html#calculator_example"> Calculator </a>
+                        <ul class="nested">
+                            <li><a   id="calculator_example_source_index" href="docs/calculator_source.html#calculator_example_source"> Calculator Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="console_example_index" href="docs/index_doc.html#console_example"> Console Button </a>
+                        <ul class="nested">
+                            <li><a   id="console_example_source_index" href="docs/console_source.html#console_example_source"> Console Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="simple_example_index" href="docs/index_doc.html#simple_example"> Simple </a>
+                        <ul class="nested">
+                            <li><a   id="simple_example_source_index" href="docs/simple_source.html#simple_example_source"> Simple Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="likes_example_index" href="docs/index_doc.html#likes_example"> Likes </a>
+                        <ul class="nested">
+                            <li><a   id="likes_example_source_index" href="docs/likes_source.html#likes_example_source"> Likes Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="consult_console_example_index" href="docs/index_doc.html#consult_console_example"> Consult console </a>
+                        <ul class="nested">
+                            <li><a   id="consult_console_example_source_index" href="docs/consult_console_source.html#consult_console_example_source"> Consult Console Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="tiles_example_index" href="docs/index_doc.html#tiles_example"> Consult console </a>
+                        <ul class="nested">
+                            <li><a   id="tiles_example_source_index" href="docs/tiles_source.html#tiles_example_source"> Tiles Example Source </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
         </ul>
     </li>
     <li><a   id="download_index" href="docs/index_download.html#download"> Download </a></li>
@@ -83,8 +116,8 @@ There is an index.html file generated in proscriptls/doc - it is copied to prosc
     </div>
     <div class="indexed" id="running-proscriptls">
         <h3>Running ProscriptLS</h3>
-        ProscriptLS is started by the proscriptls_init  function (implemented in the proscriptls.js library).
-        This function is typically invoked once per load of the web page in an onload handler for the 'body'
+        ProscriptLS is started by the proscriptls_init  <span style='color:blue'>function</span> (implemented in the proscriptls.js library).
+        This <span style='color:blue'>function</span> is typically invoked once per load of the web page in an onload handler for the 'body'
         element:
         <pre class="html"><code>
 &lt;body onload=
@@ -95,7 +128,7 @@ Body stuff
     </div>
     <div class="indexed" id="compiling-proscriptls">
         <h3>Compiling ProscriptLS programs in the web client</h3>
-        The proscriptls_init  function supports compilation of ProscriptLS programs in the client
+        The proscriptls_init  <span style='color:blue'>function</span> supports compilation of ProscriptLS programs in the client
         using the 'script' tag with the 'type' attribute of 'text/prolog'
         or using the ProscriptLS 'consult/1' predicate.
         <h4>Compilation Examples</h4>
@@ -113,13 +146,13 @@ Body stuff
                 The 'script' tag with the source as the text content of the 'script' element:
                 <pre class="html"><code>
 &lt;script type="text/prolog">
-my_program :-
+my_program <span style='color:blue'>:-</span>
     some_code.
 &lt;/script>
 </code></pre>
             </li>
             <li>
-                Consulting a source file using the proscriptls function:
+                Consulting a source file using the proscriptls <span style='color:blue'>function</span>:
                 <pre class="html"><code>
 &lt;body onLoad= "proscriptls( 'consult([my_program])');">
 More HTML
@@ -151,9 +184,9 @@ More HTML
         src="../dist/proscriptls.js">
 &lt;/script>
 &lt;script type="text/prolog">
-:- initialization(setup_button).
+<span style='color:blue'>:-</span> initialization(setup_button).
 
-setup_button :-
+setup_button <span style='color:blue'>:-</span>
     dom_element_attribute_value(E, id, basic),
     create_dom_element('BUTTON', Button),
     create_dom_text_node("Click Me", NewContent),
@@ -166,7 +199,7 @@ setup_button :-
 &lt;/body>
 &lt;/html>
 </code></pre>
-        The ':- initialization(setup_button).' statement in the Prolog source is a Prolog compiler
+        The '<span style='color:blue'>:-</span> initialization(setup_button).' statement in the Prolog source is a Prolog compiler
         directive that causes the wam_compiler to evaluate 'setup_button' after completing the compilation
         of the Prolog source in that 'script' element.
     </div>
