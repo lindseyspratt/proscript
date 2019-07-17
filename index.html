@@ -115,8 +115,8 @@ There is an index.html file generated in proscriptls/doc - it is copied to prosc
     </div>
     <div class="indexed" id="running-proscriptls">
         <h3>Running ProscriptLS</h3>
-        ProscriptLS is started by the proscriptls_init  <span style='color:blue'>function</span> (implemented in the proscriptls.js library).
-        This <span style='color:blue'>function</span> is typically invoked once per load of the web page in an onload handler for the 'body'
+        ProscriptLS is started by the proscriptls_init  function (implemented in the proscriptls.js library).
+        This function is typically invoked once per load of the web page in an onload handler for the 'body'
         element:
         <pre class="html"><code>
 &lt;body onload=
@@ -127,7 +127,7 @@ Body stuff
     </div>
     <div class="indexed" id="compiling-proscriptls">
         <h3>Compiling ProscriptLS programs in the web client</h3>
-        The proscriptls_init  <span style='color:blue'>function</span> supports compilation of ProscriptLS programs in the client
+        The proscriptls_init  function supports compilation of ProscriptLS programs in the client
         using the 'script' tag with the 'type' attribute of 'text/prolog'
         or using the ProscriptLS 'consult/1' predicate.
         <h4>Compilation Examples</h4>
@@ -145,13 +145,13 @@ Body stuff
                 The 'script' tag with the source as the text content of the 'script' element:
                 <pre class="html"><code>
 &lt;script type="text/prolog">
-my_program <span style='color:blue'>:-</span>
+my_program :-
     some_code.
 &lt;/script>
 </code></pre>
             </li>
             <li>
-                Consulting a source file using the proscriptls <span style='color:blue'>function</span>:
+                Consulting a source file using the proscriptls function:
                 <pre class="html"><code>
 &lt;body onLoad= "proscriptls( 'consult([my_program])');">
 More HTML
@@ -183,9 +183,9 @@ More HTML
         src="../dist/proscriptls.js">
 &lt;/script>
 &lt;script type="text/prolog">
-<span style='color:blue'>:-</span> initialization(setup_button).
+:- initialization(setup_button).
 
-setup_button <span style='color:blue'>:-</span>
+setup_button :-
     dom_element_attribute_value(E, id, basic),
     create_dom_element('BUTTON', Button),
     create_dom_text_node("Click Me", NewContent),
@@ -198,7 +198,7 @@ setup_button <span style='color:blue'>:-</span>
 &lt;/body>
 &lt;/html>
 </code></pre>
-        The '<span style='color:blue'>:-</span> initialization(setup_button).' statement in the Prolog source is a Prolog compiler
+        The ':- initialization(setup_button).' statement in the Prolog source is a Prolog compiler
         directive that causes the wam_compiler to evaluate 'setup_button' after completing the compilation
         of the Prolog source in that 'script' element.
     </div>

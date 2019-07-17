@@ -111,11 +111,11 @@
 &lt;script type="text/prolog" src="PATH_TO_PROLOG_SOURCE"&lt;/script></code></pre>
                         This PROLOG_SOURCE will be compiled to WAM (Warren Abstract Machine) byte codes when the
                         proscriptls_init
-                        <span style='color:blue'>function</span> is evaluated.
+                        function is evaluated.
                         These byte codes are interpreted by the WAM engine in the procriptls.js library.
                     </li>
                     <li>
-                        Run proscriptls_init () <span style='color:blue'>function</span>:
+                        Run proscriptls_init () function:
                         <pre class="html"><code>
 &lt;body onload="proscriptls_init ();"> BODY &lt;/body></code></pre>
                         proscriptls_init () sets up the Prolog state including the core system predicates.
@@ -320,7 +320,7 @@ to simplify working with objects.
                     applies attribute operation <code class="prolog inline">(A :> V)</code> to Obj.
                 </li>
                 <li>
-                    <code class="prolog inline">Obj >> A &lt;<span style='color:blue'>:-</span> V</code>
+                    <code class="prolog inline">Obj >> A &lt;:- V</code>
                     applies attribute operation <code class="prolog inline">(A &lt;: V)</code> to Obj.
                 </li>
                 <li>
@@ -346,7 +346,7 @@ to simplify working with objects.
                     an object (such as (id -:> canvas)), then Obj may be unbound initially.
                     It will be bound by X1, and the bound Obj will be used for subsequent applications
                     of Xi.
-                    The Xi may be any of the above forms: * M, - AV, + PV, @ G, A -:> V, A &lt;<span style='color:blue'>:-</span> V,
+                    The Xi may be any of the above forms: * M, - AV, + PV, @ G, A -:> V, A &lt;:- V,
                     P +:> V, P &lt;:+ V, and M *:> V. Xi may also be a list.
                 </li>
             </ul>
@@ -354,7 +354,7 @@ to simplify working with objects.
     </ul>
     An example:
     <pre><code class="prolog">
-on_click <span style='color:blue'>:-</span>
+on_click :-
     _ >> [id -:> select, selectedIndex +:> Index, item(Index) *:> Option],
     Option >+> value :> Name,
     show_likes(Name). </code></pre>
