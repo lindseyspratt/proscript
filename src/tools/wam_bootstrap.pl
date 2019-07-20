@@ -524,6 +524,7 @@ reset:-
         reserve_predicate(set_dom_object_property/3, predicate_set_dom_object_property),
         reserve_predicate(set_dom_object_property/4, predicate_set_dom_object_property),
         reserve_predicate(alert/1, predicate_alert),
+        reserve_predicate(dom_window/1, predicate_dom_window),
 
         true.
 

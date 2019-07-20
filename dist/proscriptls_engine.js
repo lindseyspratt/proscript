@@ -8342,6 +8342,14 @@ function predicate_alert(term) {
     return true;
 }
 
+function predicate_dom_window(windowPL) {
+    if(typeof window === 'undefined') {
+        return false;
+    }
+    let objectPL = create_object_structure(window, recordedTypeJS);
+    return unify(objectPL, windowPL);
+}
+
 function predicate_create_dom_element(tag, element) {
     if(TAG(tag) !== TAG_ATM) {
         return instantiation_error(tag);
@@ -9333,8 +9341,11 @@ function get_object_id_container(term, idContainer) {
 var parentMap = new Map([
     ['eventtarget', []],
     ['node', ['eventtarget']],
-    ['document', ['node']],
-    ['element', ['node']],
+    ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
+    ['document', ['node', 'parentnode']],
+    ['htmldocument', ['document']],
+    ['documentfragment', ['node', 'parentnode']],
+    ['element', ['node', 'parentnode']],
     ['htmlelement', ['element']],
     ['htmlcanvaselement', ['htmlelement']],
     ['event', []],
@@ -9357,7 +9368,8 @@ var parentMap = new Map([
     ['mouseevent', ['uievent']],
     ['textmetrics', []],
     ['validitystate', []],
-    ['file', ['blob']]
+    ['file', ['blob']],
+    ['elementcreationoptions', []]
 ]);
 
 var childMap = new Map();
@@ -9398,7 +9410,9 @@ var constructorMap = {
     "MouseEvent" : 'mouseevent',
     "TextMetrics" : 'textmetrics',
     "ValidityState" : 'validitystate',
-    "File": 'file'
+    "File": 'file',
+    "ElementCreationOptions": 'elementcreationoptions',
+    "DocumentFragment": 'documentfragment'
 };
 
 var distinctivePropertyMap = {
@@ -10019,7 +10033,7 @@ function ChildProperty() {
 
 function SimpleChildProperty(propertyName) {
     var that = {};
-    that.name = "firstChild";
+    that.name = propertyName;
     that.type = 'object';
     that.objects = function(valueJS) {
         var objects = [];
@@ -10183,22 +10197,101 @@ webInterfaces.set('node',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Node'
         }
     });
+/*
+interface ParentNode {
+  [SameObject] readonly attribute HTMLCollection children;
+  readonly attribute Element? firstElementChild;
+  readonly attribute Element? lastElementChild;
+  readonly attribute unsigned long childElementCount;
+
+  [CEReactions, Unscopable] void prepend((Node or DOMString)... nodes);
+  [CEReactions, Unscopable] void append((Node or DOMString)... nodes);
+
+  Element? querySelector(DOMString selectors);
+  [NewObject] NodeList querySelectorAll(DOMString selectors);
+};
+
+ */
+var parentNodeInterfaceProperties = new Map([
+    ['child', ChildProperty()], // adapted from children
+    ['childElementCount', SimpleProperty('number','childElementCount')],
+    ['firstElementChild', SimpleChildProperty('firstElementChild')],
+    ['lastElementChild', SimpleChildProperty('lastElementChild')]
+]);
+
+var parentNodeMethodSpecs = new Map([
+    ['prepend',{name:'prepend',arguments:[{type: {arrayType:['object','string']}}]}], // list of Node or DOMString
+    ['append',{name:'append',arguments:[{type:{arrayType:['object','string']}}]}], // list of Node or DOMString
+    ['querySelector',{name:'querySelector',arguments:[{type:'string'}],returns:{type:'object'}}], // Element
+    ['querySelectorAll',{name:'querySelectorAll',arguments:[{type:'string'}],returns:{type:'object', multiple:true}}], // NodeList
+]);
+
+webInterfaces.set('parentnode',
+    {
+        name: 'parentnode',
+        parent: ['node'],
+        properties:parentNodeInterfaceProperties,
+        methods:parentNodeMethodSpecs,
+        reference: {name:'ParentNode',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#parentnode',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/ParentNode'
+        }
+    });
+
+var documentInterfaceProperties = new Map([
+    ['URL', SimpleProperty('string','URL')],
+    ['documentURI', SimpleProperty('string','documentURI')],
+    ['origin', SimpleProperty('string','origin')],
+    ['compatMode', SimpleProperty('atom','compatMode')],
+    ['characterSet', SimpleProperty('atom','characterSet')],
+    ['contentType', SimpleProperty('atom','contentType')],
+    ['docType', SimpleProperty('object','docType')], // DocumentType
+    ['documentElement', SimpleProperty('object','documentElement')] // Element
+]);
+
+var documentMethodSpecs = new Map([
+    ['getElementsByTagName',{name:'getElementsByTagName',arguments:[{type:'string'}],returns:{type:'object'}}],
+    ['getElementsByTagNameNS',{name:'getElementsByTagNameNS',arguments:[{type:'string'},{type:'string'}],returns:{type:'object'}}],
+    ['createElement',{name:'createElement',arguments:[{type:'string'},{type:'object'}],returns:{type:'object'}}], // input ElementCreationOptions, output Element
+    ['createElementNS',{name:'createElementNS',arguments:[{type:'string'},{type:'string'},{type:'object'}],returns:{type:'object'}}], // input ElementCreationOptions, output Element
+    ['createDocumentFragment',{name:'createDocumentFragment',arguments:[],returns:{type:'object'}}], // DocumentFragment
+    ['createTextNode',{name:'createTextNode',arguments:[{type:'string'}],returns:{type:'object'}}], // Text
+    ['createCDATASection',{name:'createCDATASection',arguments:[{type:'string'}],returns:{type:'object'}}], // CDATASection
+    ['createComment',{name:'createComment',arguments:[{type:'string'}],returns:{type:'object'}}], // Comment
+    ['createProcessingInstruction',{name:'createProcessingInstruction',arguments:[{type:'string'},{type:'string'}],returns:{type:'object'}}], // ProcessingInstruction
+    ['importNode',{name:'importNode',arguments:[{type:'object'},{type:'boolean'}],returns:{type:'object'}}], // input Node, output Node
+    ['adoptNode',{name:'adoptNode',arguments:[{type:'object'}],returns:{type:'object'}}], // input Node, output Node
+    ['createAttribute',{name:'createAttribute',arguments:[{type:'string'}],returns:{type:'object'}}], // Attr
+    ['createAttributeNS',{name:'createAttributeNS',arguments:[{type:'string'},{type:'string'}],returns:{type:'object'}}], // Attr
+    ['createEvent',{name:'createEvent',arguments:[{type:'string'}],returns:{type:'object'}}], // Event
+    ['createRange',{name:'createRange',arguments:[{type:'string'}],returns:{type:'object'}}], // Range
+    ['createNodeIterator',{name:'createNodeIterator',arguments:[{type:'object'},{type:'number'},{type:'object'}],returns:{type:'object'}}], // input Node, NodeFilter, output NodeIterator
+    ['createTreeWalker',{name:'createTreeWalker',arguments:[{type:'object'},{type:'number'},{type:'object'}],returns:{type:'object'}}], // input Node, NodeFilter, output TreeWalker
+]);
+
+webInterfaces.set('document',
+    {
+        name: 'document',
+        parent: ['node'],
+        properties:documentInterfaceProperties,
+        methods:documentMethodSpecs,
+        reference: {name:'Document',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#document',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Document'
+        }
+    });
 
 var elementInterfaceProperties = new Map([
     ['accessKey', SimpleProperty('atom','accessKey', true)],
     // attributes: available using dom_element_attribute_value
-    ['child', ChildProperty()], // adapted from children
-    ['childElementCount', SimpleProperty('number','childElementCount')],
     ['class', ClassProperty()], // adapted from classList, className
     ['clientHeight', SimpleProperty('number','clientHeight')],
     ['clientLeft', SimpleProperty('number','clientLeft')],
     ['clientTop', SimpleProperty('number','clientTop')],
     ['clientWidth', SimpleProperty('number','clientWidth')],
     // currentStyle: available using dom_element_attribute_value?
-    ['firstElementChild', SimpleChildProperty('firstElementChild')],
     ['id', SimpleProperty('atom','id', true)],
     ['innerHTML', SimpleProperty('string', 'innerHTML', true)],
-    ['lastElementChild', SimpleChildProperty('lastElementChild')],
     // name: available using dom_element_attribute_value
     ['namespaceURI', SimpleProperty('string', 'namespaceURI')],
     ['nextElementSibling', SimpleChildProperty('nextElementSibling')],
@@ -10931,6 +11024,42 @@ webInterfaces.set('file',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/File'
         }
     });
+
+var elementCreationOptionsInterfaceProperties = new Map( [
+    ['is', SimpleProperty('atom', 'is')]
+
+]);
+
+var elementCreationOptionsMethodSpecs = new Map([
+]);
+
+webInterfaces.set('elementcreationoptions',
+    {name: 'elementcreationoptions',
+        properties:elementCreationOptionsInterfaceProperties,
+        methods:elementCreationOptionsMethodSpecs,
+        reference: {name:'ElementCreationOptions',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#dictdef-elementcreationoptions',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement'
+        }
+    });
+
+var documentFragmentInterfaceProperties = new Map( [
+    ['is', SimpleProperty('atom', 'is')]
+
+]);
+
+var documentFragmentMethodSpecs = new Map([
+]);
+
+webInterfaces.set('documentfragment',
+    {name: 'documentfragment',
+        properties:documentFragmentInterfaceProperties,
+        methods:documentFragmentMethodSpecs,
+        reference: {name:'DocumentFragment',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#documentfragment',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment'
+        }
+    });
 // File object_property.js
 
 var dopCursors = new Map();
@@ -11463,84 +11592,142 @@ This file implements access to Javascript object methods.
 // object_method(Element, add_event_listener(click, bar(thing))).
 // method:EventAgent.addEventListener, arguments:[string, goal_function]
 // object_method_no_return(objectJS, EventAgent.addEventListener, [eventJS, handlerFunction]);
+var domCursors = new Map();
+var domCursorCounter = 0;
 
 function predicate_dom_object_method(object, methodStructure, specTerm) {
-    if (TAG(object) !== TAG_STR) {
-        return instantiation_error(object);
-    }
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = domCursors.get(cursorIDJS);
 
-    if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
-        return instantiation_error(methodStructure);
     }
+    else {
+        if (TAG(object) !== TAG_STR) {
+            return instantiation_error(object);
+        }
 
-    if (specTerm && TAG(specTerm) !== TAG_LST ) {
-        return instantiation_error(specTerm);
-    }
+        if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
+            return instantiation_error(methodStructure);
+        }
 
-    var objectContainer = {};
-    if (!get_object_container(object, objectContainer)) {
-        return false;
-    }
-    let objectType = objectContainer.type;
-    var objectJS = objectContainer.value;
+        if (specTerm && TAG(specTerm) !== TAG_LST) {
+            return instantiation_error(specTerm);
+        }
 
-    let methodName;
-    let arity;
-    if (TAG(methodStructure) === TAG_ATM) {
-        methodName = atable[VAL(methodStructure)];
-        arity = 0;
-    } else {
-        methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
-        arity = ftable[VAL(memory[VAL(methodStructure)])][1];
-    }
-
-    let spec;
-    if(specTerm) {
-        let specContainer = {};
-        if(!convert_method_spec(specTerm, specContainer)) {
+        var objectContainer = {};
+        if (!get_object_container(object, objectContainer)) {
             return false;
         }
-        spec = specContainer.value;
-    } else {
-        spec = getInterfaceItemSpec(objectType, 'method', methodName);
-    }
+        let objectType = objectContainer.type;
+        var objectJS = objectContainer.value;
 
-    if(!spec) {
-        return domain_error('method for ' + objectType, lookup_atom(methodName));
-    }
-    if (spec.returns && spec.returns.type !== 'boolean') {
-        arity--; // the last argument to the methodStructure is for the return value.
-    }
-
-    let specArguments = spec.arguments;
-    let applyArguments = [];
-    for (var i = 0; i < arity; i++) {
-        let specArgument = specArguments[i];
-        let applyArgumentContainer = {};
-        if (convert_method_argument(deref(memory[VAL(methodStructure) + i + 1]), specArgument, applyArgumentContainer)) {
-            applyArguments.push(applyArgumentContainer.value);
+        let methodName;
+        let arity;
+        if (TAG(methodStructure) === TAG_ATM) {
+            methodName = atable[VAL(methodStructure)];
+            arity = 0;
         } else {
-            return false;
+            methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
+            arity = ftable[VAL(memory[VAL(methodStructure)])][1];
+        }
+
+        let spec;
+        if (specTerm) {
+            let specContainer = {};
+            if (!convert_method_spec(specTerm, specContainer)) {
+                return false;
+            }
+            spec = specContainer.value;
+        } else {
+            spec = getInterfaceItemSpec(objectType, 'method', methodName);
+        }
+
+        if (!spec) {
+            return domain_error('method for ' + objectType, lookup_atom(methodName));
+        }
+        if (spec.returns && spec.returns.type !== 'boolean') {
+            arity--; // the last argument to the methodStructure is for the return value.
+        }
+
+        let specArguments = spec.arguments;
+        let applyArguments = [];
+        for (var i = 0; i < arity; i++) {
+            let specArgument = specArguments[i];
+            let applyArgumentContainer = {};
+            if (convert_method_argument(deref(memory[VAL(methodStructure) + i + 1]), specArgument, applyArgumentContainer)) {
+                applyArguments.push(applyArgumentContainer.value);
+            } else {
+                return false;
+            }
+        }
+
+        if (spec.returns) {
+            let resultJS = object_method_return(objectJS, spec.name, applyArguments);
+            if(spec.returns.multiple) {
+                let values = [];
+                if(typeof resultJS !== 'undefined' && resultJS !== null) {
+                    if(typeof resultJS === 'object' && resultJS.constructor.name === 'NodeList') {
+                        values = Array.from(resultJS);
+                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'FileList') {
+                        values = Array.from(resultJS);
+                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLOptionsCollection') {
+                        values = Array.from(resultJS);
+                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLCollection') {
+                        values = Array.from(resultJS);
+                    } else {
+                        values.push(resultJS);
+                    }
+                }
+
+                cursor = {values: values, spec: spec, arity: arity};
+                cursorIDJS = 'crs' + domCursorCounter++;
+                domCursors.set(cursorIDJS, cursor);
+                cursorIDPL = lookup_atom(cursorIDJS);
+
+                create_choicepoint();
+
+            } else {
+                let resultContainer = {};
+                if (convert_result(resultJS, spec.returns, resultContainer)) {
+                    let resultPL = resultContainer.value;
+                    if (spec.returns.type === 'boolean') {
+                        return resultPL;
+                    } else {
+                        return unify(resultPL, deref(memory[VAL(methodStructure) + arity + 1]));
+                    }
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            object_method_no_return(objectJS, spec.name, applyArguments);
+            return true;
         }
     }
 
-    if (spec.returns) {
-        let resultJS = object_method_return(objectJS, spec.name, applyArguments);
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.values.length > 0) {
+        let resultJS = cursor.values.pop();
         let resultContainer = {};
-        if(convert_result(resultJS, spec.returns, resultContainer)) {
+        if (convert_result(resultJS, cursor.spec.returns, resultContainer)) {
             let resultPL = resultContainer.value;
-            if (spec.returns.type === 'boolean') {
+            if (cursor.spec.returns.type === 'boolean') {
                 return resultPL;
             } else {
-                return unify(resultPL, deref(memory[VAL(methodStructure) + arity + 1]));
+                return unify(resultPL, deref(memory[VAL(methodStructure) + cursor.arity + 1]));
             }
         } else {
             return false;
         }
-    } else {
-        object_method_no_return(objectJS, spec.name, applyArguments);
-        return true;
     }
+
+    destroy_choicepoint();
+    return false;
 }
 
 function convert_method_argument(term, spec, resultContainer, reportError) {

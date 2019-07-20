@@ -92,8 +92,11 @@ function get_object_id_container(term, idContainer) {
 var parentMap = new Map([
     ['eventtarget', []],
     ['node', ['eventtarget']],
-    ['document', ['node']],
-    ['element', ['node']],
+    ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
+    ['document', ['node', 'parentnode']],
+    ['htmldocument', ['document']],
+    ['documentfragment', ['node', 'parentnode']],
+    ['element', ['node', 'parentnode']],
     ['htmlelement', ['element']],
     ['htmlcanvaselement', ['htmlelement']],
     ['event', []],
@@ -116,7 +119,8 @@ var parentMap = new Map([
     ['mouseevent', ['uievent']],
     ['textmetrics', []],
     ['validitystate', []],
-    ['file', ['blob']]
+    ['file', ['blob']],
+    ['elementcreationoptions', []]
 ]);
 
 var childMap = new Map();
@@ -157,7 +161,9 @@ var constructorMap = {
     "MouseEvent" : 'mouseevent',
     "TextMetrics" : 'textmetrics',
     "ValidityState" : 'validitystate',
-    "File": 'file'
+    "File": 'file',
+    "ElementCreationOptions": 'elementcreationoptions',
+    "DocumentFragment": 'documentfragment'
 };
 
 var distinctivePropertyMap = {

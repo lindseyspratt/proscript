@@ -157,3 +157,26 @@ test('Element', 'insertAdjacentText of "a test" afterEnd of test1', succeeded) :
 test('Element', 'scrollIntoView of test1 succeeds', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_method(E, scrollIntoView([inline-center])).
+
+% parentNode methods.
+test('Element', 'querySelector of test1 succeeds', succeeded) :-
+    dom_element_attribute_value(E, id, test1),
+    dom_object_method(E, querySelector('#test1child', _)).
+
+test('Element', 'querySelectorAll of test1 succeeds', succeeded) :-
+    dom_element_attribute_value(E, id, test1),
+    setof(T, dom_object_method(E, querySelectorAll('div', T)), _).
+
+test('Element', 'prepend of test1 succeeds', succeeded) :-
+    dom_element_attribute_value(E, id, test1),
+    dom_object_method(E, prepend(['stuff'])),
+    dom_object_property(_, E, childNode, N),
+    dom_object_property(_, N, nodeValue, "stuff"),
+    dom_object_method(E, removeChild(N)).
+
+test('Element', 'append of test1 succeeds', succeeded) :-
+    dom_element_attribute_value(E, id, test1),
+    dom_object_method(E, append(['later stuff'])),
+    dom_object_property(_, E, childNode, N),
+    dom_object_property(_, N, nodeValue, "later stuff"),
+    dom_object_method(E, removeChild(N)).

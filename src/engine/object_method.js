@@ -10,84 +10,144 @@ This file implements access to Javascript object methods.
 // object_method(Element, add_event_listener(click, bar(thing))).
 // method:EventAgent.addEventListener, arguments:[string, goal_function]
 // object_method_no_return(objectJS, EventAgent.addEventListener, [eventJS, handlerFunction]);
+var domCursors = new Map();
+var domCursorCounter = 0;
 
 function predicate_dom_object_method(object, methodStructure, specTerm) {
-    if (TAG(object) !== TAG_STR) {
-        return instantiation_error(object);
-    }
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = domCursors.get(cursorIDJS);
 
-    if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
-        return instantiation_error(methodStructure);
+        debug_msg("Is retry! Setting cursor back to " + cursor);
     }
+    else {
+        if (TAG(object) !== TAG_STR) {
+            return instantiation_error(object);
+        }
 
-    if (specTerm && TAG(specTerm) !== TAG_LST ) {
-        return instantiation_error(specTerm);
-    }
+        if (TAG(methodStructure) !== TAG_STR && TAG(methodStructure) !== TAG_ATM) {
+            return instantiation_error(methodStructure);
+        }
 
-    var objectContainer = {};
-    if (!get_object_container(object, objectContainer)) {
-        return false;
-    }
-    let objectType = objectContainer.type;
-    var objectJS = objectContainer.value;
+        if (specTerm && TAG(specTerm) !== TAG_LST) {
+            return instantiation_error(specTerm);
+        }
 
-    let methodName;
-    let arity;
-    if (TAG(methodStructure) === TAG_ATM) {
-        methodName = atable[VAL(methodStructure)];
-        arity = 0;
-    } else {
-        methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
-        arity = ftable[VAL(memory[VAL(methodStructure)])][1];
-    }
-
-    let spec;
-    if(specTerm) {
-        let specContainer = {};
-        if(!convert_method_spec(specTerm, specContainer)) {
+        var objectContainer = {};
+        if (!get_object_container(object, objectContainer)) {
             return false;
         }
-        spec = specContainer.value;
-    } else {
-        spec = getInterfaceItemSpec(objectType, 'method', methodName);
-    }
+        let objectType = objectContainer.type;
+        var objectJS = objectContainer.value;
 
-    if(!spec) {
-        return domain_error('method for ' + objectType, lookup_atom(methodName));
-    }
-    if (spec.returns && spec.returns.type !== 'boolean') {
-        arity--; // the last argument to the methodStructure is for the return value.
-    }
-
-    let specArguments = spec.arguments;
-    let applyArguments = [];
-    for (var i = 0; i < arity; i++) {
-        let specArgument = specArguments[i];
-        let applyArgumentContainer = {};
-        if (convert_method_argument(deref(memory[VAL(methodStructure) + i + 1]), specArgument, applyArgumentContainer)) {
-            applyArguments.push(applyArgumentContainer.value);
+        let methodName;
+        let arity;
+        if (TAG(methodStructure) === TAG_ATM) {
+            methodName = atable[VAL(methodStructure)];
+            arity = 0;
         } else {
-            return false;
+            methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
+            arity = ftable[VAL(memory[VAL(methodStructure)])][1];
+        }
+
+        let spec;
+        if (specTerm) {
+            let specContainer = {};
+            if (!convert_method_spec(specTerm, specContainer)) {
+                return false;
+            }
+            spec = specContainer.value;
+        } else {
+            spec = getInterfaceItemSpec(objectType, 'method', methodName);
+        }
+
+        if (!spec) {
+            return domain_error('method for ' + objectType, lookup_atom(methodName));
+        }
+        if (spec.returns && spec.returns.type !== 'boolean') {
+            arity--; // the last argument to the methodStructure is for the return value.
+        }
+
+        let specArguments = spec.arguments;
+        let applyArguments = [];
+        for (var i = 0; i < arity; i++) {
+            let specArgument = specArguments[i];
+            let applyArgumentContainer = {};
+            if (convert_method_argument(deref(memory[VAL(methodStructure) + i + 1]), specArgument, applyArgumentContainer)) {
+                applyArguments.push(applyArgumentContainer.value);
+            } else {
+                return false;
+            }
+        }
+
+        if (spec.returns) {
+            let resultJS = object_method_return(objectJS, spec.name, applyArguments);
+            if(spec.returns.multiple) {
+                let values = [];
+                if(typeof resultJS !== 'undefined' && resultJS !== null) {
+                    if(typeof resultJS === 'object' && resultJS.constructor.name === 'NodeList') {
+                        values = Array.from(resultJS);
+                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'FileList') {
+                        values = Array.from(resultJS);
+                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLOptionsCollection') {
+                        values = Array.from(resultJS);
+                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLCollection') {
+                        values = Array.from(resultJS);
+                    } else {
+                        values.push(resultJS);
+                    }
+                }
+
+                cursor = {values: values, spec: spec, arity: arity};
+                cursorIDJS = 'crs' + domCursorCounter++;
+                domCursors.set(cursorIDJS, cursor);
+                cursorIDPL = lookup_atom(cursorIDJS);
+
+                debug_msg("Not a retry");
+                create_choicepoint();
+
+            } else {
+                let resultContainer = {};
+                if (convert_result(resultJS, spec.returns, resultContainer)) {
+                    let resultPL = resultContainer.value;
+                    if (spec.returns.type === 'boolean') {
+                        return resultPL;
+                    } else {
+                        return unify(resultPL, deref(memory[VAL(methodStructure) + arity + 1]));
+                    }
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            object_method_no_return(objectJS, spec.name, applyArguments);
+            return true;
         }
     }
 
-    if (spec.returns) {
-        let resultJS = object_method_return(objectJS, spec.name, applyArguments);
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.values.length > 0) {
+        let resultJS = cursor.values.pop();
         let resultContainer = {};
-        if(convert_result(resultJS, spec.returns, resultContainer)) {
+        if (convert_result(resultJS, cursor.spec.returns, resultContainer)) {
             let resultPL = resultContainer.value;
-            if (spec.returns.type === 'boolean') {
+            if (cursor.spec.returns.type === 'boolean') {
                 return resultPL;
             } else {
-                return unify(resultPL, deref(memory[VAL(methodStructure) + arity + 1]));
+                return unify(resultPL, deref(memory[VAL(methodStructure) + cursor.arity + 1]));
             }
         } else {
             return false;
         }
-    } else {
-        object_method_no_return(objectJS, spec.name, applyArguments);
-        return true;
     }
+
+    destroy_choicepoint();
+    return false;
 }
 
 function convert_method_argument(term, spec, resultContainer, reportError) {

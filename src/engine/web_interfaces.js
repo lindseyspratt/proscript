@@ -164,7 +164,7 @@ function ChildProperty() {
 
 function SimpleChildProperty(propertyName) {
     var that = {};
-    that.name = "firstChild";
+    that.name = propertyName;
     that.type = 'object';
     that.objects = function(valueJS) {
         var objects = [];
@@ -328,22 +328,101 @@ webInterfaces.set('node',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Node'
         }
     });
+/*
+interface ParentNode {
+  [SameObject] readonly attribute HTMLCollection children;
+  readonly attribute Element? firstElementChild;
+  readonly attribute Element? lastElementChild;
+  readonly attribute unsigned long childElementCount;
+
+  [CEReactions, Unscopable] void prepend((Node or DOMString)... nodes);
+  [CEReactions, Unscopable] void append((Node or DOMString)... nodes);
+
+  Element? querySelector(DOMString selectors);
+  [NewObject] NodeList querySelectorAll(DOMString selectors);
+};
+
+ */
+var parentNodeInterfaceProperties = new Map([
+    ['child', ChildProperty()], // adapted from children
+    ['childElementCount', SimpleProperty('number','childElementCount')],
+    ['firstElementChild', SimpleChildProperty('firstElementChild')],
+    ['lastElementChild', SimpleChildProperty('lastElementChild')]
+]);
+
+var parentNodeMethodSpecs = new Map([
+    ['prepend',{name:'prepend',arguments:[{type: {arrayType:['object','string']}}]}], // list of Node or DOMString
+    ['append',{name:'append',arguments:[{type:{arrayType:['object','string']}}]}], // list of Node or DOMString
+    ['querySelector',{name:'querySelector',arguments:[{type:'string'}],returns:{type:'object'}}], // Element
+    ['querySelectorAll',{name:'querySelectorAll',arguments:[{type:'string'}],returns:{type:'object', multiple:true}}], // NodeList
+]);
+
+webInterfaces.set('parentnode',
+    {
+        name: 'parentnode',
+        parent: ['node'],
+        properties:parentNodeInterfaceProperties,
+        methods:parentNodeMethodSpecs,
+        reference: {name:'ParentNode',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#parentnode',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/ParentNode'
+        }
+    });
+
+var documentInterfaceProperties = new Map([
+    ['URL', SimpleProperty('string','URL')],
+    ['documentURI', SimpleProperty('string','documentURI')],
+    ['origin', SimpleProperty('string','origin')],
+    ['compatMode', SimpleProperty('atom','compatMode')],
+    ['characterSet', SimpleProperty('atom','characterSet')],
+    ['contentType', SimpleProperty('atom','contentType')],
+    ['docType', SimpleProperty('object','docType')], // DocumentType
+    ['documentElement', SimpleProperty('object','documentElement')] // Element
+]);
+
+var documentMethodSpecs = new Map([
+    ['getElementsByTagName',{name:'getElementsByTagName',arguments:[{type:'string'}],returns:{type:'object'}}],
+    ['getElementsByTagNameNS',{name:'getElementsByTagNameNS',arguments:[{type:'string'},{type:'string'}],returns:{type:'object'}}],
+    ['createElement',{name:'createElement',arguments:[{type:'string'},{type:'object'}],returns:{type:'object'}}], // input ElementCreationOptions, output Element
+    ['createElementNS',{name:'createElementNS',arguments:[{type:'string'},{type:'string'},{type:'object'}],returns:{type:'object'}}], // input ElementCreationOptions, output Element
+    ['createDocumentFragment',{name:'createDocumentFragment',arguments:[],returns:{type:'object'}}], // DocumentFragment
+    ['createTextNode',{name:'createTextNode',arguments:[{type:'string'}],returns:{type:'object'}}], // Text
+    ['createCDATASection',{name:'createCDATASection',arguments:[{type:'string'}],returns:{type:'object'}}], // CDATASection
+    ['createComment',{name:'createComment',arguments:[{type:'string'}],returns:{type:'object'}}], // Comment
+    ['createProcessingInstruction',{name:'createProcessingInstruction',arguments:[{type:'string'},{type:'string'}],returns:{type:'object'}}], // ProcessingInstruction
+    ['importNode',{name:'importNode',arguments:[{type:'object'},{type:'boolean'}],returns:{type:'object'}}], // input Node, output Node
+    ['adoptNode',{name:'adoptNode',arguments:[{type:'object'}],returns:{type:'object'}}], // input Node, output Node
+    ['createAttribute',{name:'createAttribute',arguments:[{type:'string'}],returns:{type:'object'}}], // Attr
+    ['createAttributeNS',{name:'createAttributeNS',arguments:[{type:'string'},{type:'string'}],returns:{type:'object'}}], // Attr
+    ['createEvent',{name:'createEvent',arguments:[{type:'string'}],returns:{type:'object'}}], // Event
+    ['createRange',{name:'createRange',arguments:[{type:'string'}],returns:{type:'object'}}], // Range
+    ['createNodeIterator',{name:'createNodeIterator',arguments:[{type:'object'},{type:'number'},{type:'object'}],returns:{type:'object'}}], // input Node, NodeFilter, output NodeIterator
+    ['createTreeWalker',{name:'createTreeWalker',arguments:[{type:'object'},{type:'number'},{type:'object'}],returns:{type:'object'}}], // input Node, NodeFilter, output TreeWalker
+]);
+
+webInterfaces.set('document',
+    {
+        name: 'document',
+        parent: ['node'],
+        properties:documentInterfaceProperties,
+        methods:documentMethodSpecs,
+        reference: {name:'Document',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#document',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Document'
+        }
+    });
 
 var elementInterfaceProperties = new Map([
     ['accessKey', SimpleProperty('atom','accessKey', true)],
     // attributes: available using dom_element_attribute_value
-    ['child', ChildProperty()], // adapted from children
-    ['childElementCount', SimpleProperty('number','childElementCount')],
     ['class', ClassProperty()], // adapted from classList, className
     ['clientHeight', SimpleProperty('number','clientHeight')],
     ['clientLeft', SimpleProperty('number','clientLeft')],
     ['clientTop', SimpleProperty('number','clientTop')],
     ['clientWidth', SimpleProperty('number','clientWidth')],
     // currentStyle: available using dom_element_attribute_value?
-    ['firstElementChild', SimpleChildProperty('firstElementChild')],
     ['id', SimpleProperty('atom','id', true)],
     ['innerHTML', SimpleProperty('string', 'innerHTML', true)],
-    ['lastElementChild', SimpleChildProperty('lastElementChild')],
     // name: available using dom_element_attribute_value
     ['namespaceURI', SimpleProperty('string', 'namespaceURI')],
     ['nextElementSibling', SimpleChildProperty('nextElementSibling')],
@@ -1074,5 +1153,41 @@ webInterfaces.set('file',
         reference: {name:'File',
             standard:'https://www.w3.org/TR/2019/WD-FileAPI-20190531/#dfn-file',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/File'
+        }
+    });
+
+var elementCreationOptionsInterfaceProperties = new Map( [
+    ['is', SimpleProperty('atom', 'is')]
+
+]);
+
+var elementCreationOptionsMethodSpecs = new Map([
+]);
+
+webInterfaces.set('elementcreationoptions',
+    {name: 'elementcreationoptions',
+        properties:elementCreationOptionsInterfaceProperties,
+        methods:elementCreationOptionsMethodSpecs,
+        reference: {name:'ElementCreationOptions',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#dictdef-elementcreationoptions',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement'
+        }
+    });
+
+var documentFragmentInterfaceProperties = new Map( [
+    ['is', SimpleProperty('atom', 'is')]
+
+]);
+
+var documentFragmentMethodSpecs = new Map([
+]);
+
+webInterfaces.set('documentfragment',
+    {name: 'documentfragment',
+        properties:documentFragmentInterfaceProperties,
+        methods:documentFragmentMethodSpecs,
+        reference: {name:'DocumentFragment',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#documentfragment',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment'
         }
     });

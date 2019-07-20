@@ -440,6 +440,14 @@ function predicate_alert(term) {
     return true;
 }
 
+function predicate_dom_window(windowPL) {
+    if(typeof window === 'undefined') {
+        return false;
+    }
+    let objectPL = create_object_structure(window, recordedTypeJS);
+    return unify(objectPL, windowPL);
+}
+
 function predicate_create_dom_element(tag, element) {
     if(TAG(tag) !== TAG_ATM) {
         return instantiation_error(tag);
