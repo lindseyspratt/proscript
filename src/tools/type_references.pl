@@ -18,15 +18,22 @@ generate_type_references1([x(Type, Name, Standard, MDN)|T], Stream) :-
     generate_type_references1(T, Stream).
 
 generate_type_reference(Stream, Type, Name, Standard, MDN) :-
+    (MDN = none
+      -> MDNPart = ''
+     ;
+     atom_codes(MDN, MDNCodes),
+     append(", <a href='", MDNCodes, A),
+     append(A, "'>MDN</a>", MDNPartCodes),
+     atom_codes(MDNPart, MDNPartCodes)
+    ),
     write_list([
         '<li>',
         Name,
         ' (<a href="',
         Standard,
         '">Standard</a>',
-        ', <a href="',
-        MDN,
-        '">MDN</a>): ',
+        MDNPart,
+        '): ',
         Type,
         '</li>\n'
     ],

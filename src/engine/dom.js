@@ -444,7 +444,7 @@ function predicate_dom_window(windowPL) {
     if(typeof window === 'undefined') {
         return false;
     }
-    let objectPL = create_object_structure(window, recordedTypeJS);
+    let objectPL = create_object_structure(window, 'window');
     return unify(objectPL, windowPL);
 }
 

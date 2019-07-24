@@ -360,7 +360,7 @@ var parentNodeMethodSpecs = new Map([
 webInterfaces.set('parentnode',
     {
         name: 'parentnode',
-        parent: ['node'],
+        parent: [],
         properties:parentNodeInterfaceProperties,
         methods:parentNodeMethodSpecs,
         reference: {name:'ParentNode',
@@ -411,6 +411,85 @@ webInterfaces.set('document',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Document'
         }
     });
+
+var documentFragmentInterfaceProperties = new Map( [
+    ['is', SimpleProperty('atom', 'is')]
+
+]);
+
+var documentFragmentMethodSpecs = new Map([
+]);
+
+webInterfaces.set('documentfragment',
+    {name: 'documentfragment',
+        parent: ['node'],
+        properties:documentFragmentInterfaceProperties,
+        methods:documentFragmentMethodSpecs,
+        reference: {name:'DocumentFragment',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#documentfragment',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment'
+        }
+    });
+
+var windowInterfaceProperties = new Map([
+    // window
+    // self
+    ['document', SimpleProperty('object','document')], // Document
+    ['name', SimpleProperty('atom','name')],
+    ['location', SimpleProperty('object','location')], // Location
+    ['history', SimpleProperty('object','history')], // History
+    ['customElements', SimpleProperty('object','customElements')], // CustomElementRegistry
+    ['locationbar', SimpleProperty('object','locationbar')], // BarProp
+    ['menubar', SimpleProperty('object','menubar')], // BarProp
+    ['personalbar', SimpleProperty('object','personalbar')], // BarProp
+    ['scrollbars', SimpleProperty('object','scrollbars')], // BarProp
+    ['statusbar', SimpleProperty('object','statusbar')], // BarProp
+    ['toolbar', SimpleProperty('object','toolbar')], // BarProp
+    ['status', SimpleProperty('atom','status')],
+    ['closed', SimpleProperty('boolean','closed')],
+    // frames
+    ['length', SimpleProperty('number','length')],
+    // top
+    // opener
+    // parent
+    ['frameElement', SimpleProperty('object','frameElement')], // Element
+    ['navigator', SimpleProperty('object', 'navigator')], // Navigator
+    ['applicationCache', SimpleProperty('object', 'applicationCache')] // ApplicationCache
+]);
+
+var windowMethodSpecs = new Map([
+    ['close',{name:'close',arguments:[]}],
+    ['stop',{name:'stop',arguments:[]}],
+    ['focus',{name:'focus',arguments:[]}],
+    ['blur',{name:'blur',arguments:[]}],
+    //   WindowProxy? open(optional USVString url = "about:blank", optional DOMString target = "_blank", optional [TreatNullAs=EmptyString] DOMString features = "");
+    ['open', {name: 'open',arguments:[{type:'string'},{type:'string'},{type:'string'}],returns:{type:'object'}}], // WindowProxy
+    ['alert',{name:'alert',arguments:[{type:'string'}]}],
+    ['confirm',{name:'confirm',arguments:[{type:'string'}],returns:{type:'boolean'}}],
+    ['prompt',{name:'prompt',arguments:[{type:'string'}],returns:{type:'string'}}],
+    ['print',{name:'print',arguments:[]}],
+//    void postMessage(any message, USVString targetOrigin, optional sequence<object> transfer = []);
+//void postMessage(any message, optional WindowPostMessageOptions options);
+    ['postMessageOrigin',{name:'postMessage',arguments:[{type:'string'},{type:'string'},{arrayType:'object'}]}],
+    ['postMessage',{name:'postMessage',arguments:[{type:'string'}, {type:'object'}]}] // WindowPostMessageOptions
+]);
+
+
+//Window includes GlobalEventHandlers;
+//Window includes WindowEventHandlers;
+
+webInterfaces.set('window',
+    {
+        name: 'window',
+        parent: ['eventtarget'],
+        properties:windowInterfaceProperties,
+        methods:windowMethodSpecs,
+        reference: {name:'Window',
+            standard:'https://html.spec.whatwg.org/multipage/window-object.html',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Window'
+        }
+    });
+
 
 var elementInterfaceProperties = new Map([
     ['accessKey', SimpleProperty('atom','accessKey', true)],
@@ -933,8 +1012,8 @@ webInterfaces.set('canvasrenderingcontext2d',
     });
 
 var blobInterfaceProperties = new Map( [
-    ['size', SimpleProperty('string', 'size', true)],
-    ['type', SimpleProperty('string', 'type')],
+    ['size', SimpleProperty('number', 'size', true)],
+    ['type', SimpleProperty('atom', 'type')],
 ]);
 
 var blobMethodSpecs = new Map([
@@ -1174,20 +1253,197 @@ webInterfaces.set('elementcreationoptions',
         }
     });
 
-var documentFragmentInterfaceProperties = new Map( [
-    ['is', SimpleProperty('atom', 'is')]
+var locationInterfaceProperties = new Map( [
+    ['href', SimpleProperty('atom', 'href')],
+    ['origin', SimpleProperty('atom', 'origin')],
+    ['protocol', SimpleProperty('atom', 'protocol')],
+    ['host', SimpleProperty('atom', 'host')],
+    ['hostname', SimpleProperty('atom', 'hostname')],
+    ['port', SimpleProperty('atom', 'port')],
+    ['pathname', SimpleProperty('atom', 'pathname')],
+    ['search', SimpleProperty('atom', 'search')],
+    ['hash', SimpleProperty('atom', 'hash')]
+]);
+
+var locationMethodSpecs = new Map([
+    ['assign', {name:'assign',arguments:[{type:'string'}]}],
+    ['replace', {name:'replace',arguments:[{type:'string'}]}],
+    ['reload', {name:'reload',arguments:[]}]
+]);
+
+webInterfaces.set('location',
+    {name: 'location',
+        properties:locationInterfaceProperties,
+        methods:locationMethodSpecs,
+        reference: {name:'Location',
+            standard:'https://html.spec.whatwg.org/multipage/history.html#location',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Window/location'
+        }
+    });
+
+var historyInterfaceProperties = new Map( [
+    ['length', SimpleProperty('number', 'length')],
+    ['scrollRestoration', SimpleProperty('atom', 'scrollRestoration', true)],
+    ['state', SimpleProperty('atom', 'state')]
+]);
+
+var historyMethodSpecs = new Map([
+    ['go', {name:'go',arguments:[{type:'number'}]}],
+    ['back', {name:'back',arguments:[]}],
+    ['forward', {name:'forward',arguments:[]}],
+    ['pushState', {name:'pushState',arguments:[{type:'string'},{type:'string'}, {type:'string'}]}],
+    ['replaceState', {name:'replaceState',arguments:[{type:'string'},{type:'string'}, {type:'string'}]}]
+]);
+
+webInterfaces.set('history',
+    {name: 'history',
+        properties:historyInterfaceProperties,
+        methods:historyMethodSpecs,
+        reference: {name:'History',
+            standard:'https://html.spec.whatwg.org/multipage/history.html#history',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Window/history'
+        }
+    });
+
+var customElementRegistryInterfaceProperties = new Map( [
+]);
+
+var customElementRegistryMethodSpecs = new Map([
+    ['define', {name:'define',arguments:[{type:'string'},{type:'object'},{type:'object'}]}], //CustomElementConstructor, ElementDefinitionOptions
+    ['get', {name:'get', arguments:[{type:'string'}],returns:{type:'object'}}], // returned object is a constructor function (with internal method [[Constructor]])
+    ['upgrade', {name:'upgrade', arguments:[{type:'object'}]}],
+    ['whenDefined', {name:'whenDefined', arguments:[{type:'string'}],returns:{type:'object'}}] // returns Promise object
+]);
+
+webInterfaces.set('customelementregistry',
+    {name: 'customelementregistry',
+        properties:customElementRegistryInterfaceProperties,
+        methods:customElementRegistryMethodSpecs,
+        reference: {name:'CustomElementRegistry',
+            standard:'https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry'
+        }
+    });
+
+var barPropInterfaceProperties = new Map( [
+    ['visible', SimpleProperty('boolean', 'visible')]
 
 ]);
 
-var documentFragmentMethodSpecs = new Map([
+var barPropMethodSpecs = new Map([
 ]);
 
-webInterfaces.set('documentfragment',
-    {name: 'documentfragment',
-        properties:documentFragmentInterfaceProperties,
-        methods:documentFragmentMethodSpecs,
-        reference: {name:'DocumentFragment',
-            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#documentfragment',
-            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment'
+webInterfaces.set('barprop',
+    {name: 'barprop',
+        properties:barPropInterfaceProperties,
+        methods:barPropMethodSpecs,
+        reference: {name:'BarProp',
+            standard:'https://html.spec.whatwg.org/multipage/window-object.html#barprop',
+            mdn:'none'
+        }
+    });
+
+// Navigator properties and methods are defined entirely in
+// mixins such as NavigatorID
+var navigatorInterfaceProperties = new Map( [
+]);
+
+var navigatorMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigator',
+    {name: 'navigator',
+        properties:navigatorInterfaceProperties,
+        methods:navigatorMethodSpecs,
+        reference: {name:'Navigator',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigator',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Navigator'
+        }
+    });
+
+var navigatorIDInterfaceProperties = new Map( [
+    ['userAgent', SimpleProperty('atom', 'userAgent')]
+]);
+
+var navigatorIDMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigatorid',
+    {name: 'navigatorid',
+        properties:navigatorIDInterfaceProperties,
+        methods:navigatorIDMethodSpecs,
+        reference: {name:'NavigatorID',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigatorid',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID'
+        }
+    });
+
+var navigatorLanguageInterfaceProperties = new Map( [
+    ['language', SimpleProperty('atom', 'language')],
+    ['languages', SimpleProperty('atom', 'languages')] //  should be array(atom), or have SimpleProperty handle array objects.
+]);
+
+var navigatorLanguageMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigatorlanguage',
+    {name: 'navigatorlanguage',
+        properties:navigatorLanguageInterfaceProperties,
+        methods:navigatorLanguageMethodSpecs,
+        reference: {name:'NavigatorLanguage',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigatorlanguage',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage'
+        }
+    });
+
+var navigatorOnLineInterfaceProperties = new Map( [
+    ['onLine', SimpleProperty('boolean', 'onLine')]
+]);
+
+var navigatorOnLineMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigatoronline',
+    {name: 'navigatoronline',
+        properties:navigatorOnLineInterfaceProperties,
+        methods:navigatorOnLineMethodSpecs,
+        reference: {name:'NavigatorOnLine',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigatoronline',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine'
+        }
+    });
+
+var navigatorContentUtilsInterfaceProperties = new Map( [
+]);
+
+var navigatorContentUtilsMethodSpecs = new Map([
+    ['registerProtocolHandler', {name:'registerProtocolHandler',arguments:[{type:'string'},{type:'string'},{type:'string'}]}],
+    ['unregisterProtocolHandler', {name:'unregisterProtocolHandler',arguments:[{type:'string'},{type:'string'}]}]
+]);
+
+webInterfaces.set('navigatorcontentutils',
+    {name: 'navigatorcontentutils',
+        properties:navigatorContentUtilsInterfaceProperties,
+        methods:navigatorContentUtilsMethodSpecs,
+        reference: {name:'NavigatorContentUtils',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#NavigatorContentUtils',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorContentUtils'
+        }
+    });
+
+var navigatorCookiesInterfaceProperties = new Map( [
+    ['cookieEnabled', SimpleProperty('boolean', 'cookieEnabled')]
+]);
+
+var navigatorCookiesMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigatorcookies',
+    {name: 'navigatorcookies',
+        properties:navigatorCookiesInterfaceProperties,
+        methods:navigatorCookiesMethodSpecs,
+        reference: {name:'NavigatorCookies',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigatorcookies',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorCookies'
         }
     });

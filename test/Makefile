@@ -2,6 +2,7 @@ JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
 DEBUG=true
 SWIPL=/usr/local/bin/swipl --traditional
 ENGINE=../dist/proscriptls_engine.js
+SRC_ENGINE=../src/engine
 SRC_SYSTEM=../src/system
 SRC_TOOLS=../src/tools
 
@@ -20,3 +21,6 @@ proscriptls_test.js:    $(ENGINE) proscriptls_state.js $(SRC_TOOLS)/node_standal
 
 node_test: $(SRC_TOOLS)/node_toplevel.js proscriptls_test.js
 		node $(SRC_TOOLS)/node_toplevel.js ../../test/proscriptls_test.js
+
+dump-state: $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js $(SRC_TOOLS)/dump.js
+		$(JSC) $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js $(SRC_TOOLS)/dump.js  -e "dump()" #Predicate('compile_body_args')"

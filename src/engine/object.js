@@ -8,6 +8,9 @@ var goalFunctions = new Map();
 var dotrCursors = new Map();
 var dotrCursorCounter = 0;
 
+var dtpCursors = new Map();
+var dtpCursorCounter = 0;
+
 // create_object_structure interns a Javascript object by creating
 // a unique key string for that object and storing the relationship
 // between that key and the object in two global static Map objects.
@@ -91,6 +94,7 @@ function get_object_id_container(term, idContainer) {
 
 var parentMap = new Map([
     ['eventtarget', []],
+    ['window', ['eventtarget']],
     ['node', ['eventtarget']],
     ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
     ['document', ['node', 'parentnode']],
@@ -120,7 +124,17 @@ var parentMap = new Map([
     ['textmetrics', []],
     ['validitystate', []],
     ['file', ['blob']],
-    ['elementcreationoptions', []]
+    ['elementcreationoptions', []],
+    ['location', []],
+    ['history', []],
+    ['customelementregistrgy',[]],
+    ['barprop', []],
+    ['navigator', ['navigatorid','navigatorlanguage', 'navigatoronline', 'navigatorcontentutils', 'navigatorcookies']],
+    ['navigatorid', []],
+    ['navigatorlanguage', []],
+    ['navigatoronline', []],
+    ['navigatorcontentutils', []],
+    ['navigatorcookies', []]
 ]);
 
 var childMap = new Map();
@@ -163,7 +177,12 @@ var constructorMap = {
     "ValidityState" : 'validitystate',
     "File": 'file',
     "ElementCreationOptions": 'elementcreationoptions',
-    "DocumentFragment": 'documentfragment'
+    "DocumentFragment": 'documentfragment',
+    "Location": 'location',
+    "History" : 'history',
+    "CustomElementRegistry" : 'customelementregistrgy',
+    "BarProp" : 'barprop',
+    "Navigator" : 'navigator'
 };
 
 var distinctivePropertyMap = {
@@ -562,7 +581,7 @@ function predicate_dom_type_reference(type, name, standard, mdn) {
     }
     else {
         let container = {};
-        if(!setupReferencesForType(type, container)) {
+        if(!setupInterfaceSpecificationsForType(type, container)) {
             return false;
         }
         cursor = {
@@ -608,13 +627,192 @@ function predicate_dom_type_reference(type, name, standard, mdn) {
     }
 }
 
-
-function setupReferencesForType(type, container) {
+function setupInterfaceSpecificationsForType(type, container) {
     if (TAG(type) !== TAG_REF) {
         let typeJS = PL_get_atom_chars(type);
         container.value = [typeJS];
     } else {
         container.value = Array.from(webInterfaces.keys());
+    }
+
+    return true;
+}
+
+// Find the related values for a WebInterface API object type, a property name implemented for that type, the Javascript Web API function name used
+// to implement that property, and the type of value for that property.
+//
+// All binding patterns are supported: objectType REF or ATM, propertyName REF or ATM, jsName REF or ATM, and valueType REF or ATM.
+
+function predicate_dom_type_property(objectType, propertyName, jsName, valueType) {
+    // The function uses fail/retry to implement a doubly-nested loop: the outer loop
+    // iterates over the Web Interface API object types, the inner loop iterates over
+    // the properties defined for the current object type of the outer loop.
+    // A pair of values for objectType and propertyName uniquely identifies values
+    // for jsName and valueType.
+
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = dtpCursors.get(cursorIDJS);
+
+        debug_msg("Is retry! Setting cursor back to " + cursor);
+    }
+    else if(TAG(objectType) !== TAG_REF && TAG(propertyName) !== TAG_REF) {
+        return deterministic_dom_type_property(objectType, propertyName, jsName, valueType);
+    }
+    else {
+        cursor = {};
+        if(! setupCursorForTypes(objectType, jsName, valueType, cursor)) {
+            return false;
+        }
+        cursorIDJS = 'crs' + dtpCursorCounter++;
+        dtpCursors.set(cursorIDJS, cursor);
+        cursorIDPL = lookup_atom(cursorIDJS);
+
+        debug_msg("Not a retry");
+        create_choicepoint();
+    }
+
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.objectTypes && cursor.objectTypes.length > 0) {
+        let objectTypeJS = cursor.objectTypes[0];
+        let spec = webInterfaces.get(objectTypeJS);
+        if(spec) {
+            let properties = spec.properties;
+            if (! cursor.propertyNames) {
+                if(! setupCursorForPropertyNames(properties, propertyName, cursor)) {
+                    destroy_choicepoint();
+                    return false;
+                }
+            }
+
+            if(cursor.propertyNames && cursor.propertyNames.length > 0) {
+                let propertyNameJS = cursor.propertyNames[0];
+                cursor.propertyNames = cursor.propertyNames.slice(1);
+                let propertySpec = properties.get(propertyNameJS);
+                if(propertySpec) {
+                    if (! cursor.implementingName || propertySpec.name === cursor.implementingName) {
+                        let implementingName = propertySpec.name;
+                        if (! cursor.propertyType || propertySpec.type === cursor.propertyType) {
+                            let propertyType = propertySpec.type;
+
+                            return unify(objectType, PL_put_atom_chars(objectTypeJS)) &&
+                                unify(propertyName, PL_put_atom_chars(propertyNameJS)) &&
+                                unify(jsName, PL_put_atom_chars(implementingName)) &&
+                                unify(valueType, PL_put_atom_chars(propertyType));
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                } else {
+                    destroy_choicepoint();
+                    return domain_error(objectTypeJS  + ' property', PL_put_atom_chars(propertyNameJS))
+                }
+            } else {
+                // All propertyNames for current type have been processed.
+                // Set the cursor.propertyNames to undefined to force recalculation of propertyNames
+                // with next type.
+
+                cursor.propertyNames = undefined;
+
+                // set cursor.objectTypes to next objectType for retry.
+                cursor.objectTypes = cursor.objectTypes.slice(1);
+                return false;
+            }
+         } else {
+            destroy_choicepoint();
+            return domain_error('web api interface type', PL_put_atom_chars(objectTypeJS));
+        }
+    } else {
+        destroy_choicepoint();
+        return false;
+    }
+}
+
+function deterministic_dom_type_property(objectType, propertyName, jsName, valueType) {
+    if(TAG(objectType) === TAG_REF) {
+        return instantiation_error(objectType);
+    } if (TAG(objectType) !== TAG_ATM) {
+        return type_error('atom', objectType);
+    }
+
+    let objectTypeJS = PL_get_atom_chars(objectType);
+
+    if(TAG(propertyName) === TAG_REF) {
+        return instantiation_error(propertyName);
+    } if (TAG(propertyName) !== TAG_ATM) {
+        return type_error('atom', propertyName);
+    }
+
+    let propertyNameJS = PL_get_atom_chars(propertyName);
+
+    let spec = webInterfaces.get(objectTypeJS);
+    if(spec) {
+        let properties = spec.properties;
+        if(properties) {
+            let propertySpec = properties.get(propertyNameJS);
+            if(propertySpec) {
+                let implementingName = propertySpec.name;
+                let propertyType = propertySpec.type;
+                return unify(jsName, PL_put_atom_chars(implementingName)) &&
+                    unify(valueType, PL_put_atom_chars(propertyType));
+            } else {
+                return false;
+            }
+        } else {
+            return engine_error('Web API Interface type ' + objectTypeJS + ' has specification without a "properties" section : ' + JSON.stringify(spec));
+        }
+    } else {
+        return domain_error('web api interface type', objectTypeJS);
+    }
+}
+
+function setupCursorForTypes(objectType, jsName, valueType, cursor) {
+    let container = {};
+    if(!setupInterfaceSpecificationsForType(objectType, container)) {
+        return false;
+    }
+    cursor.objectTypes = container.value;
+
+    if(TAG(jsName) !== TAG_REF) {
+        if(TAG(jsName) !== TAG_ATM) {
+            return type_error('atom', jsName);
+        }
+        cursor.implementingName = PL_get_atom_chars(jsName);
+    }
+
+    if(TAG(valueType) !== TAG_REF) {
+        if(TAG(valueType) !== TAG_ATM) {
+            return type_error('atom', valueType);
+        }
+        cursor.propertyType = PL_get_atom_chars(valueType);
+    }
+
+    return true;
+}
+
+function setupCursorForPropertyNames(properties, propertyName, cursor) {
+    if (! properties) {
+        cursor.propertyNames = [];
+    } else if (TAG(propertyName) !== TAG_REF) {
+        if (TAG(propertyName) !== TAG_ATM) {
+            return type_error('atom', propertyName);
+        }
+        let propertyNameJS = PL_get_atom_chars(propertyName);
+        if (properties.get(propertyNameJS)) {
+            cursor.propertyNames = [propertyNameJS];
+        } else {
+            cursor.propertyNames = [];
+        }
+    } else {
+        cursor.propertyNames = Array.from(properties.keys());
     }
 
     return true;

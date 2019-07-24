@@ -8346,7 +8346,7 @@ function predicate_dom_window(windowPL) {
     if(typeof window === 'undefined') {
         return false;
     }
-    let objectPL = create_object_structure(window, recordedTypeJS);
+    let objectPL = create_object_structure(window, 'window');
     return unify(objectPL, windowPL);
 }
 
@@ -9257,6 +9257,9 @@ var goalFunctions = new Map();
 var dotrCursors = new Map();
 var dotrCursorCounter = 0;
 
+var dtpCursors = new Map();
+var dtpCursorCounter = 0;
+
 // create_object_structure interns a Javascript object by creating
 // a unique key string for that object and storing the relationship
 // between that key and the object in two global static Map objects.
@@ -9340,6 +9343,7 @@ function get_object_id_container(term, idContainer) {
 
 var parentMap = new Map([
     ['eventtarget', []],
+    ['window', ['eventtarget']],
     ['node', ['eventtarget']],
     ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
     ['document', ['node', 'parentnode']],
@@ -9369,7 +9373,17 @@ var parentMap = new Map([
     ['textmetrics', []],
     ['validitystate', []],
     ['file', ['blob']],
-    ['elementcreationoptions', []]
+    ['elementcreationoptions', []],
+    ['location', []],
+    ['history', []],
+    ['customelementregistrgy',[]],
+    ['barprop', []],
+    ['navigator', ['navigatorid','navigatorlanguage', 'navigatoronline', 'navigatorcontentutils', 'navigatorcookies']],
+    ['navigatorid', []],
+    ['navigatorlanguage', []],
+    ['navigatoronline', []],
+    ['navigatorcontentutils', []],
+    ['navigatorcookies', []]
 ]);
 
 var childMap = new Map();
@@ -9412,7 +9426,12 @@ var constructorMap = {
     "ValidityState" : 'validitystate',
     "File": 'file',
     "ElementCreationOptions": 'elementcreationoptions',
-    "DocumentFragment": 'documentfragment'
+    "DocumentFragment": 'documentfragment',
+    "Location": 'location',
+    "History" : 'history',
+    "CustomElementRegistry" : 'customelementregistrgy',
+    "BarProp" : 'barprop',
+    "Navigator" : 'navigator'
 };
 
 var distinctivePropertyMap = {
@@ -9810,7 +9829,7 @@ function predicate_dom_type_reference(type, name, standard, mdn) {
     }
     else {
         let container = {};
-        if(!setupReferencesForType(type, container)) {
+        if(!setupInterfaceSpecificationsForType(type, container)) {
             return false;
         }
         cursor = {
@@ -9855,13 +9874,190 @@ function predicate_dom_type_reference(type, name, standard, mdn) {
     }
 }
 
-
-function setupReferencesForType(type, container) {
+function setupInterfaceSpecificationsForType(type, container) {
     if (TAG(type) !== TAG_REF) {
         let typeJS = PL_get_atom_chars(type);
         container.value = [typeJS];
     } else {
         container.value = Array.from(webInterfaces.keys());
+    }
+
+    return true;
+}
+
+// Find the related values for a WebInterface API object type, a property name implemented for that type, the Javascript Web API function name used
+// to implement that property, and the type of value for that property.
+//
+// All binding patterns are supported: objectType REF or ATM, propertyName REF or ATM, jsName REF or ATM, and valueType REF or ATM.
+
+function predicate_dom_type_property(objectType, propertyName, jsName, valueType) {
+    // The function uses fail/retry to implement a doubly-nested loop: the outer loop
+    // iterates over the Web Interface API object types, the inner loop iterates over
+    // the properties defined for the current object type of the outer loop.
+    // A pair of values for objectType and propertyName uniquely identifies values
+    // for jsName and valueType.
+
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = dtpCursors.get(cursorIDJS);
+
+    }
+    else if(TAG(objectType) !== TAG_REF && TAG(propertyName) !== TAG_REF) {
+        return deterministic_dom_type_property(objectType, propertyName, jsName, valueType);
+    }
+    else {
+        cursor = {};
+        if(! setupCursorForTypes(objectType, jsName, valueType, cursor)) {
+            return false;
+        }
+        cursorIDJS = 'crs' + dtpCursorCounter++;
+        dtpCursors.set(cursorIDJS, cursor);
+        cursorIDPL = lookup_atom(cursorIDJS);
+
+        create_choicepoint();
+    }
+
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.objectTypes && cursor.objectTypes.length > 0) {
+        let objectTypeJS = cursor.objectTypes[0];
+        let spec = webInterfaces.get(objectTypeJS);
+        if(spec) {
+            let properties = spec.properties;
+            if (! cursor.propertyNames) {
+                if(! setupCursorForPropertyNames(properties, propertyName, cursor)) {
+                    destroy_choicepoint();
+                    return false;
+                }
+            }
+
+            if(cursor.propertyNames && cursor.propertyNames.length > 0) {
+                let propertyNameJS = cursor.propertyNames[0];
+                cursor.propertyNames = cursor.propertyNames.slice(1);
+                let propertySpec = properties.get(propertyNameJS);
+                if(propertySpec) {
+                    if (! cursor.implementingName || propertySpec.name === cursor.implementingName) {
+                        let implementingName = propertySpec.name;
+                        if (! cursor.propertyType || propertySpec.type === cursor.propertyType) {
+                            let propertyType = propertySpec.type;
+
+                            return unify(objectType, PL_put_atom_chars(objectTypeJS)) &&
+                                unify(propertyName, PL_put_atom_chars(propertyNameJS)) &&
+                                unify(jsName, PL_put_atom_chars(implementingName)) &&
+                                unify(valueType, PL_put_atom_chars(propertyType));
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                } else {
+                    destroy_choicepoint();
+                    return domain_error(objectTypeJS  + ' property', PL_put_atom_chars(propertyNameJS))
+                }
+            } else {
+                // All propertyNames for current type have been processed.
+                // Set the cursor.propertyNames to undefined to force recalculation of propertyNames
+                // with next type.
+
+                cursor.propertyNames = undefined;
+
+                // set cursor.objectTypes to next objectType for retry.
+                cursor.objectTypes = cursor.objectTypes.slice(1);
+                return false;
+            }
+         } else {
+            destroy_choicepoint();
+            return domain_error('web api interface type', PL_put_atom_chars(objectTypeJS));
+        }
+    } else {
+        destroy_choicepoint();
+        return false;
+    }
+}
+
+function deterministic_dom_type_property(objectType, propertyName, jsName, valueType) {
+    if(TAG(objectType) === TAG_REF) {
+        return instantiation_error(objectType);
+    } if (TAG(objectType) !== TAG_ATM) {
+        return type_error('atom', objectType);
+    }
+
+    let objectTypeJS = PL_get_atom_chars(objectType);
+
+    if(TAG(propertyName) === TAG_REF) {
+        return instantiation_error(propertyName);
+    } if (TAG(propertyName) !== TAG_ATM) {
+        return type_error('atom', propertyName);
+    }
+
+    let propertyNameJS = PL_get_atom_chars(propertyName);
+
+    let spec = webInterfaces.get(objectTypeJS);
+    if(spec) {
+        let properties = spec.properties;
+        if(properties) {
+            let propertySpec = properties.get(propertyNameJS);
+            if(propertySpec) {
+                let implementingName = propertySpec.name;
+                let propertyType = propertySpec.type;
+                return unify(jsName, PL_put_atom_chars(implementingName)) &&
+                    unify(valueType, PL_put_atom_chars(propertyType));
+            } else {
+                return false;
+            }
+        } else {
+            return engine_error('Web API Interface type ' + objectTypeJS + ' has specification without a "properties" section : ' + JSON.stringify(spec));
+        }
+    } else {
+        return domain_error('web api interface type', objectTypeJS);
+    }
+}
+
+function setupCursorForTypes(objectType, jsName, valueType, cursor) {
+    let container = {};
+    if(!setupInterfaceSpecificationsForType(objectType, container)) {
+        return false;
+    }
+    cursor.objectTypes = container.value;
+
+    if(TAG(jsName) !== TAG_REF) {
+        if(TAG(jsName) !== TAG_ATM) {
+            return type_error('atom', jsName);
+        }
+        cursor.implementingName = PL_get_atom_chars(jsName);
+    }
+
+    if(TAG(valueType) !== TAG_REF) {
+        if(TAG(valueType) !== TAG_ATM) {
+            return type_error('atom', valueType);
+        }
+        cursor.propertyType = PL_get_atom_chars(valueType);
+    }
+
+    return true;
+}
+
+function setupCursorForPropertyNames(properties, propertyName, cursor) {
+    if (! properties) {
+        cursor.propertyNames = [];
+    } else if (TAG(propertyName) !== TAG_REF) {
+        if (TAG(propertyName) !== TAG_ATM) {
+            return type_error('atom', propertyName);
+        }
+        let propertyNameJS = PL_get_atom_chars(propertyName);
+        if (properties.get(propertyNameJS)) {
+            cursor.propertyNames = [propertyNameJS];
+        } else {
+            cursor.propertyNames = [];
+        }
+    } else {
+        cursor.propertyNames = Array.from(properties.keys());
     }
 
     return true;
@@ -10229,7 +10425,7 @@ var parentNodeMethodSpecs = new Map([
 webInterfaces.set('parentnode',
     {
         name: 'parentnode',
-        parent: ['node'],
+        parent: [],
         properties:parentNodeInterfaceProperties,
         methods:parentNodeMethodSpecs,
         reference: {name:'ParentNode',
@@ -10280,6 +10476,85 @@ webInterfaces.set('document',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Document'
         }
     });
+
+var documentFragmentInterfaceProperties = new Map( [
+    ['is', SimpleProperty('atom', 'is')]
+
+]);
+
+var documentFragmentMethodSpecs = new Map([
+]);
+
+webInterfaces.set('documentfragment',
+    {name: 'documentfragment',
+        parent: ['node'],
+        properties:documentFragmentInterfaceProperties,
+        methods:documentFragmentMethodSpecs,
+        reference: {name:'DocumentFragment',
+            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#documentfragment',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment'
+        }
+    });
+
+var windowInterfaceProperties = new Map([
+    // window
+    // self
+    ['document', SimpleProperty('object','document')], // Document
+    ['name', SimpleProperty('atom','name')],
+    ['location', SimpleProperty('object','location')], // Location
+    ['history', SimpleProperty('object','history')], // History
+    ['customElements', SimpleProperty('object','customElements')], // CustomElementRegistry
+    ['locationbar', SimpleProperty('object','locationbar')], // BarProp
+    ['menubar', SimpleProperty('object','menubar')], // BarProp
+    ['personalbar', SimpleProperty('object','personalbar')], // BarProp
+    ['scrollbars', SimpleProperty('object','scrollbars')], // BarProp
+    ['statusbar', SimpleProperty('object','statusbar')], // BarProp
+    ['toolbar', SimpleProperty('object','toolbar')], // BarProp
+    ['status', SimpleProperty('atom','status')],
+    ['closed', SimpleProperty('boolean','closed')],
+    // frames
+    ['length', SimpleProperty('number','length')],
+    // top
+    // opener
+    // parent
+    ['frameElement', SimpleProperty('object','frameElement')], // Element
+    ['navigator', SimpleProperty('object', 'navigator')], // Navigator
+    ['applicationCache', SimpleProperty('object', 'applicationCache')] // ApplicationCache
+]);
+
+var windowMethodSpecs = new Map([
+    ['close',{name:'close',arguments:[]}],
+    ['stop',{name:'stop',arguments:[]}],
+    ['focus',{name:'focus',arguments:[]}],
+    ['blur',{name:'blur',arguments:[]}],
+    //   WindowProxy? open(optional USVString url = "about:blank", optional DOMString target = "_blank", optional [TreatNullAs=EmptyString] DOMString features = "");
+    ['open', {name: 'open',arguments:[{type:'string'},{type:'string'},{type:'string'}],returns:{type:'object'}}], // WindowProxy
+    ['alert',{name:'alert',arguments:[{type:'string'}]}],
+    ['confirm',{name:'confirm',arguments:[{type:'string'}],returns:{type:'boolean'}}],
+    ['prompt',{name:'prompt',arguments:[{type:'string'}],returns:{type:'string'}}],
+    ['print',{name:'print',arguments:[]}],
+//    void postMessage(any message, USVString targetOrigin, optional sequence<object> transfer = []);
+//void postMessage(any message, optional WindowPostMessageOptions options);
+    ['postMessageOrigin',{name:'postMessage',arguments:[{type:'string'},{type:'string'},{arrayType:'object'}]}],
+    ['postMessage',{name:'postMessage',arguments:[{type:'string'}, {type:'object'}]}] // WindowPostMessageOptions
+]);
+
+
+//Window includes GlobalEventHandlers;
+//Window includes WindowEventHandlers;
+
+webInterfaces.set('window',
+    {
+        name: 'window',
+        parent: ['eventtarget'],
+        properties:windowInterfaceProperties,
+        methods:windowMethodSpecs,
+        reference: {name:'Window',
+            standard:'https://html.spec.whatwg.org/multipage/window-object.html',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Window'
+        }
+    });
+
 
 var elementInterfaceProperties = new Map([
     ['accessKey', SimpleProperty('atom','accessKey', true)],
@@ -10802,8 +11077,8 @@ webInterfaces.set('canvasrenderingcontext2d',
     });
 
 var blobInterfaceProperties = new Map( [
-    ['size', SimpleProperty('string', 'size', true)],
-    ['type', SimpleProperty('string', 'type')],
+    ['size', SimpleProperty('number', 'size', true)],
+    ['type', SimpleProperty('atom', 'type')],
 ]);
 
 var blobMethodSpecs = new Map([
@@ -11043,21 +11318,198 @@ webInterfaces.set('elementcreationoptions',
         }
     });
 
-var documentFragmentInterfaceProperties = new Map( [
-    ['is', SimpleProperty('atom', 'is')]
+var locationInterfaceProperties = new Map( [
+    ['href', SimpleProperty('atom', 'href')],
+    ['origin', SimpleProperty('atom', 'origin')],
+    ['protocol', SimpleProperty('atom', 'protocol')],
+    ['host', SimpleProperty('atom', 'host')],
+    ['hostname', SimpleProperty('atom', 'hostname')],
+    ['port', SimpleProperty('atom', 'port')],
+    ['pathname', SimpleProperty('atom', 'pathname')],
+    ['search', SimpleProperty('atom', 'search')],
+    ['hash', SimpleProperty('atom', 'hash')]
+]);
+
+var locationMethodSpecs = new Map([
+    ['assign', {name:'assign',arguments:[{type:'string'}]}],
+    ['replace', {name:'replace',arguments:[{type:'string'}]}],
+    ['reload', {name:'reload',arguments:[]}]
+]);
+
+webInterfaces.set('location',
+    {name: 'location',
+        properties:locationInterfaceProperties,
+        methods:locationMethodSpecs,
+        reference: {name:'Location',
+            standard:'https://html.spec.whatwg.org/multipage/history.html#location',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Window/location'
+        }
+    });
+
+var historyInterfaceProperties = new Map( [
+    ['length', SimpleProperty('number', 'length')],
+    ['scrollRestoration', SimpleProperty('atom', 'scrollRestoration', true)],
+    ['state', SimpleProperty('atom', 'state')]
+]);
+
+var historyMethodSpecs = new Map([
+    ['go', {name:'go',arguments:[{type:'number'}]}],
+    ['back', {name:'back',arguments:[]}],
+    ['forward', {name:'forward',arguments:[]}],
+    ['pushState', {name:'pushState',arguments:[{type:'string'},{type:'string'}, {type:'string'}]}],
+    ['replaceState', {name:'replaceState',arguments:[{type:'string'},{type:'string'}, {type:'string'}]}]
+]);
+
+webInterfaces.set('history',
+    {name: 'history',
+        properties:historyInterfaceProperties,
+        methods:historyMethodSpecs,
+        reference: {name:'History',
+            standard:'https://html.spec.whatwg.org/multipage/history.html#history',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Window/history'
+        }
+    });
+
+var customElementRegistryInterfaceProperties = new Map( [
+]);
+
+var customElementRegistryMethodSpecs = new Map([
+    ['define', {name:'define',arguments:[{type:'string'},{type:'object'},{type:'object'}]}], //CustomElementConstructor, ElementDefinitionOptions
+    ['get', {name:'get', arguments:[{type:'string'}],returns:{type:'object'}}], // returned object is a constructor function (with internal method [[Constructor]])
+    ['upgrade', {name:'upgrade', arguments:[{type:'object'}]}],
+    ['whenDefined', {name:'whenDefined', arguments:[{type:'string'}],returns:{type:'object'}}] // returns Promise object
+]);
+
+webInterfaces.set('customelementregistry',
+    {name: 'customelementregistry',
+        properties:customElementRegistryInterfaceProperties,
+        methods:customElementRegistryMethodSpecs,
+        reference: {name:'CustomElementRegistry',
+            standard:'https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry'
+        }
+    });
+
+var barPropInterfaceProperties = new Map( [
+    ['visible', SimpleProperty('boolean', 'visible')]
 
 ]);
 
-var documentFragmentMethodSpecs = new Map([
+var barPropMethodSpecs = new Map([
 ]);
 
-webInterfaces.set('documentfragment',
-    {name: 'documentfragment',
-        properties:documentFragmentInterfaceProperties,
-        methods:documentFragmentMethodSpecs,
-        reference: {name:'DocumentFragment',
-            standard:'https://www.w3.org/TR/2018/WD-dom41-20180201/#documentfragment',
-            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment'
+webInterfaces.set('barprop',
+    {name: 'barprop',
+        properties:barPropInterfaceProperties,
+        methods:barPropMethodSpecs,
+        reference: {name:'BarProp',
+            standard:'https://html.spec.whatwg.org/multipage/window-object.html#barprop',
+            mdn:'none'
+        }
+    });
+
+// Navigator properties and methods are defined entirely in
+// mixins such as NavigatorID
+var navigatorInterfaceProperties = new Map( [
+]);
+
+var navigatorMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigator',
+    {name: 'navigator',
+        properties:navigatorInterfaceProperties,
+        methods:navigatorMethodSpecs,
+        reference: {name:'Navigator',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigator',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Navigator'
+        }
+    });
+
+var navigatorIDInterfaceProperties = new Map( [
+    ['userAgent', SimpleProperty('atom', 'userAgent')]
+]);
+
+var navigatorIDMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigatorid',
+    {name: 'navigatorid',
+        properties:navigatorIDInterfaceProperties,
+        methods:navigatorIDMethodSpecs,
+        reference: {name:'NavigatorID',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigatorid',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID'
+        }
+    });
+
+var navigatorLanguageInterfaceProperties = new Map( [
+    ['language', SimpleProperty('atom', 'language')],
+    ['languages', SimpleProperty('atom', 'languages')] //  should be array(atom), or have SimpleProperty handle array objects.
+]);
+
+var navigatorLanguageMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigatorlanguage',
+    {name: 'navigatorlanguage',
+        properties:navigatorLanguageInterfaceProperties,
+        methods:navigatorLanguageMethodSpecs,
+        reference: {name:'NavigatorLanguage',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigatorlanguage',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage'
+        }
+    });
+
+var navigatorOnLineInterfaceProperties = new Map( [
+    ['onLine', SimpleProperty('boolean', 'onLine')]
+]);
+
+var navigatorOnLineMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigatoronline',
+    {name: 'navigatoronline',
+        properties:navigatorOnLineInterfaceProperties,
+        methods:navigatorOnLineMethodSpecs,
+        reference: {name:'NavigatorOnLine',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigatoronline',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine'
+        }
+    });
+
+var navigatorContentUtilsInterfaceProperties = new Map( [
+]);
+
+var navigatorContentUtilsMethodSpecs = new Map([
+    ['registerProtocolHandler', {name:'registerProtocolHandler',arguments:[{type:'string'},{type:'string'},{type:'string'}]}],
+    ['unregisterProtocolHandler', {name:'unregisterProtocolHandler',arguments:[{type:'string'},{type:'string'}]}]
+]);
+
+webInterfaces.set('navigatorcontentutils',
+    {name: 'navigatorcontentutils',
+        properties:navigatorContentUtilsInterfaceProperties,
+        methods:navigatorContentUtilsMethodSpecs,
+        reference: {name:'NavigatorContentUtils',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#NavigatorContentUtils',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorContentUtils'
+        }
+    });
+
+var navigatorCookiesInterfaceProperties = new Map( [
+    ['cookieEnabled', SimpleProperty('boolean', 'cookieEnabled')]
+]);
+
+var navigatorCookiesMethodSpecs = new Map([
+]);
+
+webInterfaces.set('navigatorcookies',
+    {name: 'navigatorcookies',
+        properties:navigatorCookiesInterfaceProperties,
+        methods:navigatorCookiesMethodSpecs,
+        reference: {name:'NavigatorCookies',
+            standard:'https://html.spec.whatwg.org/multipage/system-state.html#navigatorcookies',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorCookies'
         }
     });
 // File object_property.js
