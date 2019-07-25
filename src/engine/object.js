@@ -11,6 +11,9 @@ var dotrCursorCounter = 0;
 var dtpCursors = new Map();
 var dtpCursorCounter = 0;
 
+var dtmCursors = new Map();
+var dtmCursorCounter = 0;
+
 // create_object_structure interns a Javascript object by creating
 // a unique key string for that object and storing the relationship
 // between that key and the object in two global static Map objects.
@@ -700,11 +703,12 @@ function predicate_dom_type_property(objectType, propertyName, jsName, valueType
                         let implementingName = propertySpec.name;
                         if (! cursor.propertyType || propertySpec.type === cursor.propertyType) {
                             let propertyType = propertySpec.type;
+                            let propertyTypePL = method_property_type_to_term(propertyType);
 
                             return unify(objectType, PL_put_atom_chars(objectTypeJS)) &&
                                 unify(propertyName, PL_put_atom_chars(propertyNameJS)) &&
                                 unify(jsName, PL_put_atom_chars(implementingName)) &&
-                                unify(valueType, PL_put_atom_chars(propertyType));
+                                unify(valueType, propertyTypePL);
                         } else {
                             return false;
                         }
@@ -813,6 +817,213 @@ function setupCursorForPropertyNames(properties, propertyName, cursor) {
         }
     } else {
         cursor.propertyNames = Array.from(properties.keys());
+    }
+
+    return true;
+}
+
+// Find the related values for a WebInterface API object type, a method name implemented for that type, the Javascript Web API function name used
+// to implement that method, the types of arguments for that method, and the result type (possibly undefined).
+//
+// All binding patterns are supported: objectType REF or ATM, methodName REF or ATM, implementationName REF or ATM, argumentTypes REF or LST,
+// and resultType REF or ATM.
+
+function predicate_dom_type_method(objectType, methodName, implementationName, argumentTypes, resultType) {
+    // The function uses fail/retry to implement a doubly-nested loop: the outer loop
+    // iterates over the Web Interface API objectTypes, the inner loop iterates over
+    // the methodNames defined for the current objectType of the outer loop.
+    // A pair of values for objectType and methodName uniquely identifies values
+    // for implementationName, argumentTypes, and resultTYpe.
+
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = dtmCursors.get(cursorIDJS);
+
+        debug_msg("Is retry! Setting cursor back to " + cursor);
+    }
+    else if(TAG(objectType) !== TAG_REF && TAG(methodName) !== TAG_REF) {
+        return deterministic_dom_type_method(objectType, methodName, implementationName, argumentTypes, resultType);
+    }
+    else {
+        cursor = {};
+        if(! setupMethodCursorForTypes(objectType, cursor)) {
+            return false;
+        }
+        cursorIDJS = 'crs' + dtmCursorCounter++;
+        dtmCursors.set(cursorIDJS, cursor);
+        cursorIDPL = lookup_atom(cursorIDJS);
+
+        debug_msg("Not a retry");
+        create_choicepoint();
+    }
+
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.objectTypes && cursor.objectTypes.length > 0) {
+        let objectTypeJS = cursor.objectTypes[0];
+        let spec = webInterfaces.get(objectTypeJS);
+        if(spec) {
+            let methods = spec.methods;
+            if (! cursor.methodNames) {
+                if(! setupCursorForMethodNames(methods, methodName, cursor)) {
+                    destroy_choicepoint();
+                    return false;
+                }
+            }
+
+            if(cursor.methodNames && cursor.methodNames.length > 0) {
+                let methodNameJS = cursor.methodNames[0];
+                cursor.methodNames = cursor.methodNames.slice(1);
+                let methodSpec = methods.get(methodNameJS);
+                if(methodSpec) {
+                    let implementingNameJS = methodSpec.name;
+                    let argumentTypesJS = methodSpec.arguments;
+                    let argumentTypesPL = method_property_types_to_list(argumentTypesJS);
+                    let resultTypeJS = methodSpec.returns ? methodSpec.returns.type : 'void';
+
+                    return unify(objectType, PL_put_atom_chars(objectTypeJS)) &&
+                        unify(methodName, PL_put_atom_chars(methodNameJS)) &&
+                        unify(implementationName, PL_put_atom_chars(implementingNameJS)) &&
+                        unify(argumentTypes, argumentTypesPL) &&
+                        unify(resultType, method_property_type_to_term(resultTypeJS));
+                } else {
+                    destroy_choicepoint();
+                    return domain_error(objectTypeJS  + ' method', PL_put_atom_chars(methodNameJS))
+                }
+            } else {
+                // All methodNames for current type have been processed.
+                // Set the cursor.methodNames to undefined to force recalculation of methodNames
+                // with next type.
+
+                cursor.methodNames = undefined;
+
+                // set cursor.objectTypes to next objectType for retry.
+                cursor.objectTypes = cursor.objectTypes.slice(1);
+                return false;
+            }
+        } else {
+            destroy_choicepoint();
+            return domain_error('web api interface type', PL_put_atom_chars(objectTypeJS));
+        }
+    } else {
+        destroy_choicepoint();
+        return false;
+    }
+}
+
+function deterministic_dom_type_method(objectType, methodName, implementationName, argumentTypes, resultType) {
+    if(TAG(objectType) === TAG_REF) {
+        return instantiation_error(objectType);
+    } if (TAG(objectType) !== TAG_ATM) {
+        return type_error('atom', objectType);
+    }
+
+    let objectTypeJS = PL_get_atom_chars(objectType);
+
+    if(TAG(methodName) === TAG_REF) {
+        return instantiation_error(methodName);
+    } if (TAG(methodName) !== TAG_ATM) {
+        return type_error('atom', methodName);
+    }
+
+    let methodNameJS = PL_get_atom_chars(methodName);
+
+    let spec = webInterfaces.get(objectTypeJS);
+    if(spec) {
+        let methods = spec.methods;
+        if(methods) {
+            let methodSpec = methods.get(methodNameJS);
+            if(methodSpec) {
+                let implementingName = methodSpec.name;
+                let argumentTypesJS = methodSpec.arguments;
+                let argumentTypesPL = method_property_types_to_list(argumentTypesJS);
+                let resultTypeJS = methodSpec.returns ? methodSpec.returns.type : 'void';
+
+                return unify(objectType, PL_put_atom_chars(objectTypeJS)) &&
+                    unify(methodName, PL_put_atom_chars(methodNameJS)) &&
+                    unify(implementationName, PL_put_atom_chars(implementingNameJS)) &&
+                    unify(argumentTypes, argumentTypesPL) &&
+                    unify(resultType, method_property_type_to_term(resultTypeJS));
+            } else {
+                return false;
+            }
+        } else {
+            return engine_error('Web API Interface type ' + objectTypeJS + ' has specification without a "methods" section : ' + JSON.stringify(spec));
+        }
+    } else {
+        return domain_error('web api interface type', objectTypeJS);
+    }
+}
+
+function method_property_types_to_list(typesJS) {
+    if(typesJS.length === 0) {
+        return NIL;
+    }
+
+    let items = [];
+    for(let typeJS of typesJS) {
+        items.push(method_property_type_to_term(typeJS.type));
+    }
+
+    let typesPL;
+
+    let tmp = state.H ^ (TAG_LST << WORD_BITS);
+    for (let i = 0; i < items.length; i++)
+    {
+        memory[state.H] = items[i];
+        // If there are no more items we will overwrite the last entry with [] when we exit the loop
+        memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+        state.H += 2;
+    }
+    memory[state.H-1] = NIL;
+    return tmp;
+
+}
+function method_property_type_to_term(typeJS) {
+    let typePL;
+    if(typeof typeJS === 'object' && typeJS.length) // list of strings
+    {
+        typePL = strings_to_atom_list(typeJS);
+    } else if(typeof typeJS === 'object' && typeJS.arrayType)
+    {
+        typePL = PL_put_atom_chars('array:' + typeJS.arrayType);
+    } else {
+        typePL = PL_put_atom_chars(typeJS);
+    }
+    return typePL;
+}
+
+
+function setupMethodCursorForTypes(objectType, cursor) {
+    let container = {};
+    if (!setupInterfaceSpecificationsForType(objectType, container)) {
+        return false;
+    }
+    cursor.objectTypes = container.value;
+    return true;
+}
+
+
+function setupCursorForMethodNames(methods, methodName, cursor) {
+    if (! methods) {
+        cursor.methodNames = [];
+    } else if (TAG(methodName) !== TAG_REF) {
+        if (TAG(methodName) !== TAG_ATM) {
+            return type_error('atom', methodName);
+        }
+        let methodNameJS = PL_get_atom_chars(methodName);
+        if (methods.get(methodNameJS)) {
+            cursor.methodNames = [methodNameJS];
+        } else {
+            cursor.methodNames = [];
+        }
+    } else {
+        cursor.methodNames = Array.from(methods.keys());
     }
 
     return true;

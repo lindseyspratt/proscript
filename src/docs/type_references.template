@@ -1,41 +1,431 @@
-<li>BarProp (<a href="https://html.spec.whatwg.org/multipage/window-object.html#barprop">Standard</a>): barprop</li>
-<li>Blob (<a href="https://www.w3.org/TR/FileAPI/#dfn-Blob">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Blob'>MDN</a>): blob</li>
-<li>CanvasGradient (<a href="https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CanvasGradient'>MDN</a>): canvasgradient</li>
-<li>CanvasPattern (<a href="https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CanvasPattern'>MDN</a>): canvaspattern</li>
-<li>CanvasRenderingContext2D (<a href="https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D'>MDN</a>): canvasrenderingcontext2d</li>
-<li>CSSRule (<a href="https://www.w3.org/TR/cssom-1/#cssrule">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CSSRule'>MDN</a>): cssrule</li>
-<li>CSSStyleDeclaration (<a href="https://www.w3.org/TR/cssom-1/#cssstyledeclaration">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleDeclaration'>MDN</a>): cssstyledeclaration</li>
-<li>CustomElementRegistry (<a href="https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry'>MDN</a>): customelementregistry</li>
-<li>Document (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#document">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Document'>MDN</a>): document</li>
-<li>DocumentFragment (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#documentfragment">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment'>MDN</a>): documentfragment</li>
-<li>Element (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#element">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Element'>MDN</a>): element</li>
-<li>ElementCreationOptions (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#dictdef-elementcreationoptions">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement'>MDN</a>): elementcreationoptions</li>
-<li>Event (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#interface-event">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Event'>MDN</a>): event</li>
-<li>EventTarget (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#interface-eventtarget">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/EventTarget'>MDN</a>): eventtarget</li>
-<li>File (<a href="https://www.w3.org/TR/2019/WD-FileAPI-20190531/#dfn-file">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/File'>MDN</a>): file</li>
-<li>History (<a href="https://html.spec.whatwg.org/multipage/history.html#history">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window/history'>MDN</a>): history</li>
-<li>HTMLCanvasElement (<a href="https://www.w3.org/TR/html5/semantics-scripting.html#the-canvas-element">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement'>MDN</a>): htmlcanvaselement</li>
-<li>HTMLElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/dom.html#htmlelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement'>MDN</a>): htmlelement</li>
-<li>HTMLFormElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlformelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement'>MDN</a>): htmlformelement</li>
-<li>HTMLImageElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/semantics-embedded-content.html#htmlimageelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement'>MDN</a>): htmlimageelement</li>
-<li>HTMLInputElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlinputelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement'>MDN</a>): htmlinputelement</li>
-<li>HTMLOptionElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmloptionelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLOptionElement'>MDN</a>): htmloptionelement</li>
-<li>HTMLSelectElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlselectelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement'>MDN</a>): htmlselectelement</li>
-<li>HTMLTextAreaElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmltextareaelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLTextAreaElement'>MDN</a>): htmltextareaelement</li>
-<li>ImageData (<a href="https://www.w3.org/TR/2dcontext/#imagedata">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/ImageData'>MDN</a>): imagedata</li>
-<li>Location (<a href="https://html.spec.whatwg.org/multipage/history.html#location">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window/location'>MDN</a>): location</li>
-<li>MouseEvent (<a href="https://www.w3.org/TR/2019/WD-uievents-20190530/#idl-mouseevent">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent'>MDN</a>): mouseevent</li>
-<li>Navigator (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigator">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Navigator'>MDN</a>): navigator</li>
-<li>NavigatorContentUtils (<a href="https://html.spec.whatwg.org/multipage/system-state.html#NavigatorContentUtils">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorContentUtils'>MDN</a>): navigatorcontentutils</li>
-<li>NavigatorCookies (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigatorcookies">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorCookies'>MDN</a>): navigatorcookies</li>
-<li>NavigatorID (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigatorid">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID'>MDN</a>): navigatorid</li>
-<li>NavigatorLanguage (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigatorlanguage">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage'>MDN</a>): navigatorlanguage</li>
-<li>NavigatorOnLine (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigatoronline">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine'>MDN</a>): navigatoronline</li>
-<li>Node (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#node">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Node'>MDN</a>): node</li>
-<li>ParentNode (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#parentnode">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/ParentNode'>MDN</a>): parentnode</li>
-<li>Path2D (<a href="https://html.spec.whatwg.org/multipage/canvas.html#dom-path2d">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Path2D'>MDN</a>): path2d</li>
-<li>TextMetrics (<a href="https://www.w3.org/TR/2dcontext/#textmetrics">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics'>MDN</a>): textmetrics</li>
-<li>UIEvent (<a href="https://www.w3.org/TR/2019/WD-uievents-20190530/#idl-uievent">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/UIEvent'>MDN</a>): uievent</li>
-<li>Uint8ClampedArray (<a href="https://www.ecma-international.org/ecma-262/6.0/#table-49">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Uint8ClampedArray'>MDN</a>): uint8clampedarray</li>
-<li>ValidityState (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#validitystate">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/ValidityState'>MDN</a>): validitystate</li>
-<li>Window (<a href="https://html.spec.whatwg.org/multipage/window-object.html">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window'>MDN</a>): window</li>
+<li>BarProp (<a href="https://html.spec.whatwg.org/multipage/window-object.html#barprop">Standard</a>): barprop
+<h5>Properties</h5>
+	<ul>
+		<li>visible: boolean</li>
+	</ul>
+</li>
+<li>Blob (<a href="https://www.w3.org/TR/FileAPI/#dfn-Blob">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Blob'>MDN</a>): blob
+<h5>Properties</h5>
+	<ul>
+		<li>size: number</li>
+		<li>type: atom</li>
+	</ul>
+</li>
+<li>CanvasGradient (<a href="https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CanvasGradient'>MDN</a>): canvasgradient
+	(no properties)
+</li>
+<li>CanvasPattern (<a href="https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CanvasPattern'>MDN</a>): canvaspattern
+	(no properties)
+</li>
+<li>CanvasRenderingContext2D (<a href="https://www.w3.org/TR/2dcontext/#canvasrenderingcontext2d">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D'>MDN</a>): canvasrenderingcontext2d
+<h5>Properties</h5>
+	<ul>
+		<li>canvas: object</li>
+		<li>fillStyle: [atom,object]</li>
+		<li>font: atom</li>
+		<li>globalAlpha: number</li>
+		<li>globalCompositeOperation: atom</li>
+		<li>imageSmoothingEnabled: atom</li>
+		<li>lineCap: atom</li>
+		<li>lineDashOffset: number</li>
+		<li>lineJoin: atom</li>
+		<li>lineWidth: number</li>
+		<li>miterLimit: number</li>
+		<li>shadowBlur: number</li>
+		<li>shadowColor: atom</li>
+		<li>shadowOffsetX: number</li>
+		<li>shadowOffsetY: number</li>
+		<li>strokeStyle: [atom,object]</li>
+		<li>textAlign: atom</li>
+		<li>textBaseline: atom</li>
+	</ul>
+</li>
+<li>CSSRule (<a href="https://www.w3.org/TR/cssom-1/#cssrule">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CSSRule'>MDN</a>): cssrule
+<h5>Properties</h5>
+	<ul>
+		<li>cssText: string</li>
+		<li>parentRule: object</li>
+		<li>parentStyleSheet: object</li>
+		<li>type: number</li>
+	</ul>
+</li>
+<li>CSSStyleDeclaration (<a href="https://www.w3.org/TR/cssom-1/#cssstyledeclaration">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleDeclaration'>MDN</a>): cssstyledeclaration
+<h5>Properties</h5>
+	<ul>
+		<li>cssText: string</li>
+		<li>length: number</li>
+		<li>parentRule: object</li>
+	</ul>
+</li>
+<li>CustomElementRegistry (<a href="https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry'>MDN</a>): customelementregistry
+	(no properties)
+</li>
+<li>Document (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#document">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Document'>MDN</a>): document
+<h5>Properties</h5>
+	<ul>
+		<li>URL: string</li>
+		<li>characterSet: atom</li>
+		<li>compatMode: atom</li>
+		<li>contentType: atom</li>
+		<li>docType: object</li>
+		<li>documentElement: object</li>
+		<li>documentURI: string</li>
+		<li>origin: string</li>
+	</ul>
+</li>
+<li>DocumentFragment (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#documentfragment">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment'>MDN</a>): documentfragment
+<h5>Properties</h5>
+	<ul>
+		<li>is: atom</li>
+	</ul>
+</li>
+<li>Element (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#element">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Element'>MDN</a>): element
+<h5>Properties</h5>
+	<ul>
+		<li>accessKey: atom</li>
+		<li>class: atom</li>
+		<li>clientHeight: number</li>
+		<li>clientLeft: number</li>
+		<li>clientTop: number</li>
+		<li>clientWidth: number</li>
+		<li>id: atom</li>
+		<li>innerHTML: string</li>
+		<li>namespaceURI: string</li>
+		<li>nextElementSibling: object</li>
+		<li>previousElementSibling: object</li>
+		<li>scrollHeight: number</li>
+		<li>scrollLeft: number</li>
+		<li>scrollTop: number</li>
+		<li>scrollWidth: number</li>
+		<li>tag: atom</li>
+	</ul>
+</li>
+<li>ElementCreationOptions (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#dictdef-elementcreationoptions">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement'>MDN</a>): elementcreationoptions
+<h5>Properties</h5>
+	<ul>
+		<li>is: atom</li>
+	</ul>
+</li>
+<li>Event (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#interface-event">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Event'>MDN</a>): event
+<h5>Properties</h5>
+	<ul>
+		<li>bubbles: boolean</li>
+		<li>cancelBubble: boolean</li>
+		<li>cancelable: boolean</li>
+		<li>composed: boolean</li>
+		<li>currentTarget: object</li>
+		<li>defaultPrevented: boolean</li>
+		<li>eventPhase: number</li>
+		<li>isTrusted: boolean</li>
+		<li>returnValue: boolean</li>
+		<li>target: object</li>
+		<li>timeStamp: number</li>
+		<li>type: string</li>
+	</ul>
+</li>
+<li>EventTarget (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#interface-eventtarget">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/EventTarget'>MDN</a>): eventtarget
+	(no properties)
+</li>
+<li>File (<a href="https://www.w3.org/TR/2019/WD-FileAPI-20190531/#dfn-file">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/File'>MDN</a>): file
+<h5>Properties</h5>
+	<ul>
+		<li>lastModified: number</li>
+		<li>name: atom</li>
+	</ul>
+</li>
+<li>History (<a href="https://html.spec.whatwg.org/multipage/history.html#history">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window/history'>MDN</a>): history
+<h5>Properties</h5>
+	<ul>
+		<li>length: number</li>
+		<li>scrollRestoration: atom</li>
+		<li>state: atom</li>
+	</ul>
+</li>
+<li>HTMLCanvasElement (<a href="https://www.w3.org/TR/html5/semantics-scripting.html#the-canvas-element">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement'>MDN</a>): htmlcanvaselement
+<h5>Properties</h5>
+	<ul>
+		<li>height: number</li>
+		<li>width: number</li>
+	</ul>
+</li>
+<li>HTMLElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/dom.html#htmlelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement'>MDN</a>): htmlelement
+<h5>Properties</h5>
+	<ul>
+		<li>contentEditable: atom</li>
+		<li>dir: atom</li>
+		<li>innerText: string</li>
+		<li>lang: atom</li>
+		<li>offsetHeight: number</li>
+		<li>offsetLeft: number</li>
+		<li>offsetParent: object</li>
+		<li>offsetTop: number</li>
+		<li>offsetWidth: number</li>
+		<li>style: object</li>
+		<li>tabIndex: number</li>
+		<li>title: string</li>
+	</ul>
+</li>
+<li>HTMLFormElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlformelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement'>MDN</a>): htmlformelement
+	(no properties)
+</li>
+<li>HTMLImageElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/semantics-embedded-content.html#htmlimageelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement'>MDN</a>): htmlimageelement
+<h5>Properties</h5>
+	<ul>
+		<li>src: string</li>
+	</ul>
+</li>
+<li>HTMLInputElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlinputelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement'>MDN</a>): htmlinputelement
+<h5>Properties</h5>
+	<ul>
+		<li>accept: atom</li>
+		<li>alt: string</li>
+		<li>autocomplete: atom</li>
+		<li>autofocus: boolean</li>
+		<li>checked: boolean</li>
+		<li>defaultChecked: boolean</li>
+		<li>defaultValue: atom</li>
+		<li>dirName: atom</li>
+		<li>disabled: boolean</li>
+		<li>files: object</li>
+		<li>form: object</li>
+		<li>formAction: atom</li>
+		<li>formEnctype: atom</li>
+		<li>formMethod: atom</li>
+		<li>formNoValidate: boolean</li>
+		<li>formTarget: atom</li>
+		<li>height: number</li>
+		<li>indeterminate: boolean</li>
+		<li>labels: object</li>
+		<li>max: atom</li>
+		<li>maxLength: number</li>
+		<li>min: atom</li>
+		<li>minLength: number</li>
+		<li>multiple: boolean</li>
+		<li>name: atom</li>
+		<li>pattern: atom</li>
+		<li>placeholder: atom</li>
+		<li>readOnly: boolean</li>
+		<li>required: boolean</li>
+		<li>selectionDirection: atom</li>
+		<li>selectionEnd: number</li>
+		<li>selectionStart: number</li>
+		<li>size: number</li>
+		<li>src: atom</li>
+		<li>step: atom</li>
+		<li>type: atom</li>
+		<li>validationMessage: atom</li>
+		<li>validity: object</li>
+		<li>value: atom</li>
+		<li>valueAsNumber: number</li>
+		<li>width: number</li>
+		<li>willValidate: boolean</li>
+	</ul>
+</li>
+<li>HTMLOptionElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmloptionelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLOptionElement'>MDN</a>): htmloptionelement
+<h5>Properties</h5>
+	<ul>
+		<li>defaultSelected: boolean</li>
+		<li>disabled: boolean</li>
+		<li>form: object</li>
+		<li>index: number</li>
+		<li>label: string</li>
+		<li>selected: boolean</li>
+		<li>text: string</li>
+		<li>value: atom</li>
+	</ul>
+</li>
+<li>HTMLSelectElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmlselectelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement'>MDN</a>): htmlselectelement
+<h5>Properties</h5>
+	<ul>
+		<li>autofocus: boolean</li>
+		<li>disabled: boolean</li>
+		<li>form: object</li>
+		<li>labels: object</li>
+		<li>length: number</li>
+		<li>multiple: boolean</li>
+		<li>name: atom</li>
+		<li>options: object</li>
+		<li>required: boolean</li>
+		<li>selectedIndex: number</li>
+		<li>selectedOptions: object</li>
+		<li>size: number</li>
+		<li>type: atom</li>
+		<li>validationMessage: atom</li>
+		<li>validity: object</li>
+		<li>value: atom</li>
+		<li>willValidate: boolean</li>
+	</ul>
+</li>
+<li>HTMLTextAreaElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#htmltextareaelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLTextAreaElement'>MDN</a>): htmltextareaelement
+<h5>Properties</h5>
+	<ul>
+		<li>autofocus: boolean</li>
+		<li>cols: number</li>
+		<li>defaultValue: atom</li>
+		<li>dirName: atom</li>
+		<li>disabled: boolean</li>
+		<li>form: object</li>
+		<li>labels: object</li>
+		<li>maxLength: number</li>
+		<li>minLength: number</li>
+		<li>name: atom</li>
+		<li>placeholder: atom</li>
+		<li>readOnly: boolean</li>
+		<li>required: boolean</li>
+		<li>rows: number</li>
+		<li>selectionDirection: atom</li>
+		<li>selectionEnd: number</li>
+		<li>selectionStart: number</li>
+		<li>textLength: number</li>
+		<li>type: atom</li>
+		<li>validationMessage: atom</li>
+		<li>validity: object</li>
+		<li>value: atom</li>
+		<li>willValidate: boolean</li>
+		<li>wrap: atom</li>
+	</ul>
+</li>
+<li>ImageData (<a href="https://www.w3.org/TR/2dcontext/#imagedata">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/ImageData'>MDN</a>): imagedata
+<h5>Properties</h5>
+	<ul>
+		<li>data: object</li>
+	</ul>
+</li>
+<li>Location (<a href="https://html.spec.whatwg.org/multipage/history.html#location">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window/location'>MDN</a>): location
+<h5>Properties</h5>
+	<ul>
+		<li>hash: atom</li>
+		<li>host: atom</li>
+		<li>hostname: atom</li>
+		<li>href: atom</li>
+		<li>origin: atom</li>
+		<li>pathname: atom</li>
+		<li>port: atom</li>
+		<li>protocol: atom</li>
+		<li>search: atom</li>
+	</ul>
+</li>
+<li>MouseEvent (<a href="https://www.w3.org/TR/2019/WD-uievents-20190530/#idl-mouseevent">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent'>MDN</a>): mouseevent
+<h5>Properties</h5>
+	<ul>
+		<li>clientX: number</li>
+		<li>clientY: number</li>
+		<li>pageX: number</li>
+		<li>pageY: number</li>
+	</ul>
+</li>
+<li>Navigator (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigator">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Navigator'>MDN</a>): navigator
+	(no properties)
+</li>
+<li>NavigatorContentUtils (<a href="https://html.spec.whatwg.org/multipage/system-state.html#NavigatorContentUtils">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorContentUtils'>MDN</a>): navigatorcontentutils
+	(no properties)
+</li>
+<li>NavigatorCookies (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigatorcookies">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorCookies'>MDN</a>): navigatorcookies
+<h5>Properties</h5>
+	<ul>
+		<li>cookieEnabled: boolean</li>
+	</ul>
+</li>
+<li>NavigatorID (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigatorid">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID'>MDN</a>): navigatorid
+<h5>Properties</h5>
+	<ul>
+		<li>userAgent: atom</li>
+	</ul>
+</li>
+<li>NavigatorLanguage (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigatorlanguage">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage'>MDN</a>): navigatorlanguage
+<h5>Properties</h5>
+	<ul>
+		<li>language: atom</li>
+		<li>languages: atom</li>
+	</ul>
+</li>
+<li>NavigatorOnLine (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigatoronline">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine'>MDN</a>): navigatoronline
+<h5>Properties</h5>
+	<ul>
+		<li>onLine: boolean</li>
+	</ul>
+</li>
+<li>Node (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#node">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Node'>MDN</a>): node
+<h5>Properties</h5>
+	<ul>
+		<li>childNode: object</li>
+		<li>firstChild: object</li>
+		<li>lastChild: object</li>
+		<li>nextSibling: object</li>
+		<li>nodeName: atom</li>
+		<li>nodeType: number</li>
+		<li>nodeValue: string</li>
+		<li>ownerDocument: object</li>
+		<li>parentElement: object</li>
+		<li>parentNode: object</li>
+		<li>previousSibling: object</li>
+		<li>textContent: string</li>
+	</ul>
+</li>
+<li>ParentNode (<a href="https://www.w3.org/TR/2018/WD-dom41-20180201/#parentnode">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/ParentNode'>MDN</a>): parentnode
+<h5>Properties</h5>
+	<ul>
+		<li>child: object</li>
+		<li>childElementCount: number</li>
+		<li>firstElementChild: object</li>
+		<li>lastElementChild: object</li>
+	</ul>
+</li>
+<li>Path2D (<a href="https://html.spec.whatwg.org/multipage/canvas.html#dom-path2d">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Path2D'>MDN</a>): path2d
+	(no properties)
+</li>
+<li>TextMetrics (<a href="https://www.w3.org/TR/2dcontext/#textmetrics">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics'>MDN</a>): textmetrics
+<h5>Properties</h5>
+	<ul>
+		<li>actualBoundingBoxLeft: number</li>
+		<li>actualBoundingBoxRight: number</li>
+		<li>width: number</li>
+	</ul>
+</li>
+<li>UIEvent (<a href="https://www.w3.org/TR/2019/WD-uievents-20190530/#idl-uievent">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/UIEvent'>MDN</a>): uievent
+	(no properties)
+</li>
+<li>Uint8ClampedArray (<a href="https://www.ecma-international.org/ecma-262/6.0/#table-49">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Uint8ClampedArray'>MDN</a>): uint8clampedarray
+<h5>Properties</h5>
+	<ul>
+		<li>length: integer</li>
+	</ul>
+</li>
+<li>ValidityState (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/sec-forms.html#validitystate">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/ValidityState'>MDN</a>): validitystate
+<h5>Properties</h5>
+	<ul>
+		<li>badInput: boolean</li>
+		<li>customError: boolean</li>
+		<li>patternMismatch: boolean</li>
+		<li>rangeOverflow: boolean</li>
+		<li>rangeUnderflow: boolean</li>
+		<li>stepMismatch: boolean</li>
+		<li>tooLong: boolean</li>
+		<li>tooShort: boolean</li>
+		<li>typeMismatch: boolean</li>
+		<li>valid: boolean</li>
+		<li>valueMissing: boolean</li>
+	</ul>
+</li>
+<li>Window (<a href="https://html.spec.whatwg.org/multipage/window-object.html">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window'>MDN</a>): window
+<h5>Properties</h5>
+	<ul>
+		<li>applicationCache: object</li>
+		<li>closed: boolean</li>
+		<li>customElements: object</li>
+		<li>document: object</li>
+		<li>frameElement: object</li>
+		<li>history: object</li>
+		<li>length: number</li>
+		<li>location: object</li>
+		<li>locationbar: object</li>
+		<li>menubar: object</li>
+		<li>name: atom</li>
+		<li>navigator: object</li>
+		<li>personalbar: object</li>
+		<li>scrollbars: object</li>
+		<li>status: atom</li>
+		<li>statusbar: object</li>
+		<li>toolbar: object</li>
+	</ul>
+</li>

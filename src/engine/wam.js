@@ -1750,3 +1750,20 @@ function integers_to_list(integers) {
     return tmp;
 }
 
+function strings_to_atom_list(strings) {
+    if(strings.length === 0) {
+        return NIL;
+    }
+
+    let tmp = state.H ^ (TAG_LST << WORD_BITS);
+    for (let i = 0; i < strings.length; i++)
+    {
+        memory[state.H] = lookup_atom(strings[i]);
+        // If there are no more items we will overwrite the last entry with [] when we exit the loop
+        memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+        state.H += 2;
+    }
+    memory[state.H-1] = NIL;
+    return tmp;
+}
+
