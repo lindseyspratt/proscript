@@ -52,6 +52,58 @@ to simplify working with objects.
         by the phrase "Implemented by X" where "X" is the Javascript method name.
         If the method returns a value then the returned value will be unified with last argument.
         </p>
+        <p>
+        There are two ways to read Web API interface type object attributes, properties, and methods.
+        This can be directly using the dom_element_attribute_value/3, dom_object_property/4,
+        dom_object_method/2, and dom_object_method/3 predicates or
+        indirectly using the objects DSL, particularly the >->/2 operator for evaluating an object attribute,
+        >+>/2 operator for evaluating an object property,
+        and the >*>/2 operator for evaluating an object method.
+        </p>
+        The HTML Element innerText property of an element with ID 'foo' can be evaluated by
+        <!-- these pairs of BR tags is needed due to odd formatting of the PRE/CODE section. -->
+        <br>
+        <br>
+        <pre><code class="prolog">dom_element_attribute_value(Element, id, foo), dom_object_property(_, Element, innerText, Text).</code></pre>
+        or
+        <br>
+        <br>
+        <pre><code class="prolog">Element >-> id :> foo, Element >+> innerText :> Text.</code></pre>
+        or because these two predicates refer to the same object Element, they can be collapsed as
+        <br>
+        <br>
+        <pre><code class="prolog">Element >> [id -:> foo, innerText +:> Text].</code></pre>
+        <p>
+        The HTML Element insertAdjacentText method of an element with ID 'foo' can be evaluated by
+        </p>
+        <pre><code class="prolog">dom_element_attribute_value(Element, id, foo), dom_object_method(Element, insertAdjacentText(beforebegin, "some text")).</code></pre>
+        or
+        <br>
+        <br>
+        <pre><code class="prolog">Element >-> id :> foo, Element >*> insertAdjacentText(beforebegin, "some text").</code></pre>
+        which can be collapsed to
+        <br>
+        <br>
+        <pre><code class="prolog">Element >> [id -:> foo, insertAdjacentText(beforebegin, "some text")].</code></pre>
+        <p>
+        Some of the attributes and properties can also be written.
+        This is done in two ways: the set_dom_element_attribute_value/3 and set_dom_object_property/4 predicates or using the &lt;:/2, &lt;:-/2, or &lt;:+/2
+        operators in the object DSL.
+        </p>
+        <p>
+        Adding to the class of an element as an attribute:
+        </p>
+        <br>
+        <br>
+        <pre><code class="prolog">dom_element_attribute_value(Element, id, foo), set_dom_element_attribute_value(Element, class, fancy).</code></pre>
+        or
+        <br>
+        <br>
+        <pre><code class="prolog">Element >-> id :> foo, Element >-> class <: fancy.</code></pre>
+        which can be collapsed to
+        <br>
+        <br>
+        <pre><code class="prolog">Element >> [id -:> foo, class <:- fancy].</code></pre>
     <ul>
         {{template_file('type_references.template', [])}}
     </ul>
