@@ -8,6 +8,9 @@ var goalFunctions = new Map();
 var dotrCursors = new Map();
 var dotrCursorCounter = 0;
 
+var dtpaCursors = new Map();
+var dtpaCursorCounter = 0;
+
 var dtpCursors = new Map();
 var dtpCursorCounter = 0;
 
@@ -641,6 +644,116 @@ function setupInterfaceSpecificationsForType(type, container) {
     return true;
 }
 
+function predicate_dom_type_parent(objectType, parentType) {
+    // The function uses fail/retry to implement a doubly-nested loop: the outer loop
+    // iterates over the Web Interface API object types, the inner loop iterates over
+    // the parent types defined for the current object type of the outer loop.
+
+    var cursor;
+    var cursorIDPL;
+    var cursorIDJS;
+
+    if (state.foreign_retry) {
+        cursorIDPL = state.foreign_value;
+        cursorIDJS = atable[VAL(cursorIDPL)];
+        cursor = dtpaCursors.get(cursorIDJS);
+
+        debug_msg("Is retry! Setting cursor back to " + cursor);
+    }
+    else if(TAG(objectType) !== TAG_REF && TAG(parentType) !== TAG_REF) {
+        return deterministic_dom_type_parent(objectType, parentType);
+    }
+    else {
+        cursor = {};
+        let container = {};
+        if(!setupInterfaceSpecificationsForType(objectType, container)) {
+            return false;
+        }
+        cursor.objectTypes = container.value;
+        cursorIDJS = 'crs' + dtpaCursorCounter++;
+        dtpaCursors.set(cursorIDJS, cursor);
+        cursorIDPL = lookup_atom(cursorIDJS);
+
+        debug_msg("Not a retry");
+        create_choicepoint();
+    }
+
+    update_choicepoint_data(cursorIDPL);
+
+    if (cursor.objectTypes && cursor.objectTypes.length > 0) {
+        let objectTypeJS = cursor.objectTypes[0];
+        if (!cursor.parents) {
+            if (!setupCursorForParentTypes(parentMap.get(objectTypeJS), parentType, cursor)) {
+                destroy_choicepoint();
+                return false;
+            }
+        }
+
+        if (cursor.parents && cursor.parents.length > 0) {
+            let parentTypeJS = cursor.parents[0];
+            cursor.parents = cursor.parents.slice(1);
+
+            return unify(objectType, PL_put_atom_chars(objectTypeJS)) &&
+                unify(parentType, PL_put_atom_chars(parentTypeJS));
+        } else {
+            // All parents for current type have been processed.
+            // Set the cursor.parents to undefined to force recalculation of parents
+            // with next type.
+
+            cursor.parents = undefined;
+
+            // set cursor.objectTypes to next objectType for retry.
+            cursor.objectTypes = cursor.objectTypes.slice(1);
+            return false;
+        }
+    } else {
+        destroy_choicepoint();
+        return false;
+    }
+
+}
+
+function deterministic_dom_type_parent(objectType, parentType) {
+    if(TAG(objectType) === TAG_REF) {
+        return instantiation_error(objectType);
+    } if (TAG(objectType) !== TAG_ATM) {
+        return type_error('atom', objectType);
+    }
+
+    let objectTypeJS = PL_get_atom_chars(objectType);
+
+    if(TAG(parentType) === TAG_REF) {
+        return instantiation_error(parentType);
+    } if (TAG(parentType) !== TAG_ATM) {
+        return type_error('atom', parentType);
+    }
+
+    let parentTypeJS = PL_get_atom_chars(parentType);
+    let parents = parentMap.get(objectTypeJS);
+
+    return parents && parents.includes(parentTypeJS);
+}
+
+function setupCursorForParentTypes(parents, parentType, cursor) {
+    if (! parents) {
+        cursor.parents = [];
+    } else if (TAG(parentType) !== TAG_REF) {
+        if (TAG(parentType) !== TAG_ATM) {
+            return type_error('atom', parentType);
+        }
+        let parentTypeJS = PL_get_atom_chars(parentType);
+        if (parents.includes(parentTypeJS)) {
+            cursor.parents = [parentTypeJS];
+        } else {
+            cursor.parents = [];
+        }
+    } else {
+        cursor.parents = parents;
+    }
+
+    return true;
+
+}
 // Find the related values for a WebInterface API object type, a property name implemented for that type, the Javascript Web API function name used
 // to implement that property, and the type of value for that property.
 //
@@ -939,7 +1052,7 @@ function deterministic_dom_type_method(objectType, methodName, implementationNam
         if(methods) {
             let methodSpec = methods.get(methodNameJS);
             if(methodSpec) {
-                let implementingName = methodSpec.name;
+                let implementingNameJS = methodSpec.name;
                 let argumentTypesJS = methodSpec.arguments;
                 let argumentTypesPL = method_property_types_to_list(argumentTypesJS);
                 let resultTypeJS = methodSpec.returns ? methodSpec.returns.type : 'void';

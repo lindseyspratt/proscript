@@ -20,9 +20,38 @@ to simplify working with objects.
     window.fetch() method, and
     <a href="https://www.w3.org/TR/2019/WD-FileAPI-20190531/">FileAPI</a> for accessing files.
     <p>
-        Several Web API Interfaces are implemented as ProscriptLS object types.
-        Each interface has a corresonding ProscriptLS type that is the lowercase version of the interface name.
+        The Web API Interfaces that are implemented as ProscriptLS object types are documented below.
     </p>
+         Each interface has:
+        <ul>
+        <li>a corresponding ProscriptLS type that is the lowercase version of the interface name,</li>
+        <li>a link to a <a href="https://www.w3.org/TR/">World Wide Web Consortium (W3C)</a> standard
+        or the <a href="https://whatwg.org">Web Hypertext Application Technology Working Group (WHATWG)</a> standard for that interface
+        (generally this documentation uses the W3C documentation where available in preference to WHATWG),</li>
+        <li>a link to the <a href="https://developer.mozilla.org/en-US/">MDN</a>
+        ("MDN Web Docs" formerly known as "MDN &mdash; the Mozilla Developer Network") documentation for that interface,</li>
+        <li>a list of parent interfaces from which the subject interface inherits methods and properties,</li>
+        <li>a list of child interfaces that inherit from the subject interface,</li>
+        <li>a list of the properties defined for the subject interface, and</li>
+        <li>a list of methods defined for the subject interface.</li>
+        </ul>
+        <p>
+        Each property is defined with the name used to access that property in ProscriptLS
+        and the ProscriptLS data type for that property.
+        If the Javascript method name is different
+        from the ProscriptLS name for the property then that is indicated by the implementation name
+        in parentheses.
+        The ProscriptLS data type of 'object' indicates that the term represents a Javascript object,
+        either one with an interface type defined in this section or a Javascript system object such as Promise.
+        </p>
+        <p>
+        Each method is defined with a named used to access that method in ProscriptLS
+        and a parenthesized list of the ProscriptLS data types of the arguments for invoking that
+        method.
+        If the Javascript method used to implement the subject method has a different name then this is indicated
+        by the phrase "Implemented by X" where "X" is the Javascript method name.
+        If the method returns a value then the returned value will be unified with last argument.
+        </p>
     <ul>
         {{template_file('type_references.template', [])}}
     </ul>

@@ -33,7 +33,7 @@ $(TOP_HTML): $(DIST_DOC)/index.html
 
 $(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template compilation.doc.template
 
-$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template anchor.sidenav.template framework.index.template ../../library/template.pl
+$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template api.sidenav.template anchor.sidenav.template framework.index.template ../../library/template.pl
 		$(SWIPL) -q -f ../../library/template.pl\
 		    -g "substitute_template('$<', '$@'), halt"
 
@@ -43,13 +43,16 @@ $(ENGINE):
 proscriptls_state_doc.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/wam_compiler.pl\
 				$(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl $(SRC_SYSTEM)/promise.pl ../tools/type_references.pl
 		$(SWIPL) -q -f $(SRC_SYSTEM)/wam_compiler.pl -g \
-			"bootstrap('$(SRC_SYSTEM)/', ['../tools/type_references.pl'], 'proscriptls_state_doc.js', generate_type_references('type_references.template')), halt"
+			"bootstrap('$(SRC_SYSTEM)/', ['../tools/type_references.pl'], 'proscriptls_state_doc.js', true), halt"
 
 dump-state: $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js
 		$(JSC) $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js  -e "dump()"
 
-proscriptls_doc_node.js:    $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_toplevel.js
-		cat $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_toplevel.js > proscriptls_doc_node.js
+proscriptls_doc_node.js:    $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_init.js
+		cat $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_init.js > proscriptls_doc_node.js
 
-type_references.template:  proscriptls_doc_node.js ../tools/node_toplevel.js
-		node ../tools/node_toplevel.js ../docs/proscriptls_doc_node
+type_references.template:  proscriptls_doc_node.js ../tools/node_goal.js
+		node ../tools/node_goal.js ../docs/proscriptls_doc_node "generate_type_references('../docs/type_references.template')"
+
+api.sidenav.template:  proscriptls_doc_node.js ../tools/node_goal.js
+		node ../tools/node_goal.js ../docs/proscriptls_doc_node "generate_type_sidenav('../docs/api.sidenav.template')"

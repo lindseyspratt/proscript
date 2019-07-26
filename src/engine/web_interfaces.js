@@ -470,7 +470,7 @@ var windowMethodSpecs = new Map([
     ['print',{name:'print',arguments:[]}],
 //    void postMessage(any message, USVString targetOrigin, optional sequence<object> transfer = []);
 //void postMessage(any message, optional WindowPostMessageOptions options);
-    ['postMessageOrigin',{name:'postMessage',arguments:[{type:'string'},{type:'string'},{arrayType:'object'}]}],
+    ['postMessageOrigin',{name:'postMessage',arguments:[{type:'string'},{type:'string'},{type:{arrayType:'object'}}]}],
     ['postMessage',{name:'postMessage',arguments:[{type:'string'}, {type:'object'}]}] // WindowPostMessageOptions
 ]);
 

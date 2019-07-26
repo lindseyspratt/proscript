@@ -1,30 +1,34 @@
 <ul class="sidenav">
     <li><span class="caret"></span>
-        {{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, home, home, 'index.html', 'Home', main]))}}
+        {{1 @ Type & 'anchor.sidenav.template' # [Type, home, home, 'index.html', 'Home', main]}}
         <ul class='nested'>
-            <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, home, 'prolog-for-the-web', 'index.html', 'Prolog for the Web']))}}</li>
-            <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, home, 'running-proscriptls', 'index.html', 'Running ProscriptLS']))}}</li>
-            <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, home, 'compiling-proscriptls', 'index.html', 'Compiling ProscriptLS']))}}</li>
-            <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, home, 'basic-example', 'index.html', 'Basic Example']))}}</li>
+            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, home, 'prolog-for-the-web', 'index.html', 'Prolog for the Web']}}</li>
+            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, home, 'running-proscriptls', 'index.html', 'Running ProscriptLS']}}</li>
+            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, home, 'compiling-proscriptls', 'index.html', 'Compiling ProscriptLS']}}</li>
+            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, home, 'basic-example', 'index.html', 'Basic Example']}}</li>
         </ul>
     </li>
-    <li><span class="caret"></span>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, doc, 'index_doc.html', 'Documentation', main]))}}
+    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, doc, 'index_doc.html', 'Documentation', main]}}
         <ul class='nested'>
-            <li><span class="caret"></span>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, reference, 'index_doc.html', 'Reference']))}}
+            <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, reference, 'index_doc.html', 'Reference']}}
                 <ul class='nested'>
-                    <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, using_proscriptls, 'index_doc.html', 'Using ProscriptLS']))}}</li>
-                    <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, debugger, 'index_doc.html', 'Debugger']))}}</li>
-                    <li><span class="caret"></span>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, objects, 'index_doc.html', 'Javascript objects']))}}
+                    <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, using_proscriptls, 'index_doc.html', 'Using ProscriptLS']}}</li>
+                    <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, debugger, 'index_doc.html', 'Debugger']}}</li>
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template'# [Type, doc, objects, 'index_doc.html', 'Javascript objects']}}
                         <ul class='nested'>
-                            <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, web_api, 'index_doc.html', 'Web API']))}}</li>
-                            <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, object_language, 'index_doc.html', 'Object Language']))}}</li>
+                            <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, web_api, 'index_doc.html', 'Web API']}}
+                                <ul class='nested'>
+                                    {{1 @ Type & 'api.sidenav.template' # [Type]}}
+                                </ul>
+                            </li>
+                            <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, object_language, 'index_doc.html', 'Object Language']}}</li>
                         </ul>
                     </li>
-                    <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, library, 'index_doc.html', 'Library']))}}</li>
-                    <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, compilation, 'index_doc.html', 'Compilation']))}}</li>
+                    <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, library, 'index_doc.html', 'Library']}}</li>
+                    <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, compilation, 'index_doc.html', 'Compilation']}}</li>
                 </ul>
             </li>
-            <li><span class="caret"></span>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, doc, examples, 'index_doc.html', 'Examples']))}}
+            <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, examples, 'index_doc.html', 'Examples']}}
                 <ul class="nested">
                     <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, calculator_example, 'index_doc.html', 'Calculator']}}
                         <ul class="nested">
@@ -60,6 +64,6 @@
             </li>
         </ul>
     </li>
-    <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, down, download, 'index_download.html', 'Download', main]))}}</li>
-    <li>{{template_and(template_arg(1, Type), template_file('anchor.sidenav.template', [Type, about, about, 'index_about.html', 'About', main]))}}</li>
+    <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, down, download, 'index_download.html', 'Download', main]}}</li>
+    <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, about, about, 'index_about.html', 'About', main]}}</li>
 </ul>
