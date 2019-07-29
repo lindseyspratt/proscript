@@ -1,4 +1,4 @@
-VERSION=0.2.0
+VERSION:=$(shell cat version.txt)
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
 DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
@@ -7,7 +7,7 @@ SDK:=proscriptls_sdk_$(VERSION)
 
 all:		dist/proscriptls.js dist/proscriptls_for_compile.js dist/node_compile.js doc examples
 
-.PHONY: all clean doc examples gc dump-state test_proscript sdk
+.PHONY: all clean doc examples gc dump-state test_proscript sdk test
 
 clean:		
 		cd src/engine && make clean

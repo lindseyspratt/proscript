@@ -14,7 +14,7 @@ ENGINE:=../../$(ROOT_ENGINE)
 SRC_SYSTEM=../system
 
 
-all:	$(HTML) $(TOP_HTML)
+all:	$(HTML) $(TOP_HTML) ../../README.SDK.md
 
 clean:		
 		rm -f $(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL) proscriptls_state_doc.js proscriptls_doc_node.js type_references.template
@@ -33,7 +33,8 @@ $(TOP_HTML): $(DIST_DOC)/index.html
 
 $(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template compilation.doc.template
 
-$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template api.sidenav.template anchor.sidenav.template framework.index.template ../../library/template.pl
+$(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template api.sidenav.template anchor.sidenav.template \
+				framework.index.template ../../version.txt ../../version_date.txt ../../library/template.pl
 		$(SWIPL) -q -f ../../library/template.pl\
 		    -g "substitute_template('$<', '$@'), halt"
 
@@ -56,3 +57,6 @@ type_references.template:  proscriptls_doc_node.js ../tools/node_goal.js
 
 api.sidenav.template:  proscriptls_doc_node.js ../tools/node_goal.js
 		node ../tools/node_goal.js ../docs/proscriptls_doc_node "generate_type_sidenav('../docs/api.sidenav.template')"
+
+../../README.SDK.md: README.SDK.md.template ../../version.txt ../../version_date.txt
+		$(SWIPL) -q -f ../../library/template.pl -g "substitute_template('$<', '$@'), halt"

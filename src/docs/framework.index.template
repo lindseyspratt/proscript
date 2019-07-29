@@ -28,7 +28,7 @@
         <hr>
         <table style="width:100%">
         <tr>
-        <td>Version 0.2.0, July 2019.</td>
+        <td>Version {{'../../version.txt' # []}}, {{'../../version_date.txt' # []}}.</td>
         <td style="text-align:right">Powered by ProscriptLS Prolog - Logic at Your Service.</td>
         </tr>
         </table>
