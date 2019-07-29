@@ -3,11 +3,30 @@
 :- initialization(init).
 
 init :-
+    set_initial_active,
     activate_parents,
+    setof(IndexLink, IndexLink >-> class :> index, Links),
+    handle_links(Links),
     setof(Toggler, Toggler >-> class :> caret, Togglers),
     init(Togglers),
     register_items,
     _ >> [class -:> body, addEventListener(scroll, update_index_visibility_emphasis)].
+
+set_initial_active :-
+    url_entry_point_id(ID)
+      -> atom_concat(ID, '_index', MenuID),
+         X >-> id :> MenuID,
+         active_link(X)
+    ;
+    true. % leave main menu node 'active'.
+
+url_entry_point_id(ID) :-
+    dom_window(W),
+    W >+> document :> D,
+    D >+> 'URL' :> URLCodes,
+    [HashCode] = "#",
+    append(_, [HashCode|IDCodes], URLCodes),
+    atom_codes(ID, IDCodes).
 
 activate_parents :-
     C >-> class :> active,
@@ -33,6 +52,16 @@ activate_element(P) :-
          )
     ;
     true.
+
+handle_links([]).
+handle_links([H|T]) :-
+    H >*> addEventListener(click, active_link(H)),
+    handle_links(T).
+
+active_link(Link) :-
+     C >-> [class :> active, class :> index], % C is the current active node of the sidenav menu.
+     toggle_dom_element_class(C, active, remove),
+     toggle_dom_element_class(Link, active, add).
 
 init([]).
 init([H|T]) :-

@@ -99,11 +99,11 @@ to simplify working with objects.
         or
         <br>
         <br>
-        <pre><code class="prolog">Element >-> id :> foo, Element >-> class <: fancy.</code></pre>
+        <pre><code class="prolog">Element >-> id :> foo, Element >-> class &lt;: fancy.</code></pre>
         which can be collapsed to
         <br>
         <br>
-        <pre><code class="prolog">Element >> [id -:> foo, class <:- fancy].</code></pre>
+        <pre><code class="prolog">Element >> [id -:> foo, class &lt;:- fancy].</code></pre>
     <ul>
         {{template_file('type_references.template', [])}}
     </ul>
