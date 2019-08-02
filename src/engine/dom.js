@@ -711,7 +711,7 @@ function consult_scripts() {
 function consult_script_text(code_atom) {
 //    initialize();
     let atom = lookup_atom(code_atom);
-    let ftor = VAL(lookup_functor("consult_atom", 1));
+    let ftor = VAL(lookup_functor("wam_compiler:consult_atom", 1));
     allocate_first_frame();
     var pred = predicates[ftor];
     var pi = predicates[ftor].clause_keys[0];
@@ -808,7 +808,7 @@ function proscriptls(queryJS, displaySucceededMsg) {
     allocate_first_frame();
     // call_atom(query, Bindings)
     // ignore the Bindings for now (may be useful later)
-    var ftor = VAL(lookup_functor("call_atom", 2));
+    var ftor = VAL(lookup_functor("wam_compiler:call_atom", 2));
     var pred = predicates[ftor];
     var pi = predicates[ftor].clause_keys[0];
     state.current_predicate = pred;

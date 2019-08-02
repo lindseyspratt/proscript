@@ -68,6 +68,8 @@ Some gotchas:
 */
 
 :-module(wam_compiler, [build_saved_state/2, build_saved_state/3, bootstrap/2, bootstrap/3, bootstrap/4, op(920, fy, ?), op(920, fy, ??)]).
+:-use_module(library(system)).
+
 :-ensure_loaded('../tools/testing').
 :-ensure_loaded('../tools/wam_bootstrap').
 :-ensure_loaded(url).
@@ -75,6 +77,9 @@ Some gotchas:
 :-dynamic(delayed_initialization/1).
 :-dynamic('$loaded'/1).
 :-dynamic('$current_compile_url'/1).
+:-dynamic('$current_module'/1).
+:-dynamic('$import'/2).
+:-dynamic('$module_export'/3).
 
 expand_term(In, Out):-
         current_predicate(term_expansion/2),
@@ -93,34 +98,111 @@ compile_clause(Term):-
 compile_clause_1([]):- !.
 compile_clause_1([Head|Tail]):-
         !,
-        compile_clause_save(Head),
+        compile_clause_save(Head, ModeIn, ModeNext),
         compile_clause_1(Tail).
-compile_clause_1(Term):-
-        compile_clause_save(Term).
+compile_clause_1(Term, ModeIn, ModeOut):-
+        compile_clause_save(Term, ModeIn, ModeOut).
 
-compile_clause_save(:- Body) :-
+compile_clause_save(:- Body, ModeIn, ModeOut) :-
         !,
-        compile_clause_directive(Body).
-compile_clause_save(Term) :-
+        compile_clause_directive(Body, ModeIn, ModeOut).
+compile_clause_save(Term, Mode, Mode) :-
         compile_clause_2(Term),
         save_clause(Term).
 
-compile_clause_directive(op(A,B,C)) :- compile_clause_system_directive(op(A,B,C)).
-compile_clause_directive(dynamic(PredIndicator)) :- compile_clause_compilation_directive(dynamic(PredIndicator)).
-compile_clause_directive(initialization(Goal)) :- compile_clause_initialization_directive(Goal).
-compile_clause_directive(ensure_loaded(Spec)) :- compile_clause_compilation_directive(ensure_loaded(Spec)).
-compile_clause_directive(include(_)). % Currently a no-op in Proscript.
-compile_clause_directive(module(_,_)). % Currently a no-op in Proscript.
+compile_clause_directive(op(A,B,C), Mode, Mode) :- compile_clause_system_directive(op(A,B,C)).
+compile_clause_directive(dynamic(PredIndicator), Mode, Mode) :- compile_clause_compilation_directive(dynamic(PredIndicator)).
+compile_clause_directive(initialization(Goal), Mode, Mode) :- compile_clause_initialization_directive(Goal).
+compile_clause_directive(ensure_loaded(Spec), Mode, Mode) :- compile_clause_compilation_directive(ensure_loaded(Spec)).
+compile_clause_directive(include(_), Mode, Mode). % Currently a no-op in Proscript.
+compile_clause_directive(module(A,B), Mode, Mode) :- compile_clause_compilation_directive(module(A,B)).
+compile_clause_directive(use_module(A), Mode, Mode) :- compile_clause_compilation_directive(use_module(A)).
+compile_clause_directive(meta_predicate(Term), Mode, Mode) :- compile_clause_compilation_directive(meta_predicate(Term)).
+compile_clause_directive(if(Goal), ModeIn, ModeOut) :- compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut).
+
 
 % A compilation directive is evaluated immediately
 % during compilation of a source unit (e.g. a file).
 % There is no evaluation of the directive when the
 % compiled WAM state is loaded and initialized.
 
-compile_clause_compilation_directive(dynamic(PredIndicator)) :-
+compile_clause_compilation_directive(dynamic(PredIndicator), Mode, Mode) :-
         define_dynamic_predicates(PredIndicator).
-compile_clause_compilation_directive(ensure_loaded(Spec)) :-
+compile_clause_compilation_directive(ensure_loaded(Spec), Mode, Mode) :-
         ensure_loaded(Spec).
+compile_clause_compilation_directive(module(ModuleName, Exports), Mode, Mode) :-
+        define_current_module(ModuleName, Exports).
+compile_clause_compilation_directive(use_module(Spec), Mode, Mode) :-
+        use_module(Spec).
+compile_clause_compilation_directive(meta_predicate(Term), Mode, Mode) :-
+        define_meta_predicate(Term).
+compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut) :-
+        ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
+        IfLevelNext is IfLevel +1,
+        (Action = skip(SkipLevel), SkipLevel < IfLevelNext
+          -> ModeOut = mode(IfLevel, skip(SkipLevel))
+        ;
+        Action = skip(SkipLevel), SkipLevel >= IfLevelNext
+          -> throw('if skip level >= iflevelnext')
+        ;
+        call(Goal)
+          -> ModeOut = mode(IfLevelNext, compile(IfLevelNext))
+        ;
+        ModeOut = mode(IfLevelNext, skip(IfLevelNext)) % look for else, elseif, endif directives.
+        )
+compile_clause_compilation_directive(else, ModeIn, ModeOut) :-
+        ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
+        (
+        Action = skip(SkipLevel), IfLevel > SkipLevel % IfLevel of this :- else is deeper than the skip target level.
+          -> ModeOut = ModeIn
+        ;
+        Action = skip(SkipLevel), IfLevel = SkipLevel % IfLevel of this :- else is same as the skip target level.
+          -> ModeOut = mode(IfLevel, compile(IfLevel)) % compile to the next :- endif at target level IfLevel.
+        ;
+        Action = skip(SkipLevel), IfLevel < SkipLevel % this is an error. Malformed endif/else
+          -> throw('else ifLevel less than skiplevel')
+        ;
+        Action = compile(CompileLevel), IfLevel > CompileLevel
+          -> throw('else ifLevel greater than compileLevel')
+        ;
+        Action = compile(CompileLevel), IfLevel = CompileLevel
+          -> ModeOut = mode(IfLevel, skip(IfLevel)) % skip the ':- else' clause to the next :- endif at IfLevel.
+        ;
+        Action = compile(CompileLevel), IfLevel < CompileLevel
+          -> throw('else ifLevel less than compileLevel')
+        ).
+compile_clause_compilation_directive(elseif(Goal), ModeIn, ModeOut) :-
+        ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
+        (Action = compile(CompileLevel), IfLevel > CompileLevel
+           -> throw('else ifLevel greater than compileLevel')
+        ;
+        Action = compile(CompileLevel), IfLevel = CompileLevel
+           -> ModeOut = mode(IfLevel, skip(IfLevel)) % skip the ':- else' clause to the next :- endif at IfLevel.
+        ;
+        Action = compile(CompileLevel), IfLevel < CompileLevel
+          -> throw('else ifLevel less than compileLevel')
+        ;
+        Action = skip(SkipLevel), SkipLevel < IfLevel
+          -> ModeOut = mode(IfLevel, skip(SkipLevel))
+        ;
+        Action = skip(SkipLevel), SkipLevel > IfLevel
+          -> throw('elseif skip level > iflevel')
+        ;
+        call(Goal)
+          -> ModeOut = mode(IfLevel, compile(IfLevel))
+        ;
+        ModeOut = mode(IfLevel, skip(IfLevel)) % look for else, elseif, endif directives.
+        ).
+compile_clause_compilation_directive(endif, ModeIn, ModeOut) :-
+        ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
+        IfLevelNext is IfLevel - 1,
+        (Action = skip(SkipLevel), SkipLevel = IfLevel
+          -> ModeOut = mode(IfLevel, compile(IfLevelNext))
+        ;
+        Action = skip(SkipLevel), SkipLevel \= IfLevel
+          -> throw('if skip level not = iflevel')
+        ).
+
 
 define_dynamic_predicates(Name/Arity) :-
         !,
@@ -133,6 +215,62 @@ define_dynamic_predicates([H|T]) :-
 define_dynamic_predicates((A,B)) :-
         define_dynamic_predicates(A),
         define_dynamic_predicates(B).
+
+define_current_module(Name, Exports) :-
+        clear_imports,
+        retractall('$current_module'(_)),
+        assertz('$current_module'(Name)),
+        define_module_export(Exports, Name).
+
+define_module_export([], _).
+define_module_export([H|T], Name) :-
+        assertz('$module_export'(Name, H)),
+        define_module_export(T, Name).
+
+current_module(Name) :-
+        '$current_module'(Name),
+        !.
+current_module(user).
+
+
+define_use_module(library(LibraryName)) :-
+         current_module(Name),
+         assertz('$import'(Name, LibraryName)).
+
+clear_imports :-
+        retractall('$current_import'(_)).
+
+current_import(UnqualifiedPredicateName, Arity, ImportModuleName) :-
+        current_module(CurrentModuleName),
+        current_import(UnqualifiedPredicateName, Arity, CurrentModuleName, ImportModuleName).
+
+current_import(UnqualifiedPredicateName, Arity, ImportingModuleName, ImportModuleName) :-
+        '$import'(ImportingModuleName, ImportModuleName),
+        '$module_export'(ImportModuleName, UnqualifiedPredicateName, Arity).
+
+default_meta_arg_types([], _Flag).
+default_meta_arg_types([Flag|T], Flag) :-
+        default_meta_arg_types(T, Flag).
+
+% if Functor already has ':' in it, then do nothing.
+% otherwise create 'Module:Functor' as new name.
+
+transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor) :-
+        atom_codes(Functor, FunctorCodes),
+         ":" = [ColonCode],
+        (append(_FunctorModuleNameCodes, [ColonCode|_FunctorNameCodes], FunctorCodes)
+           -> Functor = TransformedFunctor
+         ;
+         current_import(Functor, Arity, ModuleName, ImportedModuleName)
+           -> transform_predicate_name1(ImportedModuleName, ColonCode, FunctorCodes, TransformedFunctor)
+         ;
+         transform_predicate_name1(ModuleName, ColonCode, FunctorCodes, TransformedFunctor)
+        ).
+
+transform_predicate_name1(ModuleName, ColonCode, FunctorCodes, TransformedFunctor) :-
+         atom_codes(ModuleName, ModuleNameCodes),
+         append(ModuleNameCodes, [ColonCode|FunctorCodes], TransformedCodes),
+         atom_codes(TransformedFunctor, TransformedCodes).
 
 % A system directive is evaluated immediately
 % during compilation of a source unit (e.g. a file).
@@ -177,8 +315,9 @@ compile_clause_2(?- Body):-
         environment_size_required(PermanentVariables, Transformed, EnvSize),
         allocate_environment(EnvSize, CutVariable, PermanentVariables, Opcodes, O1, [next(Arity)], State),
         first_goal_arity(Body, Arity),
-        compile_body(Transformed, PermanentVariables, EnvSize, State, _, O1, O2),
-        compile_auxiliary_goals(ExtraClauses, O2, []),
+        current_module(ModuleName),
+        compile_body(Transformed, ModuleName, PermanentVariables, EnvSize, State, _, O1, O2),
+        compile_auxiliary_goals(ExtraClauses, ModuleName, O2, []),
         reset_compile_buffer,
         assemble(Opcodes, 2). % Note that a query is just compiled into the buffer and left there
 
@@ -194,8 +333,9 @@ compile_clause_2(Head :- Body):-
         % Do NOT try and change the state size here! Space for the first goal and head are both set
         % aside in compile_head. Just because the head has only N arguments does NOT mean that it
         % only uses N registers!
-        compile_body(Transformed, PermanentVariables, EnvSize, State, _, O1, O2),
-        compile_auxiliary_goals(ExtraClauses, O2, []),
+        current_module(ModuleName),
+        compile_body(Transformed, ModuleName, PermanentVariables, EnvSize, State, _, O1, O2),
+        compile_auxiliary_goals(ExtraClauses, ModuleName, O2, []),
         reset_compile_buffer,
         !,
         assemble(Opcodes, 2),
@@ -376,8 +516,8 @@ include_cut_point_as_argument_if_needed(has_cut(CutVariable), V1, V1):-
         variable_is_in_list(CutVariable, V1), !.
 include_cut_point_as_argument_if_needed(has_cut(CutVariable), V1, [CutVariable|V1]).
 
-compile_auxiliary_goals([], O, O):- !.
-compile_auxiliary_goals([aux_definition(Label, Variables, LocalCutVariable, Body1)|Aux], [aux_label(Label)|Opcodes], Tail):-
+compile_auxiliary_goals([], _ModuleName, O, O):- !.
+compile_auxiliary_goals([aux_definition(Label, Variables, LocalCutVariable, Body1)|Aux], ModuleName, [aux_label(Label)|Opcodes], Tail):-
         entail(Body1, Body),
         instantiate_local_cut(LocalCutVariable, LocalCut),
         permanent_variable_list(Variables-LocalCut, Body, PermanentVariables),
@@ -388,8 +528,8 @@ compile_auxiliary_goals([aux_definition(Label, Variables, LocalCutVariable, Body
         A1 is A0 + BodyArity,
         allocate_environment(EnvSize, LocalCut, PermanentVariables, Opcodes, O1, [next(A1)], State),
         compile_head_args(Variables, State, S1, 0, PermanentVariables, O1, O2),
-        compile_body(Body, PermanentVariables, EnvSize, S1, _, O2, O3),
-        compile_auxiliary_goals(Aux, O3, Tail).
+        compile_body(Body, ModuleName, PermanentVariables, EnvSize, S1, _, O2, O3),
+        compile_auxiliary_goals(Aux, ModuleName, O3, Tail).
 
 include_local_cut_in_arity(N, no_cut, N):- !.
 include_local_cut_in_arity(N, has_cut(_), NN):- NN is N+1.
@@ -647,61 +787,64 @@ trim_environment(P, [Var|PermanentVars], [Var|P1], EnvSize, TrimmedEnvSize):-
         !,
         trim_environment(P, PermanentVars, P1, EnvSize, TrimmedEnvSize).
 
-compile_body(Body, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
-        compile_body_goals(Body, 0, depart, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail).
+compile_body(Body, ModuleName, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
+        compile_body_goals(Body, ModuleName, 0, depart, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail).
 
 % LCO is either 'call' or 'depart' and governs whether we permit the last goal to do LCO or whether it must actually be a call as well.
-compile_body_goals((Goal, Goals), Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
+compile_body_goals((Goal, Goals), ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
         !,
-        compile_goal(Goal, Position, call, PermanentVariables, EnvSize, State, S1, Opcodes, O1),
+        compile_goal(Goal, ModuleName, Position, call, PermanentVariables, EnvSize, State, S1, Opcodes, O1),
         PP is Position + 1,
         trim_environment(Position, PermanentVariables, RemainingPermanentVariables, EnvSize, TrimmedEnvSize),
-        compile_body_goals(Goals, PP, LCO, RemainingPermanentVariables, TrimmedEnvSize, S1, S2, O1, OpcodesTail).
+        compile_body_goals(Goals, ModuleName, PP, LCO, RemainingPermanentVariables, TrimmedEnvSize, S1, S2, O1, OpcodesTail).
+compile_body_goals(LastGoal, ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S1, Opcodes, OpcodesTail):-
+        compile_goal(LastGoal, ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S1, Opcodes, OpcodesTail).
 
-compile_body_goals(LastGoal, Position, LCO, PermanentVariables, EnvSize, State, S1, Opcodes, OpcodesTail):-
-        compile_goal(LastGoal, Position, LCO, PermanentVariables, EnvSize, State, S1, Opcodes, OpcodesTail).
-
-compile_goal(aux_head(Label, Variables), Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
+compile_goal(aux_head(Label, Variables), ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
         !,
         list_length(Variables, Arity),
+        list_length(MetaArgTypes, Arity),
+        default_meta_arg_types(MetaArgTypes, (?)),
         resize_state(Position, State, Arity, S1),
-        compile_body_args(Variables, Position, 0, PermanentVariables, S1, S2, Opcodes, O1),
+        compile_body_args(Variables, MetaArgTypes, ModuleName, Position, 0, PermanentVariables, S1, S2, Opcodes, O1),
         compile_aux_call(LCO, Arity, EnvSize, Label, O1, OpcodesTail).
 
 % Note that get_top_choicepoint(n, Yn) must mark Yn as seen (similar to get_level).
-compile_goal(get_top_choicepoint(N, B), _Position, _LCO, PermanentVariables, _EnvSize, State, [var(B, get, y(Register))|State], [get_choicepoint(N, y(Register))|Tail], Tail):-
+compile_goal(get_top_choicepoint(N, B), _ModuleName, _Position, _LCO, PermanentVariables, _EnvSize, State, [var(B, get, y(Register))|State], [get_choicepoint(N, y(Register))|Tail], Tail):-
         variable_is_known_permanent(B, PermanentVariables, y(Register)).
 
 
 % If ! is the first goal but NOT a depart, it is a neck_cut.
-compile_goal(goal(!), 0, call, _PermanentVariables, _EnvSize, State, State, [neck_cut|OpcodesTail], OpcodesTail):-
+compile_goal(goal(!), _ModuleName, 0, call, _PermanentVariables, _EnvSize, State, State, [neck_cut|OpcodesTail], OpcodesTail):-
         !.
 % If ! is the first goal AND depart, then this is basically a fact of the form head:- !.
-compile_goal(goal(!), 0, depart, _PermanentVariables, _EnvSize, State, State, [neck_cut, proceed|OpcodesTail], OpcodesTail):-
+compile_goal(goal(!), _ModuleName, 0, depart, _PermanentVariables, _EnvSize, State, State, [neck_cut, proceed|OpcodesTail], OpcodesTail):-
         !.
 % If ! is not the first goal, then it is a deep cut
-compile_goal(!(Var), _Position, call, PermanentVariables, _EnvSize, State, State, [cut(y(Register))|OpcodesTail], OpcodesTail):-
+compile_goal(!(Var), _ModuleName, _Position, call, PermanentVariables, _EnvSize, State, State, [cut(y(Register))|OpcodesTail], OpcodesTail):-
         !,
         variable_must_be_known_permanent(Var, PermanentVariables, y(Register)).
 % This case kind of wrecks LCO
-compile_goal(!(Var), _Position, depart, PermanentVariables, _EnvSize, State, State, [cut(y(Register)), deallocate, proceed|OpcodesTail], OpcodesTail):-
+compile_goal(!(Var), _ModuleName, _Position, depart, PermanentVariables, _EnvSize, State, State, [cut(y(Register)), deallocate, proceed|OpcodesTail], OpcodesTail):-
         !,
         variable_must_be_known_permanent(Var, PermanentVariables, y(Register)).
 
-compile_goal(goal(Goal), Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
+compile_goal(goal(Goal), ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
         !,
         Goal =.. [Functor|Args],
         list_length(Args, Arity),
         resize_state(Position, State, Arity, S1),
-        compile_body_args(Args, Position, 0, PermanentVariables, S1, S2, Opcodes, O1),
-        compile_predicate_call(LCO, EnvSize, Functor, Arity, O1, OpcodesTail).
+        transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor),
+        meta_predicate(TransformedFunctor, Arity, MetaArgTypes),
+        compile_body_args(Args, MetaArgTypes, ModuleName, Position, 0, PermanentVariables, S1, S2, Opcodes, O1),
+        compile_predicate_call(LCO, EnvSize, TransformedFunctor, Arity, O1, OpcodesTail).
 
 % This is possible. For example, consider ((foo, bar), baz).
-compile_goal((LHS, RHS), Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
+compile_goal((LHS, RHS), ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
         !,
-        compile_body_goals((LHS, RHS), Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail).
+        compile_body_goals((LHS, RHS), ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail).
 
-compile_goal(AnythingElse, _, _, _, _, _, _, _, _):-
+compile_goal(AnythingElse, _, _, _, _, _, _, _, _, _):-
         throw(wrong_type_of_functor(compile_goal, AnythingElse)).
 
 variable_must_be_known_permanent(Var, PermanentVariables, Register):-
@@ -719,14 +862,14 @@ compile_aux_call(depart, ArgCount, EnvSize, Label, O1, O2):-
 compile_aux_call(call, ArgCount, EnvSize, Label, O1, O2):-
         O1 = [call_aux(Label, ArgCount, EnvSize)|O2].
 
-compile_body_args([], _, _, _PermanentVariables, State, State, Tail, Tail):- !.
-compile_body_args([Arg|Args], Position, I, PermanentVariables, S1, S3, Opcodes, Tail):-
-        compile_body_arg(Arg, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, GUV),
+compile_body_args([], [], _ModuleName, _, _, _PermanentVariables, State, State, Tail, Tail):- !.
+compile_body_args([Arg|Args], [MetaArgType|MetaArgTypes], ModuleName, Position, I, PermanentVariables, S1, S3, Opcodes, Tail):-
+        compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, GUV),
         compile_message(guv(GUV)),
         %OpcodesX = Opcodes,
         compile_body_arg_adjust(GUV, OpcodesX, Opcodes),
         II is I+1,
-        compile_body_args(Args, Position, II, PermanentVariables, S2, S3, O1, Tail).
+        compile_body_args(Args, MetaArgTypes, ModuleName, Position, II, PermanentVariables, S2, S3, O1, Tail).
 
 compile_body_arg_adjust(GUV, OpcodesX, Opcodes) :-
         var(GUV),
@@ -735,38 +878,52 @@ compile_body_arg_adjust(GUV, OpcodesX, Opcodes) :-
 compile_body_arg_adjust(_GUV, OpcodesX, Opcodes) :-
         adjust_unify_variable(OpcodesX, Opcodes).
 
-compile_body_arg(Arg, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1) :-
-        compile_body_arg(Arg, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, _).
+compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1) :-
+        compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, _).
 
-compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_constant(Arg, Dest)|Tail], Tail, _):-
-        atom_or_empty_list(Arg), !.
-compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_integer(Arg, Dest)|Tail], Tail, _):-
+compile_body_arg(Arg, MetaArgType, ModuleName, _Position, Dest, _PermanentVariables, State, State, [put_constant(TransformedArg, Dest)|Tail], Tail, _):-
+        atom_or_empty_list(Arg), !,
+        (atom(Arg),
+         (integer(MetaArgType) % 0..9
+          ; MetaArgType = (:)
+         ) -> transform_predicate_name(Arg, 0, ModuleName, TransformedArg)
+         ;
+         Arg = TransformedArg
+        ).
+compile_body_arg(Arg, _MetaArgType, _ModuleName, _Position, Dest, _PermanentVariables, State, State, [put_integer(Arg, Dest)|Tail], Tail, _):-
         integer(Arg), !.
-compile_body_arg(Arg, _Position, Dest, _PermanentVariables, State, State, [put_float(Arg, Dest)|Tail], Tail, _):-
+compile_body_arg(Arg, _MetaArgType, _ModuleName, _Position, Dest, _PermanentVariables, State, State, [put_float(Arg, Dest)|Tail], Tail, _):-
         float(Arg), !.
-compile_body_arg(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, _):-
+compile_body_arg(Arg, _MetaArgType, _ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, _):-
         var(Arg), !, put_variable(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail).
-compile_body_arg([Head|Tail], Position, Dest, PermanentVariables, State, S1, Opcodes, OpcodesTail, GUV):-
-        compile_body_unification([Head, Tail], Position, State, S1, PermanentVariables, Opcodes, [put_list(Dest)|R], R, OpcodesTail, GUV).
+compile_body_arg([Head|Tail], _MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, OpcodesTail, GUV):-
+        !,
+        compile_body_unification([Head, Tail], ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_list(Dest)|R], R, OpcodesTail, GUV).
 
-compile_body_arg(Arg, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
+compile_body_arg(Arg, MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
         Arg =.. [Functor|Args],
         list_length(Args, Arity),
-        compile_body_unification(Args, Position, State, S1, PermanentVariables, Opcodes, [put_structure(Functor/Arity, Dest)|R], R, Tail, GUV).
+        ((MetaArgType = integer(MetaArgType) % 0..9
+          ; MetaArgType = (:))
+           -> transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor)
+         ;
+          Functor = TransformedFunctor
+        ),
+        compile_body_unification(Args, ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_structure(TransformedFunctor/Arity, Dest)|R], R, Tail, GUV).
 
-compile_body_unification([], _, State, State, _PermanentVariables, Opcodes, Opcodes, R, R, _):- !.
-compile_body_unification([Arg|Args], Position, State, S1, PermanentVariables, O, OT, [unify_constant(Arg)|R], RT, GUV):-
-        atom_or_empty_list(Arg), !, compile_body_unification(Args, Position, State, S1, PermanentVariables, O, OT, R, RT, GUV).
-compile_body_unification([Arg|Args], Position, State, S1, PermanentVariables, O, OT, [unify_integer(Arg)|R], RT, GUV):-
-        integer(Arg), !, compile_body_unification(Args, Position, State, S1, PermanentVariables, O, OT, R, RT, GUV).
-compile_body_unification([Arg|Args], Position, State, S2, PermanentVariables, O, OT, R, RT, generated_unify_variable):-
+compile_body_unification([], _, _, State, State, _PermanentVariables, Opcodes, Opcodes, R, R, _):- !.
+compile_body_unification([Arg|Args], ModuleName, Position, State, S1, PermanentVariables, O, OT, [unify_constant(Arg)|R], RT, GUV):-
+        atom_or_empty_list(Arg), !, compile_body_unification(Args, ModuleName, Position, State, S1, PermanentVariables, O, OT, R, RT, GUV).
+compile_body_unification([Arg|Args], ModuleName, Position, State, S1, PermanentVariables, O, OT, [unify_integer(Arg)|R], RT, GUV):-
+        integer(Arg), !, compile_body_unification(Args, ModuleName, Position, State, S1, PermanentVariables, O, OT, R, RT, GUV).
+compile_body_unification([Arg|Args], ModuleName, Position, State, S2, PermanentVariables, O, OT, R, RT, generated_unify_variable):-
         var(Arg), !,
         unify_variable(Arg, PermanentVariables, State, S1, R, R1),
-        compile_body_unification(Args, Position, S1, S2, PermanentVariables, O, OT, R1, RT, _).
-compile_body_unification([Arg|Args], Position, State, S3, PermanentVariables, O, OT, [unify_value(Xi)|R], RT, GUV):-
+        compile_body_unification(Args, ModuleName, Position, S1, S2, PermanentVariables, O, OT, R1, RT, _).
+compile_body_unification([Arg|Args], ModuleName, Position, State, S3, PermanentVariables, O, OT, [unify_value(Xi)|R], RT, GUV):-
         fresh_variable(State, S1, Xi),
-        compile_body_arg(Arg, Position, Xi, PermanentVariables, S1, S2, O, O1, GUV),
-        compile_body_unification(Args, Position, S2, S3, PermanentVariables, O1, OT, R, RT, GUV).
+        compile_body_arg(Arg, ModuleName, Position, Xi, PermanentVariables, S1, S2, O, O1, GUV),
+        compile_body_unification(Args, ModuleName, Position, S2, S3, PermanentVariables, O1, OT, R, RT, GUV).
 
 % if unify_value(x(N)) precedes unify_variable(x(N)) then swap them.
 adjust_unify_variable(O, A) :-
@@ -1085,12 +1242,14 @@ compile_memory_file(MemoryFile) :-
 save_clause(Head:-Body):-
         !,
         functor(Head, Name, Arity),
-        add_clause_to_predicate(Name/Arity, Head, Body).
+        transform_predicate_name(Name, Arity, TransformedName),
+        add_clause_to_predicate(TransformedName/Arity, Head, Body).
 
 save_clause(Fact):-
         !,
         functor(Fact, Name, Arity),
-        add_clause_to_predicate(Name/Arity, Fact, true).
+        transform_predicate_name(Name, Arity, TransformedName),
+        add_clause_to_predicate(TransformedName/Arity, Fact, true).
 
 % first fetch all of the URLs, then compile them.
 % This allows the client to get the URLs in parallel.

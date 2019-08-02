@@ -98,6 +98,7 @@ let retry_foreign_offset;  // 'defined' by load_state() in proscriptls_state.js.
 let foreign_predicates; // 'defined' by load_state() in proscriptls_state.js.
 let system;  // 'defined' by load_state() in proscriptls_state.js.
 let initialization;  // 'defined' by load_state() in proscriptls_state.js.
+let exports;  // 'defined' by load_state() in proscriptls_state.js.
 
 /* Special purpose machine registers:
 
@@ -127,7 +128,7 @@ function debug_msg(msg)
 
 function initialize()
 {
-    let trace_ftor = VAL(lookup_functor('$traceR', 3));
+    let trace_ftor = VAL(lookup_functor('wam_compiler:$traceR', 3));
     let trace_predicate = predicates[trace_ftor];
     let trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
 

@@ -720,6 +720,7 @@ function predicate_dump_tables(streamPL) {
         format(S, 'foreign_predicates = {~w};~n', [FPredicatesAtom]),
         format(S, 'system = [~w];~n', [SystemAtom]),
         format(S, 'initialization = [~w];~n', [InitializationAtom]).
+        format(S, 'exports = [~w];~n', [ModuleExportsAtom]).
      */
     let streamContainer = {};
     if (!get_stream(streamPL, streamContainer))
@@ -746,6 +747,7 @@ function predicate_dump_tables(streamPL) {
 
     write_to_stream(streamValue, 'system =' + JSON.stringify(system) + ';\n');
     write_to_stream(streamValue, 'initialization =' + JSON.stringify(initialization) + ';\n');
+    write_to_stream(streamValue, 'exports =' + JSON.stringify(exports) + ';\n');
 
     return true;
 }

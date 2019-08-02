@@ -20,6 +20,7 @@
 :-dynamic(itable/1). % initialization directive predicates
 :-dynamic(stable/1). % system directive predicates
 :-dynamic(dtable/1). % dynamic predicates
+:-dynamic('$module_export'/3).
 
 lookup_functor(Functor, Arity, N):-
         lookup_atom(Functor, F),
@@ -229,7 +230,18 @@ dump_tables(S):-
         format(S, 'system = [~w];~n', [SystemAtom]),
         findall(G, itable(G), IGs),
         atomic_list_concat(IGs, ', ', InitializationAtom),
-        format(S, 'initialization = [~w];~n', [InitializationAtom]).
+        format(S, 'initialization = [~w];~n', [InitializationAtom]),
+        setof(X,
+              M^MN^ENs^
+              (setof(EN,
+                    E^('$module_export'(M, E), atable(E, EN)),
+                    ENs
+                 ),
+               atable(M, MN),
+               format(atom(X), '~w : ~w', [MN, ENs]) % { ModuleN1 : [Export1, ...], ModuleN2 : [Export1, ...]...}
+              ), R),
+        atomic_list_concat(R, ', ', ModuleExportsAtom),
+        format(S, 'exports = [~w];~n', [ModuleExportsAtom]).
 
 dump_predicate(PredicateAtom) :-
        bagof(c(Clause, Index, Head, Body),
@@ -261,8 +273,12 @@ dump_predicate(PredicateAtom) :-
        format(atom(PredicateAtom), '~w: {is_public:~w, clauses:{~w}, clause_keys:[~w], next_key:~w, key:~w}', [Functor, Dynamic, ClauseAtom, IndexAtom, I, Functor]).
 
 reserve_predicate(Functor/Arity, Foreign):-
-        lookup_functor(Functor, Arity, F),
-        assert(fptable(F, Foreign)).
+        [ColonCode] = ":",
+        atom_codes(Functor, FunctorCodes),
+        transform_predicate_name1(system, ColonCode, FunctorCodes, TransformedFunctor),
+        lookup_functor(TransformedFunctor, Arity, F),
+        assert(fptable(F, Foreign)),
+        assertz('$module_export'(system, Functor, Arity)).
 
 % record_term returns a string which is a javascript representation of the term
 record_term(Term, String) :-

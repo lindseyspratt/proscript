@@ -714,6 +714,7 @@ function predicate_dump_tables(streamPL) {
         format(S, 'foreign_predicates = {~w};~n', [FPredicatesAtom]),
         format(S, 'system = [~w];~n', [SystemAtom]),
         format(S, 'initialization = [~w];~n', [InitializationAtom]).
+        format(S, 'exports = [~w];~n', [ModuleExportsAtom]).
      */
     let streamContainer = {};
     if (!get_stream(streamPL, streamContainer))
@@ -740,6 +741,7 @@ function predicate_dump_tables(streamPL) {
 
     write_to_stream(streamValue, 'system =' + JSON.stringify(system) + ';\n');
     write_to_stream(streamValue, 'initialization =' + JSON.stringify(initialization) + ';\n');
+    write_to_stream(streamValue, 'exports =' + JSON.stringify(exports) + ';\n');
 
     return true;
 }
@@ -3128,6 +3130,7 @@ let retry_foreign_offset;  // 'defined' by load_state() in proscriptls_state.js.
 let foreign_predicates; // 'defined' by load_state() in proscriptls_state.js.
 let system;  // 'defined' by load_state() in proscriptls_state.js.
 let initialization;  // 'defined' by load_state() in proscriptls_state.js.
+let exports;  // 'defined' by load_state() in proscriptls_state.js.
 
 /* Special purpose machine registers:
 
@@ -3157,7 +3160,7 @@ function debug_msg(msg)
 
 function initialize()
 {
-    let trace_ftor = VAL(lookup_functor('$traceR', 3));
+    let trace_ftor = VAL(lookup_functor('wam_compiler:$traceR', 3));
     let trace_predicate = predicates[trace_ftor];
     let trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
 
@@ -8628,7 +8631,7 @@ function consult_scripts() {
 function consult_script_text(code_atom) {
 //    initialize();
     let atom = lookup_atom(code_atom);
-    let ftor = VAL(lookup_functor("consult_atom", 1));
+    let ftor = VAL(lookup_functor("wam_compiler:consult_atom", 1));
     allocate_first_frame();
     var pred = predicates[ftor];
     var pi = predicates[ftor].clause_keys[0];
@@ -8725,7 +8728,7 @@ function proscriptls(queryJS, displaySucceededMsg) {
     allocate_first_frame();
     // call_atom(query, Bindings)
     // ignore the Bindings for now (may be useful later)
-    var ftor = VAL(lookup_functor("call_atom", 2));
+    var ftor = VAL(lookup_functor("wam_compiler:call_atom", 2));
     var pred = predicates[ftor];
     var pi = predicates[ftor].clause_keys[0];
     state.current_predicate = pred;

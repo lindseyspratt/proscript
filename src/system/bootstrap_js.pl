@@ -1,15 +1,25 @@
+:- meta_predicate(call/1, [0]).
+
+module(Name, Exports) :-
+        define_current_module(Name, Exports).
+
+use_module(Spec) :-
+        define_use_module(Spec).
+
 assert(Term):-
         assertz(Term).
 
 save_clausea(Head:-Body):-
        !,
        functor(Head, Name, Arity),
-       prepend_clause_to_predicate(Name/Arity, Head, Body).
+       transform_predicate_name(Name, TransformedName),
+       prepend_clause_to_predicate(TransformedName/Arity, Head, Body).
 
 save_clausea(Fact):-
         !,
         functor(Fact, Name, Arity),
-        prepend_clause_to_predicate(Name/Arity, Fact, true).
+        transform_predicate_name(Name, TransformedName),
+        prepend_clause_to_predicate(TransformedName/Arity, Fact, true).
 
 handle_term_expansion(_Clause).
 
