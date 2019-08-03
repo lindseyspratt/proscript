@@ -1,0 +1,95 @@
+<h3>Syntax:</h3>
+The syntax of a ProscriptLS source file is approximately the same as ISO Prolog.
+The directives supported by ProscriptLS include:
+<ul>
+<li>
+<code>:- if(Goal).</code>
+<br>
+<code>:- else.</code>
+<br>
+<code>:- elseif(Goal).</code>
+<br>
+<code>:- endif.</code>
+<br>
+These directives are used to optionally include or suppress compilation of clauses.
+If 'Goal' of <code>:- if(Goal).</code> evaluates to true then the clauses following the 'if' directive
+up to the next 'else', 'elseif', or 'endif' directive are compiled and the other clauses
+up to the next 'endif' are suppressed.
+If 'Goal' of <code>:- if(Goal).</code> evaluates to false then the clauses up to the next
+'else', 'elseif', or 'endif' directive are suppressed.
+If the next macro directive is 'else' then the clauses following it (up to <code>:- endif.</code>)
+are compiled (and there must not be an 'elseif' directive).
+An 'elseif(GoalEI)' directive must follow an 'if(Goal)' or 'elseif(GoalEI1)' directive.
+If previous macro directive goals have failed and GoalEI succeeds then the clauses
+following this directive up to the next elseif, else, or endif directive are compiled with
+subsequent clauses being suppressed up to the next endif directive.
+<br>
+Uses of the if/elseif/else/endif directives may be nested.
+<br>
+Example:
+<pre><code>
+some_predicate(before).
+:- if(false).
+some_predicate(if).
+:- elseif(true).
+some_predicate(elseif).
+:- else.
+some_predicate(else).
+:- endif.
+some_predicate(after).
+</code></pre>
+This program source fragment has the same effect as:
+<pre><code>
+some_predicate(before).
+some_predicate(elseif).
+some_predicate(after).
+</code></pre>
+</li>
+<li>
+<code>:- ensure_loaded(Spec).</code>
+<br>
+The ensure_loaded/1 directive ensures that the ProscriptLS source identified by Spec is loaded/compiled once.
+If it has already been compiled when this directive is evaluated then it is not compiled again.
+</li>
+<li>
+<code>:- op(Precedence, Associativity, Atom).</code>
+<br>
+The op/3 directive defines an operator Atom with Precedence (between 0 and 1200) and Associativity determining whether the
+operator appears in prefix, infix, or suffix position and how multiple uses of the operator in a sequence associate.
+There are many operators predefined for ProscriptLS, e.g. infix + and prefix -.
+<br>
+Example: <code>:- op(200, fx, *).</code>
+</li>
+<li>
+<code>:- dynamic(PredicateIndicator).</code>
+<br>
+The dynamic/1 directive identifies PredicateIndicator predicate as dynamic: it can be the subject of assert and retract goals.
+The PredicateIndicator is of the form 'Name/Arity'.
+<br>
+Example: <code>:- dynamic(special_things/3).</code>
+<br>
+This defines a dynamic 'special_things' predicate with three arguments.
+</li>
+<li>
+<code>:- initialization(Goal).</code>
+<br>
+The initialization/1 directive specifies a 'Goal' that is to be evaluated after the compiled program is loaded.
+There may be several initialization directives in a single source - they are evaluated in the order defined.
+<br>
+Example: <code>:- initialization(writeln('Loaded.')).</code>
+<br>
+This defines <code>writeln('Loaded.')</code> as a goal to evaluate after the compiled program has been loaded.
+Once the program is loaded then 'Loaded.' followed by a newline will be written to user-output.
+</li>
+<li>
+<code>:- module(A, B).</code>
+<br>
+<code>:- use_module(A).</code>
+<br>
+<code>:- meta_predicate(_).</code>
+<br>
+<code>:- include(A).</code>
+<br>
+These directives have no effect. They are allowed in ProscriptLS source but are otherwise ignored.
+</li>
+</ul>

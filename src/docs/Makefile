@@ -31,7 +31,8 @@ clean:
 $(TOP_HTML): $(DIST_DOC)/index.html
 		sed '1d' $(DIST_DOC)/index.html > $(TOP_HTML)
 
-$(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template compilation.doc.template
+$(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template \
+				compilation.doc.template syntax.doc.template
 
 $(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template api.sidenav.template anchor.sidenav.template \
 				framework.index.template ../../version.txt ../../version_date.txt ../../library/template.pl
