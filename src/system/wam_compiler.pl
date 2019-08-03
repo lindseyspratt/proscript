@@ -82,12 +82,15 @@ expand_term(In, Out):-
         !.
 expand_term(In, In).
 
-compile_clause(Term):-
+compile_clause(Term) :-
+        compile_clause(Term, mode(0, compile(0)), _).
+
+compile_clause(Term, ModeIn, ModeOut):-
         compile_message(['Compiling ', Term]),
         expand_term(Term, Terms),
         gc,
         compile_message(done_gc),
-        compile_clause_1(Terms, mode(0, compile(0)), _).
+        compile_clause_1(Terms, ModeIn, ModeOut).
 
 compile_clause_1([], Mode, Mode):- !.
 compile_clause_1([Head|Tail], ModeIn, ModeOut):-
@@ -216,10 +219,19 @@ macro_endif(ModeIn, ModeOut) :-
         ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
         IfLevelNext is IfLevel - 1,
         (Action = skip(SkipLevel), SkipLevel = IfLevel
-          -> ModeOut = mode(IfLevel, compile(IfLevelNext))
+          -> ModeOut = mode(IfLevelNext, compile(IfLevelNext))
         ;
         Action = skip(SkipLevel), SkipLevel \= IfLevel
           -> throw('if skip level not = iflevel')
+        ;
+        Action = compile(CompileLevel), CompileLevel = IfLevel
+          -> ModeOut = mode(IfLevelNext, compile(IfLevelNext))
+        ;
+        Action = compile(CompileLevel), CompileLevel \= IfLevel
+          -> throw('if compile level not = iflevel')
+        ;
+        true
+          -> throw('endif unknown action')
         ).
 
 define_dynamic_predicates(Name/Arity) :-
@@ -1110,25 +1122,32 @@ compile_file(Source):-
         close(S).
         %writeln(end_compile_file(Source)).
 
-compile_stream(Stream):-
+compile_stream(Stream) :-
+        compile_stream(Stream, mode(0, compile(0))).
+
+compile_stream(Stream, Mode):-
         read_term(Stream, Term, []),
-        compile_stream_term(Stream, Term).
+        compile_stream_term(Stream, Term, Mode).
 
 % Originally this used 'forall(retract(delayed_initialization(Goal)), call(Goal))'.
 % However, this caused some tests to perform very poorly. E.g. bench/nrev took almost 3 times longer (speed decreased from 3 Mlips to 1.2Mlips).
 % The slowdown is puzzling since there were no initialization goals defined in the test.
-compile_stream_term(_, end_of_file):-
+compile_stream_term(_, end_of_file, Mode):-
         !,
-        (retract(delayed_initialization(Goal)),
-         call_init(Goal),
-         fail
-         ;
-         true
+        (Mode = mode(0, compile(0))
+          -> (retract(delayed_initialization(Goal)),
+              call_init(Goal),
+              fail
+             ;
+              true
+             )
+        ;
+        throw('macro error: missing endif directive.')
         ).
-compile_stream_term(Stream, Term):-
-        compile_clause(Term),
+compile_stream_term(Stream, Term, ModeIn):-
+        compile_clause(Term, ModeIn, ModeNext),
         !,
-        compile_stream(Stream).
+        compile_stream(Stream, ModeNext).
 
 save_compiled_state(SavedStateFile) :-
         compiled_state_boot_code(BootCode),
