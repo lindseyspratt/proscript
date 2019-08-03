@@ -82,45 +82,145 @@ expand_term(In, Out):-
         !.
 expand_term(In, In).
 
-
 compile_clause(Term):-
         compile_message(['Compiling ', Term]),
         expand_term(Term, Terms),
         gc,
         compile_message(done_gc),
-        compile_clause_1(Terms).
+        compile_clause_1(Terms, mode(0, compile(0)), _).
 
-compile_clause_1([]):- !.
-compile_clause_1([Head|Tail]):-
+compile_clause_1([], Mode, Mode):- !.
+compile_clause_1([Head|Tail], ModeIn, ModeOut):-
         !,
-        compile_clause_save(Head),
-        compile_clause_1(Tail).
-compile_clause_1(Term):-
-        compile_clause_save(Term).
+        compile_clause_save(Head, ModeIn, ModeNext),
+        compile_clause_1(Tail, ModeNext, ModeOut).
+compile_clause_1(Term, ModeIn, ModeOut):-
+        compile_clause_save(Term, ModeIn, ModeOut).
 
-compile_clause_save(:- Body) :-
+compile_clause_save(:- Body, ModeIn, ModeOut) :-
         !,
-        compile_clause_directive(Body).
-compile_clause_save(Term) :-
+        compile_clause_directive(Body, ModeIn, ModeOut).
+compile_clause_save(Term, Mode, Mode) :-
+        mode_skip(Mode)
+           -> true
+        ;
         compile_clause_2(Term),
         save_clause(Term).
 
-compile_clause_directive(op(A,B,C)) :- compile_clause_system_directive(op(A,B,C)).
-compile_clause_directive(dynamic(PredIndicator)) :- compile_clause_compilation_directive(dynamic(PredIndicator)).
-compile_clause_directive(initialization(Goal)) :- compile_clause_initialization_directive(Goal).
-compile_clause_directive(ensure_loaded(Spec)) :- compile_clause_compilation_directive(ensure_loaded(Spec)).
-compile_clause_directive(include(_)). % Currently a no-op in Proscript.
-compile_clause_directive(module(_,_)). % Currently a no-op in Proscript.
+mode_skip(mode(_, skip(_))).
+
+mode_compile(mode(_, compile(_))).
+
+compile_clause_directive(Directive, ModeIn, ModeOut) :-
+        compile_clause_directive_macro(Directive, ModeIn, ModeOut)
+          -> true
+        ;
+        mode_skip(ModeIn)
+          -> ModeIn = ModeOut
+        ;
+        compile_clause_directive_nonmacro(Directive, ModeIn, ModeOut).
+
+compile_clause_directive_nonmacro(op(A,B,C), Mode, Mode) :- compile_clause_system_directive(op(A,B,C)).
+compile_clause_directive_nonmacro(dynamic(PredIndicator), Mode, Mode) :- compile_clause_compilation_directive(dynamic(PredIndicator), Mode, Mode).
+compile_clause_directive_nonmacro(initialization(Goal), Mode, Mode) :- compile_clause_initialization_directive(Goal).
+compile_clause_directive_nonmacro(ensure_loaded(Spec), Mode, Mode) :- compile_clause_compilation_directive(ensure_loaded(Spec), Mode, Mode).
+compile_clause_directive_nonmacro(include(_), Mode, Mode). % Currently a no-op in ProscriptLS.
+compile_clause_directive_nonmacro(module(_,_), Mode, Mode). % Currently a no-op in ProscriptLS.
+compile_clause_directive_nonmacro(use_module(_), Mode, Mode). % Currently a no-op in ProscriptLS.
+compile_clause_directive_nonmacro(meta_predicate(_), Mode, Mode). % Currently a no-op in ProscriptLS.
+
+compile_clause_directive_macro(if(Goal), ModeIn, ModeOut) :- compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut).
+compile_clause_directive_macro(else, ModeIn, ModeOut) :- compile_clause_compilation_directive(else, ModeIn, ModeOut).
+compile_clause_directive_macro(elseif(Goal), ModeIn, ModeOut) :- compile_clause_compilation_directive(elseif(Goal), ModeIn, ModeOut).
+compile_clause_directive_macro(endif, ModeIn, ModeOut) :- compile_clause_compilation_directive(endif, ModeIn, ModeOut).
 
 % A compilation directive is evaluated immediately
 % during compilation of a source unit (e.g. a file).
 % There is no evaluation of the directive when the
 % compiled WAM state is loaded and initialized.
 
-compile_clause_compilation_directive(dynamic(PredIndicator)) :-
+compile_clause_compilation_directive(dynamic(PredIndicator), Mode, Mode) :-
         define_dynamic_predicates(PredIndicator).
-compile_clause_compilation_directive(ensure_loaded(Spec)) :-
+compile_clause_compilation_directive(ensure_loaded(Spec), Mode, Mode) :-
         ensure_loaded(Spec).
+compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut) :-
+        macro_if(Goal, ModeIn, ModeOut).
+compile_clause_compilation_directive(else, ModeIn, ModeOut) :-
+        macro_else(ModeIn, ModeOut).
+compile_clause_compilation_directive(elseif(Goal), ModeIn, ModeOut) :-
+        macro_elseif(Goal, ModeIn, ModeOut).
+compile_clause_compilation_directive(endif, ModeIn, ModeOut) :-
+        macro_endif(ModeIn, ModeOut).
+
+macro_if(Goal, ModeIn, ModeOut) :-
+        ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
+        IfLevelNext is IfLevel +1,
+        (Action = skip(SkipLevel), SkipLevel < IfLevelNext
+           -> ModeOut = mode(IfLevel, skip(SkipLevel))
+         ;
+         Action = skip(SkipLevel), SkipLevel >= IfLevelNext
+           -> throw('if skip level >= iflevelnext')
+         ;
+         call(Goal)
+           -> ModeOut = mode(IfLevelNext, compile(IfLevelNext))
+         ;
+         ModeOut = mode(IfLevelNext, skip(IfLevelNext)) % look for else, elseif, endif directives.
+        ).
+
+macro_else(ModeIn, ModeOut) :-
+        ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
+        (
+        Action = skip(SkipLevel), IfLevel > SkipLevel % IfLevel of this :- else is deeper than the skip target level.
+          -> ModeOut = ModeIn
+        ;
+        Action = skip(SkipLevel), IfLevel = SkipLevel % IfLevel of this :- else is same as the skip target level.
+          -> ModeOut = mode(IfLevel, compile(IfLevel)) % compile to the next :- endif at target level IfLevel.
+        ;
+        Action = skip(SkipLevel), IfLevel < SkipLevel % this is an error. Malformed endif/else
+          -> throw('else ifLevel less than skiplevel')
+        ;
+        Action = compile(CompileLevel), IfLevel > CompileLevel
+          -> throw('else ifLevel greater than compileLevel')
+        ;
+        Action = compile(CompileLevel), IfLevel = CompileLevel
+          -> ModeOut = mode(IfLevel, skip(IfLevel)) % skip the ':- else' clause to the next :- endif at IfLevel.
+        ;
+        Action = compile(CompileLevel), IfLevel < CompileLevel
+          -> throw('else ifLevel less than compileLevel')
+        ).
+
+macro_elseif(Goal, ModeIn, ModeOut) :-
+        ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
+        (Action = compile(CompileLevel), IfLevel > CompileLevel
+           -> throw('else ifLevel greater than compileLevel')
+        ;
+        Action = compile(CompileLevel), IfLevel = CompileLevel
+           -> ModeOut = mode(IfLevel, skip(IfLevel)) % skip the ':- else' clause to the next :- endif at IfLevel.
+        ;
+        Action = compile(CompileLevel), IfLevel < CompileLevel
+          -> throw('else ifLevel less than compileLevel')
+        ;
+        Action = skip(SkipLevel), SkipLevel < IfLevel
+          -> ModeOut = mode(IfLevel, skip(SkipLevel))
+        ;
+        Action = skip(SkipLevel), SkipLevel > IfLevel
+          -> throw('elseif skip level > iflevel')
+        ;
+        call(Goal)
+          -> ModeOut = mode(IfLevel, compile(IfLevel))
+        ;
+        ModeOut = mode(IfLevel, skip(IfLevel)) % look for else, elseif, endif directives.
+        ).
+
+macro_endif(ModeIn, ModeOut) :-
+        ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
+        IfLevelNext is IfLevel - 1,
+        (Action = skip(SkipLevel), SkipLevel = IfLevel
+          -> ModeOut = mode(IfLevel, compile(IfLevelNext))
+        ;
+        Action = skip(SkipLevel), SkipLevel \= IfLevel
+          -> throw('if skip level not = iflevel')
+        ).
 
 define_dynamic_predicates(Name/Arity) :-
         !,
