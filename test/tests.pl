@@ -1,5 +1,40 @@
 :- dynamic(test/1).
 
+:- if(true).
+macro1(if).
+:- else.
+macro1(else).
+:- endif.
+
+:- if(false).
+macro2(if).
+:- else.
+macro2(else).
+:- endif.
+
+:- if(false).
+macro3(if).
+:- elseif(true).
+macro3(elseif).
+:- else.
+macro3(else).
+:- endif.
+
+:- if(false).
+macro4(if).
+:- elseif(true).
+macro4(elseif).
+    :- if(false).
+    macro4(elseif-if).
+    :- elseif(false).
+    macro4(elseif-elseif).
+    :- else.
+    macro4(elseif-else).
+    :- endif.
+:- else.
+macro4(else).
+:- endif.
+
 term_expansion((test(Label, ExpectedPort):- Body), (test(Label):- (catch(setup_call_catcher_cleanup(format('~w: ', [Label]),
                                                                                                     Body,
                                                                                                     Port,
@@ -24,6 +59,17 @@ check_test_results(Got, Expected):- format('FAIL: Expected ~q, got ~q~n', [Expec
 once_test_1.
 once_test_1.
 
+test(macro1, exit) :-
+        findall(V, macro1(V), [if]).
+
+test(macro2, exit) :-
+        findall(V, macro2(V), [else]).
+
+test(macro3, exit) :-
+        findall(V, macro3(V), [elseif]).
+
+test(macro4, exit) :-
+        findall(V, macro4(V), [elseif, elseif-else]).
 
 test(cut, exit):-
         once_test_1,

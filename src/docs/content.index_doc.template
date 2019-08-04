@@ -49,6 +49,9 @@
             <li class="indexed" id="compilation">
                 {{template_file('compilation.doc.template', [])}}
             </li>
+            <li class="indexed" id="syntax">
+                {{template_file('syntax.doc.template', [])}}
+            </li>
         </ul>
     </div>
     <div class="indexed" id="examples">
