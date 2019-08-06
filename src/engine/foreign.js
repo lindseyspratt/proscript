@@ -1937,7 +1937,8 @@ var prolog_flags = [{name:"bounded", fn:flag_bounded},
                     {name:"debug", fn:flag_debug},
                     {name:"max_arity", fn:flag_max_arity},
                     {name:"unknown", fn:flag_unknown},
-                    {name:"double_quotes", fn:flag_double_quotes}];
+                    {name:"double_quotes", fn:flag_double_quotes},
+                    {name:"dialect", fn:flag_dialect}];
 
 var prolog_flag_values = {char_conversion: false,
                           debug: false,
@@ -2039,6 +2040,13 @@ function flag_double_quotes(set, value)
     }
     return unify(value, lookup_atom(prolog_flag_values.double_quotes));
 }
+
+function flag_dialect(set, value)
+{
+    if (set) return permission_error("prolog_flag");
+    return unify(value, lookup_atom("proscriptls"));
+}
+
 
 function predicate_set_prolog_flag(key, value)
 {

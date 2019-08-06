@@ -68,7 +68,10 @@ Some gotchas:
 */
 
 :-module(wam_compiler, [build_saved_state/2, build_saved_state/3, bootstrap/2, bootstrap/3, bootstrap/4, op(920, fy, ?), op(920, fy, ??)]).
+
+:- if(current_prolog_flag(dialect, proscriptls)).
 :-use_module(library(system)).
+:- endif.
 
 :-ensure_loaded('../tools/testing').
 :-ensure_loaded('../tools/wam_bootstrap').
@@ -154,7 +157,7 @@ compile_clause_compilation_directive(ensure_loaded(Spec), Mode, Mode) :-
 compile_clause_compilation_directive(module(ModuleName, Exports), Mode, Mode) :-
         define_current_module(ModuleName, Exports).
 compile_clause_compilation_directive(use_module(Spec), Mode, Mode) :-
-        use_module(Spec).
+        define_use_module(Spec).
 compile_clause_compilation_directive(meta_predicate(Term), Mode, Mode) :-
         define_meta_predicate(Term).
 compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut) :-
