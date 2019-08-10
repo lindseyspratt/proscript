@@ -12,6 +12,7 @@ LIB_OBJECT_PL := ../../library/object.pl
 ROOT_ENGINE=dist/proscriptls_engine.js
 ENGINE:=../../$(ROOT_ENGINE)
 SRC_SYSTEM=../system
+SRC_TOOLS=../tools
 
 
 all:	$(HTML) $(TOP_HTML) ../../README.SDK.md
@@ -43,9 +44,12 @@ $(ENGINE):
 		../../make $(ROOT_ENGINE)
 
 proscriptls_state_doc.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/wam_compiler.pl\
-				$(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl $(SRC_SYSTEM)/promise.pl ../tools/type_references.pl
-		$(SWIPL) -q -f $(SRC_SYSTEM)/wam_compiler.pl -g \
-			"bootstrap('$(SRC_SYSTEM)/', ['../tools/type_references.pl'], 'proscriptls_state_doc.js', true), halt"
+                $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
+                $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/wam_bootstrap_util.pl\
+				$(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl $(SRC_SYSTEM)/promise.pl\
+				$(SRC_TOOLS)/type_references.pl
+		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g \
+			"bootstrap('$(SRC_SYSTEM)/', ['$(SRC_TOOLS)/type_references.pl'], 'proscriptls_state_doc.js', true), halt"
 
 dump-state: $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js
 		$(JSC) $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js  -e "dump()"

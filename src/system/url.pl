@@ -6,8 +6,8 @@ convert_URL_to_base(URL, BaseURL) :-
     -> url_directory(ReferenceURL, ReferenceDirectory),
        resolve_url(ReferenceDirectory, URL, BaseURL)
   ;
-  true
-    -> URL = BaseURL.
+  absolute_file_name(URL, Absolute, [])
+    -> BaseURL = Absolute.
 
 absolute_url(URL) :-
   atom_codes(URL, URLCodes),
@@ -33,17 +33,21 @@ url_directory(URL, Directory) :-
 
 resolve_url('./', URL, URL) :- !.
 
+
 resolve_url(Directory, URL, BaseURL) :-
   atom_codes(URL, URLCodes),
-  (append("../", PrefixCodes, URLCodes)
+  sub(Directory, URLCodes, BaseURL).
+
+sub(Directory, URLCodes, BaseURL) :-
+  append("../", PrefixCodes, URLCodes)
     -> trim_directory(Directory, TrimmedDirectory),
        atom_codes(Prefix, PrefixCodes),
        resolve_url(TrimmedDirectory, Prefix, BaseURL)
    ;
    atom_codes(Directory, DirectoryCodes),
    append(DirectoryCodes, URLCodes, BaseURLCodes),
-   atom_codes(BaseURL, BaseURLCodes)
-   ).
+   atom_codes(BaseURL, BaseURLCodes).
+
 
 % TrimmedDirectory is Directory with the last component
 % removed. Directory = 'X/Y/' -> TrimmedDirectory = 'X/'.

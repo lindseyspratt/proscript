@@ -67,22 +67,23 @@ Some gotchas:
 
 */
 
-:-module(wam_compiler, [build_saved_state/2, build_saved_state/3, bootstrap/2, bootstrap/3, bootstrap/4, op(920, fy, ?), op(920, fy, ??)]).
+:-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/2]).
 
-:- if(current_prolog_flag(dialect, proscriptls)).
-:-use_module(library(system)).
-:- endif.
+ :-use_module('../tools/wam_bootstrap').
+ :-use_module('../tools/wam_bootstrap_util').
+:- use_module(wam_assemble).
+:- use_module(wam_util).
 
 :-ensure_loaded('../tools/testing').
-:-ensure_loaded('../tools/wam_bootstrap').
 :-ensure_loaded(url).
 
 :-dynamic(delayed_initialization/1).
 :-dynamic('$loaded'/1).
 :-dynamic('$current_compile_url'/1).
-:-dynamic('$current_module'/1).
+:-dynamic('$current_compilation_module'/1).
+:-dynamic('$current_compilation_stream'/1).
 :-dynamic('$import'/2).
-:-dynamic('$module_export'/3).
+:-dynamic('$meta_predicate'/3).
 
 expand_term(In, Out):-
         current_predicate(term_expansion/2),
@@ -98,7 +99,12 @@ compile_clause(Term, ModeIn, ModeOut):-
         expand_term(Term, Terms),
         gc,
         compile_message(done_gc),
-        compile_clause_1(Terms, ModeIn, ModeOut).
+        (compile_clause_1(Terms, ModeIn, ModeOut)
+          -> true
+        ;
+         write('Failed compilation of '), writeln(Term)
+          -> fail
+        ).
 
 compile_clause_1([], Mode, Mode):- !.
 compile_clause_1([Head|Tail], ModeIn, ModeOut):-
@@ -136,9 +142,9 @@ compile_clause_directive_nonmacro(dynamic(PredIndicator), Mode, Mode) :- compile
 compile_clause_directive_nonmacro(initialization(Goal), Mode, Mode) :- compile_clause_initialization_directive(Goal).
 compile_clause_directive_nonmacro(ensure_loaded(Spec), Mode, Mode) :- compile_clause_compilation_directive(ensure_loaded(Spec), Mode, Mode).
 compile_clause_directive_nonmacro(include(_), Mode, Mode). % Currently a no-op in ProscriptLS.
-compile_clause_directive_nonmacro(module(A,B), Mode, Mode) :- compile_clause_compilation_directive(module(A,B)).
-compile_clause_directive_nonmacro(use_module(A), Mode, Mode) :- compile_clause_compilation_directive(use_module(A)).
-compile_clause_directive_nonmacro(meta_predicate(Term), Mode, Mode) :- compile_clause_compilation_directive(meta_predicate(Term)).
+compile_clause_directive_nonmacro(module(A,B), Mode, Mode) :- compile_clause_compilation_directive(module(A,B), Mode, Mode).
+compile_clause_directive_nonmacro(use_module(A), Mode, Mode) :- compile_clause_compilation_directive(use_module(A), Mode, Mode).
+compile_clause_directive_nonmacro(meta_predicate(Term), Mode, Mode) :- compile_clause_compilation_directive(meta_predicate(Term), Mode, Mode).
 
 compile_clause_directive_macro(if(Goal), ModeIn, ModeOut) :- compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut).
 compile_clause_directive_macro(else, ModeIn, ModeOut) :- compile_clause_compilation_directive(else, ModeIn, ModeOut).
@@ -261,36 +267,93 @@ define_dynamic_predicates((A,B)) :-
         define_dynamic_predicates(B).
 
 define_current_module(Name, Exports) :-
-        clear_imports,
-        retractall('$current_module'(_)),
-        assertz('$current_module'(Name)),
+        current_compilation_stream(Stream),
+        push_current_compilation_module(Name, Stream),
         define_module_export(Exports, Name).
 
 define_module_export([], _).
 define_module_export([H|T], Name) :-
-        assertz('$module_export'(Name, H)),
+        add_module_export(Name, H),
         define_module_export(T, Name).
 
-current_module(Name) :-
-        '$current_module'(Name),
+current_compilation_module(Name) :-
+        current_compilation_module(Name, _).
+
+current_compilation_module(Name, Stream) :-
+        '$current_compilation_module'([Name-Stream|_]),
         !.
-current_module(user).
+current_compilation_module(user, none).
 
+push_current_compilation_module(Name, Stream) :-
+  (retract('$current_compilation_module'(Names))
+    -> true
+   ;
+   Names = []
+  ),
+  asserta('$current_compilation_module'([Name-Stream|Names])).
 
-define_use_module(library(LibraryName)) :-
-         current_module(Name),
-         assertz('$import'(Name, LibraryName)).
+pop_current_compilation_module(Name, Stream) :-
+  retract('$current_compilation_module'([Name-Stream|Names])),
+  asserta('$current_compilation_module'(Names)).
+
+define_use_module(Spec) :-
+        setup_use_module(Spec, ImportName),
+        current_compilation_module(Name, _),
+        assertz('$import'(Name, ImportName)).
+
+setup_use_module(library(LibraryName), LibraryName) :-
+        !,
+        (module_export(LibraryName, _)
+          -> true
+        ;
+        LibraryName = system
+          -> true
+        ;
+        library_name_to_path(LibraryName, Path),
+        load_file_for_use_module(Path)
+        ).
+setup_use_module(Path, ImportName) :-
+        path_to_module_name(Path, ImportName),
+        canonical_source(Path, CanonicalPath),
+        ('$loaded'(CanonicalPath)
+          -> true
+        ;
+        compile_file(Path)
+        ).
+
+:- if((current_predicate(wam_compiler:current_compile_url/1), current_compile_url(_))).
+load_file_for_use_module(Path) :-
+        consult([Path]).
+:- else.
+load_file_for_use_module(Path) :-
+        compile_file(Path).
+:- endif.
+
+define_meta_predicate(Term) :-
+        Term =.. [Functor|MetaArgTypes],
+        list_length(MetaArgTypes, Arity),
+        current_compilation_module(Name),
+        transform_predicate_name(Functor, Arity, Name, TransformedFunctor),
+        assertz('$meta_predicate'(TransformedFunctor, Arity, MetaArgTypes)).
+
+defined_meta_predicate(Functor, Arity, MetaArgTypes) :-
+        '$meta_predicate'(Functor, Arity, MetaArgTypes)
+        ;
+        \+ var(Functor),
+        \+ '$meta_predicate'(Functor, Arity, MetaArgTypes),
+        list_length(MetaArgTypes, Arity),
+        default_meta_arg_types(MetaArgTypes, (?)).
 
 clear_imports :-
         retractall('$current_import'(_)).
 
 current_import(UnqualifiedPredicateName, Arity, ImportModuleName) :-
-        current_module(CurrentModuleName),
+        current_compilation_module(CurrentModuleName),
         current_import(UnqualifiedPredicateName, Arity, CurrentModuleName, ImportModuleName).
 
 current_import(UnqualifiedPredicateName, Arity, ImportingModuleName, ImportModuleName) :-
         '$import'(ImportingModuleName, ImportModuleName),
-        '$module_export'(ImportModuleName, UnqualifiedPredicateName, Arity).
+        module_export(ImportModuleName, UnqualifiedPredicateName/Arity).
 
 default_meta_arg_types([], _Flag).
 default_meta_arg_types([Flag|T], Flag) :-
@@ -310,11 +373,6 @@ transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor) :-
          ;
          transform_predicate_name1(ModuleName, ColonCode, FunctorCodes, TransformedFunctor)
         ).
-
-transform_predicate_name1(ModuleName, ColonCode, FunctorCodes, TransformedFunctor) :-
-         atom_codes(ModuleName, ModuleNameCodes),
-         append(ModuleNameCodes, [ColonCode|FunctorCodes], TransformedCodes),
-         atom_codes(TransformedFunctor, TransformedCodes).
 
 % A system directive is evaluated immediately
 % during compilation of a source unit (e.g. a file).
@@ -359,7 +417,7 @@ compile_clause_2(?- Body):-
         environment_size_required(PermanentVariables, Transformed, EnvSize),
         allocate_environment(EnvSize, CutVariable, PermanentVariables, Opcodes, O1, [next(Arity)], State),
         first_goal_arity(Body, Arity),
-        current_module(ModuleName),
+        current_compilation_module(ModuleName),
         compile_body(Transformed, ModuleName, PermanentVariables, EnvSize, State, _, O1, O2),
         compile_auxiliary_goals(ExtraClauses, ModuleName, O2, []),
         reset_compile_buffer,
@@ -377,7 +435,7 @@ compile_clause_2(Head :- Body):-
         % Do NOT try and change the state size here! Space for the first goal and head are both set
         % aside in compile_head. Just because the head has only N arguments does NOT mean that it
         % only uses N registers!
-        current_module(ModuleName),
+        current_compilation_module(ModuleName),
         compile_body(Transformed, ModuleName, PermanentVariables, EnvSize, State, _, O1, O2),
         compile_auxiliary_goals(ExtraClauses, ModuleName, O2, []),
         reset_compile_buffer,
@@ -597,14 +655,6 @@ environment_size_required(Variables, _, Length):-
         Length > 0,
         !.
 environment_size_required(_, _, none).
-
-list_length(A, B):-
-        list_length_1(A, 0, B).
-
-list_length_1([], N, N):- !.
-list_length_1([_|A], N, L):-
-        NN is N+1,
-        list_length_1(A, NN, L).
 
 entail(Goal, Flattened):-
         last_goal(Goal, Head, Last),
@@ -879,7 +929,7 @@ compile_goal(goal(Goal), ModuleName, Position, LCO, PermanentVariables, EnvSize,
         list_length(Args, Arity),
         resize_state(Position, State, Arity, S1),
         transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor),
-        meta_predicate(TransformedFunctor, Arity, MetaArgTypes),
+        defined_meta_predicate(TransformedFunctor, Arity, MetaArgTypes),
         compile_body_args(Args, MetaArgTypes, ModuleName, Position, 0, PermanentVariables, S1, S2, Opcodes, O1),
         compile_predicate_call(LCO, EnvSize, TransformedFunctor, Arity, O1, OpcodesTail).
 
@@ -966,7 +1016,7 @@ compile_body_unification([Arg|Args], ModuleName, Position, State, S2, PermanentV
         compile_body_unification(Args, ModuleName, Position, S1, S2, PermanentVariables, O, OT, R1, RT, _).
 compile_body_unification([Arg|Args], ModuleName, Position, State, S3, PermanentVariables, O, OT, [unify_value(Xi)|R], RT, GUV):-
         fresh_variable(State, S1, Xi),
-        compile_body_arg(Arg, ModuleName, Position, Xi, PermanentVariables, S1, S2, O, O1, GUV),
+        compile_body_arg(Arg, (?), ModuleName, Position, Xi, PermanentVariables, S1, S2, O, O1, GUV),
         compile_body_unification(Args, ModuleName, Position, S2, S3, PermanentVariables, O1, OT, R, RT, GUV).
 
 % if unify_value(x(N)) precedes unify_variable(x(N)) then swap them.
@@ -1018,185 +1068,6 @@ adjust_unify_variable2([InstVar-InstVar/_N|T])  :-
 adjust_unify_variable2([_|T])  :-
         adjust_unify_variable2(T).
 
-
-% -------------------- Below is the assembler -----------------------------
-% Assemble Opcodes into a state, beginning at memory address N
-% The resulting bytes are emitted using emit_code(+Address, +Code)
-assemble(Opcodes, N):-
-        term_variables(Opcodes, Variables),
-        encode_opcodes_1(Opcodes, N, Labels, [], DanglingReferences, []),
-        % Now build the jump table between clauses
-        compile_message(linking(Variables, Labels)),
-        link(Labels, DanglingReferences),
-        compile_message(linked).
-
-link([], _):- !.
-link([label(Label, Address)|Labels], References):-
-        link_1(Label, Address, References),
-        link(Labels, References).
-
-link_1(_Label, _Address, []):- !.
-link_1(Label, Address, [address_of(L, N)|References]):-
-        Label == L, !,
-        compile_message(emitting_address_1_of(L, Address, to(N))),
-        emit_code(N, Address),
-        link_1(Label, Address, References).
-link_1(Label, Address, [aux_address_of(L, N)|References]):-
-        Label == L, !,
-        compile_message(emitting_aux_address_2_of(L, Address, to(N))),
-        A is Address xor 0x80000000,
-        emit_code(N, A),
-        link_1(Label, Address, References).
-link_1(Label, Address, [_|References]):-
-        link_1(Label, Address, References).
-
-
-emit_codes(_, []):- !.
-emit_codes(N, [Code|Codes]):-
-        emit_code(N, Code),
-        NN is N+1,
-        emit_codes(NN, Codes).
-
-encode_register(y(N), [0, N|T], T).
-encode_register(x(N), [1, N|T], T).
-
-
-encode_opcodes_1([], _, L, L, D, D):- !.
-
-encode_opcodes_1([aux_label(Label)|As], N, L, L2, D, D1):-
-        !,
-        add_clause_to_aux(Label, N, L, L1),
-        compile_message(auxiliary(Label, N)),
-        NN is N + 2,
-        encode_opcodes_1(As, NN, L1, L2, D, D1).
-
-encode_opcodes_1([call_aux(Label, Arity, Trim)|As], N, L, L1, [address_of(Label, Offset)|D], D1):-
-        !,
-        compile_message('    '(call_aux(Label, Arity, Trim, N))),
-        Offset is N+1,
-        emit_codes(N, [40]),
-        NN is N+2,
-        emit_codes(NN, [Arity, Trim]),
-        compile_message(need_address_of(Label, at(Offset))),
-        NNN is N+4,
-        encode_opcodes_1(As, NNN, L, L1, D, D1).
-
-encode_opcodes_1([execute_aux(Label, Arity)|As], N, L, L1, [address_of(Label, NN)|D], D1):-
-        !,
-        compile_message('    '(execute_aux(Label, Arity, N))),
-        NN is N+1,
-        emit_codes(N, [41]),
-        N2 is N+2,
-        emit_codes(N2, [Arity]),
-        NNN is N+3,
-        encode_opcodes_1(As, NNN, L, L1, D, D1).
-
-
-encode_opcodes_1([try_me_else(Label)|As], N, L, L1, [address_of(Label, NN)|D], D1):-
-        !,
-        % We do not necessarily know what Label is. Reserve a byte and add it to the list of things to resolve once compilation has completed.
-        compile_message(try_me_else(Label, N)),
-        NN is N+1,
-        emit_codes(N, [28]),
-        NNN is N+2,
-        encode_opcodes_1(As, NNN, L, L1, D, D1).
-
-encode_opcodes_1([label(Label)|As], N, [label(Label, N)|L], L1, D, D1):-
-        !,
-        encode_opcodes_1(As, N, L, L1, D, D1).
-
-encode_opcodes_1([A|As], N, L, L1, D, D1):-
-        !,
-        compile_message('    '(A, N)),
-        encode_opcode(A, OpcodeSize, Codes),
-        emit_codes(N, Codes),
-        NN is N + OpcodeSize,
-        encode_opcodes_1(As, NN, L, L1, D, D1).
-
-% This is used ONLY for printing out partially-compiled instructions
-encode_opcode(clause(_), 0, []).
-
-/* Control instructions 1-5 */
-encode_opcode(allocate, 1, [1]).
-encode_opcode(deallocate, 1, [2]).
-encode_opcode(call(Functor/Arity, N), 3, [3, I, N]):-
-        lookup_functor(Functor, Arity, I).
-encode_opcode(execute(Functor/Arity), 2, [4, I]):-
-        lookup_functor(Functor, Arity, I).
-encode_opcode(proceed, 1, [5]).
-
-/* Put instructions 6-13 */
-encode_opcode(put_variable(y(N), x(I)), 3, [6, N, I]).
-encode_opcode(put_variable(y(N)), 2, [60, N]).
-encode_opcode(put_variable(x(N), x(I)), 3, [7, N, I]).
-encode_opcode(put_value(R, x(I)), 4, [8|S]):-
-        encode_register(R, S, [I]).
-encode_opcode(put_unsafe_value(y(N), x(I)), 3, [9, N, I]).
-encode_opcode(put_unsafe_value(x(N), x(I)), 3, [9, N, I]):-
-        throw(illegal_unsafe_value_register(x(N))).
-encode_opcode(put_constant(C, x(I)), 3, [10, K, I]):-
-        lookup_atom(C, K).
-encode_opcode(put_nil(x(I)), 2, [11,I]).
-encode_opcode(put_structure(Functor/Arity, x(I)), 3, [12, F, I]):-
-        lookup_functor(Functor, Arity, F).
-encode_opcode(put_list(x(I)), 2, [13, I]).
-encode_opcode(put_integer(C, x(I)), 3, [14, C, I]).
-encode_opcode(put_float(C, x(I)), 3, [51, N, I]):-
-        lookup_float(C, N).
-
-/* Get instructions 15-21 */
-encode_opcode(get_variable(R, x(I)), 4, [15|S]):-
-        encode_register(R, S, [I]).
-encode_opcode(get_value(R, x(I)), 4, [16|S]):-
-        encode_register(R, S, [I]).
-encode_opcode(get_constant(C, x(I)), 3, [17, K, I]):-
-        lookup_atom(C, K).
-encode_opcode(get_nil(x(I)), 2, [18, I]).
-encode_opcode(get_structure(Functor/Arity, x(I)), 3, [19, F, I]):-
-        lookup_functor(Functor, Arity, F).
-encode_opcode(get_list(x(I)), 2, [20, I]).
-encode_opcode(get_integer(C, x(I)), 3, [21, C, I]).
-encode_opcode(get_float(C, x(I)), 3, [50, N, I]):-
-        lookup_float(C, N).
-
-/* Unify instructions 22-27 */
-encode_opcode(unify_void(N), 2, [22, N]).
-encode_opcode(unify_variable(R), 3, [23|S]):-
-        encode_register(R, S, []).
-encode_opcode(unify_value(R), 3, [24|S]):-
-        encode_register(R, S, []).
-encode_opcode(unify_local_value(R), 3, [25|S]):-
-        encode_register(R, S, []).
-encode_opcode(unify_constant(C), 2, [26, K]):-
-        lookup_atom(C, K).
-encode_opcode(unify_integer(C), 2, [27, C]).
-encode_opcode(unify_float(C), 2, [52, N]):-
-        lookup_float(C, N).
-
-
-/* Indexing instructions 28-30 */
-encode_opcode(try_me_else(L), 2, [28, L]).
-encode_opcode(retry_me_else(L), 2, [29, L]).
-encode_opcode(trust_me, 2, [30, 0]).
-
-/* Cut instructions */
-encode_opcode(neck_cut, 1, [31]).
-encode_opcode(cut(y(I)), 2, [32, I]).
-encode_opcode(get_level(y(I)), 2, [33, I]).
-
-/* Aux instructions. Used for ; and ->. Basically just call with an offset rather than a functor to look up*/
-encode_opcode(call_aux(P, A, N), 4, [40, P, A, N]).
-encode_opcode(execute_aux(P, A), 3, [41, P, A]).
-
-/* retry_foreign is for foreign predicates with nondeterministic behaviour */
-encode_opcode(retry_foreign, 1, [42]).
-
-/* get_choicepoint is used for setup_call_cleanup */
-encode_opcode(get_choicepoint(N, y(I)), 3, [43, N, I]).
-
-encode_opcode(nop2, 2, [254, 0]).
-
-
 compile_files([]):- !.
 compile_files([File|Files]):-
         compile_file(File),
@@ -1205,17 +1076,44 @@ compile_files([File|Files]):-
 
 
 compile_file(Source):-
-        %writeln(start_compile_file(Source)),
-        open(Source, read, S),
+  %writeln(compile_file(Source)),
+  canonical_source(Source, CanonicalSource),
+  push_current_compile_url(CanonicalSource),
+        open(CanonicalSource, read, S),
         compile_stream(S),
-        close(S).
-        %writeln(end_compile_file(Source)).
+        close(S),
+  pop_current_compile_url(CanonicalSource),
+  retractall('$loaded'(CanonicalSource)), % clear old loaded fact, if any.
+  assertz('$loaded'(CanonicalSource)).
+
+current_compilation_stream(Stream) :-
+        '$current_compilation_stream'([Stream|_]).
+
+push_current_compilation_stream(Stream) :-
+  (retract('$current_compilation_stream'(Streams))
+    -> true
+   ;
+   Streams = []
+  ),
+  asserta('$current_compilation_stream'([Stream|Streams])).
+
+pop_current_compilation_stream(Stream) :-
+  retract('$current_compilation_stream'([Stream|Streams])),
+  asserta('$current_compilation_stream'(Streams)).
 
 compile_stream(Stream) :-
-        compile_stream(Stream, mode(0, compile(0))).
+        push_current_compilation_stream(Stream),
+        compile_stream(Stream, mode(0, compile(0))),
+        pop_current_compilation_stream(Stream), % should pop the same stream that was pushed.
+        (current_compilation_module(Module, Stream)
+          -> pop_current_compilation_module(Module, Stream)
+         ;
+         true
+        ).
 
 compile_stream(Stream, Mode):-
         read_term(Stream, Term, []),
+        %write('  '), writeln(read(Term)),
         compile_stream_term(Stream, Term, Mode).
 
 % Originally this used 'forall(retract(delayed_initialization(Goal)), call(Goal))'.
@@ -1293,13 +1191,15 @@ compile_memory_file(MemoryFile) :-
 save_clause(Head:-Body):-
         !,
         functor(Head, Name, Arity),
-        transform_predicate_name(Name, Arity, TransformedName),
+        current_compilation_module(ModuleName),
+        transform_predicate_name(Name, Arity, ModuleName, TransformedName),
         add_clause_to_predicate(TransformedName/Arity, Head, Body).
 
 save_clause(Fact):-
         !,
         functor(Fact, Name, Arity),
-        transform_predicate_name(Name, Arity, TransformedName),
+        current_compilation_module(ModuleName),
+        transform_predicate_name(Name, Arity, ModuleName, TransformedName),
         add_clause_to_predicate(TransformedName/Arity, Fact, true).
 
 % first fetch all of the URLs, then compile them.

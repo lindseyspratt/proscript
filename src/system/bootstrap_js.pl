@@ -1,4 +1,4 @@
-:- meta_predicate(call/1, [0]).
+:- meta_predicate(call(0)).
 
 module(Name, Exports) :-
         define_current_module(Name, Exports).

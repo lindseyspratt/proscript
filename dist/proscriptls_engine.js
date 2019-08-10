@@ -704,6 +704,160 @@ function predicate_define_dynamic_predicate(indicator) {
         return type_error("predicate_indicator", indicator);
 }
 
+// The predicateIndicator is a structure of Name/Arity, where Name
+// is the unqualified name of a predicate (i.e. does not have a module
+// name prefix).
+
+function predicate_add_module_export(moduleName, predicateIndicator) {
+  //     assertz('$module_export'(Name, F, A)).
+    if (TAG(moduleName) === TAG_REF)
+        return instantiation_error(moduleName);
+    else if (TAG(moduleName) !== TAG_ATM)
+        return type_error("atom", moduleName);
+
+    var slash2 = lookup_functor("/", 2);
+    if (TAG(predicateIndicator) === TAG_STR && memory[VAL(predicateIndicator)] === slash2)
+    {
+        var name = deref(memory[VAL(predicateIndicator) + 1]);
+        var arity = deref(memory[VAL(predicateIndicator) + 2]);
+        if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT)
+        {
+            if (VAL(arity) < 0)
+                return domain_error("not_less_than_zero", arity);
+            let namePL = PL_put_atom_chars(name);
+
+            let exportedPredicates = module_exports[moduleName];
+            if(exportedPredicates) {
+                for (let entry of exportedPredicates) {
+                    if (entry[0] === namePL && entry[1] === arity) {
+                        return true; // do nothing, the predicate is already specified in the exports.
+                    }
+                }
+            } else {
+                exportedPredicates = [];
+                module_exports[moduleName] = exportedPredicates;
+            }
+
+            // add namePL/arity to exports.
+            exportedPredicates.push([namePL, arity]);
+            return true;
+        }
+        else if (TAG(name) === TAG_REF)
+            return instantiation_error(name);
+        else if (TAG(name) !== TAG_ATM)
+            return type_error("atom", name);
+        else if (TAG(arity) === TAG_REF)
+            return instantiation_error(arity);
+        else if (TAG(arity) !== TAG_INT)
+            return type_error("integer", arity);
+    }
+    else if (TAG(predicateIndicator) === TAG_REF)
+        return instantiation_error(predicateIndicator);
+    else
+        return type_error("predicate_indicator", predicateIndicator);
+}
+
+
+function predicate_method_export(moduleName, predicateIndicator)
+{
+    if (TAG(moduleName) === TAG_REF)
+    {
+        let cursor;
+
+        if (state.foreign_retry)
+        {
+            cursor = state.foreign_value;
+            cursor.exportIndex++;
+        }
+        else
+        {
+            create_choicepoint();
+            cursor = {module:0, exportIndex:0};
+        }
+
+        if (cursor.module >= module_exports.length)
+        {
+            destroy_choicepoint();
+            return false;
+        } else if(cursor.exportIndex >= module_exports[cursor.module].length) {
+            cursor.module++;
+            cursor.exportIndex = 0;
+        }
+
+        update_choicepoint_data(cursor);
+
+        let moduleExports = module_exports[cursor.module];
+        while(!moduleExports && cursor.module < module_exports.length) {
+            cursor.module++;
+            moduleExports = module_exports[cursor.module];
+        }
+
+        if(!moduleExports) {
+            destroy_choicepoint();
+            return false;
+        } else if( unify(moduleName, cursor.module)) {
+            let pair = moduleExports[cursor.exportIndex];
+            if(!pair) {
+                return false;
+            } else {
+                let indicatorPL = create_indicator_structure(pair[0], pair[1]);
+                return unify(predicateIndicator, indicatorPL);
+            }
+        } else {
+            return false;
+        }
+    }
+    else if (TAG(moduleName) === TAG_ATM)
+    {
+
+        let cursor;
+
+        if (state.foreign_retry)
+        {
+            cursor = state.foreign_value;
+            cursor.exportIndex++;
+        }
+        else
+        {
+            create_choicepoint();
+            cursor = {module:moduleName, exportIndex:0};
+        }
+
+        if(cursor.exportIndex >= module_exports[cursor.module].length) {
+            destroy_choicepoint();
+            return false;
+        }
+
+        update_choicepoint_data(cursor);
+        let moduleExports = module_exports[cursor.module];
+
+        if(!moduleExports) {
+            destroy_choicepoint();
+            return false;
+        } else if( unify(moduleName, cursor.module)) {
+            if(!pair) {
+                return false;
+            } else {
+                let indicatorPL = create_indicator_structure(pair[0], pair[1]);
+                return unify(predicateIndicator, indicatorPL);
+            }
+        } else {
+            return false;
+        }
+    }
+    else
+        return type_error("atom", key);
+}
+
+function create_indicator_structure(name, arity) {
+    var ftor = lookup_functor('/', 2);
+    var structure = alloc_structure(ftor);
+    memory[state.H++] = name;
+    memory[state.H++] = arity;
+    return structure;
+}
+
+
 function predicate_dump_tables(streamPL) {
     /*
             format(S, 'atable = [~w];~n', [AtomAtom]),
@@ -741,7 +895,7 @@ function predicate_dump_tables(streamPL) {
 
     write_to_stream(streamValue, 'system =' + JSON.stringify(system) + ';\n');
     write_to_stream(streamValue, 'initialization =' + JSON.stringify(initialization) + ';\n');
-    write_to_stream(streamValue, 'exports =' + JSON.stringify(exports) + ';\n');
+    write_to_stream(streamValue, 'module_exports =' + JSON.stringify(module_exports) + ';\n');
 
     return true;
 }
@@ -2041,6 +2195,8 @@ function predicate_current_prolog_flag(key, value)
 {
     if (TAG(key) === TAG_REF)
     {
+        let index;
+
         if (state.foreign_retry)
         {
             index = state.foreign_value + 1;         
@@ -2061,9 +2217,9 @@ function predicate_current_prolog_flag(key, value)
     }
     else if (TAG(key) === TAG_ATM)
     {
-        var keyname = atable[VAL(key)];
-        var index = 0;
-        for (var i = 0; i < prolog_flags.length; i++)
+        let keyname = atable[VAL(key)];
+        let index = 0;
+        for (let i = 0; i < prolog_flags.length; i++)
         {
             if (prolog_flags[index].name === keyname)
                 return prolog_flags[index].fn(false, value);
@@ -2120,6 +2276,8 @@ function predicate_clause(head, body)
     }
 }
 
+// indicator may have module prefix - Module:Name/Arity - or not - Name/Arity.
+// Module:Name/Arity = :(Module, /(Name, Arity)).
 
 function predicate_current_predicate(indicator)
 {
@@ -3138,7 +3296,7 @@ let retry_foreign_offset;  // 'defined' by load_state() in proscriptls_state.js.
 let foreign_predicates; // 'defined' by load_state() in proscriptls_state.js.
 let system;  // 'defined' by load_state() in proscriptls_state.js.
 let initialization;  // 'defined' by load_state() in proscriptls_state.js.
-let exports;  // 'defined' by load_state() in proscriptls_state.js.
+let module_exports;  // 'defined' by load_state() in proscriptls_state.js.
 
 /* Special purpose machine registers:
 
@@ -3168,7 +3326,7 @@ function debug_msg(msg)
 
 function initialize()
 {
-    let trace_ftor = VAL(lookup_functor('wam_compiler:$traceR', 3));
+    let trace_ftor = VAL(lookup_functor('user:$traceR', 3));
     let trace_predicate = predicates[trace_ftor];
     let trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
 

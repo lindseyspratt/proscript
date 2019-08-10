@@ -10,51 +10,14 @@
    * add_clause_to_predicate(Name/Arity, +Head, +Body)
    * emit_code(+Address, +Code)
 ---------------------------------------------------------- */
+:- module(wam_bootstrap,
+    [add_clause_to_predicate/3, emit_code/2,
+    generate_system_goal/1, generate_initialization_goal/1, define_dynamic_predicate/1, add_module_export/2, module_export/2, handle_term_expansion/1,
+    fetch_promise/2, promise_result/2, open_memory_file/3, reset/0, gc/0, reset_compile_buffer/0, dump_tables/1]).
 
-:-dynamic(ftable/2). % functors
-:-dynamic(fltable/2). % floats
-:-dynamic(atable/2). % atoms
-:-dynamic(clause_table/5). % clauses
-:-dynamic(fptable/2). % foreign predicates
-:-dynamic(ctable/2). % code
-:-dynamic(itable/1). % initialization directive predicates
-:-dynamic(stable/1). % system directive predicates
-:-dynamic(dtable/1). % dynamic predicates
-:-dynamic('$module_export'/3).
-
-lookup_functor(Functor, Arity, N):-
-        lookup_atom(Functor, F),
-        ( ftable(F/Arity, N)->
-            true
-        ; otherwise->
-            flag(ftable, N, N+1),
-            assert(ftable(F/Arity, N))
-        ).
-
-lookup_dynamic_functor(Functor, Arity, N):-
-        lookup_functor(Functor, Arity, N),
-        ( dtable(N)->
-            true
-        ; otherwise->
-            assert(dtable(N))
-        ).
-
-lookup_atom([], 0):- !.
-lookup_atom(Atom, N):-
-        ( atable(Atom, N)->
-            true
-        ; otherwise->
-            flag(atable, N, N+1),
-            assert(atable(Atom, N))
-        ).
-
-lookup_float(Float, N):-
-        ( fltable(Float, N)->
-            true
-        ; otherwise->
-            flag(fltable, N, N+1),
-            assert(fltable(Float, N))
-        ).
+:- use_module(wam_bootstrap_util).
+:- use_module('../system/wam_util').
+:- use_module('../system/wam_assemble').
 
 generate_system_goal(Init) :-
         flag(stable, N, N+1),
@@ -72,9 +35,6 @@ generate_initialization_goal(Init) :-
         lookup_functor(Init, 0, FN),
         assert(itable(FN)).
 
-emit_code(N, Code):-
-        assert(ctable(N, Code)).
-
 % dynamic implies public. In proscript, public also implies dynamic.
 % the is_public flag will be set to true in the saved state
 % for predicate Name/Arity.
@@ -87,79 +47,39 @@ define_dynamic_predicate(Name/Arity) :-
          assertz(clause_table(Predicate, 0, [], none, none))
         ).
 
+add_module_export(Name, F/A) :-
+        lookup_atom(Name, NameID),
+        lookup_atom(F, FID),
+        assertz('$module_export'(NameID, FID, A)).
+add_module_export(_Name, op(_,_,_)). % ignore op exports for now.
+
+module_export(Name, F/A) :-
+        var(Name)
+          -> (var(F)
+               -> '$module_export'(NameID, FID, A),
+                  atable(Name, NameID),
+                  atable(F, FID)
+              ;
+               lookup_atom(F, FID),
+               '$module_export'(NameID, FID, A),
+               atable(Name, NameID)
+              )
+        ;
+        var(F)
+          -> lookup_atom(Name, NameID),
+             '$module_export'(NameID, FID, A),
+             atable(F, FID)
+        ;
+        lookup_atom(Name, NameID),
+        lookup_atom(F, FID),
+        '$module_export'(NameID, FID, A).
+
 handle_term_expansion(Clause) :-
     assertz(Clause).
 
-add_clause_to_predicate(Name/Arity, Head, Body):-
-        setof(N-Code, T^(ctable(T, Code), N is T /\ 0x7fffffff), SortedCodes),
-        findall(Code, member(_-Code, SortedCodes), Codes),
-        lookup_functor(Name, Arity, Predicate),
-        ( retract(clause_table(Predicate, I, [254,0|PreviousCodes], HeadP, BodyP))->
-            % If there is a NOP clause, then we have only one clause. Make it try_me_else, then add our new one as trust_me.
-            II is I+1,
-            assertz(clause_table(Predicate, I, [28, II|PreviousCodes], HeadP, BodyP)),
-            assertz(clause_table(Predicate, II, [30, 0|Codes], Head, Body))
-        ; retract(clause_table(Predicate, I, [30,0|PreviousCodes], HeadP, BodyP))->
-            II is I+1,
-            % If we have a trust_me, then make it retry_me_else (since there must have been another clause to try first, if we then have to trust_me)
-            assertz(clause_table(Predicate, I, [29, II|PreviousCodes], HeadP, BodyP)),
-            assertz(clause_table(Predicate, II, [30, 0|Codes], Head, Body))
-        ; retract(clause_table(Predicate, 0, [], _HeadP, _BodyP))->
-            % Predicate defined with no clauses, possibly due to dynamic directive defining Predicate.
-            % add ours as a <NOP,0>
-            assertz(clause_table(Predicate, 0, [254, 0|Codes], Head, Body))
-        ; otherwise->
-            % Otherwise Predicate not defined so there are no clauses yet. So just add ours as a <NOP,0>
-            assertz(clause_table(Predicate, 0, [254, 0|Codes], Head, Body))
-        ).
-
-add_clause_to_aux(AuxLabel, N, L, LT):-
-        ( nonvar(AuxLabel),
-          AuxLabel = defined(A) ->
-            NN is N xor 0x80000000,
-            add_clause_to_existing(A, NN),
-            L = LT
-        ; otherwise->
-            % Brand new aux! This gets <NOP,0> and sets L
-            NN is N+1,
-            assert(ctable(N, 254)),
-            assert(ctable(NN, 0)),
-            AuxLabel = defined(N),
-            L = [label(AuxLabel, N)|LT]
-        ).
-
-
-add_clause_to_existing(A, N):-
-        AA is A+1,
-        NN is N+1,
-        ( ctable(A, 254)->
-            % Change <NOP,0> -> <try_me_else N>
-            retract(ctable(A, _)),
-            retract(ctable(AA, _)),
-            assert(ctable(A, 28)),
-            assert(ctable(AA, N)),
-            % Add <trust_me, 0> at N
-            assert(ctable(N, 30)),
-            assert(ctable(NN, 0))
-        ; ctable(A, 28)->
-            % Follow path
-            ctable(AA, Link),
-            add_clause_to_existing(Link, N)
-        ; ctable(A, 29)->
-            % Follow link
-            ctable(AA, Link),
-            add_clause_to_existing(Link, N)
-        ; ctable(A, 30)->
-            % Change <trust_me, 0> -> <retry_me_else, N>
-            retract(ctable(A, _)),
-            retract(ctable(AA, _)),
-            assert(ctable(A, 29)),
-            assert(ctable(AA, N)),
-            % Add <trust_me, 0> at N
-            assert(ctable(N, 30)),
-            assert(ctable(NN, 0))
-        ).
-
+fetch_promise(_,_).
+promise_result(_,_).
+open_memory_file(_,_,_).
 
 quote_atom_for_javascript([], '"[]"'):- !.
 quote_atom_for_javascript(Atom, QuotedAtom):-
@@ -232,16 +152,15 @@ dump_tables(S):-
         atomic_list_concat(IGs, ', ', InitializationAtom),
         format(S, 'initialization = [~w];~n', [InitializationAtom]),
         setof(X,
-              M^MN^ENs^
-              (setof(EN,
-                    E^('$module_export'(M, E), atable(E, EN)),
+              MN^ENs^
+              (setof([FN,A],
+                    '$module_export'(MN, FN, A),
                     ENs
                  ),
-               atable(M, MN),
                format(atom(X), '~w : ~w', [MN, ENs]) % { ModuleN1 : [Export1, ...], ModuleN2 : [Export1, ...]...}
               ), R),
         atomic_list_concat(R, ', ', ModuleExportsAtom),
-        format(S, 'exports = [~w];~n', [ModuleExportsAtom]).
+        format(S, 'module_exports = {~w};~n', [ModuleExportsAtom]).
 
 dump_predicate(PredicateAtom) :-
        bagof(c(Clause, Index, Head, Body),
@@ -278,7 +197,9 @@ reserve_predicate(Functor/Arity, Foreign):-
         transform_predicate_name1(system, ColonCode, FunctorCodes, TransformedFunctor),
         lookup_functor(TransformedFunctor, Arity, F),
         assert(fptable(F, Foreign)),
-        assertz('$module_export'(system, Functor, Arity)).
+        lookup_atom(system, SystemID),
+        lookup_atom(Functor, FunctorID),
+        assertz('$module_export'(SystemID, FunctorID, Arity)).
 
 % record_term returns a string which is a javascript representation of the term
 record_term(Term, String) :-
@@ -463,6 +384,8 @@ reset:-
         reserve_predicate(define_dynamic_predicate/1, predicate_define_dynamic_predicate),
         reserve_predicate(compiled_state_boot_code/1, predicate_compiled_state_boot_code),
         reserve_predicate(dump_tables/1, predicate_dump_tables),
+        reserve_predicate(add_module_export/2, predicate_add_module_export),
+        reserve_predicate(method_export/2, predicate_method_export),
 
         % Promises
         reserve_predicate(request_result/1, predicate_request_result),
@@ -547,63 +470,6 @@ reset:-
         true.
 
 
-build_saved_state(SourceFiles, TopLevelQuery) :-
-    build_saved_state(SourceFiles, 'proscriptls_state.js', TopLevelQuery).
-
-build_saved_state(SourceFiles, SavedStateFile, TopLevelQuery):-
-        reset_and_build_boot_code(BootCode),
-        compile_clause(toplevel:-TopLevelQuery),
-        ( compile_files(SourceFiles)->
-            true
-        ; otherwise->
-            writeln(failed_to_compile),
-            halt,
-            fail
-        ),
-        !,
-        save_compiled_state(BootCode, SavedStateFile).
-
-reset_and_build_boot_code([0,255|MainBootCodes]) :-
-        reset,
-        assemble([call(toplevel/0,0), execute(halt/0), retry_foreign], 2),
-        setof(N-Code, ctable(N, Code), SortedBootCodes),
-        findall(Code, member(_-Code, SortedBootCodes), MainBootCodes).
-
-
-% eg bootstrap('demo.pl', (factorial(5, X), writeln(X))).
-% Ultimately, bootstrap('prolog.pl', prolog_toplevel).
-bootstrap(Source, Query):-
-        bootstrap('', [Source], Query).
-
-bootstrap(CorePrefix, Sources, Query):-
-        bootstrap(CorePrefix, Sources, 'proscriptls_state.js', Query).
-
-bootstrap(CorePrefix, Sources, SavedStateFile, Query):-
-        current_prolog_flag(version_data, swi(Mj, Mn, P, E)),
-        (Mj >= 7 -> true;throw(wrong_swi_version('expected >= 7', swi(Mj, Mn, P, E)))),
-        % Since javascript will not support open/3, we must load it into an atom and pass it.
-        % Ultimately we could use XmlHTTPRequest, but probably that is less useful anyway
-        atom_concat(CorePrefix, 'wam_compiler.pl', WAM),
-        atom_concat(CorePrefix, 'debugger.pl', Debugger),
-        atom_concat(CorePrefix, 'bootstrap_js.pl', Bootstrap),
-        atom_concat(CorePrefix, 'url.pl', URL),
-        atom_concat(CorePrefix, 'not.pl', Not),
-        atom_concat(CorePrefix, 'promise.pl', Promise),
-        append([WAM,
-              Debugger,
-              Bootstrap,
-              URL,
-              Not,
-              Promise], Sources, AllFiles),
-
-        build_saved_state(AllFiles,
-                          SavedStateFile,
-                          ( writeln(toplevel),
-                            compile_clause(bootstrap:-Query),
-                            !,
-                            bootstrap
-                            )).
-
 
 files_to_atoms([], []).
 files_to_atoms([H|T], [HA|TA]) :-
@@ -620,15 +486,6 @@ file_to_atom(Filename, Atom):-
 
 trace_unify(A, A).
 
-/*
-compile_message(A):-
-    A = [H|T] -> write(H), compile_message(T)
-    ;
-    A = [] -> writeln('')
-    ;
-    writeln(A).
-*/
-compile_message(_).
 flush_stdout.
 gc.
 
@@ -636,7 +493,7 @@ gc.
 % where the wam_compiler:compile_clause_2/N predicate attempts to call the directives
 % it encounters.
 
-module(_,_).
+%module(_,_).
 
 concat_list(L, A) :-
     concat_list(L, '', A).
