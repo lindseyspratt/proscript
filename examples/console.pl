@@ -191,7 +191,7 @@ function keypress(e)
         initialize();
         allocate_first_frame();
 
-        var ftor = VAL(lookup_functor("repl", 1));
+        var ftor = VAL(lookup_functor("wam_compiler:repl", 1));
         var pred = predicates[ftor];
         var pi = predicates[ftor].clause_keys[0];
         state.current_predicate = pred;

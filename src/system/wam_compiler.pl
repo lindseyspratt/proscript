@@ -69,17 +69,20 @@ Some gotchas:
 
 :-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/2]).
 
- :-use_module('../tools/wam_bootstrap').
- :-use_module('../tools/wam_bootstrap_util').
+:- if(\+ (current_predicate(wam_compiler:current_compile_url/1), current_compile_url(_))).
+    :- use_module('../tools/wam_bootstrap').
+    :- use_module('../tools/wam_bootstrap_util').
+    :- use_module(url). % in proscriptls system.
+:- endif.
+
 :- use_module(wam_assemble).
 :- use_module(wam_util).
 
+
 :-ensure_loaded('../tools/testing').
-:-ensure_loaded(url).
 
 :-dynamic(delayed_initialization/1).
 :-dynamic('$loaded'/1).
-:-dynamic('$current_compile_url'/1).
 :-dynamic('$current_compilation_module'/1).
 :-dynamic('$current_compilation_stream'/1).
 :-dynamic('$import'/2).
@@ -144,6 +147,7 @@ compile_clause_directive_nonmacro(ensure_loaded(Spec), Mode, Mode) :- compile_cl
 compile_clause_directive_nonmacro(include(_), Mode, Mode). % Currently a no-op in ProscriptLS.
 compile_clause_directive_nonmacro(module(A,B), Mode, Mode) :- compile_clause_compilation_directive(module(A,B), Mode, Mode).
 compile_clause_directive_nonmacro(use_module(A), Mode, Mode) :- compile_clause_compilation_directive(use_module(A), Mode, Mode).
+compile_clause_directive_nonmacro(reexport(A), Mode, Mode) :- compile_clause_compilation_directive(reexport(A), Mode, Mode).
 compile_clause_directive_nonmacro(meta_predicate(Term), Mode, Mode) :- compile_clause_compilation_directive(meta_predicate(Term), Mode, Mode).
 
 compile_clause_directive_macro(if(Goal), ModeIn, ModeOut) :- compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut).
@@ -164,6 +168,8 @@ compile_clause_compilation_directive(module(ModuleName, Exports), Mode, Mode) :-
         define_current_module(ModuleName, Exports).
 compile_clause_compilation_directive(use_module(Spec), Mode, Mode) :-
         define_use_module(Spec).
+compile_clause_compilation_directive(reexport(Spec), Mode, Mode) :-
+        define_reexport(Spec).
 compile_clause_compilation_directive(meta_predicate(Term), Mode, Mode) :-
         define_meta_predicate(Term).
 compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut) :-
@@ -256,7 +262,7 @@ macro_endif(ModeIn, ModeOut) :-
 
 define_dynamic_predicates(Name/Arity) :-
         !,
-        define_dynamic_predicate(Name/Arity).
+        define_dynamic_predicate1(Name/Arity).
 define_dynamic_predicates([]).
 define_dynamic_predicates([H|T]) :-
         !,
@@ -266,10 +272,21 @@ define_dynamic_predicates((A,B)) :-
         define_dynamic_predicates(A),
         define_dynamic_predicates(B).
 
+define_dynamic_predicate1(Functor/Arity) :-
+        current_compilation_module(Module),
+        transform_predicate_name(Functor, Arity, Module, TransformedFunctor),
+        define_dynamic_predicate(TransformedFunctor/Arity).
+
+
 define_current_module(Name, Exports) :-
         current_compilation_stream(Stream),
         push_current_compilation_module(Name, Stream),
-        define_module_export(Exports, Name).
+        define_module_export(Exports, Name),
+        (Name \= system
+          -> define_use_module(library(system)) % autoload system module into every (non-system) module.
+        ;
+         true
+        ).
 
 define_module_export([], _).
 define_module_export([H|T], Name) :-
@@ -299,7 +316,11 @@ pop_current_compilation_module(Name, Stream) :-
 define_use_module(Spec) :-
         setup_use_module(Spec, ImportName),
         current_compilation_module(Name, _),
-        assertz('$import'(Name, ImportName)).
+        (Name = ImportName
+          -> throw(cyclic_module(Name))
+        ;
+        assertz('$import'(Name, ImportName))
+        ).
 
 setup_use_module(library(LibraryName), LibraryName) :-
         !,
@@ -329,6 +350,31 @@ load_file_for_use_module(Path) :-
         compile_file(Path).
 :- endif.
 
+use_module_imports(library(LibraryName), Imports) :-
+        !,
+        setof(Import, module_export(LibraryName, Import), Imports).
+use_module_imports(Path, Imports) :-
+        path_to_module_name(Path, ImportName),
+        setof(Import, module_export(ImportName, Import), Imports).
+
+define_reexport([]).
+define_reexport([Spec|Specs]) :-
+        define_reexport(Spec, all),
+        define_reexport(Specs).
+
+define_reexport(Spec, all) :-
+        define_use_module(Spec),
+        (use_module_imports(Spec, Imports)
+          -> current_compilation_module(Module),
+             define_module_export(Imports, Module)
+        ;
+         writeln(no_imports(Spec))
+        ).
+
+define_meta_predicate(((A, B))) :-
+        !,
+        define_meta_predicate(A),
+        define_meta_predicate(B).
 define_meta_predicate(Term) :-
         Term =.. [Functor|MetaArgTypes],
         list_length(MetaArgTypes, Arity),
@@ -349,11 +395,29 @@ clear_imports :-
 
 current_import(UnqualifiedPredicateName, Arity, ImportModuleName) :-
         current_compilation_module(CurrentModuleName),
-        current_import(UnqualifiedPredicateName, Arity, CurrentModuleName, ImportModuleName).
+        current_import(UnqualifiedPredicateName, Arity, CurrentModuleName, ImportModuleName),
+        !,
+        CurrentModuleName \= ImportModuleName.
+
+% The system module is implemented specially: it is assigned exported predicates directly by the
+% reserve_predicate/2 predicate, and it is assigned exported predicates by reexport of
+% 'primitive' modules. These primitive modules do not 'use' any other modules.
+% Because of this special implementation the recursion through current_import/4
+% stops at the primitive modules imported by 'system'.
 
 current_import(UnqualifiedPredicateName, Arity, ImportingModuleName, ImportModuleName) :-
-        '$import'(ImportingModuleName, ImportModuleName),
-        module_export(ImportModuleName, UnqualifiedPredicateName/Arity).
+        '$import'(ImportingModuleName, ImportModuleNameINTERIM),
+        module_export(ImportModuleNameINTERIM, UnqualifiedPredicateName/Arity)
+          -> (ImportingModuleName = system
+                -> ImportModuleNameINTERIM = ImportModuleName
+             ;
+              current_import1(UnqualifiedPredicateName, Arity, ImportModuleNameINTERIM, ImportModuleName)
+             )
+        ;
+        ImportingModuleName = ImportModuleName.
+
+current_import1(UnqualifiedPredicateName, Arity, ImportModuleNameINTERIM, ImportModuleName) :-
+        current_import(UnqualifiedPredicateName, Arity, ImportModuleNameINTERIM, ImportModuleName).
 
 default_meta_arg_types([], _Flag).
 default_meta_arg_types([Flag|T], Flag) :-
@@ -923,6 +987,16 @@ compile_goal(!(Var), _ModuleName, _Position, depart, PermanentVariables, _EnvSiz
         !,
         variable_must_be_known_permanent(Var, PermanentVariables, y(Register)).
 
+compile_goal(goal(SpecifiedModule:Goal), _ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
+        !,
+        Goal =.. [Functor|Args],
+        list_length(Args, Arity),
+        resize_state(Position, State, Arity, S1),
+        transform_predicate_name(Functor, Arity, SpecifiedModule, TransformedFunctor),
+        defined_meta_predicate(TransformedFunctor, Arity, MetaArgTypes),
+        compile_body_args(Args, MetaArgTypes, SpecifiedModule, Position, 0, PermanentVariables, S1, S2, Opcodes, O1),
+        compile_predicate_call(LCO, EnvSize, TransformedFunctor, Arity, O1, OpcodesTail).
+
 compile_goal(goal(Goal), ModuleName, Position, LCO, PermanentVariables, EnvSize, State, S2, Opcodes, OpcodesTail):-
         !,
         Goal =.. [Functor|Args],
@@ -978,9 +1052,15 @@ compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariable
 compile_body_arg(Arg, MetaArgType, ModuleName, _Position, Dest, _PermanentVariables, State, State, [put_constant(TransformedArg, Dest)|Tail], Tail, _):-
         atom_or_empty_list(Arg), !,
         (atom(Arg),
-         (integer(MetaArgType) % 0..9
-          ; MetaArgType = (:)
-         ) -> transform_predicate_name(Arg, 0, ModuleName, TransformedArg)
+         MetaArgType = (:)
+           -> transform_predicate_name(Arg, 0, ModuleName, TransformedArg)
+         ;
+         integer(MetaArgType) % 0..9
+           -> Arg =.. [Functor|SubArgs],
+              length(SubArgs, ArgArity),
+              Arity is ArgArity + MetaArgType,
+              transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor),
+              TransformedArg =.. [TransformedFunctor|SubArgs]
          ;
          Arg = TransformedArg
         ).
@@ -1240,21 +1320,6 @@ compile_results([URL-Promise|T]) :-
   retractall('$loaded'(URL)), % clear old loaded fact, if any.
   assertz('$loaded'(URL)),
   compile_results(T).
-
-current_compile_url(URL) :-
-  '$current_compile_url'([URL|_]).
-
-push_current_compile_url(URL) :-
-  (retract('$current_compile_url'(URLs))
-    -> true
-   ;
-   URLs = []
-  ),
-  asserta('$current_compile_url'([URL|URLs])).
-
-pop_current_compile_url(URL) :-
-  retract('$current_compile_url'([URL|URLs])),
-  asserta('$current_compile_url'(URLs)).
 
 %-------------------------- Finally we have a crude toplevel ----------------------
 % swipl -f wam_compiler.pl -t "make, bootstrap('demo.pl', call_test), halt" && /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc foreign.js wam.js bootstrap.js read.js -e "demo(false)"

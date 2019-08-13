@@ -1,4 +1,22 @@
-:- meta_predicate(call(0)).
+:- module(bootstrap_js,
+        [append/3, assert/1, save_clausea/1, handle_term_expansion/1,
+         include/1, (dynamic)/1, consult_atom/1, ensure_loaded/1, format/2,
+         compile_message/1, (??) / 1, (?) / 1, otherwise/0, end_block/2, findall/3, setof/3, bagof/3,
+         asserta/1, assertz/1, retract/1,
+         unify_with_occurs_check/2, (\=) / 2, (\==) / 2, atomic/1, number/1,
+         open/3, close/1, flush_output/0, stream_property/2, get_char/1, get_code/1, peek_char/1,
+         put_char/1, put_code/1, get_byte/1, peek_byte/1, put_byte/1, read_term/2, read/1, read/2,
+         write_term/2, write/1, write/2, writeq/2, write_canonical/1, write_canonical/2,
+         halt/0,
+         callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
+         call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8
+         /* */
+         ]).
+
+:- meta_predicate((
+            call(0), call(1,+), call(2,+, +), call(3, +, +, +), call(4, +, +, +, +), call(5, +, +, +, +, +), call(6, +, +, +, +, +, +), call(7, +, +, +, +, +, +, +),
+            retractall(0), asserta(0), assertz(0), retract(0)
+            )).
 
 module(Name, Exports) :-
         define_current_module(Name, Exports).
@@ -32,7 +50,7 @@ call(Goal):-
         term_variables(Goal, Vars),
         % Compile this into a predicate, but do not actually declare it anywhere.
         % The functor is therefore irrelevant.
-        compile_clause_2(query(Vars):-Goal),
+        wam_compiler:compile_clause_2(query(Vars):-Goal),
         !,
         % Now we need to call our anonymous predicate. $jmp does the trick here
         '$jmp'(Vars),
@@ -42,7 +60,7 @@ call(Goal):-
 
 dynamic(Name/Arity) :-
         !,
-        define_dynamic_predicate(Name/Arity).
+        wam_compiler:define_dynamic_predicate(Name/Arity).
 dynamic([]).
 dynamic([H|T]) :-
         !,
@@ -57,12 +75,12 @@ consult_atom(Atom):-
         compile_atom(Atom).
 
 ensure_loaded(URL) :-
-  canonical_source(URL, CanonicalURL),
+  wam_compiler:canonical_source(URL, CanonicalURL),
   (
-  '$loaded'(CanonicalURL)
+  wam_compiler:'$loaded'(CanonicalURL)
     -> true
   ;
-  consult([CanonicalURL])
+  wam_compiler:consult([CanonicalURL])
   ).
 
 format(Format, Args):-
@@ -286,8 +304,8 @@ number(X):- (integer(X)-> true; float(X)).
 % current_predicate/1 (foreign)
 
 % 8.9
-asserta(Term):- compile_clause_2(Term), save_clausea(Term).
-assertz(Term):- compile_clause_2(Term), save_clause(Term).
+asserta(Term):- wam_compiler:compile_clause_2(Term), save_clausea(Term).
+assertz(Term):- wam_compiler:compile_clause_2(Term), save_clause(Term).
 retract(Head:-Body):- !, retract_clause(Head, Body).
 retract(Fact):- !, retract_clause(Fact, true).
 % abolish/1 (foreign)

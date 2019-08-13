@@ -203,6 +203,7 @@ generate_type_sidenav1([H|T], Stream) :-
     generate_type_sidenav1(T, Stream).
 
 generate_type_sidenav_entry(x(Type, Name), Stream) :-
+    writeln(x(Type, Name)),
     write(Stream, '<li>{{1 @ Type & \'anchor.sidenav.template\' # [Type, doc, api_'),
     write(Stream, Type),
     write(Stream, ', \'index_doc.html\', \''),

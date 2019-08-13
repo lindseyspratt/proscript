@@ -1,3 +1,22 @@
+:- module(url, [current_compile_url/1, push_current_compile_url/1, pop_current_compile_url/1, convert_URL_to_base/2, url_directory/2, resolve_url/3]).
+
+:-dynamic('$current_compile_url'/1).
+
+current_compile_url(URL) :-
+  '$current_compile_url'([URL|_]).
+
+push_current_compile_url(URL) :-
+  (retract('$current_compile_url'(URLs))
+    -> true
+   ;
+   URLs = []
+  ),
+  asserta('$current_compile_url'([URL|URLs])).
+
+pop_current_compile_url(URL) :-
+  retract('$current_compile_url'([URL|URLs])),
+  asserta('$current_compile_url'(URLs)).
+
 convert_URL_to_base(URL, BaseURL) :-
   absolute_url(URL)
     -> URL = BaseURL

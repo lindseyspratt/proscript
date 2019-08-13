@@ -1,3 +1,5 @@
+:- module(debugger, [trace/0, notrace/0, notrace_backtrackable/0, '$traceR'/1]).
+
 trace :-
     '$trace_set'(trace).
 

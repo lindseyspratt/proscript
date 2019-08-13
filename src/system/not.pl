@@ -40,6 +40,8 @@
 	    term_is_free_of(+,+,+).
 */
 
+:- module(not, [free_variables/4, free_variables/5, not/1 ]).
+
 not(Goal) :-
 	free_variables(Goal, [], [], Vars),
 	Vars \== [], !,

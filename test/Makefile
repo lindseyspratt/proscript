@@ -1,5 +1,5 @@
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
-DEBUG=true
+DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 ENGINE=../dist/proscriptls_engine.js
 SRC_ENGINE=../src/engine

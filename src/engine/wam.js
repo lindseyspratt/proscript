@@ -128,7 +128,7 @@ function debug_msg(msg)
 
 function initialize()
 {
-    let trace_ftor = VAL(lookup_functor('user:$traceR', 3));
+    let trace_ftor = VAL(lookup_functor('debugger:$traceR', 3));
     let trace_predicate = predicates[trace_ftor];
     let trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
 
@@ -455,6 +455,8 @@ function wam_setup_trace_call(target_ftor_ofst) {
 function wam_complete_call_or_execute(predicate) {
    if (predicate.clauses && predicate.clause_keys && predicate.clause_keys.length > 0
            && predicate.clauses[predicate.clause_keys[0]]) {
+        //stdout("Complete " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
+
         state.B0 = state.B;
         state.num_of_args = ftable[code[state.P + 1]][1];
         state.current_predicate = predicate;
@@ -616,7 +618,7 @@ function wam1()
                 stdout(instruction.string + '\n');
             }
         } else {
-           debugging = false;
+           //debugging = false;
         }
 
         if(! code) {

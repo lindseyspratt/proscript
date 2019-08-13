@@ -746,7 +746,7 @@ function consult_script_srcs(srcs) {
     }
     memory[state.H-1] = NIL;
 
-    let ftor = VAL(lookup_functor("consult", 1));
+    let ftor = VAL(lookup_functor("wam_compiler:consult", 1));
     allocate_first_frame();
     var pred = predicates[ftor];
     var pi = predicates[ftor].clause_keys[0];
