@@ -758,7 +758,7 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
 }
 
 
-function predicate_method_export(moduleName, predicateIndicator)
+function predicate_module_export(moduleName, predicateIndicator)
 {
     if (TAG(moduleName) === TAG_REF)
     {
@@ -795,7 +795,7 @@ function predicate_method_export(moduleName, predicateIndicator)
         if(!moduleExports) {
             destroy_choicepoint();
             return false;
-        } else if( unify(moduleName, cursor.module)) {
+        } else if( unify(moduleName, PL_put_atom(cursor.module))) {
             let pair = moduleExports[cursor.exportIndex];
             if(!pair) {
                 return false;
@@ -820,7 +820,7 @@ function predicate_method_export(moduleName, predicateIndicator)
         else
         {
             create_choicepoint();
-            cursor = {module:moduleName, exportIndex:0};
+            cursor = {module:VAL(moduleName), exportIndex:0};
         }
 
         if(cursor.exportIndex >= module_exports[cursor.module].length) {
@@ -834,7 +834,8 @@ function predicate_method_export(moduleName, predicateIndicator)
         if(!moduleExports) {
             destroy_choicepoint();
             return false;
-        } else if( unify(moduleName, cursor.module)) {
+        } else if( unify(moduleName, PL_put_atom(cursor.module))) {
+            let pair = moduleExports[cursor.exportIndex];
             if(!pair) {
                 return false;
             } else {
@@ -2601,6 +2602,52 @@ function predicate_eval_javascript(expression, result)
     } else {
         return true;
     }
+}
+
+function predicate_absolute_file_name(relative, absolute, options) {
+    if(TAG(relative) === TAG_REF) {
+        return instantiation_error(relative);
+    } else if(TAG(relative) !== TAG_ATM) {
+        return type_error('atom', relative);
+    }
+
+    let relativeJS = PL_get_atom_chars(relative);
+    if(!relativeJS) {
+        return domain_error('atom', relative);
+    }
+
+    if(relativeJS.startsWith("/")) {
+        return unify(relative, absolute);
+    }
+
+    if(! __dirname)  {
+        return unify(relative, absolute);
+    }
+
+    let parent = __dirname; // this only works in NodeJS.
+
+    let absoluteJS;
+    while(!absoluteJS) {
+        if (relativeJS.startsWith("./")) {
+            relativeJS = relativeJS.substr(2);
+        } else if (relativeJS.startsWith("../")) {
+            relativeJS = relativeJS.substr(3);
+            let lastIndex = parent.lastIndexOf("/");
+            if (lastIndex === 0) {
+                // at root
+                parent = "/";
+                absoluteJS = parent + "/" + relativeJS;
+            } else if(lastIndex > 0) {
+                parent = parent.substring(0, lastIndex);
+            } else {
+                return engine_error("reference directory has no slash: " + parent);
+            }
+        } else {
+            absoluteJS = parent + "/" + relativeJS;
+        }
+    }
+
+    return unify(absolute, lookup_atom((absoluteJS)));
 }
 
 /* errors */

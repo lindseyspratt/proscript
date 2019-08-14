@@ -23,4 +23,4 @@ dump-state: $(ENGINE) proscriptls_state_demo.js ../test/standalone.js $(SRC_TOOL
 		$(JSC) $(ENGINE) proscriptls_state_demo.js ../test/standalone.js $(SRC_TOOLS)/dump.js  -e "dump()"
 
 proscriptls_state_tiles.js:  ../dist/proscriptls_for_compile.js tiles.pl ../dist/node_compile.js
-		node ../dist/node_compile.js tiles.pl proscriptls_state_tiles.js
+		node ../dist/node_compile.js `pwd`/tiles.pl `pwd`/proscriptls_state_tiles.js

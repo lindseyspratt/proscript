@@ -1,4 +1,4 @@
-:- module(wam_util, [transform_predicate_name1/4, path_to_module_name/2, list_length/2, library_name_to_path/2, library_path/1]).
+:- module(wam_util, [transform_predicate_name1/4, path_to_module_name/2, list_length/2, library_name_to_path/2, library_path/1, existential_variables/3]).
 
 transform_predicate_name1(ModuleName, ColonCode, FunctorCodes, TransformedFunctor) :-
          atom_codes(ModuleName, ModuleNameCodes),
@@ -39,3 +39,8 @@ list_length_1([], N, N):- !.
 list_length_1([_|A], N, L):-
         NN is N+1,
         list_length_1(A, NN, L).
+
+existential_variables(Var ^ Term, [Var|T], Goal) :-
+    !,
+    existential_variables(Term, T, Goal).
+existential_variables(Goal, [], Goal).

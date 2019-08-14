@@ -69,6 +69,8 @@ Some gotchas:
 
 :-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/2]).
 
+:- meta_predicate(compile_clause_system_directive(0)).
+
 :- if(\+ (current_predicate(wam_compiler:current_compile_url/1), current_compile_url(_))).
     :- use_module('../tools/wam_bootstrap').
     :- use_module('../tools/wam_bootstrap_util').
@@ -406,7 +408,11 @@ current_import(UnqualifiedPredicateName, Arity, ImportModuleName) :-
 % stops at the primitive modules imported by 'system'.
 
 current_import(UnqualifiedPredicateName, Arity, ImportingModuleName, ImportModuleName) :-
-        '$import'(ImportingModuleName, ImportModuleNameINTERIM),
+        (ImportingModuleName == user
+          -> ImportModuleNameINTERIM = system
+         ;
+        '$import'(ImportingModuleName, ImportModuleNameINTERIM)
+        ),
         module_export(ImportModuleNameINTERIM, UnqualifiedPredicateName/Arity)
           -> (ImportingModuleName = system
                 -> ImportModuleNameINTERIM = ImportModuleName
@@ -1053,8 +1059,9 @@ compile_body_arg(Arg, MetaArgType, ModuleName, _Position, Dest, _PermanentVariab
         atom_or_empty_list(Arg), !,
         (atom(Arg),
          MetaArgType = (:)
-           -> transform_predicate_name(Arg, 0, ModuleName, TransformedArg)
+           -> TransformedArg = Arg
          ;
+         atom(Arg),
          integer(MetaArgType) % 0..9
            -> Arg =.. [Functor|SubArgs],
               length(SubArgs, ArgArity),
@@ -1077,13 +1084,82 @@ compile_body_arg([Head|Tail], _MetaArgType, ModuleName, Position, Dest, Permanen
 compile_body_arg(Arg, MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
         Arg =.. [Functor|Args],
         list_length(Args, Arity),
-        ((MetaArgType = integer(MetaArgType) % 0..9
-          ; MetaArgType = (:))
-           -> transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor)
+        (MetaArgType = (:)
+           -> TransformedArgs = [ModuleName, Arg],
+              TransformedFunctor = (:),
+              TransformedArity = 2
          ;
-          Functor = TransformedFunctor
+         integer(MetaArgType) % 0..9
+           -> MetaArity is Arity + MetaArgType,
+              transform_predicate_name(Functor, MetaArity, ModuleName, TransformedFunctor),
+              TransformedArgs = Args,
+              TransformedArity = Arity
+         ;
+         MetaArgType = (^) % Arg is assumed to be MetaArgType of 0 - no extra args to be applied.
+           -> existential_variables(Arg, Vars, Expression),
+              transform_meta_expression(Expression, ModuleName, TransformedExpression),
+              existential_variables(TransformedArg, Vars, TransformedExpression),
+              TransformedArg =.. [TransformedFunctor|TransformedArgs],
+              list_length(TransformedArgs, TransformedArity)
+         ;
+         Functor = TransformedFunctor,
+         TransformedArgs = Args,
+         TransformedArity = Arity
         ),
-        compile_body_unification(Args, ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_structure(TransformedFunctor/Arity, Dest)|R], R, Tail, GUV).
+        compile_body_unification(TransformedArgs, ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_structure(TransformedFunctor/TransformedArity, Dest)|R], R, Tail, GUV).
+
+transform_meta_expression((A, B), ModuleName, (TransformedA, TransformedB)) :-
+        !,
+        transform_meta_expression(A, ModuleName, TransformedA),
+        transform_meta_expression(B, ModuleName, TransformedB).
+transform_meta_expression(once(A), ModuleName, once(TransformedA)) :-
+        !,
+        transform_meta_expression(A, ModuleName, TransformedA).
+% setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup)
+transform_meta_expression(setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup), ModuleName,
+            setup_call_catcher_cleanup(TransformedSetup, TransformedGoal, Catcher, TransformedCleanup)) :-
+        !,
+        transform_meta_expression(Setup, ModuleName, TransformedSetup),
+        transform_meta_expression(Goal, ModuleName, TransformedGoal),
+        transform_meta_expression(Cleanup, ModuleName, TransformedCleanup).
+%catch(Goal, Catcher, Recovery)
+transform_meta_expression(catch(Goal, Catcher, Recovery), ModuleName,
+            catch(TransformedGoal, Catcher, TransformedRecovery)) :-
+        !,
+        transform_meta_expression(Goal, ModuleName, TransformedGoal),
+        transform_meta_expression(Recovery, ModuleName, TransformedRecovery).
+%forall(Cond, Action)
+transform_meta_expression(forall(Cond, Action), ModuleName,
+            forall(TransformedCond, TransformedAction)) :-
+        !,
+        transform_meta_expression(Cond, ModuleName, TransformedCond),
+        transform_meta_expression(Action, ModuleName, TransformedAction).
+%(A->B ; C)
+transform_meta_expression((A->B ; C), ModuleName, (TransformedA->TransformedB;TransformedC)) :-
+        !,
+        transform_meta_expression(A, ModuleName, TransformedA),
+        transform_meta_expression(B, ModuleName, TransformedB),
+        transform_meta_expression(C, ModuleName, TransformedC).
+%(A -> B)
+transform_meta_expression((A->B), ModuleName, (TransformedA->TransformedB)) :-
+        !,
+        transform_meta_expression(A, ModuleName, TransformedA),
+        transform_meta_expression(B, ModuleName, TransformedB).
+%(LHS ; RHS)
+transform_meta_expression((A; B), ModuleName, (TransformedA; TransformedB)) :-
+        !,
+        transform_meta_expression(A, ModuleName, TransformedA),
+        transform_meta_expression(B, ModuleName, TransformedB).
+%\+(Goal)
+transform_meta_expression(\+(A), ModuleName, \+(TransformedA)) :-
+        !,
+        transform_meta_expression(A, ModuleName, TransformedA).
+transform_meta_expression(Expression, ModuleName, TransformedExpression) :-
+        Expression =.. [Functor|Args],
+        list_length(Args, Arity),
+        transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor),
+        TransformedExpression =.. [TransformedFunctor|Args].
+
 
 compile_body_unification([], _, _, State, State, _PermanentVariables, Opcodes, Opcodes, R, R, _):- !.
 compile_body_unification([Arg|Args], ModuleName, Position, State, S1, PermanentVariables, O, OT, [unify_constant(Arg)|R], RT, GUV):-
@@ -1346,21 +1422,6 @@ repl_1(Atom):-
         Duration is (1000 * (End - Start)) // 1000,
         write_list(['(', Duration, 'ms)'], ''),
         writeln('').
-
-write_list(List, Separator) :-
-    current_output(Stream),
-    write_list(List, Separator, Stream).
-
-write_list([], _, _).
-write_list([H|T], Separator, Stream) :-
-        write(Stream, H),
-        write_list1(T, Separator, Stream).
-
-write_list1([], _, _).
-write_list1([H|T], Separator, Stream) :-
-        write(Stream, Separator),
-        write(Stream, H),
-        write_list1(T, Separator, Stream).
 
 call_atom(QueryAtom, Bindings) :-
     atom_to_term(QueryAtom, Query, Bindings),

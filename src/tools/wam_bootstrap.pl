@@ -365,6 +365,7 @@ reset:-
         reserve_predicate(format/3, predicate_format),
         reserve_predicate(flag/3, predicate_flag),
         reserve_predicate(memory_file_description/2, predicate_memory_file_description),
+        reserve_predicate(absolute_file_name/3, predicate_absolute_file_name),
 
         % Stuff related to actually compiling
         reserve_predicate(reset_compile_buffer/0, reset_compile_buffer),
@@ -385,7 +386,7 @@ reset:-
         reserve_predicate(compiled_state_boot_code/1, predicate_compiled_state_boot_code),
         reserve_predicate(dump_tables/1, predicate_dump_tables),
         reserve_predicate(add_module_export/2, predicate_add_module_export),
-        reserve_predicate(method_export/2, predicate_method_export),
+        reserve_predicate(module_export/2, predicate_module_export),
 
         % Promises
         reserve_predicate(request_result/1, predicate_request_result),

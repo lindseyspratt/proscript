@@ -3,7 +3,9 @@
 
 :- module(wam_assemble, [assemble/2]).
 
-:- use_module('../tools/wam_bootstrap_util').
+:- if(\+ (current_predicate(wam_compiler:current_compile_url/1), wam_compiler:current_compile_url(_))).
+    :- use_module('../tools/wam_bootstrap_util').
+:- endif.
 
 assemble(Opcodes, N):-
         term_variables(Opcodes, Variables),

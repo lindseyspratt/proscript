@@ -42,6 +42,9 @@
 
 :- module(not, [free_variables/4, free_variables/5, not/1 ]).
 
+'\\=='(A,B) :-
+    'bootstrap_js:\\=='(A,B).
+
 not(Goal) :-
 	free_variables(Goal, [], [], Vars),
 	Vars \== [], !,

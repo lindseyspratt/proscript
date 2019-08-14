@@ -1,0 +1,596 @@
+<html lang="en">
+<head>
+    <title>
+        Calculator source
+    </title>
+    <link rel="stylesheet" href="index.css"/>
+    <script type="text/javascript" src="../dist/proscriptls.js"></script>
+    <!-- proscriptls interpreter
+    <script src="../terminal/jquery-3.3.1.js"></script>
+    <script src="../terminal/jquery_terminal.js"></script>
+    <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
+    -->
+</head>
+
+<body onload="proscriptls_init ();">
+<!-- Side navigation -->
+<ul class="sidenav">
+    <li><span class="caret"></span>
+        <a   id="home_index" href="../index.html#home"> Home </a>
+        <ul class='nested'>
+            <li><a   id="prolog-for-the-web_index" href="../index.html#prolog-for-the-web"> Prolog for the Web </a></li>
+            <li><a   id="running-proscriptls_index" href="../index.html#running-proscriptls"> Running ProscriptLS </a></li>
+            <li><a   id="compiling-proscriptls_index" href="../index.html#compiling-proscriptls"> Compiling ProscriptLS </a></li>
+            <li><a   id="basic-example_index" href="../index.html#basic-example"> Basic Example </a></li>
+        </ul>
+    </li>
+    <li><span class="caret"></span><a   id="doc_index" href="index_doc.html#doc"> Documentation </a>
+        <ul class='nested'>
+            <li><span class="caret"></span><a   id="reference_index" href="index_doc.html#reference"> Reference </a>
+                <ul class='nested'>
+                    <li><a   id="using_proscriptls_index" href="index_doc.html#using_proscriptls"> Using ProscriptLS </a></li>
+                    <li><a   id="debugger_index" href="index_doc.html#debugger"> Debugger </a></li>
+                    <li><span class="caret"></span><a   id="objects_index" href="index_doc.html#objects"> Javascript objects </a>
+                        <ul class='nested'>
+                            <li><span class="caret"></span><a   id="web_api_index" href="index_doc.html#web_api"> Web API </a>
+                                <ul class='nested'>
+                                    <li><a   id="api_barprop_index" href="index_doc.html#api_barprop"> BarProp </a></li>
+<li><a   id="api_blob_index" href="index_doc.html#api_blob"> Blob </a></li>
+<li><a   id="api_canvasgradient_index" href="index_doc.html#api_canvasgradient"> CanvasGradient </a></li>
+<li><a   id="api_canvaspattern_index" href="index_doc.html#api_canvaspattern"> CanvasPattern </a></li>
+<li><a   id="api_canvasrenderingcontext2d_index" href="index_doc.html#api_canvasrenderingcontext2d"> CanvasRenderingContext2D </a></li>
+<li><a   id="api_cssrule_index" href="index_doc.html#api_cssrule"> CSSRule </a></li>
+<li><a   id="api_cssstyledeclaration_index" href="index_doc.html#api_cssstyledeclaration"> CSSStyleDeclaration </a></li>
+<li><a   id="api_customelementregistry_index" href="index_doc.html#api_customelementregistry"> CustomElementRegistry </a></li>
+<li><a   id="api_document_index" href="index_doc.html#api_document"> Document </a></li>
+<li><a   id="api_documentfragment_index" href="index_doc.html#api_documentfragment"> DocumentFragment </a></li>
+<li><a   id="api_element_index" href="index_doc.html#api_element"> Element </a></li>
+<li><a   id="api_elementcreationoptions_index" href="index_doc.html#api_elementcreationoptions"> ElementCreationOptions </a></li>
+<li><a   id="api_event_index" href="index_doc.html#api_event"> Event </a></li>
+<li><a   id="api_eventtarget_index" href="index_doc.html#api_eventtarget"> EventTarget </a></li>
+<li><a   id="api_file_index" href="index_doc.html#api_file"> File </a></li>
+<li><a   id="api_history_index" href="index_doc.html#api_history"> History </a></li>
+<li><a   id="api_htmlcanvaselement_index" href="index_doc.html#api_htmlcanvaselement"> HTMLCanvasElement </a></li>
+<li><a   id="api_htmlelement_index" href="index_doc.html#api_htmlelement"> HTMLElement </a></li>
+<li><a   id="api_htmlformelement_index" href="index_doc.html#api_htmlformelement"> HTMLFormElement </a></li>
+<li><a   id="api_htmlimageelement_index" href="index_doc.html#api_htmlimageelement"> HTMLImageElement </a></li>
+<li><a   id="api_htmlinputelement_index" href="index_doc.html#api_htmlinputelement"> HTMLInputElement </a></li>
+<li><a   id="api_htmloptionelement_index" href="index_doc.html#api_htmloptionelement"> HTMLOptionElement </a></li>
+<li><a   id="api_htmlselectelement_index" href="index_doc.html#api_htmlselectelement"> HTMLSelectElement </a></li>
+<li><a   id="api_htmltextareaelement_index" href="index_doc.html#api_htmltextareaelement"> HTMLTextAreaElement </a></li>
+<li><a   id="api_imagedata_index" href="index_doc.html#api_imagedata"> ImageData </a></li>
+<li><a   id="api_location_index" href="index_doc.html#api_location"> Location </a></li>
+<li><a   id="api_mouseevent_index" href="index_doc.html#api_mouseevent"> MouseEvent </a></li>
+<li><a   id="api_navigator_index" href="index_doc.html#api_navigator"> Navigator </a></li>
+<li><a   id="api_navigatorcontentutils_index" href="index_doc.html#api_navigatorcontentutils"> NavigatorContentUtils </a></li>
+<li><a   id="api_navigatorcookies_index" href="index_doc.html#api_navigatorcookies"> NavigatorCookies </a></li>
+<li><a   id="api_navigatorid_index" href="index_doc.html#api_navigatorid"> NavigatorID </a></li>
+<li><a   id="api_navigatorlanguage_index" href="index_doc.html#api_navigatorlanguage"> NavigatorLanguage </a></li>
+<li><a   id="api_navigatoronline_index" href="index_doc.html#api_navigatoronline"> NavigatorOnLine </a></li>
+<li><a   id="api_node_index" href="index_doc.html#api_node"> Node </a></li>
+<li><a   id="api_parentnode_index" href="index_doc.html#api_parentnode"> ParentNode </a></li>
+<li><a   id="api_path2d_index" href="index_doc.html#api_path2d"> Path2D </a></li>
+<li><a   id="api_textmetrics_index" href="index_doc.html#api_textmetrics"> TextMetrics </a></li>
+<li><a   id="api_uievent_index" href="index_doc.html#api_uievent"> UIEvent </a></li>
+<li><a   id="api_uint8clampedarray_index" href="index_doc.html#api_uint8clampedarray"> Uint8ClampedArray </a></li>
+<li><a   id="api_validitystate_index" href="index_doc.html#api_validitystate"> ValidityState </a></li>
+<li><a   id="api_window_index" href="index_doc.html#api_window"> Window </a></li>
+
+                                </ul>
+                            </li>
+                            <li><a   id="object_language_index" href="index_doc.html#object_language"> Object Language </a></li>
+                        </ul>
+                    </li>
+                    <li><a   id="library_index" href="index_doc.html#library"> Library </a></li>
+                    <li><a   id="compilation_index" href="index_doc.html#compilation"> Compilation </a></li>
+                    <li><a   id="syntax_index" href="index_doc.html#syntax"> Syntax </a></li>
+                </ul>
+            </li>
+            <li><span class="caret"></span><a   id="examples_index" href="index_doc.html#examples"> Examples </a>
+                <ul class="nested">
+                    <li><span class="caret"></span><a   id="calculator_example_index" href="index_doc.html#calculator_example"> Calculator </a>
+                        <ul class="nested">
+                            <li><a class="active index"  id="calculator_example_source_index" href="#calculator_example_source"> Calculator Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="console_example_index" href="index_doc.html#console_example"> Console Button </a>
+                        <ul class="nested">
+                            <li><a   id="console_example_source_index" href="console_source.html#console_example_source"> Console Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="simple_example_index" href="index_doc.html#simple_example"> Simple </a>
+                        <ul class="nested">
+                            <li><a   id="simple_example_source_index" href="simple_source.html#simple_example_source"> Simple Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="likes_example_index" href="index_doc.html#likes_example"> Likes </a>
+                        <ul class="nested">
+                            <li><a   id="likes_example_source_index" href="likes_source.html#likes_example_source"> Likes Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="consult_console_example_index" href="index_doc.html#consult_console_example"> Consult console </a>
+                        <ul class="nested">
+                            <li><a   id="consult_console_example_source_index" href="consult_console_source.html#consult_console_example_source"> Consult Console Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="tiles_example_index" href="index_doc.html#tiles_example"> Consult console </a>
+                        <ul class="nested">
+                            <li><a   id="tiles_example_source_index" href="tiles_source.html#tiles_example_source"> Tiles Example Source </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+    <li><a   id="download_index" href="index_download.html#download"> Download </a></li>
+    <li><a   id="about_index" href="index_about.html#about"> About </a></li>
+</ul>
+
+<!-- Page content -->
+<div class="content">
+    <header>
+        <h1>Calculator source</h1>
+        <hr>
+    </header>
+
+    <div class="body" id="calculator_example_source">
+    <p>
+        The ProscriptLS source used in the Calculator example.
+        Links to these source files are:
+        <a href="../examples/calculator.pl">calculator.pl</a>
+        and
+        <a href="../examples/calculator.pl">calculator_data.pl</a>
+        .
+        There are three library packages used in the ProscriptLS source: dom.pl, listut.pl, and listut2.pl.
+    </p>
+    <p>
+        Javascript source for a similar web page is shown in the calculator.js file.
+    </p>
+    <div id="prolog" style='white-space:nowrap;width:48%;height:100%;background-color:#eee;overflow:auto;float:left'>
+    <div id="calculator_pl" >
+        <h2 id='calculator_pl_header'>calculator.pl</h2>
+        <code class='content'>
+        <span style='color:green'>%&nbsp;Purpose:&nbsp;Support&nbsp;a&nbsp;simple&nbsp;HTML&nbsp;Calculator.&nbsp;The&nbsp;calculator&nbsp;allows&nbsp;positive&nbsp;and&nbsp;negative</span><br>
+<span style='color:green'>%&nbsp;numbers&nbsp;including&nbsp;exponent&nbsp;notation.&nbsp;It&nbsp;supports&nbsp;four&nbsp;operators:&nbsp;+,&nbsp;-,&nbsp;*,&nbsp;and&nbsp;/.</span><br>
+<span style='color:green'>%</span><br>
+<span style='color:green'>%&nbsp;Author:&nbsp;Lindsey&nbsp;Spratt,&nbsp;2019.</span><br>
+<span style='color:green'>%</span><br>
+<span style='color:green'>%&nbsp;Implementation:&nbsp;This&nbsp;calculator&nbsp;implementation&nbsp;uses&nbsp;clauses&nbsp;to&nbsp;store</span><br>
+<span style='color:green'>%&nbsp;state&nbsp;(implemented&nbsp;in&nbsp;calculator_data.pl).</span><br>
+<span style='color:green'>%&nbsp;'current'&nbsp;is&nbsp;the&nbsp;current&nbsp;register&nbsp;value.&nbsp;This&nbsp;is</span><br>
+<span style='color:green'>%&nbsp;where&nbsp;digits&nbsp;input&nbsp;from&nbsp;the&nbsp;user&nbsp;are&nbsp;held&nbsp;and</span><br>
+<span style='color:green'>%&nbsp;where&nbsp;results&nbsp;of&nbsp;operations&nbsp;are&nbsp;displayed.</span><br>
+<span style='color:green'>%&nbsp;'memory'&nbsp;holds&nbsp;the&nbsp;previous&nbsp;value&nbsp;of&nbsp;'current'.</span><br>
+<span style='color:green'>%&nbsp;Clicking&nbsp;on&nbsp;an&nbsp;operator&nbsp;in&nbsp;the&nbsp;interface&nbsp;records</span><br>
+<span style='color:green'>%&nbsp;the&nbsp;index&nbsp;(1&nbsp;-&nbsp;4)&nbsp;of&nbsp;that&nbsp;operator,&nbsp;copies&nbsp;'current'</span><br>
+<span style='color:green'>%&nbsp;to&nbsp;'memory',&nbsp;and&nbsp;resets&nbsp;'current'&nbsp;to&nbsp;empty.</span><br>
+<span style='color:green'>%&nbsp;Clicking&nbsp;on&nbsp;'='&nbsp;in&nbsp;the&nbsp;interface&nbsp;runs&nbsp;the</span><br>
+<span style='color:green'>%&nbsp;calculate/0&nbsp;predicate&nbsp;that&nbsp;evaluates</span><br>
+<span style='color:green'>%&nbsp;'operator'('memory',&nbsp;'current')&nbsp;to&nbsp;get&nbsp;new</span><br>
+<span style='color:green'>%&nbsp;vaue&nbsp;for&nbsp;'current'.</span><br>
+<br>
+<br>
+<span style='color:red'>:-</span>&nbsp;ensure_loaded(calculator_data).<br>
+<span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/dom.pl').<br>
+<span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/listut.pl').<br>
+<span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/listut2.pl').<br>
+<br>
+fix_current.<br>
+<br>
+current_prop_string(has_e,&nbsp;"e").<br>
+current_prop_string(has_e0,&nbsp;"e0").<br>
+current_prop_string(has_period,&nbsp;".").<br>
+current_prop_string(in_error,&nbsp;"!").<br>
+current_prop_string(is_blank,&nbsp;"&nbsp;").<br>
+current_prop_string(has_eneg0,&nbsp;"e-0").<br>
+current_prop_string(has_eneg,&nbsp;"e-").<br>
+<br>
+current_prop(has_neg)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append("-",&nbsp;<i>_</i>,&nbsp;<i>Current</i>).<br>
+<br>
+current_prop(too_long)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;!,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;current_length(<i>Length</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;maxlengthx(<i>Maxlength</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>Length</i>&nbsp;>&nbsp;<i>Maxlength</i>.<br>
+<br>
+current_prop(<i>Prop</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;current_prop_string(<i>Prop</i>,&nbsp;<i>String</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;contains_list(<i>Current</i>,&nbsp;<i>String</i>).<br>
+<br>
+<br>
+update_old_new(collapse_e0,&nbsp;"e0",&nbsp;"e").<br>
+update_old_new(collapse_eneg0,&nbsp;"e-0",&nbsp;"e-").<br>
+update_old_new(remove_neg_exponent,&nbsp;"e-",&nbsp;"e").<br>
+update_old_new(insert_neg_exponent,&nbsp;"e",&nbsp;"e-").<br>
+<br>
+<br>
+update_current(remove_neg)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;!,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append("-",&nbsp;<i>NewCurrent</i>,&nbsp;<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current(<i>NewCurrent</i>).<br>
+<br>
+update_current(insert_neg)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;!,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append("-",&nbsp;<i>Current</i>,&nbsp;<i>NewCurrent</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current(<i>NewCurrent</i>).<br>
+<br>
+update_current(append_e0)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;!,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append(<i>Current</i>,&nbsp;"e0",&nbsp;<i>NewCurrent</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current(<i>NewCurrent</i>).<br>
+<br>
+update_current(lowercase)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;!,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;lowercase(<i>Current</i>,&nbsp;<i>NewCurrent</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current(<i>NewCurrent</i>).<br>
+<br>
+update_current(<i>Key</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_old_new(<i>Key</i>,&nbsp;<i>Old</i>,&nbsp;<i>New</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_current(<i>Old</i>,&nbsp;<i>New</i>).<br>
+<br>
+<br>
+update_current(<i>Old</i>,&nbsp;<i>New</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;select_list(<i>Old</i>,&nbsp;<i>Current</i>,&nbsp;<i>New</i>,&nbsp;<i>NewCurrent</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current(<i>NewCurrent</i>).<br>
+<br>
+<br>
+display_current&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_dom_name_path_value(["<i>Calculator</i>",&nbsp;"<i>Display</i>"],&nbsp;<i>Current</i>).<br>
+<br>
+add_digit(<i>Dig</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;number_codes(<i>Dig</i>,&nbsp;<i>DigCodes</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(\+&nbsp;current_prop(in_error)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;(current_prop(is_blank)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;set_current(<i>DigCodes</i>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval_current(0),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\+&nbsp;current_prop(has_period)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;set_current(<i>DigCodes</i>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;add_current(<i>DigCodes</i>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update_current(lowercase)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current("<i>Hint</i>!&nbsp;<i>Press</i>&nbsp;'AC'")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(current_prop(has_e0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;update_current(collapse_e0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;current_prop(has_eneg0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;update_current(collapse_eneg0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;&nbsp;true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(current_prop(too_long)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;set_current("<i>Aargh</i>!&nbsp;<i>Too</i>&nbsp;long")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;&nbsp;true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display_current.<br>
+<br>
+add_exponent&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_current(append_e0),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display_current.<br>
+<br>
+dot&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(current_length(0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;set_current("0.")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;\+&nbsp;current_prop(has_period),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;\+&nbsp;current_prop(has_e)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;add_current(".")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display_current.<br>
+<br>
+eval_current(<i>R</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>C</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_codes(<i>C</i>,&nbsp;<i>R</i>).<br>
+<br>
+<span style='color:green'>%&nbsp;eval&nbsp;codes&nbsp;with&nbsp;'e':&nbsp;e.g.&nbsp;"2.1e-3"</span><br>
+eval_codes(<i>C</i>,&nbsp;<i>R</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;split_list(<i>C</i>,&nbsp;<i>Prefix</i>,&nbsp;"e",&nbsp;<i>Suffix</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;!,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_codes(<i>Prefix</i>,&nbsp;<i>P</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_codes(<i>Suffix</i>,&nbsp;<i>S</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>R</i>&nbsp;is&nbsp;<i>P</i>&nbsp;*&nbsp;10&nbsp;^&nbsp;<i>S</i>.<br>
+<br>
+eval_codes(<i>C</i>,&nbsp;<i>R</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;catch(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(atom_codes(<i>A</i>,&nbsp;<i>C</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atom_to_term(<i>A</i>,&nbsp;<i>T</i>,&nbsp;<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;call(<i>R</i>&nbsp;is&nbsp;<i>T</i>)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fail).<br>
+<br>
+clear&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current("0"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display_current.<br>
+<br>
+all_clear&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_memory("0"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current("0"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_operation(0),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display_current.<br>
+<br>
+plus_minus&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(current_prop(has_e)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;(current_prop(has_eneg)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;update_current(remove_neg_exponent)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update_current(insert_neg_exponent)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;current_prop(has_neg)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;update_current(remove_neg)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_current(insert_neg)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval_current(0),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;\+&nbsp;current_prop(has_period)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;set_current("0")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;&nbsp;true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display_current.<br>
+<br>
+do_exponent&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;current_prop(has_e)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;add_exponent.<br>
+<br>
+operate(<i>Op</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;operationx(<i>CurrentOp</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<i>CurrentOp</i>&nbsp;\=&nbsp;0&nbsp;->&nbsp;calculate;true),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;atom_codes(<i>Op</i>,&nbsp;[<i>OpCode</i>]),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nth1(<i>NewOp</i>,&nbsp;"*/+-",&nbsp;<i>OpCode</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;!,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_operation(<i>NewOp</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_memory(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current("&nbsp;"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display_current.<br>
+<br>
+calculate&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;operationx(<i>OpNum</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;memoryx(<i>Memory</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>Current</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_codes(<i>Memory</i>,&nbsp;<i>MV</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_codes(<i>Current</i>,&nbsp;<i>CV</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_operation(<i>OpNum</i>,&nbsp;<i>MV</i>,&nbsp;<i>CV</i>,&nbsp;<i>Value</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_operation(0),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_memory("0"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(number(<i>Value</i>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;number_codes(<i>Value</i>,&nbsp;<i>ValueCodes</i>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;atom_codes(<i>Value</i>,&nbsp;<i>ValueCodes</i>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_current(<i>ValueCodes</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display_current.<br>
+<br>
+eval_operation(1,&nbsp;<i>MV</i>,&nbsp;<i>CV</i>,&nbsp;<i>Value</i>)&nbsp;<span style='color:red'>:-</span>&nbsp;<i>Value</i>&nbsp;is&nbsp;<i>MV</i>&nbsp;*&nbsp;<i>CV</i>.<br>
+eval_operation(2,&nbsp;<i>MV</i>,&nbsp;<i>CV</i>,&nbsp;<i>Value</i>)&nbsp;<span style='color:red'>:-</span>&nbsp;<i>Value</i>&nbsp;is&nbsp;<i>MV</i>&nbsp;/&nbsp;<i>CV</i>.<br>
+eval_operation(3,&nbsp;<i>MV</i>,&nbsp;<i>CV</i>,&nbsp;<i>Value</i>)&nbsp;<span style='color:red'>:-</span>&nbsp;<i>Value</i>&nbsp;is&nbsp;<i>MV</i>&nbsp;+&nbsp;<i>CV</i>.<br>
+eval_operation(4,&nbsp;<i>MV</i>,&nbsp;<i>CV</i>,&nbsp;<i>Value</i>)&nbsp;<span style='color:red'>:-</span>&nbsp;<i>Value</i>&nbsp;is&nbsp;<i>MV</i>&nbsp;-&nbsp;<i>CV</i>.<br>
+
+        </code>
+    </div>
+    <br>
+    <div id="calculator_data_pl">
+        <h2>calculator_data.pl</h2>
+        <code>
+        <span style='color:red'>:-</span>&nbsp;dynamic([current/1,&nbsp;memory/1,&nbsp;operation/1,&nbsp;maxlength/1]).<br>
+<span style='color:red'>:-</span>&nbsp;initialization(init).<br>
+<br>
+init&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;asserta(current("0")),<br>
+&nbsp;&nbsp;asserta(memory("0")),<br>
+&nbsp;&nbsp;asserta(operation(0)),<br>
+&nbsp;&nbsp;asserta(maxlength(30)).<br>
+<br>
+currentx(<i>X</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;clause(current(<i>X</i>),&nbsp;true),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;!.<br>
+currentx("0").<br>
+<br>
+current_length(<i>L</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;currentx(<i>X</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;length(<i>X</i>,&nbsp;<i>L</i>).<br>
+<br>
+set_current(<i>X</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;retractall(current(<i>_</i>)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asserta(current(<i>X</i>)).<br>
+<br>
+add_current(<i>X</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;retract(current(<i>C</i>)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append(<i>C</i>,&nbsp;<i>X</i>,&nbsp;<i>Y</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asserta(current(<i>Y</i>)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;!.<br>
+<br>
+maxlengthx(<i>X</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;clause(maxlength(<i>X</i>),&nbsp;true).<br>
+<br>
+<br>
+memoryx(<i>X</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;clause(memory(<i>X</i>),&nbsp;true).<br>
+<br>
+set_memory(<i>X</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;retractall(memory(<i>_</i>)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asserta(memory(<i>X</i>)).<br>
+<br>
+operationx(<i>X</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;clause(operation(<i>X</i>),&nbsp;true).<br>
+<br>
+set_operation(<i>X</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;retractall(operation(<i>_</i>)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asserta(operation(<i>X</i>)).<br>
+
+        </code>
+    </div>
+    </div>
+    <div id="calculator_js" style='vertical-align:top;white-space:nowrap;width:48%;height:100%;background-color:#ddd;overflow:auto;float:right'>
+        <h2>calculator.js</h2>
+        <code>
+        Memory&nbsp;&nbsp;=&nbsp;"0";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;initialise&nbsp;memory&nbsp;variable</span><br>
+Current&nbsp;=&nbsp;"0";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;&nbsp;&nbsp;and&nbsp;value&nbsp;of&nbsp;Display&nbsp;("current"&nbsp;value)</span><br>
+Operation&nbsp;=&nbsp;0;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;Records&nbsp;code&nbsp;for&nbsp;eg&nbsp;*&nbsp;/&nbsp;etc.</span><br>
+MAXLENGTH&nbsp;=&nbsp;30;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;maximum&nbsp;number&nbsp;of&nbsp;digits&nbsp;before&nbsp;decimal!</span><br>
+<br>
+<span style='color:blue'>function</span>&nbsp;AddDigit(dig)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//ADD&nbsp;A&nbsp;DIGIT&nbsp;TO&nbsp;DISPLAY&nbsp;(keep&nbsp;as&nbsp;'Current')</span><br>
+{&nbsp;if&nbsp;(Current.indexOf("!")&nbsp;==&nbsp;-1)&nbsp;&nbsp;<span style='color:green'>//if&nbsp;not&nbsp;already&nbsp;an&nbsp;error</span><br>
+{&nbsp;if&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;(eval(Current)&nbsp;==&nbsp;0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&&&nbsp;(Current.indexOf(".")&nbsp;==&nbsp;-1)<br>
+)&nbsp;{&nbsp;Current&nbsp;=&nbsp;dig;<br>
+}&nbsp;else<br>
+{&nbsp;Current&nbsp;=&nbsp;Current&nbsp;+&nbsp;dig;<br>
+};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Current&nbsp;=&nbsp;Current.toLowerCase();&nbsp;<span style='color:green'>//FORCE&nbsp;LOWER&nbsp;CASE</span><br>
+}&nbsp;else<br>
+{&nbsp;Current&nbsp;=&nbsp;"Hint!&nbsp;Press&nbsp;'AC'";&nbsp;&nbsp;<span style='color:green'>//Help&nbsp;out,&nbsp;if&nbsp;error&nbsp;present.</span><br>
+};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Current.indexOf("e0")&nbsp;!=&nbsp;-1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;var&nbsp;epos&nbsp;=&nbsp;Current.indexOf("e");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Current&nbsp;=&nbsp;Current.substring(0,epos+1)&nbsp;+&nbsp;Current.substring(epos+2);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Current.length&nbsp;>&nbsp;MAXLENGTH)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;"Aargh!&nbsp;Too&nbsp;long";&nbsp;<span style='color:green'>//don't&nbsp;allow&nbsp;over&nbsp;MAXLENGTH&nbsp;digits&nbsp;before&nbsp;"."&nbsp;???</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;Dot()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//PUT&nbsp;IN&nbsp;"."&nbsp;if&nbsp;appropriate.</span><br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(&nbsp;Current.length&nbsp;==&nbsp;0)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//no&nbsp;leading&nbsp;".",&nbsp;use&nbsp;"0."</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;"0.";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;&nbsp;if&nbsp;(&nbsp;&nbsp;&nbsp;(&nbsp;Current.indexOf(".")&nbsp;==&nbsp;-1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&&(&nbsp;Current.indexOf("e")&nbsp;==&nbsp;-1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;Current&nbsp;+&nbsp;".";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;DoExponent()<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(&nbsp;Current.indexOf("e")&nbsp;==&nbsp;-1&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;Current&nbsp;+&nbsp;"e0";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;PlusMinus()<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;&nbsp;(Current.indexOf("e")&nbsp;!=&nbsp;-1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;var&nbsp;epos&nbsp;=&nbsp;Current.indexOf("e-");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(epos&nbsp;!=&nbsp;-1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;Current.substring(0,1+epos)&nbsp;+&nbsp;Current.substring(2+epos);&nbsp;<span style='color:green'>//clip&nbsp;out&nbsp;-ve&nbsp;exponent</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;epos&nbsp;=&nbsp;Current.indexOf("e");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Current&nbsp;=&nbsp;Current.substring(0,1+epos)&nbsp;+&nbsp;"-"&nbsp;+&nbsp;Current.substring(1+epos);&nbsp;<span style='color:green'>//insert&nbsp;-ve&nbsp;exponent</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;&nbsp;if&nbsp;(&nbsp;Current.indexOf("-")&nbsp;==&nbsp;0&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;Current.substring(1);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;"-"&nbsp;+&nbsp;Current;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;(eval(Current)&nbsp;==&nbsp;0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&&&nbsp;(Current.indexOf(".")&nbsp;==&nbsp;-1&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;{&nbsp;Current&nbsp;=&nbsp;"0";&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;Clear()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//CLEAR&nbsp;ENTRY</span><br>
+{&nbsp;Current&nbsp;=&nbsp;"0";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;AllClear()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//Clear&nbsp;ALL&nbsp;entries!</span><br>
+{&nbsp;Current&nbsp;=&nbsp;"0";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Operation&nbsp;=&nbsp;0;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//clear&nbsp;operation</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Memory&nbsp;=&nbsp;"0";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//clear&nbsp;memory</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;Operate(op)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//STORE&nbsp;OPERATION&nbsp;e.g.&nbsp;+&nbsp;*&nbsp;/&nbsp;etc.</span><br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Operation&nbsp;!=&nbsp;0)&nbsp;{&nbsp;Calculate();&nbsp;};&nbsp;<span style='color:green'>//'Press&nbsp;"="&nbsp;if&nbsp;pending&nbsp;operation!</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;note&nbsp;that&nbsp;design&nbsp;is&nbsp;not&nbsp;good&nbsp;for&nbsp;showing&nbsp;*intermediate*&nbsp;results.</span><br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(op.indexOf("*")&nbsp;>&nbsp;-1)&nbsp;{&nbsp;Operation&nbsp;=&nbsp;1;&nbsp;};&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//codes&nbsp;for&nbsp;*</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(op.indexOf("/")&nbsp;>&nbsp;-1)&nbsp;{&nbsp;Operation&nbsp;=&nbsp;2;&nbsp;};&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;slash&nbsp;(divide)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(op.indexOf("+")&nbsp;>&nbsp;-1)&nbsp;{&nbsp;Operation&nbsp;=&nbsp;3;&nbsp;};&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;sum</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(op.indexOf("-")&nbsp;>&nbsp;-1)&nbsp;{&nbsp;Operation&nbsp;=&nbsp;4;&nbsp;};&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;difference</span><br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Memory&nbsp;=&nbsp;Current;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//store&nbsp;value</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;note&nbsp;how&nbsp;e.g.&nbsp;Current.value&nbsp;gives&nbsp;neither&nbsp;error&nbsp;nor&nbsp;value!&nbsp;***</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Current&nbsp;=&nbsp;"";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;Calculate()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//PERFORM&nbsp;CALCULATION&nbsp;(=&nbsp;button)</span><br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Operation&nbsp;==&nbsp;1)&nbsp;{&nbsp;Current&nbsp;=&nbsp;eval(Memory)&nbsp;*&nbsp;eval(Current);&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Operation&nbsp;==&nbsp;2)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;if&nbsp;(eval(Current)&nbsp;!=&nbsp;0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;eval(Memory)&nbsp;/&nbsp;eval(Current)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;"Aargh!&nbsp;Divide&nbsp;by&nbsp;zero";&nbsp;<span style='color:green'>//don't&nbsp;allow&nbsp;over&nbsp;MAXLENGTH&nbsp;digits&nbsp;before&nbsp;"."&nbsp;???</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Operation&nbsp;==&nbsp;3)&nbsp;{&nbsp;Current&nbsp;=&nbsp;eval(Memory)&nbsp;+&nbsp;eval(Current);&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Operation&nbsp;==&nbsp;4)&nbsp;{&nbsp;Current&nbsp;=&nbsp;eval(Memory)&nbsp;-&nbsp;eval(Current);&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Operation&nbsp;=&nbsp;0;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//clear&nbsp;operation</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Memory&nbsp;=&nbsp;"0";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//clear&nbsp;memory</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Current&nbsp;=&nbsp;Current&nbsp;+&nbsp;"";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//FORCE&nbsp;A&nbsp;STRING!</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Current.indexOf("Infinity")&nbsp;!=&nbsp;-1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//eg&nbsp;"1e320"&nbsp;*&nbsp;1</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;"Aargh!&nbsp;Value&nbsp;too&nbsp;big";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Current.indexOf("NaN")&nbsp;!=&nbsp;-1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//eg&nbsp;"1e320"&nbsp;/&nbsp;"1e320"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;"Aargh!&nbsp;I&nbsp;don't&nbsp;understand";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;NOTE:&nbsp;if&nbsp;no&nbsp;operation,&nbsp;nothing&nbsp;changes,&nbsp;Current&nbsp;is&nbsp;left&nbsp;the&nbsp;same!</span><br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;FixCurrent()<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Current&nbsp;=&nbsp;document.Calculator.Display.value;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Current&nbsp;=&nbsp;""&nbsp;+&nbsp;parseFloat(Current);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(Current.indexOf("NaN")&nbsp;!=&nbsp;-1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;Current&nbsp;=&nbsp;"Aargh!&nbsp;I&nbsp;don't&nbsp;understand";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.Calculator.Display.value&nbsp;=&nbsp;Current;<br>
+}<br>
+
+        </code>
+    </div>
+</div>
+
+
+    <footer>
+        <hr>
+        <table style="width:100%">
+        <tr>
+        <td>Version 0.3.0+, August 2019.</td>
+        <td style="text-align:right">Powered by ProscriptLS Prolog - Logic at Your Service.</td>
+        </tr>
+        </table>
+    </footer>
+</div>
+<!-- proscriptls interpreter
+<script src="../terminal/proscript_interpreter_terminal.js" type="text/javascript"></script>
+<div id="proscriptinterpreter">
+</div>
+-->
+<script type="text/prolog" src="index.pl"></script>
+</body>
+</html>

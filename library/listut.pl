@@ -266,14 +266,15 @@ remove_dups(List, Pruned) :-
 
 rev(List, Reversed) :-
 	reverse(List, [], Reversed).
-
+/*
+% in bootstrap_js.pl to support url:trim_directory.
 reverse(List, Reversed) :-
 	reverse(List, [], Reversed).
 
 reverse([], Reversed, Reversed).
 reverse([Head|Tail], Sofar, Reversed) :-
 	reverse(Tail, [Head|Sofar], Reversed).
-
+*/
 
 %   same_length(?List1, ?List2)
 %   is true when List1 and List2 are both lists and have the same number

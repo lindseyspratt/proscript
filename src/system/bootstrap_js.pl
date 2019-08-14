@@ -1,5 +1,5 @@
 :- module(bootstrap_js,
-        [append/3, assert/1, save_clausea/1, handle_term_expansion/1,
+        [append/3, assert/1, reverse/2, reverse/3, save_clausea/1, handle_term_expansion/1,
          include/1, (dynamic)/1, consult_atom/1, ensure_loaded/1, format/2,
          compile_message/1, (??) / 1, (?) / 1, otherwise/0, end_block/2, findall/3, setof/3, bagof/3,
          asserta/1, assertz/1, retract/1,
@@ -9,13 +9,16 @@
          write_term/2, write/1, write/2, writeq/2, write_canonical/1, write_canonical/2,
          halt/0,
          callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
-         call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8
-         /* */
+         call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8,
+         write_list/3
          ]).
 
+:- use_module(not).
+
 :- meta_predicate((
-            call(0), call(1,+), call(2,+, +), call(3, +, +, +), call(4, +, +, +, +), call(5, +, +, +, +, +), call(6, +, +, +, +, +, +), call(7, +, +, +, +, +, +, +),
-            retractall(0), asserta(0), assertz(0), retract(0)
+            call(0), call(1,?), call(2,?, ?), call(3, ?, ?, ?), call(4, ?, ?, ?, ?), call(5, ?, ?, ?, ?, ?), call(6, ?, ?, ?, ?, ?, ?), call(7, ?, ?, ?, ?, ?, ?, ?),
+            retractall(0), asserta(0), assertz(0), retract(0),
+            findall(?, ^, ?), setof(?, ^, ?), bagof(?, ^, ?)
             )).
 
 module(Name, Exports) :-
@@ -30,13 +33,15 @@ assert(Term):-
 save_clausea(Head:-Body):-
        !,
        functor(Head, Name, Arity),
-       transform_predicate_name(Name, TransformedName),
+       wam_compiler:current_compilation_module(ModuleName),
+       wam_compiler:transform_predicate_name(Name, Arity, ModuleName, TransformedName),
        prepend_clause_to_predicate(TransformedName/Arity, Head, Body).
 
 save_clausea(Fact):-
         !,
         functor(Fact, Name, Arity),
-        transform_predicate_name(Name, TransformedName),
+        wam_compiler:current_compilation_module(ModuleName),
+        wam_compiler:transform_predicate_name(Name, Arity, ModuleName, TransformedName),
         prepend_clause_to_predicate(TransformedName/Arity, Fact, true).
 
 handle_term_expansion(_Clause).
@@ -197,17 +202,12 @@ bag_of(Template, Generator, Bag) :-
 	Bag \== [].
 
 save_instances(Template, Generator) :-
-	existential_variables(Generator, _, Goal),
+	wam_util:existential_variables(Generator, _, Goal),
 	recorda(., -, _),
 	call(Goal),
 	recorda(., Template, _),
 	fail.
 save_instances(_, _).
-
-existential_variables(Var ^ Term, [Var|T], Goal) :-
-    !,
-    existential_variables(Term, T, Goal).
-existential_variables(Goal, [], Goal).
 
 list_instances(SoFar, Total) :-
 	recorded(., Term, Ref),
@@ -305,7 +305,7 @@ number(X):- (integer(X)-> true; float(X)).
 
 % 8.9
 asserta(Term):- wam_compiler:compile_clause_2(Term), save_clausea(Term).
-assertz(Term):- wam_compiler:compile_clause_2(Term), save_clause(Term).
+assertz(Term):- wam_compiler:compile_clause_2(Term), wam_compiler:save_clause(Term).
 retract(Head:-Body):- !, retract_clause(Head, Body).
 retract(Fact):- !, retract_clause(Fact, true).
 % abolish/1 (foreign)
@@ -452,6 +452,14 @@ append([],Ys,Ys).
 append([X|Xs],Ys,[X|Zs]) :-
         append(Xs,Ys,Zs).
 
+reverse(List, Reversed) :-
+	reverse(List, [], Reversed).
+
+reverse([], Reversed, Reversed).
+reverse([Head|Tail], Sofar, Reversed) :-
+	reverse(Tail, [Head|Sofar], Reversed).
+
+
 length(L, N) :-
         length(L, 0, N).
 
@@ -518,3 +526,18 @@ call(A, B, C, D, E, F, G, H):-
         call(AA).
 
 
+
+write_list(List, Separator) :-
+    current_output(Stream),
+    write_list(List, Separator, Stream).
+
+write_list([], _, _).
+write_list([H|T], Separator, Stream) :-
+        write(Stream, H),
+        write_list1(T, Separator, Stream).
+
+write_list1([], _, _).
+write_list1([H|T], Separator, Stream) :-
+        write(Stream, Separator),
+        write(Stream, H),
+        write_list1(T, Separator, Stream).

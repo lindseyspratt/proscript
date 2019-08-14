@@ -1,0 +1,516 @@
+<html lang="en">
+<head>
+    <title>
+        Console button test source
+    </title>
+    <link rel="stylesheet" href="index.css"/>
+    <script type="text/javascript" src="../dist/proscriptls.js"></script>
+    <!-- proscriptls interpreter
+    <script src="../terminal/jquery-3.3.1.js"></script>
+    <script src="../terminal/jquery_terminal.js"></script>
+    <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
+    -->
+</head>
+
+<body onload="proscriptls_init ();">
+<!-- Side navigation -->
+<ul class="sidenav">
+    <li><span class="caret"></span>
+        <a   id="home_index" href="../index.html#home"> Home </a>
+        <ul class='nested'>
+            <li><a   id="prolog-for-the-web_index" href="../index.html#prolog-for-the-web"> Prolog for the Web </a></li>
+            <li><a   id="running-proscriptls_index" href="../index.html#running-proscriptls"> Running ProscriptLS </a></li>
+            <li><a   id="compiling-proscriptls_index" href="../index.html#compiling-proscriptls"> Compiling ProscriptLS </a></li>
+            <li><a   id="basic-example_index" href="../index.html#basic-example"> Basic Example </a></li>
+        </ul>
+    </li>
+    <li><span class="caret"></span><a   id="doc_index" href="index_doc.html#doc"> Documentation </a>
+        <ul class='nested'>
+            <li><span class="caret"></span><a   id="reference_index" href="index_doc.html#reference"> Reference </a>
+                <ul class='nested'>
+                    <li><a   id="using_proscriptls_index" href="index_doc.html#using_proscriptls"> Using ProscriptLS </a></li>
+                    <li><a   id="debugger_index" href="index_doc.html#debugger"> Debugger </a></li>
+                    <li><span class="caret"></span><a   id="objects_index" href="index_doc.html#objects"> Javascript objects </a>
+                        <ul class='nested'>
+                            <li><span class="caret"></span><a   id="web_api_index" href="index_doc.html#web_api"> Web API </a>
+                                <ul class='nested'>
+                                    <li><a   id="api_barprop_index" href="index_doc.html#api_barprop"> BarProp </a></li>
+<li><a   id="api_blob_index" href="index_doc.html#api_blob"> Blob </a></li>
+<li><a   id="api_canvasgradient_index" href="index_doc.html#api_canvasgradient"> CanvasGradient </a></li>
+<li><a   id="api_canvaspattern_index" href="index_doc.html#api_canvaspattern"> CanvasPattern </a></li>
+<li><a   id="api_canvasrenderingcontext2d_index" href="index_doc.html#api_canvasrenderingcontext2d"> CanvasRenderingContext2D </a></li>
+<li><a   id="api_cssrule_index" href="index_doc.html#api_cssrule"> CSSRule </a></li>
+<li><a   id="api_cssstyledeclaration_index" href="index_doc.html#api_cssstyledeclaration"> CSSStyleDeclaration </a></li>
+<li><a   id="api_customelementregistry_index" href="index_doc.html#api_customelementregistry"> CustomElementRegistry </a></li>
+<li><a   id="api_document_index" href="index_doc.html#api_document"> Document </a></li>
+<li><a   id="api_documentfragment_index" href="index_doc.html#api_documentfragment"> DocumentFragment </a></li>
+<li><a   id="api_element_index" href="index_doc.html#api_element"> Element </a></li>
+<li><a   id="api_elementcreationoptions_index" href="index_doc.html#api_elementcreationoptions"> ElementCreationOptions </a></li>
+<li><a   id="api_event_index" href="index_doc.html#api_event"> Event </a></li>
+<li><a   id="api_eventtarget_index" href="index_doc.html#api_eventtarget"> EventTarget </a></li>
+<li><a   id="api_file_index" href="index_doc.html#api_file"> File </a></li>
+<li><a   id="api_history_index" href="index_doc.html#api_history"> History </a></li>
+<li><a   id="api_htmlcanvaselement_index" href="index_doc.html#api_htmlcanvaselement"> HTMLCanvasElement </a></li>
+<li><a   id="api_htmlelement_index" href="index_doc.html#api_htmlelement"> HTMLElement </a></li>
+<li><a   id="api_htmlformelement_index" href="index_doc.html#api_htmlformelement"> HTMLFormElement </a></li>
+<li><a   id="api_htmlimageelement_index" href="index_doc.html#api_htmlimageelement"> HTMLImageElement </a></li>
+<li><a   id="api_htmlinputelement_index" href="index_doc.html#api_htmlinputelement"> HTMLInputElement </a></li>
+<li><a   id="api_htmloptionelement_index" href="index_doc.html#api_htmloptionelement"> HTMLOptionElement </a></li>
+<li><a   id="api_htmlselectelement_index" href="index_doc.html#api_htmlselectelement"> HTMLSelectElement </a></li>
+<li><a   id="api_htmltextareaelement_index" href="index_doc.html#api_htmltextareaelement"> HTMLTextAreaElement </a></li>
+<li><a   id="api_imagedata_index" href="index_doc.html#api_imagedata"> ImageData </a></li>
+<li><a   id="api_location_index" href="index_doc.html#api_location"> Location </a></li>
+<li><a   id="api_mouseevent_index" href="index_doc.html#api_mouseevent"> MouseEvent </a></li>
+<li><a   id="api_navigator_index" href="index_doc.html#api_navigator"> Navigator </a></li>
+<li><a   id="api_navigatorcontentutils_index" href="index_doc.html#api_navigatorcontentutils"> NavigatorContentUtils </a></li>
+<li><a   id="api_navigatorcookies_index" href="index_doc.html#api_navigatorcookies"> NavigatorCookies </a></li>
+<li><a   id="api_navigatorid_index" href="index_doc.html#api_navigatorid"> NavigatorID </a></li>
+<li><a   id="api_navigatorlanguage_index" href="index_doc.html#api_navigatorlanguage"> NavigatorLanguage </a></li>
+<li><a   id="api_navigatoronline_index" href="index_doc.html#api_navigatoronline"> NavigatorOnLine </a></li>
+<li><a   id="api_node_index" href="index_doc.html#api_node"> Node </a></li>
+<li><a   id="api_parentnode_index" href="index_doc.html#api_parentnode"> ParentNode </a></li>
+<li><a   id="api_path2d_index" href="index_doc.html#api_path2d"> Path2D </a></li>
+<li><a   id="api_textmetrics_index" href="index_doc.html#api_textmetrics"> TextMetrics </a></li>
+<li><a   id="api_uievent_index" href="index_doc.html#api_uievent"> UIEvent </a></li>
+<li><a   id="api_uint8clampedarray_index" href="index_doc.html#api_uint8clampedarray"> Uint8ClampedArray </a></li>
+<li><a   id="api_validitystate_index" href="index_doc.html#api_validitystate"> ValidityState </a></li>
+<li><a   id="api_window_index" href="index_doc.html#api_window"> Window </a></li>
+
+                                </ul>
+                            </li>
+                            <li><a   id="object_language_index" href="index_doc.html#object_language"> Object Language </a></li>
+                        </ul>
+                    </li>
+                    <li><a   id="library_index" href="index_doc.html#library"> Library </a></li>
+                    <li><a   id="compilation_index" href="index_doc.html#compilation"> Compilation </a></li>
+                    <li><a   id="syntax_index" href="index_doc.html#syntax"> Syntax </a></li>
+                </ul>
+            </li>
+            <li><span class="caret"></span><a   id="examples_index" href="index_doc.html#examples"> Examples </a>
+                <ul class="nested">
+                    <li><span class="caret"></span><a   id="calculator_example_index" href="index_doc.html#calculator_example"> Calculator </a>
+                        <ul class="nested">
+                            <li><a   id="calculator_example_source_index" href="calculator_source.html#calculator_example_source"> Calculator Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="console_example_index" href="index_doc.html#console_example"> Console Button </a>
+                        <ul class="nested">
+                            <li><a class="active index"  id="console_example_source_index" href="#console_example_source"> Console Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="simple_example_index" href="index_doc.html#simple_example"> Simple </a>
+                        <ul class="nested">
+                            <li><a   id="simple_example_source_index" href="simple_source.html#simple_example_source"> Simple Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="likes_example_index" href="index_doc.html#likes_example"> Likes </a>
+                        <ul class="nested">
+                            <li><a   id="likes_example_source_index" href="likes_source.html#likes_example_source"> Likes Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="consult_console_example_index" href="index_doc.html#consult_console_example"> Consult console </a>
+                        <ul class="nested">
+                            <li><a   id="consult_console_example_source_index" href="consult_console_source.html#consult_console_example_source"> Consult Console Example Source </a></li>
+                        </ul>
+                    </li>
+                    <li><span class="caret"></span><a   id="tiles_example_index" href="index_doc.html#tiles_example"> Consult console </a>
+                        <ul class="nested">
+                            <li><a   id="tiles_example_source_index" href="tiles_source.html#tiles_example_source"> Tiles Example Source </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+    <li><a   id="download_index" href="index_download.html#download"> Download </a></li>
+    <li><a   id="about_index" href="index_about.html#about"> About </a></li>
+</ul>
+
+<!-- Page content -->
+<div class="content">
+    <header>
+        <h1>Console button test source</h1>
+        <hr>
+    </header>
+
+    <div class="body" id="console_example_source">
+    <p>
+        The source used in the Console example.
+        Links to these source files are:
+        <a href="../examples/console_button_test.pl">console_button_test.pl</a>
+        and
+        <a href="../examples/test.js">test.js</a>.
+        Eventually test.js may be implemented using Prolog, but there are complications with having ProscriptLS
+        run the HTML for an interpreter that evaluates ProscriptLS queries and keeping the two levels of ProscriptLS evaluation
+        separated.
+    </p>
+    <p>
+        Javascript source for the 'terminal' is shown in the test.js file.
+    </p>
+    <div id="prolog" style='white-space:nowrap;width:48%;height:100%;background-color:#eee;overflow:auto;float:left'>
+    <div id="console_pl" >
+        <h2 id='console_pl_header'>console_button_test.pl</h2>
+        <code class='content'>
+        /*<br>
+<i>The</i>&nbsp;<i>Console</i>&nbsp;<i>Button</i>&nbsp;<i>Test</i>&nbsp;uses&nbsp;console_button_test.html&nbsp;and&nbsp;console_button_test.pl&nbsp;to&nbsp;create&nbsp;a<br>
+web&nbsp;page&nbsp;for&nbsp;testing&nbsp;a&nbsp;dynamic&nbsp;<i>Prolog</i>&nbsp;console.<br>
+<i>There</i>&nbsp;is&nbsp;initially&nbsp;only&nbsp;a&nbsp;single&nbsp;button&nbsp;name&nbsp;'Create Console'&nbsp;that&nbsp;when&nbsp;clicked&nbsp;renames&nbsp;that<br>
+button&nbsp;'Remove Console'&nbsp;and&nbsp;creates&nbsp;a&nbsp;prolog&nbsp;'console'&nbsp;<i>DIV</i>&nbsp;on&nbsp;that&nbsp;page&nbsp;(if&nbsp;it&nbsp;does&nbsp;not&nbsp;already&nbsp;exist)<br>
+in&nbsp;which&nbsp;there&nbsp;is&nbsp;a&nbsp;'stdout'&nbsp;<i>DIV</i>&nbsp;in&nbsp;which&nbsp;the&nbsp;user&nbsp;can&nbsp;run&nbsp;<i>Prolog</i>&nbsp;queries.<br>
+<i>Clicking</i>&nbsp;the&nbsp;'Remove Console'&nbsp;button&nbsp;renames&nbsp;the&nbsp;button&nbsp;'Create Console'&nbsp;and&nbsp;removes&nbsp;the&nbsp;'stdout'&nbsp;<i>DIV</i>.<br>
+*/<br>
+<br>
+<span style='color:red'>:-</span>&nbsp;initialization(console_button_test).<br>
+<br>
+console_button_test&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;dom_element_attribute_value(<i>E</i>,&nbsp;id,&nbsp;simpletest),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;create_dom_element('BUTTON',&nbsp;<i>Button</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_dom_element_attribute_value(<i>Button</i>,&nbsp;id,&nbsp;console_button),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set_dom_element_attribute_value(<i>Button</i>,&nbsp;class,&nbsp;'example-button'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;create_dom_text_node("<i>Create</i>&nbsp;<i>Console</i>",&nbsp;<i>NewContent</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append_dom_node_child(<i>Button</i>,&nbsp;<i>NewContent</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dom_object_method(<i>Button</i>,&nbsp;addEventListener(click,&nbsp;setup_div_and_console)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append_dom_node_child(<i>E</i>,&nbsp;<i>Button</i>).<br>
+<br>
+setup_div_and_console&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;dom_element_attribute_value(<i>Button</i>,&nbsp;id,&nbsp;console_button),<br>
+&nbsp;&nbsp;dom_object_property(<i>_</i>,&nbsp;<i>Button</i>,&nbsp;innerText,&nbsp;<i>Text</i>),<br>
+&nbsp;&nbsp;setup_div_and_console(<i>Text</i>,&nbsp;<i>Button</i>).<br>
+<br>
+setup_div_and_console("<i>Create</i>&nbsp;<i>Console</i>",&nbsp;<i>Button</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;set_dom_object_property(<i>Button</i>,&nbsp;innerText,&nbsp;"<i>Remove</i>&nbsp;<i>Console</i>"),<br>
+&nbsp;&nbsp;setup_console_div,<br>
+&nbsp;&nbsp;setup_console.<br>
+<br>
+setup_div_and_console("<i>Remove</i>&nbsp;<i>Console</i>",&nbsp;<i>Button</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;set_dom_object_property(<i>Button</i>,&nbsp;innerText,&nbsp;"<i>Create</i>&nbsp;<i>Console</i>"),<br>
+&nbsp;&nbsp;remove_console_div.<br>
+<br>
+<span style='color:green'>%&nbsp;&lt;div&nbsp;style="border:&nbsp;1px&nbsp;solid&nbsp;black;&nbsp;height:&nbsp;50%;&nbsp;width:&nbsp;100%;&nbsp;overflow:&nbsp;scroll;"&nbsp;id="stdout"&nbsp;onKeyPress="keypress(event)"&nbsp;onKeyDown="keydown(event)"&nbsp;tabindex="0">&lt;/div></span><br>
+setup_console_div&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;create_dom_element('DIV',&nbsp;<i>Div</i>),<br>
+&nbsp;&nbsp;set_dom_element_attribute_value(<i>Div</i>,&nbsp;style,&nbsp;'border: 1px solid black; height: 50%; width: 100%; overflow: scroll;'),<br>
+&nbsp;&nbsp;set_dom_element_attribute_value(<i>Div</i>,&nbsp;id,&nbsp;stdout),<br>
+&nbsp;&nbsp;set_dom_element_attribute_value(<i>Div</i>,&nbsp;onkeypress,&nbsp;'keypress(event)'),<br>
+&nbsp;&nbsp;set_dom_element_attribute_value(<i>Div</i>,&nbsp;onkeydown,&nbsp;'keydown(event)'),<br>
+<span style='color:green'>%&nbsp;&nbsp;dom_element_add_event_listener(Div,&nbsp;keypress,&nbsp;eval_javascript("keypress(event)")),</span><br>
+<span style='color:green'>%&nbsp;&nbsp;dom_element_add_event_listener(Div,&nbsp;keydown,&nbsp;eval_javascript("keydown(event)")),</span><br>
+&nbsp;&nbsp;set_dom_element_attribute_value(<i>Div</i>,&nbsp;tabindex,&nbsp;'0'),<br>
+&nbsp;&nbsp;lookup_console_div(<i>OuterDiv</i>),<br>
+&nbsp;&nbsp;append_dom_node_child(<i>OuterDiv</i>,&nbsp;<i>Div</i>),<br>
+&nbsp;&nbsp;dom_object_property(element,&nbsp;<i>Body</i>,&nbsp;tag,&nbsp;body),<br>
+&nbsp;&nbsp;append_dom_node_child(<i>Body</i>,&nbsp;<i>OuterDiv</i>).<br>
+<br>
+lookup_console_div(<i>Div</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;dom_element_attribute_value(<i>Div</i>,&nbsp;id,&nbsp;console)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;true<br>
+&nbsp;&nbsp;;<br>
+&nbsp;&nbsp;create_dom_element('DIV',&nbsp;<i>Div</i>),<br>
+&nbsp;&nbsp;set_dom_element_attribute_value(<i>Div</i>,&nbsp;id,&nbsp;console).<br>
+<br>
+remove_console_div&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;dom_element_attribute_value(<i>Div</i>,&nbsp;id,&nbsp;console),<br>
+&nbsp;&nbsp;set_dom_object_property(<i>Div</i>,&nbsp;innerText,&nbsp;"").<br>
+<br>
+setup_console&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;dom_object_property(element,&nbsp;<i>Body</i>,&nbsp;tag,&nbsp;body),<br>
+&nbsp;&nbsp;set_dom_element_attribute_value(<i>Body</i>,&nbsp;onkeydown,&nbsp;'return preventBackspace(event);'),<br>
+<span style='color:green'>%&nbsp;&nbsp;dom_element_add_event_listener(Body,&nbsp;keydown,&nbsp;eval_javascript("preventBackspace(event);")),</span><br>
+&nbsp;&nbsp;eval_javascript("onload();").<br>
+
+        </code>
+    </div>
+    </div>
+    <div id="test_js" style='vertical-align:top;white-space:nowrap;width:48%;height:100%;background-color:#ddd;overflow:auto;float:right'>
+        <h2>test.js</h2>
+        <code>
+        var&nbsp;x_history&nbsp;=&nbsp;[];<br>
+var&nbsp;h_ptr&nbsp;=&nbsp;-1;<br>
+<br>
+var&nbsp;query&nbsp;=&nbsp;"";<br>
+debugging&nbsp;=&nbsp;false;<br>
+var&nbsp;output_console&nbsp;=&nbsp;null;<br>
+load_state();<br>
+call_directives();<br>
+initialize();<br>
+var&nbsp;can_backtrack&nbsp;=&nbsp;false;<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;preventBackspace(e)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(e.keyCode&nbsp;===&nbsp;8&nbsp;&&&nbsp;e.target&nbsp;===&nbsp;output_console)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.preventDefault();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.stopPropagation();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;backspace();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;true;<br>
+}<br>
+<br>
+var&nbsp;stdout_buffer;<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;predicate_flush_stdout()<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(stdout_buffer&nbsp;&&&nbsp;stdout_buffer.innerHTML&nbsp;!==&nbsp;"")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stdout("\n");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;true;<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;stdout(msg)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if(output_console)&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.removeChild(stdout_buffer);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;lines&nbsp;=&nbsp;(stdout_buffer.innerHTML&nbsp;+&nbsp;msg).split('\n');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;(var&nbsp;i&nbsp;=&nbsp;0;&nbsp;i&nbsp;&lt;&nbsp;lines.length&nbsp;-&nbsp;1;&nbsp;i++)&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;debug(lines[i]);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stdout_buffer.innerHTML&nbsp;=&nbsp;lines[lines.length&nbsp;-&nbsp;1];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(stdout_buffer);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;else&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert(msg);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;onload(initialConsult)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_console&nbsp;=&nbsp;document.getElementById('stdout');&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stdout_buffer&nbsp;=&nbsp;document.createElement('div');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stdout_buffer.innerHTML&nbsp;=&nbsp;"";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(stdout_buffer);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if(initialConsult)&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consult_for_test();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;query_node&nbsp;=&nbsp;document.createElement('div');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;query_node.className&nbsp;=&nbsp;"query";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;query_node.innerHTML&nbsp;=&nbsp;"?-";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(query_node);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;debug(e)&nbsp;<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if(output_console)&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;newElement&nbsp;=&nbsp;document.createElement('div');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newElement.innerHTML&nbsp;=&nbsp;'&lt;div>'&nbsp;+&nbsp;e&nbsp;+&nbsp;'&lt;/div>';<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(newElement);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;else&nbsp;{</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert(e);</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;}</span><br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;consult_for_test()<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;let&nbsp;code_atom&nbsp;=&nbsp;document.getElementById('code').value;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Reset&nbsp;the&nbsp;entire&nbsp;WAM&nbsp;*/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;load_state();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;call_directives();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;initialize();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;let&nbsp;atom&nbsp;=&nbsp;lookup_atom(code_atom);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;let&nbsp;ftor&nbsp;=&nbsp;VAL(lookup_functor("wam_compiler:consult_atom",&nbsp;1));<br>
+&nbsp;&nbsp;&nbsp;&nbsp;allocate_first_frame();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;pred&nbsp;=&nbsp;predicates[ftor];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;pi&nbsp;=&nbsp;predicates[ftor].clause_keys[0];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;state.current_predicate&nbsp;=&nbsp;pred;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;code&nbsp;=&nbsp;pred.clauses[pi].code;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;state.P&nbsp;=&nbsp;0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;register[0]&nbsp;=&nbsp;atom;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(wam())<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;debug("Buffer&nbsp;consulted");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;debug("Failed&nbsp;to&nbsp;load&nbsp;buffer");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;FIXME:&nbsp;This&nbsp;is&nbsp;not&nbsp;very&nbsp;good.&nbsp;At&nbsp;the&nbsp;very&nbsp;least&nbsp;setting&nbsp;state.B&nbsp;to&nbsp;0&nbsp;should&nbsp;reset&nbsp;state.H&nbsp;to&nbsp;0&nbsp;as&nbsp;well?</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;state.B&nbsp;=&nbsp;0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;can_backtrack&nbsp;=&nbsp;false;<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;backspace()<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(query.length&nbsp;>&nbsp;0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;=&nbsp;query.substring(0,&nbsp;query.length&nbsp;-&nbsp;1);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.innerHTML&nbsp;=&nbsp;"?-"&nbsp;+&nbsp;query;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.removeChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;keydown(e)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(e.keyCode&nbsp;===&nbsp;38&nbsp;&&&nbsp;!can_backtrack)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.preventDefault();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.stopPropagation();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h_ptr++;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(h_ptr&nbsp;>=&nbsp;x_history.length)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h_ptr&nbsp;=&nbsp;x_history.length-1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;=&nbsp;x_history[h_ptr];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.innerHTML&nbsp;=&nbsp;"?-"&nbsp;+&nbsp;query;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.removeChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;if&nbsp;(e.keyCode&nbsp;===&nbsp;40&nbsp;&&&nbsp;!can_backtrack)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.preventDefault();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.stopPropagation();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h_ptr--;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(h_ptr&nbsp;&lt;&nbsp;0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h_ptr&nbsp;=&nbsp;-1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;=&nbsp;"";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;=&nbsp;x_history[h_ptr];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.innerHTML&nbsp;=&nbsp;"?-"&nbsp;+&nbsp;query;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.removeChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;keypress(e)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;old_query;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(e.altKey&nbsp;||&nbsp;e.ctrlKey&nbsp;||&nbsp;e.metaKey)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;e.preventDefault();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;e.stopPropagation();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(e.keyCode&nbsp;===&nbsp;8)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;backspace();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;if&nbsp;(e.keyCode&nbsp;===&nbsp;59&nbsp;&&&nbsp;can_backtrack)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;old_query&nbsp;=&nbsp;document.createElement('div');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;old_query.innerHTML&nbsp;=&nbsp;";";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;old_query.className&nbsp;=&nbsp;"old_query";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(old_query);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(backtrack())<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try_running();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stdout("false.\n");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can_backtrack&nbsp;=&nbsp;false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;=&nbsp;"";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node&nbsp;=&nbsp;document.createElement('div');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.className&nbsp;=&nbsp;"query";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.innerHTML&nbsp;=&nbsp;"?-";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(query_node);&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;if&nbsp;(e.keyCode&nbsp;===&nbsp;13&nbsp;&&&nbsp;can_backtrack)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;Cut&nbsp;choicepoints&nbsp;(?)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.B&nbsp;=&nbsp;0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can_backtrack&nbsp;=&nbsp;false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;=&nbsp;"";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node&nbsp;=&nbsp;document.createElement('div');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.className&nbsp;=&nbsp;"query";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.innerHTML&nbsp;=&nbsp;"?-";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(query_node);&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;if&nbsp;(e.keyCode&nbsp;===&nbsp;13)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;call&nbsp;the&nbsp;toplevel&nbsp;handler</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;ARGH.&nbsp;MUST&nbsp;reset&nbsp;registers&nbsp;for&nbsp;new&nbsp;query,&nbsp;especially&nbsp;after&nbsp;failure!</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initialize();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allocate_first_frame();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;ftor&nbsp;=&nbsp;VAL(lookup_functor("wam_compiler:repl",&nbsp;1));<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;pred&nbsp;=&nbsp;predicates[ftor];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;pi&nbsp;=&nbsp;predicates[ftor].clause_keys[0];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.current_predicate&nbsp;=&nbsp;pred;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;code&nbsp;=&nbsp;pred.clauses[pi].code;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;register[0]&nbsp;=&nbsp;lookup_atom(query);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>//&nbsp;Make&nbsp;the&nbsp;query&nbsp;a&nbsp;permanent&nbsp;part&nbsp;of&nbsp;the&nbsp;output&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.removeChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;old_query&nbsp;=&nbsp;document.createElement('div');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;old_query.innerHTML&nbsp;=&nbsp;"?-"&nbsp;+&nbsp;query;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;old_query.className&nbsp;=&nbsp;"old_query";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(old_query);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x_history.unshift(query);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h_ptr&nbsp;=&nbsp;-1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try_running();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;+=&nbsp;String.fromCharCode(e.keyCode);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.innerHTML&nbsp;=&nbsp;"?-"&nbsp;+&nbsp;query;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.removeChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(query_node);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;try_running()<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;try<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(!wam())<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stdout("false.\n");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(anything)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log(anything);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;debug("Error.&nbsp;See&nbsp;javascript&nbsp;console");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(state.B&nbsp;!==&nbsp;0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;debug_msg("Can&nbsp;backtrack");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can_backtrack&nbsp;=&nbsp;true;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;debug_msg("No&nbsp;more&nbsp;solutions&nbsp;after&nbsp;this");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can_backtrack&nbsp;=&nbsp;false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;=&nbsp;"";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node&nbsp;=&nbsp;document.createElement('div');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.className&nbsp;=&nbsp;"query";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query_node.innerHTML&nbsp;=&nbsp;"?-";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output_console.appendChild(query_node);&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll_to_bottom();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+}<br>
+<br>
+<span style='color:blue'>function</span>&nbsp;scroll_to_bottom()<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_console.scrollTop&nbsp;=&nbsp;output_console.scrollHeight;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+}<br>
+
+        </code>
+    </div>
+</div>
+
+
+    <footer>
+        <hr>
+        <table style="width:100%">
+        <tr>
+        <td>Version 0.3.0+, August 2019.</td>
+        <td style="text-align:right">Powered by ProscriptLS Prolog - Logic at Your Service.</td>
+        </tr>
+        </table>
+    </footer>
+</div>
+<!-- proscriptls interpreter
+<script src="../terminal/proscript_interpreter_terminal.js" type="text/javascript"></script>
+<div id="proscriptinterpreter">
+</div>
+-->
+<script type="text/prolog" src="index.pl"></script>
+</body>
+</html>
