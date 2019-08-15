@@ -16,8 +16,8 @@ clean:
 demo:	$(ENGINE) ../test/standalone.js proscriptls_state_demo.js
 		$(JSC) $(ENGINE) proscriptls_state_demo.js ../test/standalone.js  -e "proscriptls_toplevel($(DEBUG))"
 
-proscriptls_state_demo.js: demo.pl $(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/wam_compiler.pl
-		$(SWIPL) -q -f $(SRC_SYSTEM)/wam_compiler.pl -g "bootstrap('$(SRC_SYSTEM)/', ['$<'], '$@', 'foo'), halt"
+proscriptls_state_demo.js: demo.pl $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/wam_compiler.pl
+		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['$<'], '$@', 'foo'), halt"
 
 dump-state: $(ENGINE) proscriptls_state_demo.js ../test/standalone.js $(SRC_TOOLS)/dump.js
 		$(JSC) $(ENGINE) proscriptls_state_demo.js ../test/standalone.js $(SRC_TOOLS)/dump.js  -e "dump()"

@@ -726,20 +726,20 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
                 return domain_error("not_less_than_zero", arity);
             let namePL = PL_put_atom_chars(name);
 
-            let exportedPredicates = module_exports[moduleName];
+            let exportedPredicates = module_exports[VAL(moduleName)];
             if(exportedPredicates) {
                 for (let entry of exportedPredicates) {
-                    if (entry[0] === namePL && entry[1] === arity) {
+                    if (entry[0] === namePL && entry[1] === VAL(arity)) {
                         return true; // do nothing, the predicate is already specified in the exports.
                     }
                 }
             } else {
                 exportedPredicates = [];
-                module_exports[moduleName] = exportedPredicates;
+                module_exports[VAL(moduleName)] = exportedPredicates;
             }
 
             // add namePL/arity to exports.
-            exportedPredicates.push([namePL, arity]);
+            exportedPredicates.push([namePL, VAL(arity)]);
             return true;
         }
         else if (TAG(name) === TAG_REF)
@@ -800,7 +800,7 @@ function predicate_module_export(moduleName, predicateIndicator)
             if(!pair) {
                 return false;
             } else {
-                let indicatorPL = create_indicator_structure(pair[0], pair[1]);
+                let indicatorPL = create_indicator_structure(PL_put_atom(pair[0]), PL_put_integer(pair[1]));
                 return unify(predicateIndicator, indicatorPL);
             }
         } else {
@@ -839,7 +839,7 @@ function predicate_module_export(moduleName, predicateIndicator)
             if(!pair) {
                 return false;
             } else {
-                let indicatorPL = create_indicator_structure(pair[0], pair[1]);
+                let indicatorPL = create_indicator_structure(PL_put_atom(pair[0]), PL_put_integer(pair[1]));
                 return unify(predicateIndicator, indicatorPL);
             }
         } else {
@@ -848,6 +848,372 @@ function predicate_module_export(moduleName, predicateIndicator)
     }
     else
         return type_error("atom", key);
+}
+
+function predicate_add_module_import(importingModule, importedModule) {
+    //     assertz('$import'(importingModule, importedModule)).
+    if (TAG(importingModule) === TAG_REF)
+        return instantiation_error(importingModule);
+    else if (TAG(importingModule) !== TAG_ATM)
+        return type_error("atom", importingModule);
+
+    if (TAG(importedModule) === TAG_REF)
+        return instantiation_error(importedModule);
+    else if (TAG(importedModule) !== TAG_ATM)
+        return type_error("atom", importedModule);
+
+    let selectedImportedModules = imported_modules[VAL(importingModule)];
+    if(selectedImportedModules) {
+        selectedImportedModules.push(VAL(importedModule));
+    } else {
+        module_imports[VAL(importingModule)] = [VAL(importedModule)];
+    }
+
+    return true;
+}
+
+function predicate_module_import(importingModule, importedModule)
+{
+    if (TAG(importingModule) === TAG_REF)
+    {
+        let cursor;
+
+        if (state.foreign_retry)
+        {
+            cursor = state.foreign_value;
+            cursor.importIndex++;
+        }
+        else
+        {
+            create_choicepoint();
+            cursor = {module:0, importIndex:0};
+        }
+
+        if (cursor.module >= imported_modules.length)
+        {
+            destroy_choicepoint();
+            return false;
+        } else if(cursor.importIndex >= imported_modules[cursor.module].length) {
+            cursor.module++;
+            cursor.importIndex = 0;
+        }
+
+        update_choicepoint_data(cursor);
+
+        let moduleImports = module_imports[cursor.module];
+        while(!moduleImports && cursor.module < module_imports.length) {
+            cursor.module++;
+            moduleImports = module_imports[cursor.module];
+        }
+
+        if(!moduleImports) {
+            destroy_choicepoint();
+            return false;
+        } else if( unify(importingModule, PL_put_atom(cursor.module))) {
+            let importedModuleID = moduleImports[cursor.importIndex];
+            if(!importedModuleID) {
+                return false;
+            } else {
+                return unify(importedModule, PL_put_atom(importedModuleID));
+            }
+        } else {
+            return false;
+        }
+    }
+    else if (TAG(importingModule) === TAG_ATM)
+    {
+
+        let cursor;
+
+        if (state.foreign_retry)
+        {
+            cursor = state.foreign_value;
+            cursor.importIndex++;
+        }
+        else
+        {
+            create_choicepoint();
+            cursor = {module:VAL(importingModule), importIndex:0};
+        }
+
+        if(cursor.importIndex >= module_imports[cursor.module].length) {
+            destroy_choicepoint();
+            return false;
+        }
+
+        update_choicepoint_data(cursor);
+        let moduleImports = module_imports[cursor.module];
+
+        if(!moduleImports) {
+            destroy_choicepoint();
+            return false;
+        } else if( unify(importingModule, PL_put_atom(cursor.module))) {
+            let importedModuleID = moduleImports[cursor.importIndex];
+            if(!importedModuleID) {
+                return false;
+            } else {
+                return unify(importedModule, PL_put_atom(importedModuleID));
+            }
+        } else {
+            return false;
+        }
+    }
+    else
+        return type_error("atom", importingModule);
+}
+
+// meta predicates: FunctorID : {Arity1: [ArgTypeID1, ArtTypeID2, ...], Arity2: [ArgTypes2], ...}
+// ArgType is 0..9, :, ^, +, -, ?
+
+function predicate_add_meta_predicate(functor, arity, argTypes) {
+    if (TAG(functor) === TAG_REF)
+        return instantiation_error(functor);
+    else if (TAG(functor) !== TAG_ATM)
+        return type_error("atom", functor);
+
+    if (TAG(arity) === TAG_REF)
+        return instantiation_error(arity);
+    else if (TAG(arity) !== TAG_INT)
+        return type_error("integer", arity);
+
+    if (TAG(argTypes) === TAG_REF)
+        return instantiation_error(argTypes);
+    else if (TAG(argTypes) !== TAG_LST)
+        return type_error("list", argTypes);
+
+    let functorID = VAL(functor);
+    let argTypeArray = type_list_to_id_array(argTypes);
+    let arities = meta_predicate_signatures ? meta_predicate_signatures[functorID] : undefined;
+    if(arities) {
+        let aritySignature = arities[VAL(arity)];
+        if(aritySignature) {
+            return existence_error('unique arity for ' + PL_get_atom_chars(functor), arity);
+        }
+        arities[VAL(arity)] = argTypeArray;
+    } else {
+        arities = {};
+        arities[VAL(arity)] = argTypeArray;
+        meta_predicate_signatures = {};
+        meta_predicate_signatures[functorID] = arities;
+    }
+}
+
+function predicate_pls_meta_predicate(functor, arity, argTypes) {
+    if(TAG(functor) !== TAG_REF && TAG(functor) !== TAG_ATM) {
+        return type_error('atom', functor);
+    }
+
+    if(TAG(arity) !== TAG_REF && TAG(arity) !== TAG_INT) {
+        return type_error('integer', arity);
+    }
+
+    if(TAG(argTypes) !== TAG_REF && TAG(argTypes) !== TAG_LST) {
+        return type_error('list', argTypes);
+    }
+
+    // case: all args are bound, argTypes may contain TAG_REF (variable) terms.
+    if(TAG(functor) === TAG_ATM && TAG(arity) === TAG_INT) {
+        let functorID = VAL(functor);
+        let arityInt = VAL(arity);
+        let arities = meta_predicate_signatures ? meta_predicate_signatures[functorID] : undefined;
+        if (arities) {
+            if (TAG(argTypes) === TAG_REF) {
+                let aritySignature = arities[arityInt];
+                if (aritySignature) {
+                    let argTypesPL = integers_to_list(convert_arg_types(aritySignature));
+                    return unify(argTypes, argTypesPL);
+                } else {
+                    return false;
+                }
+            } else if (TAG(argTypes) === TAG_LST) {
+                let argTypeArray = atom_or_var_list_to_term_array(argTypes);
+                let aritySignature = arities[arityInt];
+                if (aritySignature) {
+                    for (let ofst = 0; ofst < arityInt; ofst++) {
+                        let inputType = argTypeArray[ofst];
+                        let storedTypePL = convert_arg_type(aritySignature[ofst]);
+                        if (!unify(inputType, storedTypePL)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return type_error('list', argTypes);
+            }
+         } else {
+            return false;
+        }
+    }
+
+    let cursor;
+
+    if (state.foreign_retry)
+    {
+        cursor = state.foreign_value;
+        if(cursor.arities && cursor.arities.length > 1) {
+            cursor.arities = cursor.arities.slice(1);
+        } else {
+            if(cursor.functors && cursor.functors.length > 1) {
+                cursor.functors = cursor.functors.slice(1);
+                cursor.arities = meta_predicate_signatures(cursor.functors[0]);
+                if(! cursor.arities) {
+                    return false;
+                }
+            } else {
+                destroy_choicepoint();
+                return false;
+            }
+        }
+    }
+    else
+    {
+        create_choicepoint();
+
+        let functorIDs;
+        let arityIntArray;
+
+        if(TAG(functor) === TAG_ATM) {
+            functorIDs = [VAL(functor)];
+            arityIntArray = meta_predicate_signatures[VAL(functor)];
+        } else {
+            let functorIDs = [];
+            for(let ofst = 0;ofst < meta_predicate_signatures.length; ofst++) {
+                let arities = meta_predicate_signatures[ofst];
+                if(arities && (TAG(arity) == TAG_REF || arities[VAL(arity)])) {
+                    functorIDs.push(functorID);
+                }
+            }
+
+            if(TAG(arity) == TAG_REF) {
+                arityIntArray = meta_predicate_signatures[functorIDs[0]];
+            } else {
+                arityIntArray = VAL(arity);
+            }
+        }
+
+        cursor = {functors:functorIDs, arities:arityIntArray};
+    }
+
+    update_choicepoint_data(cursor);
+
+    // cursor = {functors: functorIDArray, arities: arityIntArray}
+    // current choice is functorIDArray[0] and arityIntArray[0].
+    // arityIntArray is function of functorIDArray[0]
+    // argTypesArray is function of functorIDArray[0] and arityIntArray[0].
+
+    let currentFunctorID = cursor.functors[0];
+    let currentArityInt = cursor.arities[0];
+    let functorSignatures = meta_predicate_signatures[currentFunctorID];
+    if(functorSignatures) {
+        let currentSignature = functorSignatures[currentArityInt];
+        if(currentSignature) {
+            if (TAG(argTypes) === TAG_REF) {
+                let argTypesPL = integers_to_list(convert_arg_types(currentSignature));
+                return unify(argTypes, argTypesPL);
+            } else if (TAG(argTypes) === TAG_LST) {
+                let argTypeArray = atom_or_var_list_to_term_array(argTypes);
+                for (let ofst = 0; ofst < arityInt; ofst++) {
+                    let inputType = argTypeArray[ofst];
+                    let storedType = currentSignature[ofst];
+                    if (!unify(inputType, PL_put_atom(storedType))) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return type_error('list', argTypes);
+            }
+        } else {
+            return engine_error('Stored arity ' + currentArityInt + ' does not have a stored signature.');
+        }
+    } else {
+        return engine_error('Stored functor identifier ' + currentFunctorID + ' does not have a stored signature.');
+    }
+}
+
+function convert_arg_types(storedTypes) {
+    let results = [];
+    for(let ofst = 0;ofst < storedTypes.length;ofst++) {
+        let storedType = storedTypes[ofst];
+        let resultType = convert_arg_type(storedType);
+        results[ofst] = resultType;
+    }
+    return results;
+}
+
+function convert_arg_type(storedType) {
+    let storedTypePL = PL_put_atom(storedType);
+    let storedAtom = PL_get_atom_chars(storedTypePL);
+    let resultType;
+    if(storedAtom.startsWith('t')) {
+        let storedNumberString = storedAtom.substring(1);
+        let storedNumber = Number.parseInt(storedNumberString);
+        resultType = PL_put_integer(storedNumber);
+    } else {
+        resultType = storedTypePL;
+    }
+    return resultType;
+}
+
+function type_list_to_id_array(listPL) {
+
+    let result = [];
+    var head = memory[VAL(listPL)];
+    var tail = memory[VAL(listPL)+1];
+    while (true)
+    {
+        if(TAG(head) !== TAG_ATM &&  TAG(head) !== TAG_LST) {
+            throw('Invalid type list. Item is neither an atom nor an integer.');
+        }
+
+        let termID;
+        if(TAG(head) === TAG_ATM) {
+            termID = VAL(head);
+        } else {
+            let taggedNumber = 't' + PL_get_atom_chars(head);
+            termID = VAL(lookup_atom(taggedNumber));
+        }
+
+        result.push(termID);
+
+        if (tail === NIL)
+            return result;
+        else if (TAG(tail) === TAG_LST)
+        {
+            head = memory[VAL(tail)];
+            tail = memory[VAL(tail)+1];
+        }
+        else
+            throw('Invalid atom list. Last item was not NIL.');
+    }
+}
+
+function atom_or_var_list_to_term_array(listPL) {
+
+    let result = [];
+    var head = memory[VAL(listPL)];
+    var tail = memory[VAL(listPL)+1];
+    while (true)
+    {
+        if(TAG(head) !== TAG_ATM && TAG(head) !== TAG_REF) {
+            throw('Invalid atom-or-var list. Item is not an atom and not a variable.');
+        }
+
+        result.push(head);
+
+        if (tail === NIL)
+            return result;
+        else if (TAG(tail) === TAG_LST)
+        {
+            head = memory[VAL(tail)];
+            tail = memory[VAL(tail)+1];
+        }
+        else
+            throw('Invalid atom-or-var list. Last item was not NIL.');
+    }
 }
 
 function create_indicator_structure(name, arity) {
@@ -897,6 +1263,8 @@ function predicate_dump_tables(streamPL) {
     write_to_stream(streamValue, 'system =' + JSON.stringify(system) + ';\n');
     write_to_stream(streamValue, 'initialization =' + JSON.stringify(initialization) + ';\n');
     write_to_stream(streamValue, 'module_exports =' + JSON.stringify(module_exports) + ';\n');
+    write_to_stream(streamValue, 'module_imports =' + JSON.stringify(module_imports) + ';\n');
+    write_to_stream(streamValue, 'meta_predicate_signatures =' + JSON.stringify(meta_predicate_signatures) + ';\n');
 
     return true;
 }
@@ -3344,6 +3712,8 @@ let foreign_predicates; // 'defined' by load_state() in proscriptls_state.js.
 let system;  // 'defined' by load_state() in proscriptls_state.js.
 let initialization;  // 'defined' by load_state() in proscriptls_state.js.
 let module_exports;  // 'defined' by load_state() in proscriptls_state.js.
+let module_imports;  // 'defined' by load_state() in proscriptls_state.js.
+let meta_predicate_signatures;  // 'defined' by load_state() in proscriptls_state.js.
 
 /* Special purpose machine registers:
 

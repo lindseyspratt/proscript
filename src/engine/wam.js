@@ -99,6 +99,8 @@ let foreign_predicates; // 'defined' by load_state() in proscriptls_state.js.
 let system;  // 'defined' by load_state() in proscriptls_state.js.
 let initialization;  // 'defined' by load_state() in proscriptls_state.js.
 let module_exports;  // 'defined' by load_state() in proscriptls_state.js.
+let module_imports;  // 'defined' by load_state() in proscriptls_state.js.
+let meta_predicate_signatures;  // 'defined' by load_state() in proscriptls_state.js.
 
 /* Special purpose machine registers:
 

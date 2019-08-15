@@ -87,8 +87,6 @@ Some gotchas:
 :-dynamic('$loaded'/1).
 :-dynamic('$current_compilation_module'/1).
 :-dynamic('$current_compilation_stream'/1).
-:-dynamic('$import'/2).
-:-dynamic('$meta_predicate'/3).
 
 expand_term(In, Out):-
         current_predicate(term_expansion/2),
@@ -321,7 +319,7 @@ define_use_module(Spec) :-
         (Name = ImportName
           -> throw(cyclic_module(Name))
         ;
-        assertz('$import'(Name, ImportName))
+        add_module_import(Name, ImportName)
         ).
 
 setup_use_module(library(LibraryName), LibraryName) :-
@@ -382,13 +380,13 @@ define_meta_predicate(Term) :-
         list_length(MetaArgTypes, Arity),
         current_compilation_module(Name),
         transform_predicate_name(Functor, Arity, Name, TransformedFunctor),
-        assertz('$meta_predicate'(TransformedFunctor, Arity, MetaArgTypes)).
+        add_meta_predicate(TransformedFunctor, Arity, MetaArgTypes).
 
 defined_meta_predicate(Functor, Arity, MetaArgTypes) :-
-        '$meta_predicate'(Functor, Arity, MetaArgTypes)
+        pls_meta_predicate(Functor, Arity, MetaArgTypes)
         ;
         \+ var(Functor),
-        \+ '$meta_predicate'(Functor, Arity, MetaArgTypes),
+        \+ pls_meta_predicate(Functor, Arity, MetaArgTypes),
         list_length(MetaArgTypes, Arity),
         default_meta_arg_types(MetaArgTypes, (?)).
 
@@ -410,8 +408,8 @@ current_import(UnqualifiedPredicateName, Arity, ImportModuleName) :-
 current_import(UnqualifiedPredicateName, Arity, ImportingModuleName, ImportModuleName) :-
         (ImportingModuleName == user
           -> ImportModuleNameINTERIM = system
-         ;
-        '$import'(ImportingModuleName, ImportModuleNameINTERIM)
+        ;
+         module_import(ImportingModuleName, ImportModuleNameINTERIM)
         ),
         module_export(ImportModuleNameINTERIM, UnqualifiedPredicateName/Arity)
           -> (ImportingModuleName = system

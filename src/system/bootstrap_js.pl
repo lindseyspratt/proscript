@@ -65,7 +65,7 @@ call(Goal):-
 
 dynamic(Name/Arity) :-
         !,
-        wam_compiler:define_dynamic_predicate(Name/Arity).
+        define_dynamic_predicate(Name/Arity).
 dynamic([]).
 dynamic([H|T]) :-
         !,

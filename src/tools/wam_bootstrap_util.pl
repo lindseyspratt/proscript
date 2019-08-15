@@ -1,5 +1,6 @@
 :- module(wam_bootstrap_util, [lookup_atom/2, lookup_float/2, lookup_functor/3, lookup_dynamic_functor/3, emit_code/2, compile_message/1,
-    ftable/2, fltable/2, atable/2, clause_table/5, fptable/2, ctable/2, itable/1, stable/1, dtable/1, '$module_export'/3,
+    ftable/2, fltable/2, atable/2, clause_table/5, fptable/2, ctable/2, itable/1, stable/1, dtable/1,
+    'pls$module_export'/3, 'pls$import'/2, 'pls$meta_predicate'/3,
     add_clause_to_predicate/3, add_clause_to_aux/4, add_clause_to_existing/2]).
 
 :-dynamic(ftable/2). % functors
@@ -11,7 +12,9 @@
 :-dynamic(itable/1). % initialization directive predicates
 :-dynamic(stable/1). % system directive predicates
 :-dynamic(dtable/1). % dynamic predicates
-:-dynamic('$module_export'/3).
+:-dynamic('pls$module_export'/3).
+:-dynamic('pls$import'/2).
+:-dynamic('pls$meta_predicate'/3).
 
 lookup_functor(Functor, Arity, N):-
         lookup_atom(Functor, F),

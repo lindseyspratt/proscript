@@ -12,7 +12,9 @@
 ---------------------------------------------------------- */
 :- module(wam_bootstrap,
     [add_clause_to_predicate/3, emit_code/2,
-    generate_system_goal/1, generate_initialization_goal/1, define_dynamic_predicate/1, add_module_export/2, module_export/2, handle_term_expansion/1,
+    generate_system_goal/1, generate_initialization_goal/1, define_dynamic_predicate/1,
+    add_module_export/2, module_export/2, add_module_import/2, module_import/2, add_meta_predicate/3, pls_meta_predicate/3,
+    handle_term_expansion/1,
     fetch_promise/2, promise_result/2, open_memory_file/3, reset/0, gc/0, reset_compile_buffer/0, dump_tables/1]).
 
 :- use_module(wam_bootstrap_util).
@@ -50,29 +52,127 @@ define_dynamic_predicate(Name/Arity) :-
 add_module_export(Name, F/A) :-
         lookup_atom(Name, NameID),
         lookup_atom(F, FID),
-        assertz('$module_export'(NameID, FID, A)).
+        assertz('pls$module_export'(NameID, FID, A)).
 add_module_export(_Name, op(_,_,_)). % ignore op exports for now.
 
 module_export(Name, F/A) :-
         var(Name)
           -> (var(F)
-               -> '$module_export'(NameID, FID, A),
+               -> 'pls$module_export'(NameID, FID, A),
                   atable(Name, NameID),
                   atable(F, FID)
               ;
                lookup_atom(F, FID),
-               '$module_export'(NameID, FID, A),
+               'pls$module_export'(NameID, FID, A),
                atable(Name, NameID)
               )
         ;
         var(F)
           -> lookup_atom(Name, NameID),
-             '$module_export'(NameID, FID, A),
+             'pls$module_export'(NameID, FID, A),
              atable(F, FID)
         ;
         lookup_atom(Name, NameID),
         lookup_atom(F, FID),
-        '$module_export'(NameID, FID, A).
+        'pls$module_export'(NameID, FID, A).
+
+add_module_import(Importing, Imported) :-
+        lookup_atom(Importing, ImportingID),
+        lookup_atom(Imported, ImportedID),
+        assertz('pls$import'(ImportingID, ImportedID)).
+
+module_import(Importing, Imported) :-
+        var(Importing)
+          -> (var(Imported)
+               -> 'pls$import'(ImportingID, ImportedID),
+                  lookup_atom(Importing, ImportingID),
+                  lookup_atom(Imported, ImportedID)
+             ;
+              true
+               -> lookup_atom(Imported, ImportedID),
+                  'pls$import'(ImportingID, ImportedID),
+                  lookup_atom(Importing, ImportingID)
+             )
+        ;
+        var(Imported)
+          -> lookup_atom(Importing, ImportingID),
+             'pls$import'(ImportingID, ImportedID),
+             lookup_atom(Imported, ImportedID)
+        ;
+        lookup_atom(Importing, ImportingID),
+        lookup_atom(Imported, ImportedID),
+        'pls$import'(ImportingID, ImportedID).
+
+add_meta_predicate(Functor, Arity, ArgTypes) :-
+        lookup_atom(Functor, FunctorID),
+        lookup_atoms(ArgTypes, ArgTypeIDs, Redo),
+        arg_type_redo_check('add_meta_predicate ArgTypes', ArgTypes, Redo),
+        assertz('pls$meta_predicate'(FunctorID, Arity, ArgTypeIDs)).
+
+lookup_atoms([], [], []).
+lookup_atoms([ArgType|OtherArgTypes], [ArgTypeID|OtherArgTypeIDs], Redo) :-
+        (var(ArgType), var(ArgTypeID)
+         -> Redo = [ArgType-ArgTypeID|OtherRedo]
+        ;
+         lookup_type_atom(ArgType, ArgTypeID),
+         Redo = OtherRedo
+        ),
+        lookup_atoms(OtherArgTypes, OtherArgTypeIDs, OtherRedo).
+
+lookup_atoms_redo([]).
+lookup_atoms_redo([ArgType-ArgTypeID|OtherRedo]) :-
+        lookup_type_atom(ArgType, ArgTypeID),
+        lookup_atoms_redo(OtherRedo).
+
+lookup_type_atom(Type, TypeID) :-
+        var(Type)
+          -> lookup_atom(BaseType, TypeID),
+             atom_codes(BaseType, BaseTypeCodes),
+             (append("t", R, BaseTypeCodes)
+               -> number_codes(Type, R)
+             ;
+              BaseType = Type
+             )
+        ;
+        number(Type)
+          -> number_codes(Type, TypeCodes),
+             append("t", TypeCodes, BaseTypeCodes),
+             atom_codes(BaseType, BaseTypeCodes),
+             lookup_atom(BaseType, TypeID)
+        ;
+        lookup_atom(Type, TypeID).
+
+arg_type_redo_check(Msg, ErrorTerm, Redo) :-
+        Redo \= []
+        -> atom_concat(Msg, ' partially bound ', FullMsg),
+           throw(engine_error(FullMsg, ErrorTerm))
+        ;
+        true.
+
+pls_meta_predicate(Functor, Arity, ArgTypes) :-
+        var(Functor)
+          -> (var(ArgTypes)
+               -> 'pls$meta_predicate'(FunctorID, Arity, ArgTypeIDs),
+                  lookup_atoms(ArgTypes, ArgTypeIDs, Redo),
+                  arg_type_redo_check('pls_meta_predicate ArgTypeIDs', ArgTypeIDs, Redo),
+                  lookup_atom(Functor, FunctorID)
+             ;
+              lookup_atoms(ArgTypes, ArgTypeIDs, Redo),
+              'pls$meta_predicate'(FunctorID, Arity, ArgTypeIDs),
+              lookup_atoms_redo(Redo),
+              lookup_atom(Functor, FunctorID)
+             )
+        ;
+        var(ArgTypes)
+          -> lookup_atom(Functor, FunctorID),
+             'pls$meta_predicate'(FunctorID, Arity, ArgTypeIDs),
+             lookup_atoms(ArgTypes, ArgTypeIDs, Redo),
+             arg_type_redo_check('pls_meta_predicate ArgTypeIDs', ArgTypeIDs, Redo)
+        ;
+        lookup_atom(Functor, FunctorID),
+        lookup_atoms(ArgTypes, ArgTypeIDs, Redo),
+        'pls$meta_predicate'(FunctorID, Arity, ArgTypeIDs),
+        lookup_atoms_redo(Redo).
 
 handle_term_expansion(Clause) :-
     assertz(Clause).
@@ -154,13 +254,39 @@ dump_tables(S):-
         setof(X,
               MN^ENs^
               (setof([FN,A],
-                    '$module_export'(MN, FN, A),
+                    'pls$module_export'(MN, FN, A),
                     ENs
                  ),
                format(atom(X), '~w : ~w', [MN, ENs]) % { ModuleN1 : [Export1, ...], ModuleN2 : [Export1, ...]...}
               ), R),
         atomic_list_concat(R, ', ', ModuleExportsAtom),
-        format(S, 'module_exports = {~w};~n', [ModuleExportsAtom]).
+        format(S, 'module_exports = {~w};~n', [ModuleExportsAtom]),
+        setof(X,
+            G^Ds^
+            (setof(D, 'pls$import'(G, D), Ds),
+             format(atom(X), '~w : ~w', [G, Ds]) % { ModuleN1 : [Import1, ...], ModuleN2 : [Import1, ...]...}
+            ),
+            ModuleImports),
+        atomic_list_concat(ModuleImports, ', ', ModuleImportsAtom),
+        format(S, 'module_imports = {~w};~n', [ModuleImportsAtom]),
+        setof(X,
+            F^Ws^
+            (setof(W,
+                A^Ts^
+                ('pls$meta_predicate'(F, A, Ts),
+                 format(atom(W), '~w : ~w', [A, Ts]) % A1 : [T1, ...]
+                ),
+                Ws),
+             format(atom(V), '~w', [Ws]),
+             % remove first and last characters; '[' and ']'.
+             atom_codes(V, [_|VCodes]),
+             append(CoreCodes, [_], VCodes),
+             atom_codes(Core, CoreCodes),
+             format(atom(X), '~w : {~w}', [F, Core]) % F1 : {A1 : [T1...], A2 : [T1, ...]}
+            ),
+            MetaPredicates),
+        atomic_list_concat(MetaPredicates, ', ', MetaPredicatesAtom),
+        format(S, 'meta_predicate_signatures = {~w};~n', [MetaPredicatesAtom]).
 
 dump_predicate(PredicateAtom) :-
        bagof(c(Clause, Index, Head, Body),
@@ -199,7 +325,7 @@ reserve_predicate(Functor/Arity, Foreign):-
         assert(fptable(F, Foreign)),
         lookup_atom(system, SystemID),
         lookup_atom(Functor, FunctorID),
-        assertz('$module_export'(SystemID, FunctorID, Arity)).
+        assertz('pls$module_export'(SystemID, FunctorID, Arity)).
 
 % record_term returns a string which is a javascript representation of the term
 record_term(Term, String) :-
@@ -387,6 +513,10 @@ reset:-
         reserve_predicate(dump_tables/1, predicate_dump_tables),
         reserve_predicate(add_module_export/2, predicate_add_module_export),
         reserve_predicate(module_export/2, predicate_module_export),
+        reserve_predicate(add_module_import/2, predicate_add_module_import),
+        reserve_predicate(module_import/2, predicate_module_import),
+        reserve_predicate(add_meta_predicate/3, predicate_add_meta_predicate),
+        reserve_predicate(pls_meta_predicate/3, predicate_pls_meta_predicate),
 
         % Promises
         reserve_predicate(request_result/1, predicate_request_result),
