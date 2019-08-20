@@ -485,7 +485,7 @@ function wam_setup_and_call_foreign() {
 }
 
 function wam_trace_call_or_execute(functor) {
-    return ! functor.startsWith('$trace') && functor !== 'true' && state.trace_predicate &&
+    return ! functor.startsWith('$trace') && functor !== 'true' && functor !== 'system:true' && state.trace_predicate &&
         (state.trace_call === 'trace' || state.trace_call === 'leap_trace');
 }
 
@@ -620,7 +620,7 @@ function wam1()
                 stdout(instruction.string + '\n');
             }
         } else {
-           //debugging = false;
+           debugging = false;
         }
 
         if(! code) {
@@ -1755,6 +1755,22 @@ function integers_to_list(integers) {
     return tmp;
 }
 
+function terms_to_list(terms) {
+    if(terms.length === 0) {
+        return NIL;
+    }
+
+    let tmp = state.H ^ (TAG_LST << WORD_BITS);
+    for (let i = 0; i < terms.length; i++)
+    {
+        memory[state.H] = terms[i];
+        // If there are no more items we will overwrite the last entry with [] when we exit the loop
+        memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+        state.H += 2;
+    }
+    memory[state.H-1] = NIL;
+    return tmp;
+}
 function strings_to_atom_list(strings) {
     if(strings.length === 0) {
         return NIL;

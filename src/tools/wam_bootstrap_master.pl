@@ -1,5 +1,7 @@
 :- module(wam_bootstrap_master, [build_saved_state/2, build_saved_state/3, bootstrap/2, bootstrap/3, bootstrap/4]).
 
+:- meta_predicate((build_saved_state(+,0), build_saved_state(+,+,0))).
+
 :- use_module('../system/wam_compiler').
 :- use_module('../system/wam_assemble').
 :- use_module('wam_bootstrap').
@@ -57,10 +59,4 @@ bootstrap(CorePrefix, Sources, SavedStateFile, Query):-
               System,
               WAM], Sources, AllFiles),
 
-        build_saved_state(AllFiles,
-                          SavedStateFile,
-                          ( writeln(toplevel),
-                            compile_clause(bootstrap:-Query),
-                            !,
-                            bootstrap
-                            )).
+        build_saved_state(AllFiles, SavedStateFile, 'wam_compiler:bootstrap_toplevel'(Query)).

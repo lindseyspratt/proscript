@@ -10,7 +10,7 @@
          halt/0,
          callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
          call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8,
-         write_list/3
+         write_list/2, write_list/3
          ]).
 
 :- use_module(not).
@@ -32,24 +32,28 @@ assert(Term):-
 
 save_clausea(Head:-Body):-
        !,
-       functor(Head, Name, Arity),
+       Head =.. [Name|Args],
+       length(Args, Arity),
        wam_compiler:current_compilation_module(ModuleName),
        wam_compiler:transform_predicate_name(Name, Arity, ModuleName, TransformedName),
-       prepend_clause_to_predicate(TransformedName/Arity, Head, Body).
+       TransformedHead =.. [TransformedName|Args],
+       prepend_clause_to_predicate(TransformedName/Arity, TransformedHead, Body).
 
 save_clausea(Fact):-
         !,
-        functor(Fact, Name, Arity),
+        Fact =.. [Name|Args],
+        length(Args, Arity),
         wam_compiler:current_compilation_module(ModuleName),
         wam_compiler:transform_predicate_name(Name, Arity, ModuleName, TransformedName),
-        prepend_clause_to_predicate(TransformedName/Arity, Fact, true).
+        TransformedFact =.. [TransformedName|Args],
+        prepend_clause_to_predicate(TransformedName/Arity, TransformedFact, true).
 
-handle_term_expansion(_Clause).
+handle_term_expansion(Head) :- true.
 
 include(_).
 
 call([H|T]) :-
-        call(consult([H|T])).
+        call(wam_compiler:consult([H|T])).
 
 call(Goal):-
         term_variables(Goal, Vars),
@@ -60,7 +64,7 @@ call(Goal):-
         % Now we need to call our anonymous predicate. $jmp does the trick here
         '$jmp'(Vars),
         % But jmp must never be the last thing in a body, because foreign execute() will cause P <- CP after it succeeds
-        % and I dont want to muck with CP inside $jmp.
+        % and it is safer to not mess with CP inside $jmp.
         true.
 
 dynamic(Name/Arity) :-

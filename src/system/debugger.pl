@@ -200,7 +200,7 @@ notrace_backtrackable :-
     \+ \+ (
       '$trace_spy_specification'(P, G, B),
       write('Found spec for '), write(P), write(' '), writeln(G),
-      (B = true -> true ; call(B))
+      ((B = true; B = 'system:true') -> true ; call(B))
       ).
 
 

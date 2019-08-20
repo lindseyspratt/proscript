@@ -67,9 +67,9 @@ Some gotchas:
 
 */
 
-:-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/2]).
+:-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/2, bootstrap_toplevel/1]).
 
-:- meta_predicate(compile_clause_system_directive(0)).
+:- meta_predicate((compile_clause_system_directive(0),bootstrap_toplevel(0))).
 
 :- if(\+ (current_predicate(wam_compiler:current_compile_url/1), current_compile_url(_))).
     :- use_module('../tools/wam_bootstrap').
@@ -88,11 +88,44 @@ Some gotchas:
 :-dynamic('$current_compilation_module'/1).
 :-dynamic('$current_compilation_stream'/1).
 
+/*
+Dynamic and multifile predicate, normally not defined.
+When defined by the user all terms read during consulting are given to this predicate.
+If the predicate succeeds Prolog will assert Term2 in the database rather than the read term (Term1).
+Term2 may be a term of the form ?- Goal. or :- Goal. Goal is then treated as a directive.
+If Term2 is a list, all terms of the list are stored in the database or called (for directives).
+If Term2 is of the form below, the system will assert Clause and record the indicated source location with it:
+'$source_location'(<File>, <Line>):<Clause>
+When compiling a module (see chapter 6 and the directive module/2),
+expand_term/2 will first try term_expansion/2 in the module being compiled to allow for term expansion rules that are local to a module.
+If there is no local definition, or the local definition fails to translate the term, expand_term/2 will try term_expansion/2 in module user.
+For compatibility with SICStus and Quintus Prolog, this feature should not be used.
+See also expand_term/2, goal_expansion/2 and expand_goal/2.
+
+It is possible to act on the beginning and end of a file by expanding the terms begin_of_file and end_of_file.
+The latter is supported by most Prolog systems that support term expansion as read_term/3 returns end_of_file on reaching the end of the input.
+Expanding begin_of_file may be used to initialise the compilation, for example base on the file name extension.
+It was added in SWI-Prolog 8.1.1.
+*/
 expand_term(In, Out):-
-        current_predicate(term_expansion/2),
-        term_expansion(In, Out),
+        (In = _ : Predicate
+          -> \+ functor(Predicate, term_expansion, 2)
+        ;
+         functor(In, InFunctor, 2),
+         \+ sub_atom(InFunctor, _A, _B, _L, term_expansion )
+        ),
+        current_compilation_module(ModuleName),
+        current_predicate(ModuleName : term_expansion/2),
+        Goal = ModuleName : term_expansion(In, Out),
+        call(Goal),
         !.
 expand_term(In, In).
+
+bootstrap_toplevel(Query) :-
+        writeln(toplevel),
+        compile_clause('wam_compiler:bootstrap':-Query),
+        !,
+        wam_compiler:bootstrap.
 
 compile_clause(Term) :-
         compile_clause(Term, mode(0, compile(0)), _).
@@ -433,14 +466,24 @@ default_meta_arg_types([Flag|T], Flag) :-
 transform_predicate_name(Functor, Arity, ModuleName, TransformedFunctor) :-
         atom_codes(Functor, FunctorCodes),
          ":" = [ColonCode],
-        (append(_FunctorModuleNameCodes, [ColonCode|_FunctorNameCodes], FunctorCodes)
-           -> Functor = TransformedFunctor
+        (append(FunctorModuleNameCodes, [ColonCode|_FunctorNameCodes], FunctorCodes),
+         plausible_module_name(FunctorModuleNameCodes)
+           -> Functor = TransformedFunctor % do not interpret '=:=' as module '=' with functor '='.
          ;
          current_import(Functor, Arity, ModuleName, ImportedModuleName)
            -> transform_predicate_name1(ImportedModuleName, ColonCode, FunctorCodes, TransformedFunctor)
          ;
          transform_predicate_name1(ModuleName, ColonCode, FunctorCodes, TransformedFunctor)
         ).
+
+plausible_module_name([FirstCode|OtherCodes]) :-
+        lowercase_letter_code(FirstCode),
+        "_"=[UnderlineCode],
+        forall(member(Code, OtherCodes), (lowercase_letter_code(Code);uppercase_letter_code(Code);UnderlineCode=Code;number_code(Code))).
+
+number_code(Code) :- member(Code, "0123456789").
+lowercase_letter_code(Code) :- member(Code, "abcdefghijklmnopqrstuvwxyz").
+uppercase_letter_code(Code) :- member(Code, "ABCDEFGHIJKLMNOPQRSTUVWXYZ").
 
 % A system directive is evaluated immediately
 % during compilation of a source unit (e.g. a file).
@@ -509,8 +552,8 @@ compile_clause_2(Head :- Body):-
         reset_compile_buffer,
         !,
         assemble(Opcodes, 2),
-        (Head = term_expansion(_,_)
-          -> handle_term_expansion(Head :- Body) % assert term_expansion(_,_) if compiler is being run by SWI-Prolog.
+        (Head = 'term_expansion'(_,_)
+          -> handle_term_expansion(ModuleName : Head :- Body) % assert term_expansion(_,_) if compiler is being run by SWI-Prolog.
         ;
         true
         ).
@@ -520,8 +563,10 @@ compile_clause_2(Head):-
         compile_head(Head, 0, no_cut, [], none, _State, Opcodes, [proceed]),
         reset_compile_buffer,
         assemble(Opcodes, 2),
-        (Head = term_expansion(_,_)
-          -> handle_term_expansion(Head) % assert term_expansion(_,_) if compiler is being run by SWI-Prolog.
+%        writeln(compile_clause_2(Head)),
+        ((Head = 'term_expansion'(_,_);Head = 'user:term_expansion'(_,_))
+          -> current_compilation_module(ModuleName),
+             handle_term_expansion(ModuleName : Head) % assert term_expansion(_,_) if compiler is being run by SWI-Prolog.
         ;
         true
         ).
@@ -625,10 +670,13 @@ transform_body(setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup), _Posit
 % aux_2(Ball, Ball, Recovery):- !, clear_exception, <compilation of Recovery>
 % aux_2(_, _, _):- unwind_stack.
 
-transform_body(catch(Goal, Catcher, Recovery), _Position, (goal(get_current_block(Block)), aux_head(Aux1, [Block, Catcher|V1])), [aux_definition(Aux1, [B1, _|V1], no_local_cut, (goal(install_new_block(NewBlock)), Goal1, goal(end_block(B1, NewBlock)))),
-                                                                                                                                                               aux_definition(Aux1, [B2, Catcher|V1], no_local_cut, (goal(reset_block(B2)), goal(get_exception(Ball)), aux_head(Aux2, [Ball, Catcher|V1]))),
-                                                                                                                                                               aux_definition(Aux2, [Ball, Catcher|V1], local_cut(CutVar), (goal(Ball = Catcher), !(CutVar), goal(clear_exception), Recovery1)),
-                                                                                                                                                               aux_definition(Aux2, [_, _|V1], no_local_cut, (goal(unwind_stack)))|Clauses], Tail, CutVariable):-
+transform_body(catch(Goal, Catcher, Recovery), _Position,
+            (goal(get_current_block(Block)), aux_head(Aux1, [Block, Catcher|V1])),
+            [aux_definition(Aux1, [B1, _|V1], no_local_cut, (goal(install_new_block(NewBlock)), Goal1, goal(end_block(B1, NewBlock)))),
+             aux_definition(Aux1, [B2, Catcher|V1], no_local_cut, (goal(reset_block(B2)), goal(get_exception(Ball)), aux_head(Aux2, [Ball, Catcher|V1]))),
+             aux_definition(Aux2, [Ball, Catcher|V1], local_cut(CutVar), (goal(Ball = Catcher), !(CutVar), goal(clear_exception), Recovery1)),
+             aux_definition(Aux2, [_, _|V1], no_local_cut, (goal(unwind_stack)))|Clauses],
+            Tail, CutVariable):-
         transform_body(Goal, not_first, Goal1, Clauses, C1, CutVariable),
         transform_body(Recovery, not_first, Recovery1, C1, Tail, CutVariable),
         term_variables(Goal-Recovery, V1a),
@@ -1057,7 +1105,7 @@ compile_body_arg(Arg, MetaArgType, ModuleName, _Position, Dest, _PermanentVariab
         atom_or_empty_list(Arg), !,
         (atom(Arg),
          MetaArgType = (:)
-           -> TransformedArg = Arg
+           -> TransformedArg = (ModuleName : Arg)
          ;
          atom(Arg),
          integer(MetaArgType) % 0..9
@@ -1078,11 +1126,47 @@ compile_body_arg(Arg, _MetaArgType, _ModuleName, Position, Dest, PermanentVariab
 compile_body_arg([Head|Tail], _MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, OpcodesTail, GUV):-
         !,
         compile_body_unification([Head, Tail], ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_list(Dest)|R], R, OpcodesTail, GUV).
+compile_body_arg((Head :- Body), MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
+        !,
+        (\+ callable(Head)
+          -> TransformedArgs = [Head, Body],
+             TransformedArity = 2,
+             TransformedFunctor = (:-)
+        ;
+        Head =.. [HeadFunctor|Args],
+        list_length(Args, Arity),
+        (MetaArgType = (:), HeadFunctor \= (:)
+           -> TransformedArgs = [ModuleName, (Head :- Body)],
+              TransformedFunctor = (:),
+              TransformedArity = 2
+         ;
+         integer(MetaArgType) % 0..9
+           -> MetaArity is Arity + MetaArgType,
+              transform_predicate_name(HeadFunctor, MetaArity, ModuleName, TransformedHeadFunctor),
+              TransformedHead =.. [TransformedHeadFunctor|Args],
+              TransformedArgs = [TransformedHead, Body],
+              TransformedArity = 2,
+              TransformedFunctor = (:-)
+         ;
+         MetaArgType = (^) % Arg is assumed to be MetaArgType of 0 - no extra args to be applied.
+           -> existential_variables(Head, Vars, Expression),
+              transform_meta_expression(Expression, ModuleName, TransformedExpression),
+              existential_variables(TransformedHead, Vars, TransformedExpression),
+              TransformedArgs = [TransformedHead, Body],
+              TransformedArity = 2,
+              TransformedFunctor = (:-)
+         ;
+          TransformedArgs = [Head, Body],
+          TransformedArity = 2,
+          TransformedFunctor = (:-)
+        )
+        ),
+        compile_body_unification(TransformedArgs, ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_structure(TransformedFunctor/TransformedArity, Dest)|R], R, Tail, GUV).
 
 compile_body_arg(Arg, MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
         Arg =.. [Functor|Args],
         list_length(Args, Arity),
-        (MetaArgType = (:)
+        (MetaArgType = (:), Functor \= (:)
            -> TransformedArgs = [ModuleName, Arg],
               TransformedFunctor = (:),
               TransformedArity = 2
@@ -1323,8 +1407,7 @@ compile_atoms([H|T]) :-
 
 compile_atom(Atom):-
         atom_to_memory_file(Atom, MemoryFile),
-        compile_and_free_memory_file(MemoryFile),
-        writeln('Compiled atom').
+        compile_and_free_memory_file(MemoryFile).
 
 compile_and_free_memory_file(MemoryFile) :-
         %memory_file_description(MemoryFile, Description),
@@ -1344,17 +1427,21 @@ compile_memory_file(MemoryFile) :-
 
 save_clause(Head:-Body):-
         !,
-        functor(Head, Name, Arity),
+        Head =.. [Name|Args],
+        length(Args, Arity),
         current_compilation_module(ModuleName),
         transform_predicate_name(Name, Arity, ModuleName, TransformedName),
-        add_clause_to_predicate(TransformedName/Arity, Head, Body).
+        TransformedHead =.. [TransformedName|Args],
+        add_clause_to_predicate(TransformedName/Arity, TransformedHead, Body).
 
 save_clause(Fact):-
         !,
-        functor(Fact, Name, Arity),
+        Fact =.. [Name|Args],
+        length(Args, Arity),
         current_compilation_module(ModuleName),
         transform_predicate_name(Name, Arity, ModuleName, TransformedName),
-        add_clause_to_predicate(TransformedName/Arity, Fact, true).
+        TransformedFact =.. [TransformedName|Args],
+        add_clause_to_predicate(TransformedName/Arity, TransformedFact, true).
 
 % first fetch all of the URLs, then compile them.
 % This allows the client to get the URLs in parallel.

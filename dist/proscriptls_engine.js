@@ -993,7 +993,9 @@ function predicate_add_meta_predicate(functor, arity, argTypes) {
     } else {
         arities = {};
         arities[VAL(arity)] = argTypeArray;
-        meta_predicate_signatures = {};
+        if(!meta_predicate_signatures) {
+            meta_predicate_signatures = {};
+        }
         meta_predicate_signatures[functorID] = arities;
     }
 }
@@ -1020,7 +1022,7 @@ function predicate_pls_meta_predicate(functor, arity, argTypes) {
             if (TAG(argTypes) === TAG_REF) {
                 let aritySignature = arities[arityInt];
                 if (aritySignature) {
-                    let argTypesPL = integers_to_list(convert_arg_types(aritySignature));
+                    let argTypesPL = terms_to_list(convert_arg_types(aritySignature));
                     return unify(argTypes, argTypesPL);
                 } else {
                     return false;
@@ -1082,12 +1084,12 @@ function predicate_pls_meta_predicate(functor, arity, argTypes) {
             let functorIDs = [];
             for(let ofst = 0;ofst < meta_predicate_signatures.length; ofst++) {
                 let arities = meta_predicate_signatures[ofst];
-                if(arities && (TAG(arity) == TAG_REF || arities[VAL(arity)])) {
+                if(arities && (TAG(arity) === TAG_REF || arities[VAL(arity)])) {
                     functorIDs.push(functorID);
                 }
             }
 
-            if(TAG(arity) == TAG_REF) {
+            if(TAG(arity) === TAG_REF) {
                 arityIntArray = meta_predicate_signatures[functorIDs[0]];
             } else {
                 arityIntArray = VAL(arity);
@@ -1138,8 +1140,7 @@ function convert_arg_types(storedTypes) {
     let results = [];
     for(let ofst = 0;ofst < storedTypes.length;ofst++) {
         let storedType = storedTypes[ofst];
-        let resultType = convert_arg_type(storedType);
-        results[ofst] = resultType;
+        results[ofst] = convert_arg_type(storedType);
     }
     return results;
 }
@@ -2650,23 +2651,58 @@ function predicate_clause(head, body)
 
 function predicate_current_predicate(indicator)
 {
+    let colon = lookup_functor(":", 2);
     var slash2 = lookup_functor("/", 2);
+    let indicatorHasModule = false;
     var index;
     if (!state.foreign_retry)
     {
         if (TAG(indicator) === TAG_STR)
         {
-            if (memory[VAL(indicator)] === slash2)
-            {
-                var name = memory[VAL(indicator) + 1];
-                var arity = memory[VAL(indicator) + 2];
+            if (memory[VAL(indicator)] === colon || memory[VAL(indicator)] === slash2) {
+                let slashStructure;
+                let name;
+                let arity;
+                if (memory[VAL(indicator)] === colon) {
+                    // :(ModuleName, /(Functor, Arity))
+                    indicatorHasModule = true;
+                    let moduleName = memory[VAL(indicator) + 1];
+                    slashStructure = memory[VAL(indicator) + 2];
+                    if (TAG(slashStructure) !== TAG_STR) {
+                        return type_error('predicate_indicator', slashStructure);
+                    }
+                    name = memory[VAL(slashStructure) + 1];
+                    arity = memory[VAL(slashStructure) + 2];
+
+                    if (TAG(moduleName) === TAG_REF) {
+                        return instantiation_error(moduleName);
+                    }
+
+                    let moduleNameJS = PL_get_atom_chars(moduleName);
+                    if (TAG(name) === TAG_ATM) {
+                        let nameJS = PL_get_atom_chars(name);
+                        if (!nameJS.includes(":")) {
+                            name = PL_put_atom_chars(moduleNameJS + ':' + nameJS);
+                        }
+                    }
+                } else {
+                    // VAL(indicator)] === slash2
+                    name = memory[VAL(indicator) + 1];
+                    arity = memory[VAL(indicator) + 2];
+
+                    if (TAG(name) === TAG_ATM) {
+                        let nameJS = PL_get_atom_chars(name);
+                        if (!nameJS.includes(":")) {
+                            return domain_error('qualified_functor', indicator);
+                        }
+                    }
+                }
                 if (TAG(arity) !== TAG_INT && TAG(arity) !== TAG_REF)
                     return type_error("integer", arity);
                 if (TAG(name) !== TAG_ATM && TAG(name) !== TAG_REF)
                     return type_error("atom", name);
-                
-                if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT)
-                {
+
+                if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT) {
                     // Deterministic
                     var ftor = VAL(lookup_functor(atable[VAL(name)], VAL(arity)));
                     if (predicates[ftor] !== undefined)
@@ -2683,9 +2719,9 @@ function predicate_current_predicate(indicator)
         create_choicepoint();
         index = 0;
     }
-    else
+    else {
         index = state.foreign_value + 1;
-    // Horrific :(
+    }
 
     if (index >= Object.keys(predicates).length)
     {
@@ -2694,10 +2730,32 @@ function predicate_current_predicate(indicator)
     }
     update_choicepoint_data(index);
     var key = Object.keys(predicates)[index];
-    var result = state.H ^ (TAG_STR << WORD_BITS);
-    memory[state.H++] = slash2;
-    memory[state.H++] = ftable[key][0] ^ (TAG_ATM << WORD_BITS);
-    memory[state.H++] = ftable[key][1] ^ (TAG_INT << WORD_BITS);
+    let qualifiedFunctorPL = PL_put_atom(ftable[key][0]);
+    let arityPL = PL_put_integer(ftable[key][1]);
+    var result;
+    if(indicatorHasModule) {
+        // slashStructure = /(UnqualifiedFunctor, Arity)
+        let qualifiedFunctorJS = PL_get_atom_chars(qualifiedFunctorPL);
+        let position = qualifiedFunctorJS.indexOf(":");
+        let unqualifiedFunctorJS = qualifiedFunctorJS.substring(position+1);
+        let unqualifiedFunctorPL = PL_put_atom_chars(unqualifiedFunctorJS);
+        let slashStructure = state.H ^ (TAG_STR << WORD_BITS);
+        memory[state.H++] = slash2;
+        memory[state.H++] = unqualifiedFunctorPL;
+        memory[state.H++] = arityPL;
+
+        // result = :( ModuleName, /(UnqualifiedFunctor, Arity))
+        result = state.H ^ (TAG_STR << WORD_BITS);
+        memory[state.H++] = colon;
+        memory[state.H++] = moduleNamePL;
+        memory[state.H++] = slashStructure;
+    } else {
+        // result = /(QualifiedFunctor, Arity)
+        result = state.H ^ (TAG_STR << WORD_BITS);
+        memory[state.H++] = slash2;
+        memory[state.H++] = qualifiedFunctorPL;
+        memory[state.H++] = arityPL;
+    }
     return unify(result, indicator);
 }
 
@@ -2988,7 +3046,7 @@ function predicate_absolute_file_name(relative, absolute, options) {
         return unify(relative, absolute);
     }
 
-    if(! __dirname)  {
+    if(typeof __dirname === 'undefined' || ! __dirname)  {
         return unify(relative, absolute);
     }
 
@@ -4089,7 +4147,7 @@ function wam_setup_and_call_foreign() {
 }
 
 function wam_trace_call_or_execute(functor) {
-    return ! functor.startsWith('$trace') && functor !== 'true' && state.trace_predicate &&
+    return ! functor.startsWith('$trace') && functor !== 'true' && functor !== 'system:true' && state.trace_predicate &&
         (state.trace_call === 'trace' || state.trace_call === 'leap_trace');
 }
 
@@ -4220,7 +4278,7 @@ function wam1()
                 stdout(instruction.string + '\n');
             }
         } else {
-           //debugging = false;
+           debugging = false;
         }
 
         if(! code) {
@@ -5260,6 +5318,22 @@ function integers_to_list(integers) {
     return tmp;
 }
 
+function terms_to_list(terms) {
+    if(terms.length === 0) {
+        return NIL;
+    }
+
+    let tmp = state.H ^ (TAG_LST << WORD_BITS);
+    for (let i = 0; i < terms.length; i++)
+    {
+        memory[state.H] = terms[i];
+        // If there are no more items we will overwrite the last entry with [] when we exit the loop
+        memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+        state.H += 2;
+    }
+    memory[state.H-1] = NIL;
+    return tmp;
+}
 function strings_to_atom_list(strings) {
     if(strings.length === 0) {
         return NIL;

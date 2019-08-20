@@ -270,23 +270,26 @@ dump_tables(S):-
         atomic_list_concat(ModuleImports, ', ', ModuleImportsAtom),
         format(S, 'module_imports = {~w};~n', [ModuleImportsAtom]),
         setof(X,
-            F^Ws^
+            F^Ws^Core^
             (setof(W,
                 A^Ts^
                 ('pls$meta_predicate'(F, A, Ts),
                  format(atom(W), '~w : ~w', [A, Ts]) % A1 : [T1, ...]
                 ),
                 Ws),
-             format(atom(V), '~w', [Ws]),
-             % remove first and last characters; '[' and ']'.
-             atom_codes(V, [_|VCodes]),
-             append(CoreCodes, [_], VCodes),
-             atom_codes(Core, CoreCodes),
+             list_to_core_string(Ws, Core),
              format(atom(X), '~w : {~w}', [F, Core]) % F1 : {A1 : [T1...], A2 : [T1, ...]}
             ),
             MetaPredicates),
         atomic_list_concat(MetaPredicates, ', ', MetaPredicatesAtom),
         format(S, 'meta_predicate_signatures = {~w};~n', [MetaPredicatesAtom]).
+
+list_to_core_string(List, Core) :-
+        format(atom(V), '~w', [List]),
+        % remove first and last characters; '[' and ']'.
+        atom_codes(V, [_|VCodes]),
+        append(CoreCodes, [_], VCodes),
+        atom_codes(Core, CoreCodes).
 
 dump_predicate(PredicateAtom) :-
        bagof(c(Clause, Index, Head, Body),
@@ -317,7 +320,12 @@ dump_predicate(PredicateAtom) :-
        (dtable(Functor) -> Dynamic = 'true';Dynamic = 'false'),
        format(atom(PredicateAtom), '~w: {is_public:~w, clauses:{~w}, clause_keys:[~w], next_key:~w, key:~w}', [Functor, Dynamic, ClauseAtom, IndexAtom, I, Functor]).
 
+% add_meta_predicate(Functor, Arity, ArgTypes)
+
 reserve_predicate(Functor/Arity, Foreign):-
+        reserve_predicate(Functor/Arity, Foreign, []).
+
+reserve_predicate(Functor/Arity, Foreign, Meta):-
         [ColonCode] = ":",
         atom_codes(Functor, FunctorCodes),
         transform_predicate_name1(system, ColonCode, FunctorCodes, TransformedFunctor),
@@ -325,7 +333,12 @@ reserve_predicate(Functor/Arity, Foreign):-
         assert(fptable(F, Foreign)),
         lookup_atom(system, SystemID),
         lookup_atom(Functor, FunctorID),
-        assertz('pls$module_export'(SystemID, FunctorID, Arity)).
+        assertz('pls$module_export'(SystemID, FunctorID, Arity)),
+        (Meta = [_|_]
+          -> add_meta_predicate(TransformedFunctor, Arity, Meta)
+        ;
+         true
+        ).
 
 % record_term returns a string which is a javascript representation of the term
 record_term(Term, String) :-
@@ -430,7 +443,7 @@ reset:-
         reserve_predicate(char_conversion/2, predicate_char_conversion),
         reserve_predicate(current_char_conversion/2, predicate_current_char_conversion),
 
-        reserve_predicate(current_predicate/1, predicate_current_predicate),
+        reserve_predicate(current_predicate/1, predicate_current_predicate, [(:)]),
 
         reserve_predicate((@>)/2, predicate_term_gt),
         reserve_predicate((@>=)/2, predicate_term_egt),
@@ -474,7 +487,7 @@ reset:-
         reserve_predicate(writeln/1, writeln),
         reserve_predicate(gensym/2, predicate_gensym),
         reserve_predicate(atom_to_term/3, atom_to_term),
-        reserve_predicate(clause/2, predicate_clause),
+        reserve_predicate(clause/2, predicate_clause, [0,?]),
         reserve_predicate(abolish/1, predicate_abolish),
         reserve_predicate(retract_clause/2, predicate_retract_clause),
         reserve_predicate(read_term/3, read_term),

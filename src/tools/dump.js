@@ -1,9 +1,13 @@
-function dump() {
+function dump(filter) {
     load_state();
-    for(var ofst = 0;ofst < ftable.length;ofst++){
+    for(var ofst = 0;ofst < ftable.length;ofst++) {
         var functionPair = ftable[ofst];
         var predicateName = atable[functionPair[0]];
-        print(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0]);
+        let predicate = predicates[ofst];
+        if (!filter || (filter && ((filter === 'defined-predicate' && predicate)
+            || (filter === 'undefined-predicate' && !predicate)))) {
+            print(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0] + ', ' + (predicate ? 'has' : 'no') + ' predicate clauses');
+        }
     }
 }
 
