@@ -381,7 +381,11 @@ function backtrack()
 
     state.current_predicate = next.predicate;
     if(state.trace_call !== 'no_trace') {
-        state.trace_call = memory[state.B + memory[state.B] + CP_TC];
+        let traceCallPL = memory[state.B + memory[state.B] + CP_TC];
+        state.trace_call = atable[VAL(traceCallPL)];
+        if(! state.trace_call) {
+            throw 'backtrack trace_call is undefined';
+        }
         state.trace_info = memory[state.B + memory[state.B] + CP_TI];
     }
     debug_msg("Set state.trace_call to " + state.trace_call);
@@ -485,7 +489,8 @@ function wam_setup_and_call_foreign() {
 }
 
 function wam_trace_call_or_execute(functor) {
-    return ! functor.startsWith('$trace') && functor !== 'true' && functor !== 'system:true' && state.trace_predicate &&
+    return ! functor.startsWith('debugger:') && ! functor.startsWith('system:$trace') &&
+        functor !== 'true' && functor !== 'system:true' && state.trace_predicate &&
         (state.trace_call === 'trace' || state.trace_call === 'leap_trace');
 }
 
@@ -1236,7 +1241,7 @@ function wam1()
             memory[newB + n + CP_TR] = state.TR;
             memory[newB + n + CP_H] = state.H;
             memory[newB + n + CP_B0] = state.B0;
-            memory[newB + n + CP_TC] = state.trace_call;
+            memory[newB + n + CP_TC] = lookup_atom(state.trace_call);
             memory[newB + n + CP_TI] = state.trace_info;
             state.B = newB;
             debug_msg("case 28: Before we created the choicepoint, HB was " + state.HB);
@@ -1287,7 +1292,11 @@ function wam1()
             debug_msg("case 29: state.HB <- " + state.HB);
             state.HB = state.H;
             if (state.trace_call !== 'no_trace') {
-                state.trace_call = memory[state.B + arity + CP_TC];
+                let traceCallPL = memory[state.B + arity + CP_TC];
+                state.trace_call = atable[VAL(traceCallPL)];
+                if(! state.trace_call) {
+                    throw 'retry_me_else backtrack trace_call is undefined';
+                }
                 debug_msg("Set state.trace_call " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + arity + CP_TI];
             }
@@ -1313,7 +1322,11 @@ function wam1()
             state.TR = memory[state.B + n + CP_TR];
             state.H = memory[state.B + n + CP_H];
             if (state.trace_call !== 'no_trace') {
-                state.trace_call = memory[state.B + n + CP_TC];
+                let traceCallPL = memory[state.B + n + CP_TC];
+                state.trace_call = atable[VAL(traceCallPL)];
+                if(! state.trace_call) {
+                    throw 'trust_me backtrack trace_call is undefined';
+                }
                 debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + n + CP_TI];
             }
@@ -1425,7 +1438,11 @@ function wam1()
             state.H = memory[state.B + n + CP_H];
             state.HB = state.H;
             if (state.trace_call !== 'no_trace') {
-                state.trace_call = memory[state.B + n + CP_TC];
+                let traceCallPL = memory[state.B + n + CP_TC];
+                state.trace_call = atable[VAL(traceCallPL)];
+                if(! state.trace_call) {
+                    throw 'retry_foreign backtrack trace_call is undefined';
+                }
                 debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + n + CP_TI];
             }
@@ -1531,6 +1548,9 @@ function instruction_suspend_set(value) {
 
 function predicate_trace_set(value) {
     state.trace_call = atable[VAL(value)];
+    if(! state.trace_call) {
+        throw 'predicate_trace_set trace_call is undefined';
+    }
     debug_msg("predicate_trace_set: state.trace_call is now set to " + state.trace_call );
     return true;
 }

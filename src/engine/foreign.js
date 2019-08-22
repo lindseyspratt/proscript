@@ -1604,7 +1604,7 @@ function create_choicepoint()
     else
     {
         debug_msg("top frame is a choicepoint at" + state.B);
-        newB = state.B + memory[state.B] + 8;
+        newB = state.B + memory[state.B] + CP_SIZE;
     }
     debug_msg("Creating foreign choicepoint on the stack at " + newB);
     memory[newB] = state.num_of_args+2;
@@ -1620,16 +1620,18 @@ function create_choicepoint()
         memory[newB + 3 + i] = register[i];
     }
     // Save the current context
-    memory[newB+n+1] = state.E;
-    memory[newB+n+2] = state.CP;
-    memory[newB+n+3] = state.B;
-//    memory[newB+n+4] = retry_foreign;
-    memory[newB+n+4] = {code: bootstrap_code,                        
+    memory[newB+n+CP_E] = state.E;
+    memory[newB+n+CP_CP] = state.CP;
+    memory[newB+n+CP_B] = state.B;
+//    memory[newB+n+CP_Next] = retry_foreign;
+    memory[newB+n+CP_Next] = {code: bootstrap_code,
                         predicate:state.current_predicate,  // Suspect
                         offset:retry_foreign_offset};
-    memory[newB+n+5] = state.TR;
-    memory[newB+n+6] = state.H;
-    memory[newB+n+7] = state.B0;
+    memory[newB+n+CP_TR] = state.TR;
+    memory[newB+n+CP_H] = state.H;
+    memory[newB+n+CP_B0] = state.B0;
+    memory[newB+n+CP_TC] = lookup_atom(state.trace_call);
+    memory[newB+n+CP_TI] = state.trace_info;
     state.B = newB;
     state.HB = state.H;
     return true;
