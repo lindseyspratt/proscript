@@ -1593,14 +1593,27 @@ function create_choicepoint()
     {
         newB = state.B + memory[state.B] + CP_SIZE;
     }
+
+    // 'n' (memory[newB]) is the number of slots of the dynamic initial portion of the choicepoint frame.
+    // The choicepoint frame starting at memory[newB + n] is a fixed size, CP_SIZE, where
+    // each slot i at memory[newB + n + i] has a fixed interpretation and a constant name
+    // of the form CP_*. E.g. CP_TR is the 'trail' slot at memory[newB + n + CP_TR].
+    //
+    // The dynamic portion of the choicepoint frame for foreign calls
+    // starts with a 'value' slot (at FCP_V == 1) and a 'code' slot (at FCP_C == 2).
+    // This is followed (at FCP_R == 3) by a slot for each 'register' to be saved (generally
+    // one register per predicate argument), as indicated by state.num_of_args.
+    // The choicepoint frame for 'standard' (non-foreign) calls does not
+    // have the initial two slots: the saved registers start at slot CP_R = 1.
+
     memory[newB] = state.num_of_args+2;
     var n = memory[newB];
-    memory[newB + 1] = 0;
-    memory[newB + 2] = {code: code,
+    memory[newB + FCP_V] = 0;
+    memory[newB + FCP_C] = {code: code,
                         offset: state.P};
     for (var i = 0; i < state.num_of_args; i++)
     {
-        memory[newB + 3 + i] = register[i];
+        memory[newB + FCP_R + i] = register[i];
     }
     // Save the current context
     memory[newB+n+CP_E] = state.E;
@@ -1622,7 +1635,7 @@ function create_choicepoint()
 
 function update_choicepoint_data(value)
 {
-    memory[state.B+1] = value;
+    memory[state.B+FCP_V] = value;
     return true;
 }
 
@@ -1637,9 +1650,9 @@ function destroy_all_choicepoints() {
 function destroy_choicepoint()
 {
     var n = memory[state.B];
-    unwind_trail(memory[state.B + n + 5], state.TR);
-    state.B = memory[state.B + n + 3];
-    state.HB = memory[state.B+ memory[state.B] + 6];
+    unwind_trail(memory[state.B + n + CP_TR], state.TR);
+    state.B = memory[state.B + n + CP_B];
+    state.HB = memory[state.B+ memory[state.B] + CP_H];
 }
 
 // For testing only! Assumes -,+ mode
@@ -1906,27 +1919,29 @@ function predicate_repeat()
     } 
     else
     {
-        newB = state.B + memory[state.B] + 8;
+        newB = state.B + memory[state.B] + CP_SIZE;
     }
     memory[newB] = state.num_of_args+2;
     var n = memory[newB];
-    memory[newB + 1] = 0;
-    memory[newB + 2] = {code: code,
+    memory[newB + FCP_V] = 0;
+    memory[newB + FCP_C] = {code: code,
                         offset: state.P};
     for (var i = 0; i < state.num_of_args; i++)
     {
-        memory[newB + 3 + i] = register[i];
+        memory[newB + FCP_R + i] = register[i];
     }
     // Save the current context
-    memory[newB+n+1] = state.E;
-    memory[newB+n+2] = state.CP;
-    memory[newB+n+3] = state.B;
-    memory[newB+n+4] = {code: code,
+    memory[newB+n+CP_E] = state.E;
+    memory[newB+n+CP_CP] = state.CP;
+    memory[newB+n+CP_B] = state.B;
+    memory[newB+n+CP_Next] = {code: code,
                         predicate: state.current_predicate, // suspect!
                         offset: state.P}; // Retry will just create the choicepoint again!
-    memory[newB+n+5] = state.TR;
-    memory[newB+n+6] = state.H;
-    memory[newB+n+7] = state.B0;
+    memory[newB+n+CP_TR] = state.TR;
+    memory[newB+n+CP_H] = state.H;
+    memory[newB+n+CP_B0] = state.B0;
+    memory[newB+n+CP_TC] = lookup_atom(state.trace_call);
+    memory[newB+n+CP_TI] = state.trace_info;
     state.B = newB;
     state.HB = state.H;
     return true;
@@ -3723,6 +3738,10 @@ const CP_TC = 8;
 const CP_TI = 9;
 const CP_SIZE = 10;
 
+const FCP_V = 1; // foreign choicepoint 'value'
+const FCP_C = 2; // foreign choicepoint 'code'
+const FCP_R = 3; // foreign choicepoint registers (0 to n-1) start at this offset from state.B.
+
 
 let ftable = [];
 let dtable = [];
@@ -4994,18 +5013,18 @@ function wam1()
 
         case 42: // retry_foreign
         {
-            state.foreign_value = memory[state.B + 1];
-            state.P = memory[state.B + 2].offset;
-            code = memory[state.B + 2].code;
+            state.foreign_value = memory[state.B + FCP_V];
+            state.P = memory[state.B + FCP_C].offset;
+            code = memory[state.B + FCP_C].code;
             if (!code) {
                 throw 'code is undefined';
             }
 
-            state.current_predicate = memory[state.B + 2].current_predicate;
+            state.current_predicate = memory[state.B + FCP_C].current_predicate;
             let n = memory[state.B];
             state.foreign_retry = true;
-            for (let i = 0; i < n - 2; i++) {
-                register[i] = memory[state.B + 3 + i];
+            for (let i = 0; i <= n - FCP_R; i++) {
+                register[i] = memory[state.B + FCP_R + i];
             }
             state.E = memory[state.B + n + CP_E];
             state.CP = memory[state.B + n + CP_CP];
@@ -5184,7 +5203,10 @@ function copy_state(s)
             current_predicate: s.current_predicate,
             trace_call: s.trace_call,
             trace_predicate: s.trace_predicate,
-            trace_code: s.trace_code};
+            trace_code: s.trace_code,
+            trace_info: s.trace_info,
+            trace_prompt: s.trace_prompt,
+            suspended: s.suspended};
 }
 
 function copy_registers(r)
@@ -5260,8 +5282,8 @@ function reset_block(x)
 function clean_up_block(nb)
 {
     // If alternative to B is nb, then select it now
-    if (memory[state.B+memory[state.B]+CP_Next] === VAL(nb))
-        state.B = VAL(memory[VAL(nb)+memory[VAL(nb)]+CP_Next]);
+    if (memory[state.B+memory[state.B]+CP_B] === VAL(nb))
+        state.B = VAL(memory[VAL(nb)+memory[VAL(nb)]+CP_B]);
     return true;
 
 }

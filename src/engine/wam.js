@@ -50,6 +50,10 @@ const CP_TC = 8;
 const CP_TI = 9;
 const CP_SIZE = 10;
 
+const FCP_V = 1; // foreign choicepoint 'value'
+const FCP_C = 2; // foreign choicepoint 'code'
+const FCP_R = 3; // foreign choicepoint registers (0 to n-1) start at this offset from state.B.
+
 
 let ftable = [];
 let dtable = [];
@@ -1255,7 +1259,7 @@ function wam1()
         {
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
             let arity = memory[state.B];
-            debug_msg("retry_me_else: " + state.B + " with arity " + memory[state.B] + " and retry point " + code[state.P + 1]);
+            debug_msg("retry_me_else: " + state.B + " with saved register count " + memory[state.B] + " and retry point " + code[state.P + 1]);
             for (let i = 0; i < arity; i++)
                 register[i] = memory[state.B + i + 1];
             // Now restore all the special-purpose registers
@@ -1307,7 +1311,7 @@ function wam1()
         {
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
             let n = memory[state.B];
-            debug_msg("trusting last clause: " + state.B + " with arity " + memory[state.B] + " and HB was " + state.HB + ". Choicepoint has " + n + " args");
+            debug_msg("trusting last clause: " + state.B + " with saved register count " + memory[state.B] + " and HB was " + state.HB + ". Choicepoint has " + n + " saved registers.");
             for (let i = 0; i < n; i++) {
                 debug_msg("Restoring register " + i + " to " + hex(memory[state.B + i + 1]));
                 register[i] = memory[state.B + i + 1];
@@ -1416,20 +1420,20 @@ function wam1()
         case 42: // retry_foreign
         {
             debug_msg("retry_foreign from " + state.B);
-            state.foreign_value = memory[state.B + 1];
-            state.P = memory[state.B + 2].offset;
-            code = memory[state.B + 2].code;
+            state.foreign_value = memory[state.B + FCP_V];
+            state.P = memory[state.B + FCP_C].offset;
+            code = memory[state.B + FCP_C].code;
             if (!code) {
                 throw 'code is undefined';
             }
 
-            state.current_predicate = memory[state.B + 2].current_predicate;
+            state.current_predicate = memory[state.B + FCP_C].current_predicate;
             let n = memory[state.B];
-            debug_msg("State has " + n + " saved args including the two special");
+            debug_msg("State has " + n + " saved registers including the two special");
             state.foreign_retry = true;
-            for (let i = 0; i < n - 2; i++) {
-                debug_msg("Restoring register " + i + " from memory[" + (state.B + 3 + i) + "] = " + hex(memory[state.B + 3 + i]) + " which is " + term_to_string(memory[state.B + 3 + i]));
-                register[i] = memory[state.B + 3 + i];
+            for (let i = 0; i <= n - FCP_R; i++) {
+                debug_msg("Restoring register " + i + " from memory[" + (state.B + FCP_R + i) + "] = " + hex(memory[state.B + FCP_R + i]) + " which is " + term_to_string(memory[state.B + FCP_R + i]));
+                register[i] = memory[state.B + FCP_R + i];
             }
             state.E = memory[state.B + n + CP_E];
             state.CP = memory[state.B + n + CP_CP];
@@ -1616,7 +1620,10 @@ function copy_state(s)
             current_predicate: s.current_predicate,
             trace_call: s.trace_call,
             trace_predicate: s.trace_predicate,
-            trace_code: s.trace_code};
+            trace_code: s.trace_code,
+            trace_info: s.trace_info,
+            trace_prompt: s.trace_prompt,
+            suspended: s.suspended};
 }
 
 function copy_registers(r)
@@ -1656,7 +1663,7 @@ function run_cleanup(c)
     return result;
 }
 
-// Exceptions are implement as per Bart Demoen's 1989 paper
+// Exceptions are implemented as the 'compromise' solution in Bart Demoen's 1989 paper
 // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.57.4354&rep=rep1&type=pdf
 function predicate_throw(t)
 {
@@ -1695,8 +1702,8 @@ function reset_block(x)
 function clean_up_block(nb)
 {
     // If alternative to B is nb, then select it now
-    if (memory[state.B+memory[state.B]+CP_Next] === VAL(nb))
-        state.B = VAL(memory[VAL(nb)+memory[VAL(nb)]+CP_Next]);
+    if (memory[state.B+memory[state.B]+CP_B] === VAL(nb))
+        state.B = VAL(memory[VAL(nb)+memory[VAL(nb)]+CP_B]);
     return true;
 
 }

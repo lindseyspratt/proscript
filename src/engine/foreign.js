@@ -1606,18 +1606,31 @@ function create_choicepoint()
         debug_msg("top frame is a choicepoint at" + state.B);
         newB = state.B + memory[state.B] + CP_SIZE;
     }
+
+    // 'n' (memory[newB]) is the number of slots of the dynamic initial portion of the choicepoint frame.
+    // The choicepoint frame starting at memory[newB + n] is a fixed size, CP_SIZE, where
+    // each slot i at memory[newB + n + i] has a fixed interpretation and a constant name
+    // of the form CP_*. E.g. CP_TR is the 'trail' slot at memory[newB + n + CP_TR].
+    //
+    // The dynamic portion of the choicepoint frame for foreign calls
+    // starts with a 'value' slot (at FCP_V == 1) and a 'code' slot (at FCP_C == 2).
+    // This is followed (at FCP_R == 3) by a slot for each 'register' to be saved (generally
+    // one register per predicate argument), as indicated by state.num_of_args.
+    // The choicepoint frame for 'standard' (non-foreign) calls does not
+    // have the initial two slots: the saved registers start at slot CP_R = 1.
+
     debug_msg("Creating foreign choicepoint on the stack at " + newB);
     memory[newB] = state.num_of_args+2;
     var n = memory[newB];
-    memory[newB + 1] = 0;
+    memory[newB + FCP_V] = 0;
     debug_msg("Reserved @" + (newB + 1) + " for value");
-    memory[newB + 2] = {code: code,
+    memory[newB + FCP_C] = {code: code,
                         offset: state.P};
     debug_msg("Saving " + n + " args including the two specials");
     for (var i = 0; i < state.num_of_args; i++)
     {
         debug_msg("Saving register " + i + "(" + hex(register[i]) + ") to " + (newB + 3 + i));
-        memory[newB + 3 + i] = register[i];
+        memory[newB + FCP_R + i] = register[i];
     }
     // Save the current context
     memory[newB+n+CP_E] = state.E;
@@ -1639,7 +1652,7 @@ function create_choicepoint()
 
 function update_choicepoint_data(value)
 {
-    memory[state.B+1] = value;
+    memory[state.B+FCP_V] = value;
     return true;
 }
 
@@ -1655,9 +1668,9 @@ function destroy_choicepoint()
 {
     debug_msg("Destroying choicepoint at " + state.B);
     var n = memory[state.B];
-    unwind_trail(memory[state.B + n + 5], state.TR);
-    state.B = memory[state.B + n + 3];
-    state.HB = memory[state.B+ memory[state.B] + 6];
+    unwind_trail(memory[state.B + n + CP_TR], state.TR);
+    state.B = memory[state.B + n + CP_B];
+    state.HB = memory[state.B+ memory[state.B] + CP_H];
     debug_msg("B is now " + state.B);
 }
 
@@ -1679,7 +1692,7 @@ function member(element, list)
         var head = memory[VAL(list)];
         if (unify(head, element))
         {
-            debug_msg("Unification succeeded. Setting choicepoint value @" +(state.B+1) + " to " + hex(memory[VAL(list)+1]));
+            debug_msg("Unification succeeded. Setting choicepoint value @" +(state.B+FCP_V) + " to " + hex(memory[VAL(list)+1]));
             update_choicepoint_data(memory[VAL(list)+1]);
             return true;
         }
@@ -1930,31 +1943,33 @@ function predicate_repeat()
     } 
     else
     {
-        newB = state.B + memory[state.B] + 8;
+        newB = state.B + memory[state.B] + CP_SIZE;
     }
     debug_msg("Creating foreign choicepoint on the stack at " + newB);
     memory[newB] = state.num_of_args+2;
     var n = memory[newB];
-    memory[newB + 1] = 0;
+    memory[newB + FCP_V] = 0;
     debug_msg("Reserved @" + (newB + 1) + " for value");
-    memory[newB + 2] = {code: code,
+    memory[newB + FCP_C] = {code: code,
                         offset: state.P};
     debug_msg("Saving " + n + " args including the two specials");
     for (var i = 0; i < state.num_of_args; i++)
     {
         debug_msg("Saving register " + i + "(" + hex(register[i]) + ") to " + (newB + 3 + i));
-        memory[newB + 3 + i] = register[i];
+        memory[newB + FCP_R + i] = register[i];
     }
     // Save the current context
-    memory[newB+n+1] = state.E;
-    memory[newB+n+2] = state.CP;
-    memory[newB+n+3] = state.B;
-    memory[newB+n+4] = {code: code,
+    memory[newB+n+CP_E] = state.E;
+    memory[newB+n+CP_CP] = state.CP;
+    memory[newB+n+CP_B] = state.B;
+    memory[newB+n+CP_Next] = {code: code,
                         predicate: state.current_predicate, // suspect!
                         offset: state.P}; // Retry will just create the choicepoint again!
-    memory[newB+n+5] = state.TR;
-    memory[newB+n+6] = state.H;
-    memory[newB+n+7] = state.B0;
+    memory[newB+n+CP_TR] = state.TR;
+    memory[newB+n+CP_H] = state.H;
+    memory[newB+n+CP_B0] = state.B0;
+    memory[newB+n+CP_TC] = lookup_atom(state.trace_call);
+    memory[newB+n+CP_TI] = state.trace_info;
     state.B = newB;
     state.HB = state.H;
     return true;
