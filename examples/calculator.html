@@ -9,17 +9,17 @@
     <link href="../terminal/jquery_terminal.css" rel="stylesheet"/>
     -->
 </head>
-<body onload="proscriptls_init ('consult([calculator])');">
+<body onload="proscriptls_init ('wam_compiler:consult([calculator])');">
 <div class="example-description">
 <h2>ProscriptLS Calculator Example</h2>
 <p>
     A simple arithmetic calculator.
 </p>
 </div>
-<div align="center">
+<div style="text-align: -moz-center;text-align:-webkit-center">
     <FORM name="Calculator">
-        <table bgcolor="#9999CC" border="4" width="45%"><tr>      <!--OUTER MARGIN OF CALCULATOR-->
-            <td align="center" colspan="2">
+        <table style="background-color:#9999CC;width:45%" ><tr>      <!--OUTER MARGIN OF CALCULATOR-->
+            <td style="text-align:center;border:2px" colspan="2">
 
                 <b><span style="font-family: Verdana, Arial, Helvetica,serif; color: #000080; font-size: small; ">
                     A Simple Proscript Calculator<br></span>
@@ -30,7 +30,7 @@
                     </span></b>
 
             </td></tr>
-            <tr><td align="center" width="65%">                   <!--left panel------>
+            <tr><td style="text-align: -moz-center;text-align:-webkit-center;width:65%">                   <!--left panel------>
 
                 <table><tr>
                     <td><input OnClick="proscriptls('add_digit(7)')" name="seven" type="button" value="   7    "></td>
@@ -53,7 +53,7 @@
 
 
             </td>                                   <!--end left panel-->
-                <td align="center" width="35%">                     <!--right panel----->
+                <td style="text-align: -moz-center;text-align:-webkit-center;width:35%">                     <!--right panel----->
 
                     <table><tr>
                         <td><input OnClick="proscriptls('clear')" name="clear" type="button" value="    C     "></td>
@@ -66,7 +66,7 @@
                         <td><input OnClick="proscriptls('operate(-)')" name="sub" type="button" value="     -      "></td>
                     </tr><tr>
                         <td><input OnClick="proscriptls('calculate')" name="result" type="button" value="     =    "></td>
-                        <td align="right"><input OnClick="proscriptls('do_exponent')" name="exp" type="button" value="  EXP  "></td>
+                        <td style="text-align: -moz-right;text-align:-webkit-right;"><input OnClick="proscriptls('do_exponent')" name="exp" type="button" value="  EXP  "></td>
                     </tr></table>
 
 

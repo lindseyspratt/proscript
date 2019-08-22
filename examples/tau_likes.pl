@@ -19,7 +19,7 @@ init :-
 consult_text :-
     _ >> [id -:> program, value +:> Program],
     retractall(likes(_,_)),
-    catch(compile_atom(Program), _, fail),
+    catch('wam_compiler:compile_atom'(Program), _, fail),
     update_select.
 
 update_select :-

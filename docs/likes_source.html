@@ -166,7 +166,7 @@ init&nbsp;<span style='color:red'>:-</span><br>
 consult_text&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;program,&nbsp;value&nbsp;+:>&nbsp;<i>Program</i>],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;retractall(likes(<i>_</i>,<i>_</i>)),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;catch(compile_atom(<i>Program</i>),&nbsp;<i>_</i>,&nbsp;fail),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;catch('wam_compiler:compile_atom'(<i>Program</i>),&nbsp;<i>_</i>,&nbsp;fail),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;update_select.<br>
 <br>
 update_select&nbsp;<span style='color:red'>:-</span><br>

@@ -5244,7 +5244,7 @@ function run_cleanup(c)
     return result;
 }
 
-// Exceptions are implement as per Bart Demoen's 1989 paper
+// Exceptions are implemented as the 'compromise' solution in Bart Demoen's 1989 paper
 // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.57.4354&rep=rep1&type=pdf
 function predicate_throw(t)
 {
