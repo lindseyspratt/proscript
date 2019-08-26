@@ -56,7 +56,7 @@
                             <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, consult_console_example_source, consult_console_example_source, 'consult_console_source.html', 'Consult Console Example Source', main]}}</li>
                         </ul>
                     </li>
-                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, tiles_example, 'index_doc.html', 'Consult console']}}
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, tiles_example, 'index_doc.html', 'Tiles']}}
                         <ul class="nested">
                             <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, tiles_example_source, tiles_example_source, 'tiles_source.html', 'Tiles Example Source', main]}}</li>
                         </ul>

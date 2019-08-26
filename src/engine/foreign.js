@@ -1595,58 +1595,11 @@ function add_clause_to_existing(address, offset)
 
 function create_choicepoint()
 {
-    // Create a choicepoint
-    var newB;
-    if (state.E > state.B) {
-        newB = state.E + state.CP.code[state.CP.offset - 1] + 2;
-        debug_msg("top frame is an environment at " + state.E + " state.CP.code[state.CP.offset-1] = " + state.CP.code[state.CP.offset-1]);
-    } 
-    else
-    {
-        debug_msg("top frame is a choicepoint at" + state.B);
-        newB = state.B + memory[state.B] + CP_SIZE;
-    }
+    let nextCP = {code: bootstrap_code,
+        predicate:state.current_predicate,  // Suspect
+        offset:retry_foreign_offset};
 
-    // 'n' (memory[newB]) is the number of slots of the dynamic initial portion of the choicepoint frame.
-    // The choicepoint frame starting at memory[newB + n] is a fixed size, CP_SIZE, where
-    // each slot i at memory[newB + n + i] has a fixed interpretation and a constant name
-    // of the form CP_*. E.g. CP_TR is the 'trail' slot at memory[newB + n + CP_TR].
-    //
-    // The dynamic portion of the choicepoint frame for foreign calls
-    // starts with a 'value' slot (at FCP_V == 1) and a 'code' slot (at FCP_C == 2).
-    // This is followed (at FCP_R == 3) by a slot for each 'register' to be saved (generally
-    // one register per predicate argument), as indicated by state.num_of_args.
-    // The choicepoint frame for 'standard' (non-foreign) calls does not
-    // have the initial two slots: the saved registers start at slot CP_R = 1.
-
-    debug_msg("Creating foreign choicepoint on the stack at " + newB);
-    memory[newB] = state.num_of_args+2;
-    var n = memory[newB];
-    memory[newB + FCP_V] = 0;
-    debug_msg("Reserved @" + (newB + 1) + " for value");
-    memory[newB + FCP_C] = {code: code,
-                        offset: state.P};
-    debug_msg("Saving " + n + " args including the two specials");
-    for (var i = 0; i < state.num_of_args; i++)
-    {
-        debug_msg("Saving register " + i + "(" + hex(register[i]) + ") to " + (newB + 3 + i));
-        memory[newB + FCP_R + i] = register[i];
-    }
-    // Save the current context
-    memory[newB+n+CP_E] = state.E;
-    memory[newB+n+CP_CP] = state.CP;
-    memory[newB+n+CP_B] = state.B;
-//    memory[newB+n+CP_Next] = retry_foreign;
-    memory[newB+n+CP_Next] = {code: bootstrap_code,
-                        predicate:state.current_predicate,  // Suspect
-                        offset:retry_foreign_offset};
-    memory[newB+n+CP_TR] = state.TR;
-    memory[newB+n+CP_H] = state.H;
-    memory[newB+n+CP_B0] = state.B0;
-    memory[newB+n+CP_TC] = lookup_atom(state.trace_call);
-    memory[newB+n+CP_TI] = state.trace_info;
-    state.B = newB;
-    state.HB = state.H;
+    wam_create_choicepoint(nextCP, [0, {code: code, offset: state.P}]);
     return true;
 }
 
@@ -1723,7 +1676,6 @@ function predicate_jmp(vars)
     } else if (state.trace_call === 'leap_trace_next_jmp') {
         state.trace_call = 'leap_trace_next';
     }
-
 
     state.P = -1; // PC will be incremented by 3 after this if we succeed to 2. This is where queries are compiled from, since the first two bytes are for try/retry/trust
     code = compile_buffer.slice(0);

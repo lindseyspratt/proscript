@@ -1584,52 +1584,11 @@ function add_clause_to_existing(address, offset)
 
 function create_choicepoint()
 {
-    // Create a choicepoint
-    var newB;
-    if (state.E > state.B) {
-        newB = state.E + state.CP.code[state.CP.offset - 1] + 2;
-    } 
-    else
-    {
-        newB = state.B + memory[state.B] + CP_SIZE;
-    }
+    let nextCP = {code: bootstrap_code,
+        predicate:state.current_predicate,  // Suspect
+        offset:retry_foreign_offset};
 
-    // 'n' (memory[newB]) is the number of slots of the dynamic initial portion of the choicepoint frame.
-    // The choicepoint frame starting at memory[newB + n] is a fixed size, CP_SIZE, where
-    // each slot i at memory[newB + n + i] has a fixed interpretation and a constant name
-    // of the form CP_*. E.g. CP_TR is the 'trail' slot at memory[newB + n + CP_TR].
-    //
-    // The dynamic portion of the choicepoint frame for foreign calls
-    // starts with a 'value' slot (at FCP_V == 1) and a 'code' slot (at FCP_C == 2).
-    // This is followed (at FCP_R == 3) by a slot for each 'register' to be saved (generally
-    // one register per predicate argument), as indicated by state.num_of_args.
-    // The choicepoint frame for 'standard' (non-foreign) calls does not
-    // have the initial two slots: the saved registers start at slot CP_R = 1.
-
-    memory[newB] = state.num_of_args+2;
-    var n = memory[newB];
-    memory[newB + FCP_V] = 0;
-    memory[newB + FCP_C] = {code: code,
-                        offset: state.P};
-    for (var i = 0; i < state.num_of_args; i++)
-    {
-        memory[newB + FCP_R + i] = register[i];
-    }
-    // Save the current context
-    memory[newB+n+CP_E] = state.E;
-    memory[newB+n+CP_CP] = state.CP;
-    memory[newB+n+CP_B] = state.B;
-//    memory[newB+n+CP_Next] = retry_foreign;
-    memory[newB+n+CP_Next] = {code: bootstrap_code,
-                        predicate:state.current_predicate,  // Suspect
-                        offset:retry_foreign_offset};
-    memory[newB+n+CP_TR] = state.TR;
-    memory[newB+n+CP_H] = state.H;
-    memory[newB+n+CP_B0] = state.B0;
-    memory[newB+n+CP_TC] = lookup_atom(state.trace_call);
-    memory[newB+n+CP_TI] = state.trace_info;
-    state.B = newB;
-    state.HB = state.H;
+    wam_create_choicepoint(nextCP, [0, {code: code, offset: state.P}]);
     return true;
 }
 
@@ -1701,7 +1660,6 @@ function predicate_jmp(vars)
     } else if (state.trace_call === 'leap_trace_next_jmp') {
         state.trace_call = 'leap_trace_next';
     }
-
 
     state.P = -1; // PC will be incremented by 3 after this if we succeed to 2. This is where queries are compiled from, since the first two bytes are for try/retry/trust
     code = compile_buffer.slice(0);
@@ -4171,6 +4129,71 @@ function wam_setup_and_call_foreign() {
     return result;
 }
 
+
+function wam_create_choicepoint(nextCP, prefix) {
+    // 'n' (memory[newB]) is the number of slots of the dynamic initial portion of the choicepoint frame.
+    // The choicepoint frame starting at memory[newB + n] is a fixed size, CP_SIZE, where
+    // each slot i at memory[newB + n + i] has a fixed interpretation and a constant name
+    // of the form CP_*. E.g. CP_TR is the 'trail' slot at memory[newB + n + CP_TR].
+    //
+    // The dynamic portion of the choicepoint frame for foreign calls
+    // starts with a 'value' slot (at FCP_V == 1) and a 'code' slot (at FCP_C == 2).
+    // This is followed (at FCP_R == 3) by a slot for each 'register' to be saved (generally
+    // one register per predicate argument), as indicated by state.num_of_args.
+    // The choicepoint frame for 'standard' (non-foreign) calls does not
+    // have the initial two slots: the saved registers start at slot CP_R = 1.
+
+    let newB;
+    if (state.E > state.B) {
+        // In this case, it is an environment. In the real WAM, which does stack trimming (see Ait-Kaci chapter 5.7), we only have CE, CP and then N saved Y-registers.
+        // Therefore, we need to write the new choicepoint at 2 + N. What is N, though? Well, it turns out N gets gradually smaller as time goes on, which
+        // is why it is not stored in the frame itself. If call(f) is outfitted with a second argument to become call(f, n) then we can decode this in try_me_else
+        // (and ignore it if we did not want to create a new environment) by looking at CP, which points to the instruction after the call() opcode. Therefore,
+        // code[CP-1] ought to be N.
+
+        // -----------
+        // |0  | CE  |
+        // |1  | CP  |
+        // |3  | Y0  |
+        //  ...
+        // |n+2| Yn  |
+        // -----------
+        newB = state.E + state.CP.code[state.CP.offset - 1] + 2;
+    } else {
+        // In this case, the top frame is a choicepoint. This is a bit easier: A choicepoint contains 7 saved special-purpose registers, the N root arguments
+        // for the goal, and, happily, the value of N as the very first argument. Therefore, we can read the 0th entry of the current frame (at state.B)
+        // and add 9 to it to get the top of the stack.
+        newB = state.B + memory[state.B] + CP_SIZE;
+    }
+
+    memory[newB] = state.num_of_args + prefix.length;
+    var n = memory[newB];
+    for (let prefixOfst = 0; prefixOfst < prefix.length; prefixOfst++) {
+        memory[newB + prefixOfst + 1] = prefix[prefixOfst];
+    }
+    let prefixAdjust = prefix.length + 1;
+    let msg = "";
+    if (prefix && prefix.length > 0) {
+        msg = " with " + prefix.length + " specials";
+    }
+
+    for (var i = 0; i < state.num_of_args; i++) {
+        memory[newB + prefixAdjust + i] = register[i];
+    }
+    // Save the current context
+    memory[newB + n + CP_E] = state.E;
+    memory[newB + n + CP_CP] = state.CP;
+    memory[newB + n + CP_B] = state.B;
+    memory[newB + n + CP_Next] = nextCP;
+    memory[newB + n + CP_TR] = state.TR;
+    memory[newB + n + CP_H] = state.H;
+    memory[newB + n + CP_B0] = state.B0;
+    memory[newB + n + CP_TC] = lookup_atom(state.trace_call);
+    memory[newB + n + CP_TI] = state.trace_info;
+    state.B = newB;
+    state.HB = state.H;
+}
+
 function wam_trace_call_or_execute(functor) {
     return ! functor.startsWith('debugger:') && ! functor.startsWith('system:$trace') &&
         functor !== 'true' && functor !== 'system:true' && state.trace_predicate &&
@@ -4812,41 +4835,12 @@ function wam1()
         {
             // We need to allocate a new choicepoint, but first we need to determine /where/ to put it, since we do not keep a reference to the top of the stack.
             // The last item on the stack is either an environment, or a choicepoint.
-            let newB;
-            if (state.E > state.B) {
-                // In this case, it is an environment. In the real WAM, which does stack trimming (see Ait-Kaci chapter 5.7), we only have CE, CP and then N saved Y-registers. 
-                // Therefore, we need to write the new choicepoint at 2 + N. What is N, though? Well, it turns out N gets gradually smaller as time goes on, which
-                // is why it is not stored in the frame itself. If call(f) is outfitted with a second argument to become call(f, n) then we can decode this in try_me_else
-                // (and ignore it if we did not want to create a new environment) by looking at CP, which points to the instruction after the call() opcode. Therefore,
-                // code[CP-1] ought to be N.
 
-                // -----------
-                // |0  | CE  |
-                // |1  | CP  |
-                // |3  | Y0  |
-                //  ...
-                // |n+2| Yn  |
-                // -----------
-                newB = state.E + state.CP.code[state.CP.offset - 1] + 2;
-            } else {
-                // In this case, the top frame is a choicepoint. This is a bit easier: A choicepoint contains 7 saved special-purpose registers, the N root arguments
-                // for the goal, and, happily, the value of N as the very first argument. Therefore, we can read the 0th entry of the current frame (at state.B)
-                // and add 9 to it to get the top of the stack.
-                newB = state.B + memory[state.B] + CP_SIZE;
-            }
-            memory[newB] = state.num_of_args;
-            let n = memory[newB];
-            for (let i = 0; i < n; i++) {
-                memory[newB + i + 1] = register[i];
-            }
-            // Save the current context
-            memory[newB + n + CP_E] = state.E;
-            memory[newB + n + CP_CP] = state.CP;
-            memory[newB + n + CP_B] = state.B;
             let next = code[state.P + 1];
+            let nextCP;
             if ((next & 0x80000000) === 0) {
                 // next is a clause index in the current predicate
-                memory[newB + n + CP_Next] = {
+                nextCP = {
                     code: state.current_predicate.clauses[next].code,
                     predicate: state.current_predicate,
                     offset: 0
@@ -4854,20 +4848,15 @@ function wam1()
             } else {
 
                 // next is an absolute address in the current clause: Used for auxiliary clauses only
-                memory[newB + n + CP_Next] = {
+                nextCP = {
                     code: code,
                     predicate: state.current_predicate,
                     offset: next ^ 0x80000000
                 };
             }
-            //memory[newB+n+CP_Next] = {code: code, offset:code[state.P+1]};
-            memory[newB + n + CP_TR] = state.TR;
-            memory[newB + n + CP_H] = state.H;
-            memory[newB + n + CP_B0] = state.B0;
-            memory[newB + n + CP_TC] = lookup_atom(state.trace_call);
-            memory[newB + n + CP_TI] = state.trace_info;
-            state.B = newB;
-            state.HB = state.H;
+
+            wam_create_choicepoint(nextCP, []);
+
             state.P += 2;
         }
             continue;
