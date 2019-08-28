@@ -1605,6 +1605,7 @@ function create_choicepoint()
 
 function update_choicepoint_data(value)
 {
+    debug_msg('Updating backtrack ' + state.B + ' foreign value (at ' + (state.B+FCP_V) + ' to ' + value + ' which is ' + term_to_string(value));
     memory[state.B+FCP_V] = value;
     return true;
 }
@@ -1654,8 +1655,6 @@ function member(element, list)
     destroy_choicepoint();
     return false;
 }
-
-
 
 function predicate_debug()
 {

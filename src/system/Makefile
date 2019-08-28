@@ -1,5 +1,4 @@
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
-DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 
 

@@ -1639,8 +1639,6 @@ function member(element, list)
     return false;
 }
 
-
-
 function predicate_debug()
 {
     debugging = true;
@@ -4172,10 +4170,6 @@ function wam_create_choicepoint(nextCP, prefix) {
         memory[newB + prefixOfst + 1] = prefix[prefixOfst];
     }
     let prefixAdjust = prefix.length + 1;
-    let msg = "";
-    if (prefix && prefix.length > 0) {
-        msg = " with " + prefix.length + " specials";
-    }
 
     for (var i = 0; i < state.num_of_args; i++) {
         memory[newB + prefixAdjust + i] = register[i];
@@ -4196,6 +4190,7 @@ function wam_create_choicepoint(nextCP, prefix) {
 
 function wam_trace_call_or_execute(functor) {
     return ! functor.startsWith('debugger:') && ! functor.startsWith('system:$trace') &&
+        ! state.foreign_retry &&
         functor !== 'true' && functor !== 'system:true' && state.trace_predicate &&
         (state.trace_call === 'trace' || state.trace_call === 'leap_trace');
 }
@@ -5189,6 +5184,7 @@ function copy_state(s)
             running: s.running,
             num_of_args: s.num_of_args,
             foreign_retry: s.foreign_retry,
+            foreign_value: s.foreign_value,
             current_predicate: s.current_predicate,
             trace_call: s.trace_call,
             trace_predicate: s.trace_predicate,
