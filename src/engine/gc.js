@@ -1,6 +1,8 @@
 function predicate_gc()
 {
-    debug("Before GC, heap is " + state.H);
+    let msgIn = "Before GC, heap is " + state.H;
+    //stdout("===" + msgIn + "\n" + '\n');
+    debug(msgIn);
     // WARNING: This assumes ONLY predicate_gc will mark things!
     total_marked = 0;
 
@@ -20,10 +22,15 @@ function predicate_gc()
         envsize = envcp.code[envcp.offset-1];
         e = memory[e];
     }
-*/
-//    check_stacks(false);
+
+    gc_debug('===check stacks before mark');
+    check_stacks(false);
+ */
     mark();
-//    check_stacks(true);    
+    /*
+    gc_debug('===check stacks after mark');
+    check_stacks(true);
+     */
     debug_msg("\n\nMarked " + total_marked + " cells. Starting sweep");
     push_registers();
     sweep_trail();
@@ -37,10 +44,10 @@ function predicate_gc()
     compact();
     pop_registers();
     state.H = total_marked;
-    debug("After GC, heap is " + state.H);    
-
-//    check_stacks(false);
 /*
+    gc_debug('===check stacks after compact/pop_registers');
+    check_stacks(false);
+
     var after = [];
     var e = state.E;
     var envsize = state.CP.code[state.CP.offset - 1];
@@ -78,7 +85,13 @@ function predicate_gc()
         debug_msg("Match: " + term_to_string(at) + " and " + term_to_string(bt));
     }
     debug_msg("All values accounted for");
-*/
+
+
+    display_gc_log();
+ */
+    let msgOut = "After GC, heap is " + state.H;
+    //stdout( msgOut + '\n');
+    debug(msgOut);
 
     return true;
 }
@@ -592,9 +605,9 @@ function gc_check(t)
 
 function check_stacks(m)
 {
-    debug_msg("Checking stacks " + m);
+    gc_debug("Checking stacks " + m);
     check_environments(state.E, state.CP.code[state.CP.offset - 1], m);
-    debug_msg("Stacks OK");
+    gc_debug("Stacks OK");
 }
 
 function check_environments(initial, envsize, m)
@@ -603,18 +616,18 @@ function check_environments(initial, envsize, m)
     while (e !== HEAP_SIZE)
     {
         // Traversing backwards to ensure we do not stop prematurely
-        debug_msg("Checking environment " + e);
+        gc_debug("Checking environment " + e);
         for (var y = 0; y < envsize; y++)
         {            
             if (TAG(memory[e+2+y]) === TAG_STR ||
                 TAG(memory[e+2+y]) === TAG_LST)
             {
-                debug_msg("Checking Y" + y);    
+                gc_debug("Checking Y" + y);
                 check_term(memory[e+2+y], m);
             }
             else 
             {
-                debug_msg("Y" + y + " is not a heap pointer");    
+                gc_debug("Y" + y + " is not a heap pointer");
             }
             // Otherwise we do not need to check it if it is in the environment
         }
@@ -628,10 +641,10 @@ function check_environments(initial, envsize, m)
 
 function check_term(t, m)
 {
-    debug_msg("Checking " + hex(t));
+    gc_debug("Checking " + hex(t));
     if (!m)
     {
-        debug_msg(" == " + term_to_string(t));
+        gc_debug(" == " + term_to_string(t));
     }
     if ((t & M_BIT) === M_BIT)
     {
@@ -666,4 +679,28 @@ function check_term(t, m)
             check_term(memory[VAL(t)+1+i], m);
     }
     // Everything else we assume is OK
+}
+
+let gc_log = [];
+
+// gc_log is a circular log of that last 95 gc_debug(msg) calls.
+
+function add_to_gc_log(msg) {
+    if(gc_log.length === 96) {
+        gc_log.shift();
+    } else if(gc_log.length > 96) {
+        let shift = gc_log.length - 95;
+        gc_log = gc_log.slice(shift);
+    }
+    gc_log.push(msg);
+}
+
+function gc_debug(msg) {
+//    add_to_gc_log(msg);
+}
+
+function display_gc_log() {
+    // for(let msg of gc_log) {
+    //     stdout('gc_debug: ' + msg + '\n');
+    // }
 }

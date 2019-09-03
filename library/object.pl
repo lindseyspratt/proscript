@@ -1,3 +1,21 @@
+:- module(object, [
+    op(200, fx, *),
+    op(200, fx, @),
+    op(500, xfy, :>),
+    op(500, xfx, <:),
+    op(500, xfy, -:>),
+    op(500, xfx, <:-),
+    op(500, xfy, +:>),
+    op(500, xfx, <:+),
+    op(500, xfy, *:>),
+    op(700, xfy, >->),
+    op(700, xfy, >+>),
+    op(700, xfy, >*>),
+    op(700, xfy, >@>),
+    (>>)/2, (>->)/2, (>+>)/2, (>*>)/2, (>@>)/2]).
+
+:- meta_predicate('>@>'(?, (:) )).
+
 :- op(200, fx, *).
 :- op(200, fx, @).
 :- op(500, xfy, :>).
@@ -96,7 +114,7 @@
     !,
     >>(Obj, H),
     >>(Obj, T).
->>(Obj, {G}) :-
+>>(_Obj, {G}) :-
     call(G).
 >>(Obj, * M) :-
     !, % method invocation
@@ -134,7 +152,7 @@
     !,
     >->(Obj, H),
     >->(Obj, T).
->->(Obj, {G}) :-
+>->(_Obj, {G}) :-
     !,
     call(G).
 >->(Obj, :>(Attribute, V)) :-
@@ -147,7 +165,7 @@
     !,
     >+>(Obj, H),
     >+>(Obj, T).
->+>(Obj, {G}) :-
+>+>(_Obj, {G}) :-
     !,
     call(G).
 >+>(Type-Obj, :>(Property, V)) :-
@@ -164,7 +182,7 @@
     !,
     >*>(Obj, H),
     >*>(Obj, T).
->*>(Obj, {G}) :-
+>*>(_Obj, {G}) :-
     !,
     call(G).
 >*>(Obj, :>(Method, V)) :-
@@ -176,14 +194,14 @@
 >*>(Obj, Method) :-
     dom_object_method(Obj, Method).
 
->@>(_, []) :-
+>@>(_, _ : []) :-
     !.
->@>(Obj, [H|T]) :-
+>@>(Obj, M : [H|T]) :-
     !,
-    >@>(Obj, H),
-    >@>(Obj, T).
->@>(Obj, {G}) :-
+    >@>(Obj, M : H),
+    >@>(Obj, M : T).
+>@>(_Obj, M : {G}) :-
     !,
-    call(G).
+    call(M : G).
 >@>(Obj, Goal) :-
     call(Goal, Obj).

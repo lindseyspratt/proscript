@@ -145,7 +145,7 @@
     <div id="tiles_pl" >
         <h2 id='tiles_pl_header'>tiles.pl</h2>
         <code class='content'>
-        <span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/object').&nbsp;<span style='color:green'>%&nbsp;for&nbsp;>>/2.</span><br>
+        <span style='color:red'>:-</span>&nbsp;use_module('../library/object').&nbsp;<span style='color:green'>%&nbsp;for&nbsp;>>/2.</span><br>
 <span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/listut2').&nbsp;<span style='color:green'>%&nbsp;for&nbsp;append_lists/2</span><br>
 <span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/dom').&nbsp;<span style='color:green'>%&nbsp;for&nbsp;dom_page_offset/2</span><br>
 <span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/data_predicates').<br>
@@ -211,7 +211,7 @@ display_hands_test&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;draw_all_tiles(<i>TileIDs</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>W</i>,&nbsp;<i>H</i>).<br>
 <br>
 select_test&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Canvas</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>_Canvas</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width&nbsp;+:>&nbsp;<i>W</i>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height&nbsp;+:>&nbsp;<i>H</i>,<br>
@@ -264,7 +264,7 @@ point_in_board_position(<i>BX</i>,&nbsp;<i>BY</i>,&nbsp;<i>X</i>,&nbsp;<i>Y</i>)
 &nbsp;&nbsp;&nbsp;&nbsp;board_position_top_left_coordinates(<i>BX</i>,&nbsp;<i>BY</i>,&nbsp;<i>BCX</i>,&nbsp;<i>BCY</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;in_square(<i>X</i>,&nbsp;<i>Y</i>,&nbsp;<i>BCX</i>,&nbsp;<i>BCY</i>,&nbsp;<i>Size</i>).<br>
 <br>
-on_click_tile(<i>ID</i>,&nbsp;<i>X</i>,&nbsp;<i>Y</i>)&nbsp;<span style='color:red'>:-</span><br>
+on_click_tile(<i>ID</i>,&nbsp;<i>_X</i>,&nbsp;<i>_Y</i>)&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>%writeln(click(ID,&nbsp;X,&nbsp;Y)),</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;(tile_in_active_hand(<i>ID</i>)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;on_click_active_hand_tile(<i>ID</i>)<br>

@@ -710,9 +710,16 @@ function predicate_define_dynamic_predicate(indicator) {
         return type_error("predicate_indicator", indicator);
 }
 
-// The predicateIndicator is a structure of Name/Arity, where Name
-// is the unqualified name of a predicate (i.e. does not have a module
-// name prefix).
+/**
+ The predicateIndicator is a structure of Name/Arity or op(Precedence, Associativity, Operator).
+ In the first case, Name is the unqualified name of a predicate (i.e. does not have a module
+ name prefix).
+ The second case is currently ignored - operators are global in ProcscriptLS.
+ *
+ * @param moduleName
+ * @param predicateIndicator
+ * @returns {boolean}
+ */
 
 function predicate_add_module_export(moduleName, predicateIndicator) {
   //     assertz('$module_export'(Name, F, A)).
@@ -722,6 +729,7 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
         return type_error("atom", moduleName);
 
     var slash2 = lookup_functor("/", 2);
+    var op3 = lookup_functor("op", 3);
     if (TAG(predicateIndicator) === TAG_STR && memory[VAL(predicateIndicator)] === slash2)
     {
         var name = deref(memory[VAL(predicateIndicator) + 1]);
@@ -730,12 +738,11 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
         {
             if (VAL(arity) < 0)
                 return domain_error("not_less_than_zero", arity);
-            let namePL = PL_put_atom_chars(name);
 
             let exportedPredicates = module_exports[VAL(moduleName)];
             if(exportedPredicates) {
                 for (let entry of exportedPredicates) {
-                    if (entry[0] === namePL && entry[1] === VAL(arity)) {
+                    if (entry[0] === VAL(name) && entry[1] === VAL(arity)) {
                         return true; // do nothing, the predicate is already specified in the exports.
                     }
                 }
@@ -745,7 +752,7 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
             }
 
             // add namePL/arity to exports.
-            exportedPredicates.push([namePL, VAL(arity)]);
+            exportedPredicates.push([VAL(name), VAL(arity)]);
             return true;
         }
         else if (TAG(name) === TAG_REF)
@@ -757,10 +764,14 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
         else if (TAG(arity) !== TAG_INT)
             return type_error("integer", arity);
     }
+    else if (TAG(predicateIndicator) === TAG_STR && memory[VAL(predicateIndicator)] === op3)
+    {
+        return true;
+    }
     else if (TAG(predicateIndicator) === TAG_REF)
         return instantiation_error(predicateIndicator);
     else
-        return type_error("predicate_indicator", predicateIndicator);
+        return type_error("predicate_indicator or op", predicateIndicator);
 }
 
 
@@ -868,7 +879,7 @@ function predicate_add_module_import(importingModule, importedModule) {
     else if (TAG(importedModule) !== TAG_ATM)
         return type_error("atom", importedModule);
 
-    let selectedImportedModules = imported_modules[VAL(importingModule)];
+    let selectedImportedModules = module_imports[VAL(importingModule)];
     if(selectedImportedModules) {
         selectedImportedModules.push(VAL(importedModule));
     } else {
@@ -895,11 +906,11 @@ function predicate_module_import(importingModule, importedModule)
             cursor = {module:0, importIndex:0};
         }
 
-        if (cursor.module >= imported_modules.length)
+        if (cursor.module >= module_imports.length)
         {
             destroy_choicepoint();
             return false;
-        } else if(cursor.importIndex >= imported_modules[cursor.module].length) {
+        } else if(!module_imports[cursor.module] || cursor.importIndex >= module_imports[cursor.module].length) {
             cursor.module++;
             cursor.importIndex = 0;
         }
@@ -907,12 +918,14 @@ function predicate_module_import(importingModule, importedModule)
         update_choicepoint_data(cursor);
 
         let moduleImports = module_imports[cursor.module];
-        while(!moduleImports && cursor.module < module_imports.length) {
+        while(cursor.module < module_imports.length
+            && (!moduleImports || cursor.importIndex >= moduleImports.length)) {
             cursor.module++;
+            cursor.importIndex = 0;
             moduleImports = module_imports[cursor.module];
         }
 
-        if(!moduleImports) {
+        if(!moduleImports || cursor.importIndex >= moduleImports.length) {
             destroy_choicepoint();
             return false;
         } else if( unify(importingModule, PL_put_atom(cursor.module))) {
@@ -936,10 +949,12 @@ function predicate_module_import(importingModule, importedModule)
             cursor = state.foreign_value;
             cursor.importIndex++;
         }
-        else
+        else if(module_imports[VAL(importingModule)] && module_imports[VAL(importingModule)].length > 0)
         {
             create_choicepoint();
             cursor = {module:VAL(importingModule), importIndex:0};
+        } else {
+            return false;
         }
 
         if(cursor.importIndex >= module_imports[cursor.module].length) {
@@ -968,8 +983,15 @@ function predicate_module_import(importingModule, importedModule)
         return type_error("atom", importingModule);
 }
 
-// meta predicates: FunctorID : {Arity1: [ArgTypeID1, ArtTypeID2, ...], Arity2: [ArgTypes2], ...}
-// ArgType is 0..9, :, ^, +, -, ?
+/**
+ meta predicates: FunctorID : {Arity1: [ArgTypeID1, ArtTypeID2, ...], Arity2: [ArgTypes2], ...}
+ ArgType is 0..9, :, ^, +, -, ?
+ *
+ * @param functor
+ * @param arity
+ * @param argTypes
+ * @returns {boolean}
+ */
 
 function predicate_add_meta_predicate(functor, arity, argTypes) {
     if (TAG(functor) === TAG_REF)
@@ -1004,8 +1026,19 @@ function predicate_add_meta_predicate(functor, arity, argTypes) {
         }
         meta_predicate_signatures[functorID] = arities;
     }
+    return true;
 }
 
+/**
+ * predicate_pls_meta_predicate is the ProscriptLS implementation of meta_predicate.
+ * This is named pls_meta_predicate to avoid a name collision with SWI-PL meta_predicate
+ * during bootstrap compilation.
+ *
+ * @param functor
+ * @param arity
+ * @param argTypes
+ * @returns {boolean}
+ */
 function predicate_pls_meta_predicate(functor, arity, argTypes) {
     if(TAG(functor) !== TAG_REF && TAG(functor) !== TAG_ATM) {
         return type_error('atom', functor);

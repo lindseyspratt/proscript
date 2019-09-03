@@ -9,6 +9,7 @@
          write_term/2, write/1, write/2, writeq/2, write_canonical/1, write_canonical/2,
          halt/0,
          callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
+         call_with_module/2,
          call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8,
          write_list/2, write_list/3
          ]).
@@ -56,16 +57,26 @@ call([H|T]) :-
         call(wam_compiler:consult([H|T])).
 
 call(Goal):-
+        call_with_module(user, Goal).
+
+call_with_module(Module, Goal) :-
         term_variables(Goal, Vars),
         % Compile this into a predicate, but do not actually declare it anywhere.
         % The functor is therefore irrelevant.
-        wam_compiler:compile_clause_2(query(Vars):-Goal),
+        (Module = user
+          -> wam_compiler:compile_clause_2(query(Vars):-Goal)
+        ;
+         push_current_compilation_module(Module, call),
+         wam_compiler:compile_clause_2(query(Vars):-Goal),
+         pop_current_compilation_module(Module, call)
+        ),
         !,
         % Now we need to call our anonymous predicate. $jmp does the trick here
         '$jmp'(Vars),
         % But jmp must never be the last thing in a body, because foreign execute() will cause P <- CP after it succeeds
         % and it is safer to not mess with CP inside $jmp.
         true.
+
 
 dynamic(Name/Arity) :-
         !,

@@ -130,6 +130,7 @@ notrace_backtrackable :-
     '$trace_interact'(call, fail, Goal, Ancestors, ID, B),
 
     call(Goal),
+    %catch(call(Goal), Ball, '$trace_handler'(Goal, Ball)),
 
     '$trace_suspend_if_active',
 

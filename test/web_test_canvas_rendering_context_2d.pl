@@ -1,5 +1,5 @@
+:- use_module('../library/object').
 :- ensure_loaded(web_test_utility).
-:- ensure_loaded('../library/object').
 
 % Changing the canvas width discards the existing context, if any.
 reset_context(Canvas) :-

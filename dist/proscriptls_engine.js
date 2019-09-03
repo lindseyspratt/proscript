@@ -704,9 +704,16 @@ function predicate_define_dynamic_predicate(indicator) {
         return type_error("predicate_indicator", indicator);
 }
 
-// The predicateIndicator is a structure of Name/Arity, where Name
-// is the unqualified name of a predicate (i.e. does not have a module
-// name prefix).
+/**
+ The predicateIndicator is a structure of Name/Arity or op(Precedence, Associativity, Operator).
+ In the first case, Name is the unqualified name of a predicate (i.e. does not have a module
+ name prefix).
+ The second case is currently ignored - operators are global in ProcscriptLS.
+ *
+ * @param moduleName
+ * @param predicateIndicator
+ * @returns {boolean}
+ */
 
 function predicate_add_module_export(moduleName, predicateIndicator) {
   //     assertz('$module_export'(Name, F, A)).
@@ -716,6 +723,7 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
         return type_error("atom", moduleName);
 
     var slash2 = lookup_functor("/", 2);
+    var op3 = lookup_functor("op", 3);
     if (TAG(predicateIndicator) === TAG_STR && memory[VAL(predicateIndicator)] === slash2)
     {
         var name = deref(memory[VAL(predicateIndicator) + 1]);
@@ -724,12 +732,11 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
         {
             if (VAL(arity) < 0)
                 return domain_error("not_less_than_zero", arity);
-            let namePL = PL_put_atom_chars(name);
 
             let exportedPredicates = module_exports[VAL(moduleName)];
             if(exportedPredicates) {
                 for (let entry of exportedPredicates) {
-                    if (entry[0] === namePL && entry[1] === VAL(arity)) {
+                    if (entry[0] === VAL(name) && entry[1] === VAL(arity)) {
                         return true; // do nothing, the predicate is already specified in the exports.
                     }
                 }
@@ -739,7 +746,7 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
             }
 
             // add namePL/arity to exports.
-            exportedPredicates.push([namePL, VAL(arity)]);
+            exportedPredicates.push([VAL(name), VAL(arity)]);
             return true;
         }
         else if (TAG(name) === TAG_REF)
@@ -751,10 +758,14 @@ function predicate_add_module_export(moduleName, predicateIndicator) {
         else if (TAG(arity) !== TAG_INT)
             return type_error("integer", arity);
     }
+    else if (TAG(predicateIndicator) === TAG_STR && memory[VAL(predicateIndicator)] === op3)
+    {
+        return true;
+    }
     else if (TAG(predicateIndicator) === TAG_REF)
         return instantiation_error(predicateIndicator);
     else
-        return type_error("predicate_indicator", predicateIndicator);
+        return type_error("predicate_indicator or op", predicateIndicator);
 }
 
 
@@ -862,7 +873,7 @@ function predicate_add_module_import(importingModule, importedModule) {
     else if (TAG(importedModule) !== TAG_ATM)
         return type_error("atom", importedModule);
 
-    let selectedImportedModules = imported_modules[VAL(importingModule)];
+    let selectedImportedModules = module_imports[VAL(importingModule)];
     if(selectedImportedModules) {
         selectedImportedModules.push(VAL(importedModule));
     } else {
@@ -889,11 +900,11 @@ function predicate_module_import(importingModule, importedModule)
             cursor = {module:0, importIndex:0};
         }
 
-        if (cursor.module >= imported_modules.length)
+        if (cursor.module >= module_imports.length)
         {
             destroy_choicepoint();
             return false;
-        } else if(cursor.importIndex >= imported_modules[cursor.module].length) {
+        } else if(!module_imports[cursor.module] || cursor.importIndex >= module_imports[cursor.module].length) {
             cursor.module++;
             cursor.importIndex = 0;
         }
@@ -901,12 +912,14 @@ function predicate_module_import(importingModule, importedModule)
         update_choicepoint_data(cursor);
 
         let moduleImports = module_imports[cursor.module];
-        while(!moduleImports && cursor.module < module_imports.length) {
+        while(cursor.module < module_imports.length
+            && (!moduleImports || cursor.importIndex >= moduleImports.length)) {
             cursor.module++;
+            cursor.importIndex = 0;
             moduleImports = module_imports[cursor.module];
         }
 
-        if(!moduleImports) {
+        if(!moduleImports || cursor.importIndex >= moduleImports.length) {
             destroy_choicepoint();
             return false;
         } else if( unify(importingModule, PL_put_atom(cursor.module))) {
@@ -930,10 +943,12 @@ function predicate_module_import(importingModule, importedModule)
             cursor = state.foreign_value;
             cursor.importIndex++;
         }
-        else
+        else if(module_imports[VAL(importingModule)] && module_imports[VAL(importingModule)].length > 0)
         {
             create_choicepoint();
             cursor = {module:VAL(importingModule), importIndex:0};
+        } else {
+            return false;
         }
 
         if(cursor.importIndex >= module_imports[cursor.module].length) {
@@ -962,8 +977,15 @@ function predicate_module_import(importingModule, importedModule)
         return type_error("atom", importingModule);
 }
 
-// meta predicates: FunctorID : {Arity1: [ArgTypeID1, ArtTypeID2, ...], Arity2: [ArgTypes2], ...}
-// ArgType is 0..9, :, ^, +, -, ?
+/**
+ meta predicates: FunctorID : {Arity1: [ArgTypeID1, ArtTypeID2, ...], Arity2: [ArgTypes2], ...}
+ ArgType is 0..9, :, ^, +, -, ?
+ *
+ * @param functor
+ * @param arity
+ * @param argTypes
+ * @returns {boolean}
+ */
 
 function predicate_add_meta_predicate(functor, arity, argTypes) {
     if (TAG(functor) === TAG_REF)
@@ -998,8 +1020,19 @@ function predicate_add_meta_predicate(functor, arity, argTypes) {
         }
         meta_predicate_signatures[functorID] = arities;
     }
+    return true;
 }
 
+/**
+ * predicate_pls_meta_predicate is the ProscriptLS implementation of meta_predicate.
+ * This is named pls_meta_predicate to avoid a name collision with SWI-PL meta_predicate
+ * during bootstrap compilation.
+ *
+ * @param functor
+ * @param arity
+ * @param argTypes
+ * @returns {boolean}
+ */
 function predicate_pls_meta_predicate(functor, arity, argTypes) {
     if(TAG(functor) !== TAG_REF && TAG(functor) !== TAG_ATM) {
         return type_error('atom', functor);
@@ -3235,16 +3268,34 @@ function promise_callback(promise, result) {
     promise_results.set(promise, result);
     promise_requests.delete(promise);
     if(promise_requests.size === 0) {
-        if(backtrack()){
-            if(! wam()) {
+        promise_backtrack();
+    } else {
+        // waiting on one or more requests.
+    }
+}
+
+/**
+ * promise_backtrack backtracks the WAM state then invokes the wam() function.
+ * This is done indirectly if the proscript_interpreter_terminal if present.
+ */
+function promise_backtrack() {
+    if(typeof try_backtrack === 'undefined' || !try_backtrack) {
+        if (backtrack()) {
+            if (!wam()) {
                 throw 'promise_callback failed: callback ' + promise + ' result ' + result;
             }
         } else {
             throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
         }
     } else {
-        // waiting on one or more requests.
+        // stdout('running promise_backtrack\n');
+        try_backtrack();
+        if (state.suspended) {
+            let term = $('#proscriptinterpreter').terminal();
+            setup_term_for_input(term);
+        }
     }
+
 }
 
 var promise_results_key_array = [];
@@ -3258,6 +3309,7 @@ function predicate_handle_result(promise, result) {
             if(get_object_id_container(promise, promiseIDContainer)) {
                 let description = promise_description.get(promiseIDContainer.value);
                 let memory_file = create_memory_file_structure(text, description);
+                //stdout('handle_result: ' + description + '\n');
                 return unify(result, memory_file);
             } else {
                 return representation_error('promise', promise);
@@ -4097,11 +4149,23 @@ function wam_setup_trace_call(target_ftor_ofst) {
     return traceArgArity;
 }
 
+let call_log = [];
+function add_to_call_log(msg) {
+   let currentPredicateString = (state.current_predicate == null)
+       ?("no predicate")
+       :(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1]);
+
+    if(call_log.length > 100) {
+        call_log = call_log.slice(1);
+    }
+    call_log.push(currentPredicateString + ": " + msg);
+}
+
 function wam_complete_call_or_execute(predicate) {
    if (predicate.clauses && predicate.clause_keys && predicate.clause_keys.length > 0
            && predicate.clauses[predicate.clause_keys[0]]) {
         //stdout("Complete " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
-
+//        add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
         state.B0 = state.B;
         state.num_of_args = ftable[code[state.P + 1]][1];
         state.current_predicate = predicate;
@@ -4118,6 +4182,8 @@ function wam_complete_call_or_execute(predicate) {
 }
 
 function wam_setup_and_call_foreign() {
+//    add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+
     state.num_of_args = ftable[code[state.P+1]][1];
     let args = new Array(state.num_of_args);
     for (let i = 0; i < state.num_of_args; i++)
@@ -8016,7 +8082,9 @@ function toUTF8Array(str) {
 // File gc.js
 function predicate_gc()
 {
-    debug("Before GC, heap is " + state.H);
+    let msgIn = "Before GC, heap is " + state.H;
+    //stdout("===" + msgIn + "\n" + '\n');
+    debug(msgIn);
     // WARNING: This assumes ONLY predicate_gc will mark things!
     total_marked = 0;
 
@@ -8035,10 +8103,15 @@ function predicate_gc()
         envsize = envcp.code[envcp.offset-1];
         e = memory[e];
     }
-*/
-//    check_stacks(false);
+
+    gc_debug('===check stacks before mark');
+    check_stacks(false);
+ */
     mark();
-//    check_stacks(true);    
+    /*
+    gc_debug('===check stacks after mark');
+    check_stacks(true);
+     */
     push_registers();
     sweep_trail();
     sweep_stack(); 
@@ -8047,10 +8120,10 @@ function predicate_gc()
     compact();
     pop_registers();
     state.H = total_marked;
-    debug("After GC, heap is " + state.H);    
-
-//    check_stacks(false);
 /*
+    gc_debug('===check stacks after compact/pop_registers');
+    check_stacks(false);
+
     var after = [];
     var e = state.E;
     var envsize = state.CP.code[state.CP.offset - 1];
@@ -8083,7 +8156,13 @@ function predicate_gc()
             abort("false");
         }
     }
-*/
+
+
+    display_gc_log();
+ */
+    let msgOut = "After GC, heap is " + state.H;
+    //stdout( msgOut + '\n');
+    debug(msgOut);
 
     return true;
 }
@@ -8541,7 +8620,9 @@ function gc_check(t)
 
 function check_stacks(m)
 {
+    gc_debug("Checking stacks " + m);
     check_environments(state.E, state.CP.code[state.CP.offset - 1], m);
+    gc_debug("Stacks OK");
 }
 
 function check_environments(initial, envsize, m)
@@ -8550,15 +8631,18 @@ function check_environments(initial, envsize, m)
     while (e !== HEAP_SIZE)
     {
         // Traversing backwards to ensure we do not stop prematurely
+        gc_debug("Checking environment " + e);
         for (var y = 0; y < envsize; y++)
         {            
             if (TAG(memory[e+2+y]) === TAG_STR ||
                 TAG(memory[e+2+y]) === TAG_LST)
             {
+                gc_debug("Checking Y" + y);
                 check_term(memory[e+2+y], m);
             }
             else 
             {
+                gc_debug("Y" + y + " is not a heap pointer");
             }
             // Otherwise we do not need to check it if it is in the environment
         }
@@ -8572,8 +8656,10 @@ function check_environments(initial, envsize, m)
 
 function check_term(t, m)
 {
+    gc_debug("Checking " + hex(t));
     if (!m)
     {
+        gc_debug(" == " + term_to_string(t));
     }
     if ((t & M_BIT) === M_BIT)
     {
@@ -8608,6 +8694,30 @@ function check_term(t, m)
             check_term(memory[VAL(t)+1+i], m);
     }
     // Everything else we assume is OK
+}
+
+let gc_log = [];
+
+// gc_log is a circular log of that last 95 gc_debug(msg) calls.
+
+function add_to_gc_log(msg) {
+    if(gc_log.length === 96) {
+        gc_log.shift();
+    } else if(gc_log.length > 96) {
+        let shift = gc_log.length - 95;
+        gc_log = gc_log.slice(shift);
+    }
+    gc_log.push(msg);
+}
+
+function gc_debug(msg) {
+//    add_to_gc_log(msg);
+}
+
+function display_gc_log() {
+    // for(let msg of gc_log) {
+    //     stdout('gc_debug: ' + msg + '\n');
+    // }
 }
 // File dom.js
 'use strict';

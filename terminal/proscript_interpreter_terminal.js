@@ -49,6 +49,10 @@ function top_level(query, term) {
  }
 
 function top_level_after_solve_query(term) {
+    if (promise_requests.size > 0) {
+        stdout( 'top_level:' + promise_requests.size + ' promise requests.\n');
+    }
+
     if (state.instruction_suspended) {
         debug_msg("Instruction suspended");
         setup_term_for_instruction_input(term);
@@ -96,12 +100,18 @@ function trace_instruction_level_after_running(term) {
 
 function setup_term_for_input(term) {
 
-    term.push(function (command, term) {
-        trace_level(command, term);
-    }, {
-        name: 'trace',
-        prompt: state.trace_prompt + ' ? '
-    });
+    //stdout('current term=' + term.name() +'\n');
+
+    if(term.name() !== 'trace') {
+        term.push(function (command, term) {
+            trace_level(command, term);
+        }, {
+            name: 'trace',
+            prompt: state.trace_prompt + ' ? '
+        });
+    } else {
+        term.set_prompt(state.trace_prompt + ' ? ');
+    }
 }
 
 function trace_level(command, term) {
@@ -115,7 +125,9 @@ function trace_level(command, term) {
 }
 
 function trace_level_after_backtrack(term) {
-    if (state.instruction_suspended) {
+    if (promise_requests.size > 0) {
+        stdout( 'trace_level: ' + promise_requests.size + ' promise requests.\n');
+    } else if (state.instruction_suspended) {
         debug_msg("Instruction suspended");
         setup_term_for_instruction_input(term);
     } else if (state.suspended) {

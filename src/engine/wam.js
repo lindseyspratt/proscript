@@ -462,11 +462,23 @@ function wam_setup_trace_call(target_ftor_ofst) {
     return traceArgArity;
 }
 
+let call_log = [];
+function add_to_call_log(msg) {
+   let currentPredicateString = (state.current_predicate == null)
+       ?("no predicate")
+       :(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1]);
+
+    if(call_log.length > 100) {
+        call_log = call_log.slice(1);
+    }
+    call_log.push(currentPredicateString + ": " + msg);
+}
+
 function wam_complete_call_or_execute(predicate) {
    if (predicate.clauses && predicate.clause_keys && predicate.clause_keys.length > 0
            && predicate.clauses[predicate.clause_keys[0]]) {
         //stdout("Complete " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
-
+//        add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
         state.B0 = state.B;
         state.num_of_args = ftable[code[state.P + 1]][1];
         state.current_predicate = predicate;
@@ -483,6 +495,8 @@ function wam_complete_call_or_execute(predicate) {
 }
 
 function wam_setup_and_call_foreign() {
+//    add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+
     state.num_of_args = ftable[code[state.P+1]][1];
     let args = new Array(state.num_of_args);
     for (let i = 0; i < state.num_of_args; i++)

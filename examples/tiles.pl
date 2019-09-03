@@ -1,4 +1,4 @@
-:- ensure_loaded('../library/object'). % for >>/2.
+:- use_module('../library/object'). % for >>/2.
 :- ensure_loaded('../library/listut2'). % for append_lists/2
 :- ensure_loaded('../library/dom'). % for dom_page_offset/2
 :- ensure_loaded('../library/data_predicates').
@@ -64,7 +64,7 @@ display_hands_test :-
     draw_all_tiles(TileIDs, Ctx, W, H).
 
 select_test :-
-    Canvas >> [id -:> canvas,
+    _Canvas >> [id -:> canvas,
         getContext('2d') *:> Ctx,
         width +:> W,
         height +:> H,
@@ -117,7 +117,7 @@ point_in_board_position(BX, BY, X, Y) :-
     board_position_top_left_coordinates(BX, BY, BCX, BCY),
     in_square(X, Y, BCX, BCY, Size).
 
-on_click_tile(ID, X, Y) :-
+on_click_tile(ID, _X, _Y) :-
     %writeln(click(ID, X, Y)),
     (tile_in_active_hand(ID)
       -> on_click_active_hand_tile(ID)

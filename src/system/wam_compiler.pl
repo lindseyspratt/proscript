@@ -1,7 +1,7 @@
 /* To do list
     indexing
     Bignums?
-    Modules
+    Modules for operators
     ISO exceptions
     Fix the 0x80000000 hack. Just make new opcodes for try/retry/trust in aux clauses.
     Environment trimming is not quite right. We cannot trim the environment at the point where it gets deallocated, since
@@ -372,7 +372,7 @@ setup_use_module(Path, ImportName) :-
         ('$loaded'(CanonicalPath)
           -> true
         ;
-        compile_file(Path)
+        load_file_for_use_module(CanonicalPath)
         ).
 
 :- if((current_predicate(wam_compiler:current_compile_url/1), current_compile_url(_))).
@@ -439,10 +439,11 @@ current_import(UnqualifiedPredicateName, Arity, ImportModuleName) :-
 % stops at the primitive modules imported by 'system'.
 
 current_import(UnqualifiedPredicateName, Arity, ImportingModuleName, ImportModuleName) :-
-        (ImportingModuleName == user
-          -> ImportModuleNameINTERIM = system
+        (module_import(ImportingModuleName, ImportModuleNameINTERIM)
         ;
-         module_import(ImportingModuleName, ImportModuleNameINTERIM)
+         ImportingModuleName == user,
+         \+ module_import(ImportingModuleName, system)
+          -> ImportModuleNameINTERIM = system
         ),
         module_export(ImportModuleNameINTERIM, UnqualifiedPredicateName/Arity)
           -> (ImportingModuleName = system
@@ -724,6 +725,9 @@ transform_body(\+(Goal), _Position, aux_head(Aux, Variables), [aux_definition(Au
 transform_body(!, not_first, !(CutVariable), Tail, Tail, has_cut(CutVariable)):- !.
 transform_body(aux_head(Aux, Variables), _Position, aux_head(Aux, Variables), Tail, Tail, _):- !.
 transform_body(goal(Goal), _Position, goal(Goal), Tail, Tail, _):- !.
+transform_body(Module:Goal, _Position, goal(call_with_module(Module,Goal)), Tail, Tail, _) :-
+        (\+ atom(Module) ; var(Goal)),
+        !.
 transform_body(Goal, _Position, goal(Goal), Tail, Tail, _).
 
 include_cut_point_as_argument_if_needed(CutVariable, V1, Variables):-

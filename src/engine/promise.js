@@ -77,16 +77,34 @@ function promise_callback(promise, result) {
     promise_results.set(promise, result);
     promise_requests.delete(promise);
     if(promise_requests.size === 0) {
-        if(backtrack()){
-            if(! wam()) {
+        promise_backtrack();
+    } else {
+        // waiting on one or more requests.
+    }
+}
+
+/**
+ * promise_backtrack backtracks the WAM state then invokes the wam() function.
+ * This is done indirectly if the proscript_interpreter_terminal if present.
+ */
+function promise_backtrack() {
+    if(typeof try_backtrack === 'undefined' || !try_backtrack) {
+        if (backtrack()) {
+            if (!wam()) {
                 throw 'promise_callback failed: callback ' + promise + ' result ' + result;
             }
         } else {
             throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
         }
     } else {
-        // waiting on one or more requests.
+        // stdout('running promise_backtrack\n');
+        try_backtrack();
+        if (state.suspended) {
+            let term = $('#proscriptinterpreter').terminal();
+            setup_term_for_input(term);
+        }
     }
+
 }
 
 var promise_results_key_array = [];
@@ -100,6 +118,7 @@ function predicate_handle_result(promise, result) {
             if(get_object_id_container(promise, promiseIDContainer)) {
                 let description = promise_description.get(promiseIDContainer.value);
                 let memory_file = create_memory_file_structure(text, description);
+                //stdout('handle_result: ' + description + '\n');
                 return unify(result, memory_file);
             } else {
                 return representation_error('promise', promise);
