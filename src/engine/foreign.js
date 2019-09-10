@@ -834,10 +834,14 @@ function predicate_module_export(moduleName, predicateIndicator)
             cursor = state.foreign_value;
             cursor.exportIndex++;
         }
-        else
+        else if(module_exports[VAL(moduleName)] && module_exports[VAL(moduleName)].length > 0)
         {
             create_choicepoint();
             cursor = {module:VAL(moduleName), exportIndex:0};
+        }
+        else
+        {
+            return false;
         }
 
         if(cursor.exportIndex >= module_exports[cursor.module].length) {
@@ -3158,11 +3162,33 @@ function format_error(message)
 
 function existence_error(type, instance)
 {
-    var ftor = lookup_functor('existence_error', 2);
+    let ref_in;
+
+    if(state.current_predicate !== null) {
+        // var ftor_predicate = lookup_functor('/', 2);
+        // var ref_predicate = state.H ^ (TAG_STR << WORD_BITS);
+        // memory[state.H++] = ftor_predicate;
+        // memory[state.H++] = PL_put_atom(ftable[state.current_predicate.key][0]);
+        // memory[state.H++] = PL_put_integer(ftable[state.current_predicate.key][1]);
+
+        let instruction = decode_instruction(state.current_predicate, state.P);
+
+        var ftor_in = lookup_functor('in', 1);
+        ref_in = state.H ^ (TAG_STR << WORD_BITS);
+        memory[state.H++] = ftor_in;
+//        memory[state.H++] = ref_predicate;
+        memory[state.H++] = PL_put_atom_chars(instruction.string);
+    } else {
+        ref_in = PL_put_atom_chars("no current predicate");
+    }
+
+    var ftor = lookup_functor('existence_error', 3);
     var ref = state.H ^ (TAG_STR << WORD_BITS);
     memory[state.H++] = ftor;
     memory[state.H++] = lookup_atom(type);
     memory[state.H++] = instance;
+    memory[state.H++] = ref_in;
+
     return predicate_throw(ref);
 }
 

@@ -475,26 +475,58 @@ function predicate_dom_object_type(object, type) {
     return unify(type, lookup_atom(typeJS));
 }
 
+/**
+ * The type parameter is either a Type or ModuleName : Type. If ModuleName is not specified it is inferred to be 'user'.
+ * The Type term is the constructor name and arguments (if any).
+ * An argument may be a goal_functor type, in which case the ModuleName (inferred or explicit)
+ * is needed to determine what module holds the predicate(s) of the goal_functor.
+ * @param type
+ * @param object
+ * @param spec
+ * @returns {boolean}
+ */
 function predicate_dom_create_object(type, object, spec) {
     if(TAG(type) !== TAG_ATM && TAG(type) !== TAG_STR) {
         return type_error('atom or structure', type);
     }
 
     let typeJS;
-    let structureArguments = [];
+    let moduleName;
     let arity;
-    if(TAG(type) === TAG_ATM) {
+    let methodAddress;
+
+    if (TAG(type) === TAG_ATM) {
         typeJS = atable[VAL(type)];
-    } else if(TAG(type) === TAG_STR) {
-        let functorPL = ftable[VAL(memory[VAL(type)])][0];
-        arity = ftable[VAL(memory[VAL(type)])][1];
-        typeJS = atable[functorPL];
-        for(let ofst = 0; ofst < arity;ofst++) {
-            let argument = deref(memory[VAL(type) + ofst + 1]);
-            structureArguments.push(argument);
+        arity = 0;
+        moduleName = 'user';
+    } else  {
+        let functor = atable[ftable[VAL(memory[VAL(type)])][0]];
+        let localArity = ftable[VAL(memory[VAL(type)])][1];
+        if (functor === ':' && localArity === 2) {
+            // ModuleName : MethodStructure
+            moduleName = atable[VAL(deref(memory[VAL(type) + 1]))];
+            let subStructure = deref(memory[VAL(type) + 2]);
+            if(TAG(subStructure) === TAG_ATM) {
+                typeJS = atable[VAL(subStructure)];
+                arity = 0;
+            } else {
+                methodAddress = VAL(subStructure);
+                typeJS = atable[ftable[VAL(memory[methodAddress])][0]];
+                arity = ftable[VAL(memory[methodAddress])][1];
+            }
+        } else {
+            moduleName = 'user';
+            methodAddress = VAL(type);
+            typeJS = atable[ftable[VAL(memory[methodAddress])][0]];
+            arity = ftable[VAL(memory[methodAddress])][1];
         }
-    } else {
-        return type_error('atom or structure', type);
+    }
+
+    let structureArguments = [];
+
+    for(let ofst = 0; ofst < arity;ofst++) {
+        let argument = deref(memory[methodAddress + ofst + 1]);
+        structureArguments.push(argument);
     }
 
     if(TAG(object) !== TAG_REF) {
@@ -524,7 +556,7 @@ function predicate_dom_create_object(type, object, spec) {
         let applyArguments = [];
         for (var i = 0; i < arity; i++) {
             let applyArgumentContainer = {};
-            if (convert_method_argument(structureArguments[i], specArguments[i], applyArgumentContainer)) {
+            if (convert_method_argument(structureArguments[i], specArguments[i], moduleName, applyArgumentContainer)) {
                 applyArguments.push(applyArgumentContainer.value);
             } else {
                 return false;

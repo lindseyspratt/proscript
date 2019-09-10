@@ -42,7 +42,7 @@ gc:		dist/proscriptls.js src/engine/standalone.js
 		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "gc_test($(DEBUG))"
 
 dump-state: dist/proscriptls.js src/engine/standalone.js src/tools/dump.js
-		$(JSC) dist/proscriptls.js src/engine/standalone.js src/tools/dump.js  -e "dump()" #Predicate('compile_body_args')"
+		$(JSC) dist/proscriptls.js src/engine/standalone.js src/tools/dump.js  -e "dumpPredicate('bootstrap_js:call_with_module')"
 
 test_proscript:		dist/proscriptls.js src/engine/standalone.js
 		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "proscriptls(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"

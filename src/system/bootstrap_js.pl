@@ -1,6 +1,7 @@
 :- module(bootstrap_js,
         [append/3, assert/1, reverse/2, reverse/3, save_clausea/1, handle_term_expansion/1,
          include/1, (dynamic)/1, consult_atom/1, ensure_loaded/1, format/2,
+         module/2, use_module/1,
          compile_message/1, (??) / 1, (?) / 1, otherwise/0, end_block/2, findall/3, setof/3, bagof/3,
          asserta/1, assertz/1, retract/1,
          unify_with_occurs_check/2, (\=) / 2, (\==) / 2, atomic/1, nonvar/1, number/1,
@@ -23,10 +24,10 @@
             )).
 
 module(Name, Exports) :-
-        define_current_module(Name, Exports).
+        wam_compiler:define_current_module(Name, Exports).
 
 use_module(Spec) :-
-        define_use_module(Spec).
+        wam_compiler:define_use_module(Spec).
 
 assert(Term):-
         assertz(Term).
@@ -54,28 +55,37 @@ handle_term_expansion(Head) :- true.
 include(_).
 
 call([H|T]) :-
-        call(wam_compiler:consult([H|T])).
+        call('wam_compiler:consult'([H|T])).
 
+call(Module : Goal):-
+        !,
+        call_with_module(Module, Goal).
 call(Goal):-
         call_with_module(user, Goal).
 
+call_with_module(_, Module : Goal) :-
+        !,
+        call_with_module(Module, Goal).
 call_with_module(Module, Goal) :-
+        %writeln(call(Module,Goal)),
         term_variables(Goal, Vars),
         % Compile this into a predicate, but do not actually declare it anywhere.
         % The functor is therefore irrelevant.
-        (Module = user
-          -> wam_compiler:compile_clause_2(query(Vars):-Goal)
-        ;
-         push_current_compilation_module(Module, call),
-         wam_compiler:compile_clause_2(query(Vars):-Goal),
-         pop_current_compilation_module(Module, call)
-        ),
-        !,
-        % Now we need to call our anonymous predicate. $jmp does the trick here
-        '$jmp'(Vars),
-        % But jmp must never be the last thing in a body, because foreign execute() will cause P <- CP after it succeeds
+        % Call the anonymous predicate - $jmp does the trick here
+        % Ensure that $jmp is not the last thing in a body, because foreign execute() will cause P <- CP after it succeeds
         % and it is safer to not mess with CP inside $jmp.
-        true.
+        (Module = user
+          -> wam_compiler:compile_clause_2(query(Vars):-Goal),
+            !,
+            '$jmp'(Vars),
+            true
+        ;
+         wam_compiler:push_current_compilation_module(Module, call),
+         wam_compiler:compile_clause_2(query(Vars):-Goal),
+        !,
+        '$jmp'(Vars),
+         wam_compiler:pop_current_compilation_module(Module, call)
+        ).
 
 
 dynamic(Name/Arity) :-
@@ -100,7 +110,7 @@ ensure_loaded(URL) :-
   wam_compiler:'$loaded'(CanonicalURL)
     -> true
   ;
-  wam_compiler:consult([CanonicalURL])
+  'wam_compiler:consult'([CanonicalURL])
   ).
 
 format(Format, Args):-
@@ -493,54 +503,51 @@ delete([Kill|Tail], Kill, Rest) :- !,
 delete([Head|Tail], Kill, [Head|Rest]) :- !,
 	delete(Tail, Kill, Rest).
 
-call(A, B):-
-        A =.. [Functor|Args],
-        append(Args, [B], NewArgs),
-        AA =.. [Functor|NewArgs],
-        call(AA).
 
-call(A, B, C):-
-        A =.. [Functor|Args],
-        append(Args, [B, C], NewArgs),
-        AA =.. [Functor|NewArgs],
-        call(AA).
+add_args(Structure, ExtensionArgs, ExtendedStructure) :-
+        Structure =.. [Functor|OriginalArgs],
+        append(OriginalArgs, ExtensionArgs, NewArgs),
+        ExtendedStructure =.. [Functor|NewArgs].
 
+call(A, B) :-
+        call_extension(A, [B]).
 
-call(A, B, C, D):-
-        A =.. [Functor|Args],
-        append(Args, [B, C, D], NewArgs),
-        AA =.. [Functor|NewArgs],
-        call(AA).
+call(A, B, C) :-
+        call_extension(A, [B,C]).
 
+call(A, B, C, D) :-
+        call_extension(A, [B,C,D]).
 
-call(A, B, C, D, E):-
-        A =.. [Functor|Args],
-        append(Args, [B, C, D, E], NewArgs),
-        AA =.. [Functor|NewArgs],
-        call(AA).
+call(A, B, C, D, E) :-
+        call_extension(A, [B,C,D,E]).
 
+call(A, B, C, D, E, F) :-
+        call_extension(A, [B,C,D,E,F]).
 
-call(A, B, C, D, E, F):-
-        A =.. [Functor|Args],
-        append(Args, [B, C, D, E, F], NewArgs),
-        AA =.. [Functor|NewArgs],
-        call(AA).
+call(A, B, C, D, E, F, G) :-
+        call_extension(A, [B,C,D,E,F,G]).
 
+call(A, B, C, D, E, F, G, H) :-
+        call_extension(A, [B,C,D,E,F,G,H]).
 
-call(A, B, C, D, E, F, G):-
-        A =.. [Functor|Args],
-        append(Args, [B, C, D, E, F, G], NewArgs),
-        AA =.. [Functor|NewArgs],
-        call(AA).
+call_extension('user::'(M, A), ExtensionArgs) :-
+        !,
+        call_extension_with_module(M, A, ExtensionArgs).
+call_extension(M : A, ExtensionArgs) :-
+        !,
+        call_extension_with_module(M, A, ExtensionArgs).
+call_extension(A, ExtensionArgs) :-
+        call_extension_with_module(user, A, ExtensionArgs).
 
-
-call(A, B, C, D, E, F, G, H):-
-        A =.. [Functor|Args],
-        append(Args, [B, C, D, E, F, G, H], NewArgs),
-        AA =.. [Functor|NewArgs],
-        call(AA).
-
-
+call_extension_with_module(_, 'user::'(M, A), ExtensionArgs):-
+        !,
+        call_extension_with_module(M, A, ExtensionArgs).
+call_extension_with_module(_, M : A, ExtensionArgs):-
+        !,
+        call_extension_with_module(M, A, ExtensionArgs).
+call_extension_with_module(M, A, ExtensionArgs):-
+        add_args(A, ExtensionArgs, AA),
+        call_with_module(M, AA).
 
 write_list(List, Separator) :-
     current_output(Stream),

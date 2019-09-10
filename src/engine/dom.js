@@ -842,11 +842,7 @@ function proscriptls(queryJS, displaySucceededMsg) {
     }
 }
 
-function proscript_apply(goalArguments, goal) {
-    proscriptls_apply(goalArguments, goal);
-}
-
-function proscriptls_apply(goalArguments, goal) {
+function proscriptls_apply(goalArguments, module, goal) {
     // goal = '[Tx-X,Ty-Y,...] ^ G' where G is an expression referencing X, Y, ...
     // goalArguments is an array [a,b, ...] where each item is applied to the corresonding
     // entry in [X, Y, ...].The combined expression is:
@@ -863,7 +859,9 @@ function proscriptls_apply(goalArguments, goal) {
     let goalReconstituted;
     if(typedArgumentStrings) {
         let typedArgumentPrefix = typedArgumentStrings[0];
-        let goalString = goal.substring(typedArgumentPrefix.length);
+        // 'goal' may be a complex expression with a primary operator precedence greater than that of ':'.
+        // Because of this, the goalString is 'module : (P)' instead of just 'module : P'.
+        let goalString = module + ' : (' + goal.substring(typedArgumentPrefix.length) + ')';
 
         let typedArgumentString = typedArgumentStrings[1];
         let typedArguments = typedArgumentString.trim().split(",");
@@ -878,7 +876,7 @@ function proscriptls_apply(goalArguments, goal) {
             let variable = items[1].trim();
             let argument = goalArguments[ofst];
             let resultContainer = {};
-            if (convert_result(argument, {type: type}, resultContainer)) {
+            if (convert_result(argument, {type: type}, module, resultContainer)) {
                 let argumentPL = resultContainer.value;
                 let argumentReconstituted = format_term(argumentPL, {quoted: true});
                 unificationExpressions.push(variable + " = " + argumentReconstituted);

@@ -1,3 +1,5 @@
+:- module(tiles, [select_test/0]).
+
 :- use_module('../library/object'). % for >>/2.
 :- ensure_loaded('../library/listut2'). % for append_lists/2
 :- ensure_loaded('../library/dom'). % for dom_page_offset/2

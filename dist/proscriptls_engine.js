@@ -828,10 +828,14 @@ function predicate_module_export(moduleName, predicateIndicator)
             cursor = state.foreign_value;
             cursor.exportIndex++;
         }
-        else
+        else if(module_exports[VAL(moduleName)] && module_exports[VAL(moduleName)].length > 0)
         {
             create_choicepoint();
             cursor = {module:VAL(moduleName), exportIndex:0};
+        }
+        else
+        {
+            return false;
         }
 
         if(cursor.exportIndex >= module_exports[cursor.module].length) {
@@ -3135,11 +3139,33 @@ function format_error(message)
 
 function existence_error(type, instance)
 {
-    var ftor = lookup_functor('existence_error', 2);
+    let ref_in;
+
+    if(state.current_predicate !== null) {
+        // var ftor_predicate = lookup_functor('/', 2);
+        // var ref_predicate = state.H ^ (TAG_STR << WORD_BITS);
+        // memory[state.H++] = ftor_predicate;
+        // memory[state.H++] = PL_put_atom(ftable[state.current_predicate.key][0]);
+        // memory[state.H++] = PL_put_integer(ftable[state.current_predicate.key][1]);
+
+        let instruction = decode_instruction(state.current_predicate, state.P);
+
+        var ftor_in = lookup_functor('in', 1);
+        ref_in = state.H ^ (TAG_STR << WORD_BITS);
+        memory[state.H++] = ftor_in;
+//        memory[state.H++] = ref_predicate;
+        memory[state.H++] = PL_put_atom_chars(instruction.string);
+    } else {
+        ref_in = PL_put_atom_chars("no current predicate");
+    }
+
+    var ftor = lookup_functor('existence_error', 3);
     var ref = state.H ^ (TAG_STR << WORD_BITS);
     memory[state.H++] = ftor;
     memory[state.H++] = lookup_atom(type);
     memory[state.H++] = instance;
+    memory[state.H++] = ref_in;
+
     return predicate_throw(ref);
 }
 
@@ -9560,11 +9586,7 @@ function proscriptls(queryJS, displaySucceededMsg) {
     }
 }
 
-function proscript_apply(goalArguments, goal) {
-    proscriptls_apply(goalArguments, goal);
-}
-
-function proscriptls_apply(goalArguments, goal) {
+function proscriptls_apply(goalArguments, module, goal) {
     // goal = '[Tx-X,Ty-Y,...] ^ G' where G is an expression referencing X, Y, ...
     // goalArguments is an array [a,b, ...] where each item is applied to the corresonding
     // entry in [X, Y, ...].The combined expression is:
@@ -9581,7 +9603,9 @@ function proscriptls_apply(goalArguments, goal) {
     let goalReconstituted;
     if(typedArgumentStrings) {
         let typedArgumentPrefix = typedArgumentStrings[0];
-        let goalString = goal.substring(typedArgumentPrefix.length);
+        // 'goal' may be a complex expression with a primary operator precedence greater than that of ':'.
+        // Because of this, the goalString is 'module : (P)' instead of just 'module : P'.
+        let goalString = module + ' : (' + goal.substring(typedArgumentPrefix.length) + ')';
 
         let typedArgumentString = typedArgumentStrings[1];
         let typedArguments = typedArgumentString.trim().split(",");
@@ -9596,7 +9620,7 @@ function proscriptls_apply(goalArguments, goal) {
             let variable = items[1].trim();
             let argument = goalArguments[ofst];
             let resultContainer = {};
-            if (convert_result(argument, {type: type}, resultContainer)) {
+            if (convert_result(argument, {type: type}, module, resultContainer)) {
                 let argumentPL = resultContainer.value;
                 let argumentReconstituted = format_term(argumentPL, {quoted: true});
                 unificationExpressions.push(variable + " = " + argumentReconstituted);
@@ -10542,26 +10566,58 @@ function predicate_dom_object_type(object, type) {
     return unify(type, lookup_atom(typeJS));
 }
 
+/**
+ * The type parameter is either a Type or ModuleName : Type. If ModuleName is not specified it is inferred to be 'user'.
+ * The Type term is the constructor name and arguments (if any).
+ * An argument may be a goal_functor type, in which case the ModuleName (inferred or explicit)
+ * is needed to determine what module holds the predicate(s) of the goal_functor.
+ * @param type
+ * @param object
+ * @param spec
+ * @returns {boolean}
+ */
 function predicate_dom_create_object(type, object, spec) {
     if(TAG(type) !== TAG_ATM && TAG(type) !== TAG_STR) {
         return type_error('atom or structure', type);
     }
 
     let typeJS;
-    let structureArguments = [];
+    let moduleName;
     let arity;
-    if(TAG(type) === TAG_ATM) {
+    let methodAddress;
+
+    if (TAG(type) === TAG_ATM) {
         typeJS = atable[VAL(type)];
-    } else if(TAG(type) === TAG_STR) {
-        let functorPL = ftable[VAL(memory[VAL(type)])][0];
-        arity = ftable[VAL(memory[VAL(type)])][1];
-        typeJS = atable[functorPL];
-        for(let ofst = 0; ofst < arity;ofst++) {
-            let argument = deref(memory[VAL(type) + ofst + 1]);
-            structureArguments.push(argument);
+        arity = 0;
+        moduleName = 'user';
+    } else  {
+        let functor = atable[ftable[VAL(memory[VAL(type)])][0]];
+        let localArity = ftable[VAL(memory[VAL(type)])][1];
+        if (functor === ':' && localArity === 2) {
+            // ModuleName : MethodStructure
+            moduleName = atable[VAL(deref(memory[VAL(type) + 1]))];
+            let subStructure = deref(memory[VAL(type) + 2]);
+            if(TAG(subStructure) === TAG_ATM) {
+                typeJS = atable[VAL(subStructure)];
+                arity = 0;
+            } else {
+                methodAddress = VAL(subStructure);
+                typeJS = atable[ftable[VAL(memory[methodAddress])][0]];
+                arity = ftable[VAL(memory[methodAddress])][1];
+            }
+        } else {
+            moduleName = 'user';
+            methodAddress = VAL(type);
+            typeJS = atable[ftable[VAL(memory[methodAddress])][0]];
+            arity = ftable[VAL(memory[methodAddress])][1];
         }
-    } else {
-        return type_error('atom or structure', type);
+    }
+
+    let structureArguments = [];
+
+    for(let ofst = 0; ofst < arity;ofst++) {
+        let argument = deref(memory[methodAddress + ofst + 1]);
+        structureArguments.push(argument);
     }
 
     if(TAG(object) !== TAG_REF) {
@@ -10591,7 +10647,7 @@ function predicate_dom_create_object(type, object, spec) {
         let applyArguments = [];
         for (var i = 0; i < arity; i++) {
             let applyArgumentContainer = {};
-            if (convert_method_argument(structureArguments[i], specArguments[i], applyArgumentContainer)) {
+            if (convert_method_argument(structureArguments[i], specArguments[i], moduleName, applyArgumentContainer)) {
                 applyArguments.push(applyArgumentContainer.value);
             } else {
                 return false;
@@ -13179,7 +13235,18 @@ This file implements access to Javascript object methods.
 
  */
 
-// object_method(Element, add_event_listener(click, bar(thing))).
+// The method argument may be qualified with a module name or
+// an argument of the method structure may be qualified.
+// object_method(Element, add_event_listener(click, 'foo:bar'(thing))).
+// or
+// object_method(Element, foo : add_event_listener(click, bar(thing))).
+// In the second case, the 'foo' module name is used in conjunction with
+// the meta-argument type definition for 'add_event_listener' second argument
+// (of '0') to determine
+// that 'bar(thing)' should be qualified as 'foo:bar'(thing).
+// If the foo module had imported bar/1 from the quux module, then this
+// qualification would be 'quux:bar'(thing).
+//
 // method:EventAgent.addEventListener, arguments:[string, goal_function]
 // object_method_no_return(objectJS, EventAgent.addEventListener, [eventJS, handlerFunction]);
 var domCursors = new Map();
@@ -13217,12 +13284,33 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
 
         let methodName;
         let arity;
+        let methodAddress;
+        let moduleName;
         if (TAG(methodStructure) === TAG_ATM) {
             methodName = atable[VAL(methodStructure)];
             arity = 0;
-        } else {
-            methodName = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
-            arity = ftable[VAL(memory[VAL(methodStructure)])][1];
+            moduleName = 'user';
+        } else  {
+            let functor = atable[ftable[VAL(memory[VAL(methodStructure)])][0]];
+            let localArity = ftable[VAL(memory[VAL(methodStructure)])][1];
+            if (functor === ':' && localArity === 2) {
+                // ModuleName : MethodStructure
+                moduleName = atable[VAL(deref(memory[VAL(methodStructure) + 1]))];
+                let subStructure = deref(memory[VAL(methodStructure) + 2]);
+                if(TAG(subStructure) === TAG_ATM) {
+                    methodName = atable[VAL(subStructure)];
+                    arity = 0;
+                } else {
+                    methodAddress = VAL(subStructure);
+                    methodName = atable[ftable[VAL(memory[methodAddress])][0]];
+                    arity = ftable[VAL(memory[methodAddress])][1];
+                }
+            } else {
+                moduleName = 'user';
+                methodAddress = VAL(methodStructure);
+                methodName = atable[ftable[VAL(memory[methodAddress])][0]];
+                arity = ftable[VAL(memory[methodAddress])][1];
+            }
         }
 
         let spec;
@@ -13248,7 +13336,7 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
         for (var i = 0; i < arity; i++) {
             let specArgument = specArguments[i];
             let applyArgumentContainer = {};
-            if (convert_method_argument(deref(memory[VAL(methodStructure) + i + 1]), specArgument, applyArgumentContainer)) {
+            if (convert_method_argument(deref(memory[methodAddress + i + 1]), specArgument, moduleName, applyArgumentContainer)) {
                 applyArguments.push(applyArgumentContainer.value);
             } else {
                 return false;
@@ -13273,7 +13361,7 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
                     }
                 }
 
-                cursor = {values: values, spec: spec, arity: arity};
+                cursor = {values: values, spec: spec, module: moduleName, methodAddress: methodAddress, arity: arity};
                 cursorIDJS = 'crs' + domCursorCounter++;
                 domCursors.set(cursorIDJS, cursor);
                 cursorIDPL = lookup_atom(cursorIDJS);
@@ -13282,12 +13370,12 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
 
             } else {
                 let resultContainer = {};
-                if (convert_result(resultJS, spec.returns, resultContainer)) {
+                if (convert_result(resultJS, spec.returns, moduleName, resultContainer)) {
                     let resultPL = resultContainer.value;
                     if (spec.returns.type === 'boolean') {
                         return resultPL;
                     } else {
-                        return unify(resultPL, deref(memory[VAL(methodStructure) + arity + 1]));
+                        return unify(resultPL, deref(memory[methodAddress + arity + 1]));
                     }
                 } else {
                     return false;
@@ -13304,12 +13392,12 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
     if (cursor.values.length > 0) {
         let resultJS = cursor.values.pop();
         let resultContainer = {};
-        if (convert_result(resultJS, cursor.spec.returns, resultContainer)) {
+        if (convert_result(resultJS, cursor.spec.returns, cursor.module, resultContainer)) {
             let resultPL = resultContainer.value;
             if (cursor.spec.returns.type === 'boolean') {
                 return resultPL;
             } else {
-                return unify(resultPL, deref(memory[VAL(methodStructure) + cursor.arity + 1]));
+                return unify(resultPL, deref(memory[cursor.methodAddress + cursor.arity + 1]));
             }
         } else {
             return false;
@@ -13320,7 +13408,7 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
     return false;
 }
 
-function convert_method_argument(term, spec, resultContainer, reportError) {
+function convert_method_argument(term, spec, module, resultContainer, reportError) {
     if(TAG(term) === TAG_REF) {
         return instantiation_error(term);
     }
@@ -13331,7 +13419,7 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
             // [X1, X2, ...] for array of arrayType items
             if(TAG(term) === TAG_LST) {
                 let arrayContainer = {};
-                if(terms_to_array(term, spec.type.arrayType, arrayContainer, reportError)) {
+                if(terms_to_array(term, spec.type.arrayType, module, arrayContainer, reportError)) {
                     arg = arrayContainer.value;
                 } else {
                     return false;
@@ -13342,7 +13430,7 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
         } else {
             // union of multiple types
             for (let subtype of spec.type) {
-                if (convert_method_argument(term, {type: subtype}, resultContainer, false)) {
+                if (convert_method_argument(term, {type: subtype}, module, resultContainer, false)) {
                     return true;
                 }
             }
@@ -13426,7 +13514,7 @@ function convert_method_argument(term, spec, resultContainer, reportError) {
         arg = goalFunctions.get(goal);
         if (!arg) {
             arg = function () {
-                proscript_apply(arguments, goal);
+                proscriptls_apply(arguments, module, goal);
             };
 
             goalFunctions.set(goal, arg);
@@ -13516,7 +13604,7 @@ function terms_to_options(listRoot, optionsContainer) {
     return true;
 }
 
-function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
+function terms_to_array(listRoot, itemType, module, arrayContainer, reportError) {
     var array = [];
 
     var list = listRoot;
@@ -13528,7 +13616,7 @@ function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
 
         var itemPL = deref(memory[VAL(list)]);
         let itemContainer = {};
-        if(convert_method_argument(itemPL, {type: itemType}, itemContainer, reportError)) {
+        if(convert_method_argument(itemPL, {type: itemType}, module, itemContainer, reportError)) {
             array.push(itemContainer.value);
         } else {
             return false;
@@ -13541,7 +13629,7 @@ function terms_to_array(listRoot, itemType, arrayContainer, reportError) {
     return true;
 }
 
-function result_array_to_terms(arrayJS, itemType, arrayContainer, reportError) {
+function result_array_to_terms(arrayJS, itemType, module, arrayContainer, reportError) {
     if(arrayJS.length === 0) {
         arrayContainer.value = NIL;
     } else {
@@ -13549,7 +13637,7 @@ function result_array_to_terms(arrayJS, itemType, arrayContainer, reportError) {
         arrayContainer.value = state.H ^ (TAG_LST << WORD_BITS);
         for (var i = 0; i < arrayJS.length; i++) {
             let itemContainer = {};
-            if(convert_result(arrayJS[i], {type: itemType}, itemContainer, reportError)) {
+            if(convert_result(arrayJS[i], {type: itemType}, module, itemContainer, reportError)) {
                 memory[state.H] = itemContainer.value;
                 // If there are no more items we will overwrite the last entry with [] when we exit the loop
                 memory[state.H + 1] = ((state.H + 2) ^ (TAG_LST << WORD_BITS));
@@ -13563,14 +13651,14 @@ function result_array_to_terms(arrayJS, itemType, arrayContainer, reportError) {
     return true;
 }
 
-function convert_result(resultJS, spec, resultContainer, reportError) {
+function convert_result(resultJS, spec, module, resultContainer, reportError) {
     let resultPL;
     if(typeof spec.type === 'object') {
         if(spec.type.arrayType) {
             // [X1, X2, ...] for array of arrayType items
             if(Array.isArray(resultJS)) {
                 let arrayContainer = {};
-                if(result_array_to_terms(resultJS, spec.type.arrayType, arrayContainer, reportError)) {
+                if(result_array_to_terms(resultJS, spec.type.arrayType, module, arrayContainer, reportError)) {
                     resultPL = arrayContainer.value;
                 } else {
                     return false;
@@ -13581,7 +13669,7 @@ function convert_result(resultJS, spec, resultContainer, reportError) {
         } else {
             // union of multiple types
             for (let subtype of spec.type) {
-                if (convert_method_argument(resultJS, {type: subtype}, resultContainer, false)) {
+                if (convert_method_argument(resultJS, {type: subtype}, module, resultContainer, false)) {
                     return true;
                 }
             }

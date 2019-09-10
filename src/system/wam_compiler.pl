@@ -513,9 +513,12 @@ compile_clause_system_directive(Goal) :-
 % any system directives.
 
 compile_clause_initialization_directive(Goal) :-
-        assertz(delayed_initialization(Goal)),
+        current_compilation_module(Module),
+        transform_meta_expression(Goal, Module, TransformedGoal),
+        assertz(delayed_initialization(TransformedGoal)),
         generate_initialization_goal(Init),
-        Term = (Init :- Goal),
+        transform_meta_expression(Init, Module, TransformedInit),
+        Term = (TransformedInit :- TransformedGoal),
         compile_clause_2(Term),
         save_clause(Term).
 
@@ -595,11 +598,19 @@ transform_body((Goal, Goals), Position, (NewGoal, NewGoals), ExtraClauses, Tail,
         transform_body(Goal, Position, NewGoal, ExtraClauses, T1, CutVariable),
         transform_body(Goals, not_first, NewGoals, T1, Tail, CutVariable).
 
+transform_body(Module : (Goal, Goals), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body((Module : Goal, Module : Goals), Position, NewBody, ExtraClauses, Tail, CutVariable).
+
 transform_body(once(Goal), _Position, aux_head(Aux, Variables), [aux_definition(Aux, Variables, local_cut(LocalCutVariable), (Goal1, !(LocalCutVariable)))|ExtraClauses], Tail, CutVariable):-
         !,
         transform_body(Goal, not_first, Goal1, ExtraClauses, Tail, CutVariable),
         term_variables(Goal, V1),
         include_cut_point_as_argument_if_needed(CutVariable, V1, Variables).
+
+transform_body(Module : once(Goal), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(once(Module : Goal), Position, NewBody, ExtraClauses, Tail, CutVariable).
 
 % setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup).
 % This requires a bit of explanation since it is far from obvious how I have implemented it.
@@ -662,6 +673,9 @@ transform_body(setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup), _Posit
         term_variables(Catcher-Cleanup, V2a),
         include_cut_point_as_argument_if_needed(CutVariable, V2a, V2).
 
+transform_body(Module : setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(setup_call_catcher_cleanup(Module : Setup, Module : Goal, Catcher, Module : Cleanup), Position, NewBody, ExtraClauses, Tail, CutVariable).
 
 % catch/3
 % catch(Goal, Catcher, Recovery) is translated as follows:
@@ -683,6 +697,10 @@ transform_body(catch(Goal, Catcher, Recovery), _Position,
         term_variables(Goal-Recovery, V1a),
         include_cut_point_as_argument_if_needed(CutVariable, V1a, V1).
 
+transform_body(Module : catch(Goal, Catcher, Recovery), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(catch(Module : Goal, Catcher, Module : Recovery), Position, NewBody, ExtraClauses, Tail, CutVariable).
+
 % forall/2
 % forall(Cond, Action) is simply translated as \+(Cond, \+Action).
 transform_body(forall(Cond, Action), Position, Translated, [aux_definition(Aux, Variables, no_local_cut, AuxBody)|ExtraClauses], Tail, CutVariable):-
@@ -691,6 +709,10 @@ transform_body(forall(Cond, Action), Position, Translated, [aux_definition(Aux, 
         transform_body((Cond, \+Action), not_first, AuxBody, E1, Tail, CutVariable),
         term_variables(Cond-Action, V1),
         include_cut_point_as_argument_if_needed(CutVariable, V1, Variables).
+
+transform_body(Module : forall(Cond, Action), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(forall(Module : Cond, Module : Action), Position, NewBody, ExtraClauses, Tail, CutVariable).
 
 transform_body((A->B ; C), _Position, aux_head(Aux, Variables), [aux_definition(Aux, Variables, local_cut(LocalCutVariable), (AA, !(LocalCutVariable), BB)),
                                                                  aux_definition(Aux, Variables, no_local_cut, CC)|ExtraClauses], Tail, CutVariable):-
@@ -701,6 +723,9 @@ transform_body((A->B ; C), _Position, aux_head(Aux, Variables), [aux_definition(
         term_variables(AA-BB-CC, V1),
         include_cut_point_as_argument_if_needed(CutVariable, V1, Variables).
 
+transform_body(Module : (A->B ; C), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(((Module : A)->(Module : B) ; (Module : C)), Position, NewBody, ExtraClauses, Tail, CutVariable).
 
 transform_body((A -> B), _Position, aux_head(Aux, Variables), [aux_definition(Aux, Variables, local_cut(LocalCutVariable), (AA, !(LocalCutVariable), BB))|ExtraClauses], Tail, CutVariable):-
         !,
@@ -709,6 +734,10 @@ transform_body((A -> B), _Position, aux_head(Aux, Variables), [aux_definition(Au
         term_variables(AA-BB, V1),
         include_cut_point_as_argument_if_needed(CutVariable, V1, Variables).
 
+transform_body(Module : (A -> B), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(((Module : A) -> (Module : B)), Position, NewBody, ExtraClauses, Tail, CutVariable).
+
 transform_body((LHS ; RHS), _Position, aux_head(Aux, Variables), [aux_definition(Aux, Variables, no_local_cut, LHS1), aux_definition(Aux, Variables, no_local_cut, RHS1)|Clauses], Tail, CutVariable):-
         !,
         transform_body(LHS, not_first, LHS1, Clauses, C1, CutVariable),
@@ -716,15 +745,33 @@ transform_body((LHS ; RHS), _Position, aux_head(Aux, Variables), [aux_definition
         term_variables(LHS-RHS, V1),
         include_cut_point_as_argument_if_needed(CutVariable, V1, Variables).
 
+transform_body(Module : (LHS ; RHS), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(((Module : LHS) ; (Module : RHS)), Position, NewBody, ExtraClauses, Tail, CutVariable).
+
 transform_body(\+(Goal), _Position, aux_head(Aux, Variables), [aux_definition(Aux, Variables, local_cut(LocalCutVariable), (Goal1, !(LocalCutVariable), goal(fail))), aux_definition(Aux, Variables, no_local_cut, goal(true))|T1], Tail, _):-
         !,
         transform_body(Goal, not_first, Goal1, T1, Tail, CutVariable),
         term_variables(Goal, V1),
         include_cut_point_as_argument_if_needed(CutVariable, V1, Variables).
 
+transform_body(Module : \+(Goal), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(\+(Module : Goal), Position, NewBody, ExtraClauses, Tail, CutVariable).
+
 transform_body(!, not_first, !(CutVariable), Tail, Tail, has_cut(CutVariable)):- !.
+transform_body(_Module : !, Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(!, Position, NewBody, ExtraClauses, Tail, CutVariable).
+
 transform_body(aux_head(Aux, Variables), _Position, aux_head(Aux, Variables), Tail, Tail, _):- !.
+transform_body(_Module : aux_head(Aux, Variables), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(aux_head(Aux, Variables), Position, NewBody, ExtraClauses, Tail, CutVariable).
 transform_body(goal(Goal), _Position, goal(Goal), Tail, Tail, _):- !.
+transform_body(Module : goal(Goal), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        !,
+        transform_body(goal(Module : Goal), Position, NewBody, ExtraClauses, Tail, CutVariable).
 transform_body(Module:Goal, _Position, goal(call_with_module(Module,Goal)), Tail, Tail, _) :-
         (\+ atom(Module) ; var(Goal)),
         !.
@@ -1105,6 +1152,15 @@ compile_body_arg_adjust(_GUV, OpcodesX, Opcodes) :-
 compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1) :-
         compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, _).
 
+compile_body_arg(Arg, (:), ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
+       \+ var(Arg),
+       \+ functor(Arg, (:), 2)
+           -> TransformedArgs = [ModuleName, Arg],
+              TransformedFunctor = (:),
+              TransformedArity = 2,
+              compile_body_unification(TransformedArgs, ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_structure(TransformedFunctor/TransformedArity, Dest)|R], R, Tail, GUV)
+       ;
+       compile_body_arg(Arg, (?), ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV).
 compile_body_arg(Arg, MetaArgType, ModuleName, _Position, Dest, _PermanentVariables, State, State, [put_constant(TransformedArg, Dest)|Tail], Tail, _):-
         atom_or_empty_list(Arg), !,
         (atom(Arg),
@@ -1449,6 +1505,8 @@ save_clause(Fact):-
 
 % first fetch all of the URLs, then compile them.
 % This allows the client to get the URLs in parallel.
+% The compile_results/1 predicate also auto-imports if the URL defines
+% a module.
 
 consult(URLs) :-
   canonical_sources(URLs, CanonicalURLs),
@@ -1484,6 +1542,17 @@ compile_results([URL-Promise|T]) :-
   pop_current_compile_url(URL),
   retractall('$loaded'(URL)), % clear old loaded fact, if any.
   assertz('$loaded'(URL)),
+  path_to_module_name(URL, ImportModuleName),
+  (module_export(ImportModuleName, _)
+    -> current_compilation_module(CurrentModuleName),
+       (\+ module_import(CurrentModuleName, ImportModuleName)
+         -> add_module_import(CurrentModuleName, ImportModuleName)
+       ;
+       true
+       )
+  ;
+  true
+  ),
   compile_results(T).
 
 %-------------------------- Finally we have a crude toplevel ----------------------

@@ -14,7 +14,7 @@
     op(700, xfy, >@>),
     (>>)/2, (>->)/2, (>+>)/2, (>*>)/2, (>@>)/2]).
 
-:- meta_predicate('>@>'(?, (:) )).
+:- meta_predicate(('>>'(?, (:)), '>*>'(?, (:) ), '>@>'(?, (:) ))).
 
 :- op(200, fx, *).
 :- op(200, fx, @).
@@ -108,43 +108,43 @@
 %       The Xi may be any of the above forms: * M, - AV, + PV, @ G, A -:> V, A <:- V,
 %       P +:> V, P <:+ V, and M *:> V. Xi may also be a list.
 
->>(_, []) :-
+>>(_, _M : []) :-
     !.
->>(Obj, [H|T]) :-
+>>(Obj,  M : [H|T]) :-
     !,
-    >>(Obj, H),
-    >>(Obj, T).
->>(_Obj, {G}) :-
-    call(G).
->>(Obj, * M) :-
+    >>(Obj,  M : H),
+    >>(Obj,  M : T).
+>>(_Obj,  M : {G}) :-
+    call(M : G).
+>>(Obj, M : (* Method)) :-
     !, % method invocation
-    >*>(Obj, M).
->>(Obj, + PV) :-
+    >*>(Obj, M : Method).
+>>(Obj, _M : (+ PV)) :-
     !, % property/value invocation
     >+>(Obj, PV).
->>(Obj, - AV) :-
+>>(Obj, _M : (- AV)) :-
     !, % attribute/value invocation
     >->(Obj, AV).
->>(Obj, @ G) :-
+>>(Obj, M : (@ G)) :-
     !, % goal invocation
-    >@>(Obj, G).
->>(Obj, A -:> V) :-
+    >@>(Obj, M : G).
+>>(Obj, _M : (A -:> V)) :-
     !,
     >->(Obj, A :> V).
->>(Obj, P +:> V) :-
+>>(Obj, _M : (P +:> V)) :-
     !,
     >+>(Obj, P :> V).
->>(Obj, M *:> V) :-
+>>(Obj, _M : (Method *:> V)) :-
     !,
-    >*>(Obj, M :> V).
->>(Obj, A <:- V) :-
+    >*>(Obj, Method :> V).
+>>(Obj, _M : (A <:- V)) :-
     !,
     >->(Obj, A <: V).
->>(Obj, P <:+ V) :-
+>>(Obj, _M : (P <:+ V)) :-
     !,
     >+>(Obj, P <: V).
->>(Obj, M) :-
-    >*>(Obj, M).
+>>(Obj, M : Method) :-
+    >*>(Obj, M : Method).
 
 
 >->(_, []).
@@ -176,23 +176,23 @@
 >+>(Obj, <:(Property, V)) :-
     set_dom_object_property(Obj, Property, V).
 
->*>(_, []) :-
+>*>(_, Module : []) :-
     !.
->*>(Obj, [H|T]) :-
+>*>(Obj, Module : [H|T]) :-
     !,
-    >*>(Obj, H),
-    >*>(Obj, T).
->*>(_Obj, {G}) :-
+    >*>(Obj, Module : H),
+    >*>(Obj, Module : T).
+>*>(_Obj, Module : {G}) :-
     !,
-    call(G).
->*>(Obj, :>(Method, V)) :-
+    call(Module : G).
+>*>(Obj, Module : :>(Method, V)) :-
     !,
     Method =.. [F|As],
     append(As, [V], AV),
     MethodX =.. [F|AV],
-    dom_object_method(Obj, MethodX).
->*>(Obj, Method) :-
-    dom_object_method(Obj, Method).
+    dom_object_method(Obj, Module : MethodX).
+>*>(Obj, Module : Method) :-
+    dom_object_method(Obj, Module : Method).
 
 >@>(_, _ : []) :-
     !.
