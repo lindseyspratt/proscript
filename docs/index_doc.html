@@ -1371,10 +1371,10 @@ The meta-predicates defined in a module are all declared in a single use of the 
 The above directive defines three meta-predicates: p/2, q/3, and r/3.
 The arguments specify the types of the respective parameters:
 <ul>
-<li>? - regular Prolog term,</li>
-<li>0..9 - callable predicate term that will be provided with N additional arguments,</li>
-<li>^ - callable term with variable annotation (such as is used for setof/3: 'X ^ foo(X, Y)'), and </li>
-<li>: - term that must be decorated with the calling module name (e.g. foo becomes 'mod_a : foo' when the calling module is 'mod_a').</li>
+<li><b>?</b> - regular Prolog term,</li>
+<li><b>0..9</b> - callable predicate term that will be provided with N additional arguments,</li>
+<li><b>^</b> - callable term with variable annotation (such as is used for setof/3: 'X ^ foo(X, Y)'), and </li>
+<li><b>:</b> - term that must be decorated with the calling module name (e.g. foo becomes 'mod_a : foo' when the calling module is 'mod_a').</li>
 </ul>
 Assume these meta-predicates are defined in module 'foo'and that 'foo' exports [p/2, q/3, r/3]:
 <pre><code class='prolog'>
@@ -1386,11 +1386,10 @@ p(X, Y) :- call(Y).
 q(Module : X, Y, Z) :- G =.. [X, Y, Z], call(Module : G).
 
 r(X, Y, Z) :- setof(X, Y, Z).
-
 </code></pre>
 Module 'bar' can use module foo.
 A program in 'bar' can call p/2, q/3, or r/3 and pass in a reference to a predicate local to 'bar'.
-This will be reference will be given the 'bar' module qualification due to the meta-predicate declaration.
+This reference will be given the 'bar' module qualification due to the meta-predicate declaration.
 <pre><code class='prolog'>
 :- module(bar, [s/1]).
 :- use_module(foo).
