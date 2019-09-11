@@ -1294,15 +1294,123 @@ or the program source.
 This compilation can substantially improve performance of a web page that uses a long Prolog script.
 <br>
 Compiling a program MYPROGRAM is done by
-<code class="javascript inline">node node_compile.js MYPROGRAM proscriptls_state_tiles.js</code>
-where node_compile.js and proscriptls_state_tiles.js are in /dist.
-The node_compile.js script expects the proscriptls_state_tiles.js file to be in the same
-directory as the node_compile.js script.
+<code class="javascript inline">node node_compile.js MYPROGRAM.pl MYSTATE.js</code>
+where node_compile.js and proscriptls_for_compile.js are in /dist.
+(The node_compile.js script expects the proscriptls_state_tiles.js file to be in the same
+directory as the node_compile.js script.)
+MYSTATE.js is the output from the compilation.
+It is used in conjunction with /dist/proscriptls_engine.js.
+<br><br>
+An example of the use of compilation is /examples/tiles.pl and /examples/tiles.html.
+tiles.pl is compiled by the proscriptls_state_tiles.js target of /examples/Makefile:
+<pre><code class='cli'>
+cd proscriptls/examples;
+node ../dist/node_compile.js `pwd`/tiles.pl `pwd`/proscriptls_state_tiles.js
+</code></pre>
+<br>
+The tiles.html web page uses the result of the compilation by loading the engine and state Javascript files:
+<pre><code class='html'>
+&lt;script type="text/javascript" src="../dist/proscriptls_engine.js"><&lt;/script>
+&lt;script type="text/javascript" src="proscriptls_state_tiles.js"><&lt;/script>
+</code></pre>
 
             </li>
             <li class="indexed" id="syntax">
                 <h3>Syntax:</h3>
 The syntax of a ProscriptLS source file is approximately the same as ISO Prolog.
+<h4>Modules</h4>
+Modules in ProscriptLS are a subset of the SWI-Prolog module feature.
+Programs may be written without any reference to modules, in which case all of the
+predicates are in the default 'user' module.
+All of the builtin predicates are available to the 'user' module.
+<br><br>
+The module mechanism provides a convenient way to manage a complex program by
+dividing the source into components ('modules') where each component has a defined
+interface (the 'exported' predicates) and an explicit dependency on other components
+(by the 'use_module' relationship).
+Only the predicates that a module/source file X exports are 'visible' to another module Y
+that imports/uses X - i.e. Y can reference predicates of X without qualifying the reference.
+(The ProscriptLS module mechanism provides an explicit qualification mechanism that allows
+any module to reference any predicate of another module - this should be used sparingly as it
+undermines the value of the the component interface definition provided by the 'export' mechanism.)
+<br><br>
+Metaprogramming in ProscriptLS requires an additional mechanism for modules, the meta_predicate directive.
+A meta-predicate is a predicate that uses a parameter as a predicate (e.g. setof/3, call/N).
+The complication this introduces is that the module qualification for the argument of that parameter is usually
+different from the module in which the predicate is defined.
+The meta_predicate directive alerts the compiler to this allowing the compiler to provide the appropriate
+module qualification for that argument.
+<br><br>
+Modules are defined by directives: module/2, use_module/1, and meta_predicate/1.
+The default module is 'user'.
+If a file defines a module then its first source line must be a module directive:
+<pre><code class='prolog'>
+:- module(foo, [bar/1]).
+</code></pre>
+This directive defines a module named 'foo' and a single exported predicate 'bar/1'.
+The module name must be the same as the file name (minus the '.pl' suffix).
+For the example above, the file pathname could be '/a/file/path/foo.pl'.
+<br>
+By default all modules import the 'system' module.
+This module defines and exports all of the builtin predicates of ProscriptLS.
+A module may import predicates from other modules.
+This is specified by the use_module/1 directive.
+<pre><code class='prolog'>
+:- use_module('/some/path/baz.pl').
+</code></pre>
+The above example directive imports the 'baz' module.
+The argument to use_module specifies the pathname of the file defining the module.
+<br>
+The meta_predicate directive must be the next source line after the module directive,
+followed by the use_module directives.
+<br><br>
+The meta-predicates defined in a module are all declared in a single use of the meta_predicate directive.
+<pre><code class='prolog'>
+:- meta_predicate((p(?,0), q(:,?,?), r(?,^,?)).
+</code></pre>
+The above directive defines three meta-predicates: p/2, q/3, and r/3.
+The arguments specify the types of the respective parameters:
+<ul>
+<li>? - regular Prolog term,</li>
+<li>0..9 - callable predicate term that will be provided with N additional arguments,</li>
+<li>^ - callable term with variable annotation (such as is used for setof/3: 'X ^ foo(X, Y)'), and </li>
+<li>: - term that must be decorated with the calling module name (e.g. foo becomes 'mod_a : foo' when the calling module is 'mod_a').</li>
+</ul>
+Assume these meta-predicates are defined in module 'foo'and that 'foo' exports [p/2, q/3, r/3]:
+<pre><code class='prolog'>
+:- module(foo, [p/2, q/3, r/3]).
+:- meta_predicate((p(?,0), q(:,?,?), r(?,^,?)).
+
+p(X, Y) :- call(Y).
+
+q(Module : X, Y, Z) :- G =.. [X, Y, Z], call(Module : G).
+
+r(X, Y, Z) :- setof(X, Y, Z).
+
+</code></pre>
+Module 'bar' can use module foo.
+A program in 'bar' can call p/2, q/3, or r/3 and pass in a reference to a predicate local to 'bar'.
+This will be reference will be given the 'bar' module qualification due to the meta-predicate declaration.
+<pre><code class='prolog'>
+:- module(bar, [s/1]).
+:- use_module(foo).
+
+s(G) :- p(B, t(B)), q(B, 4, 5), r(E, F ^ u(E, F), G).
+
+t(v).
+
+u(2, a).
+u(3, b).
+
+v(4, 5).
+</code></pre>
+Querying s(X):
+<pre><code class='prolog'>
+?- s(X).
+X = [2,3]
+</code></pre>
+
+<h4>Directives:</h4>
 The directives supported by ProscriptLS include:
 <ul>
 <li>
@@ -1387,13 +1495,27 @@ Once the program is loaded then 'Loaded.' followed by a newline will be written 
 <li>
 <code>:- module(A, B).</code>
 <br>
+Define module named A with exports as specified by the list B.
+The module name must be the same as the file name (minus the .pl suffix).
+</li>
+<li>
 <code>:- use_module(A).</code>
 <br>
-<code>:- meta_predicate(_).</code>
+Use the module A in the current module.
+This imports all of the exported predicates of A so that they can be referenced without qualification.
+</li>
+<li>
+<code>:- meta_predicate(A).</code>
 <br>
+Define specified predicates with one or more arguments as meta arguments.
+'A' is either a single structure term (e.g. 'foo(?, 0, ?)'') or a comma-list (e.g. '((foo(?, 0, ?), bar(: , ?, ^))').
+The arguments indicate the meta-predicate type of that argument: ? - regular Prolog term, 0..9 - callable predicate that will be provided with N additional arguments,
+^ - callable term with variable annotation (such as is used for setof/3: 'X ^ foo(X, Y)'), and : - term that must be decorated with the calling module name (e.g.
+foo becomes 'mod_a : foo' when the calling module is 'mod_a'.
+<li>
 <code>:- include(A).</code>
 <br>
-These directives have no effect. They are allowed in ProscriptLS source but are otherwise ignored.
+This directive has no effect. It is allowed in ProscriptLS source but are otherwise ignored.
 </li>
 </ul>
 

@@ -7,7 +7,22 @@ or the program source.
 This compilation can substantially improve performance of a web page that uses a long Prolog script.
 <br>
 Compiling a program MYPROGRAM is done by
-<code class="javascript inline">node node_compile.js MYPROGRAM proscriptls_state_tiles.js</code>
-where node_compile.js and proscriptls_state_tiles.js are in /dist.
-The node_compile.js script expects the proscriptls_state_tiles.js file to be in the same
-directory as the node_compile.js script.
+<code class="javascript inline">node node_compile.js MYPROGRAM.pl MYSTATE.js</code>
+where node_compile.js and proscriptls_for_compile.js are in /dist.
+(The node_compile.js script expects the proscriptls_state_tiles.js file to be in the same
+directory as the node_compile.js script.)
+MYSTATE.js is the output from the compilation.
+It is used in conjunction with /dist/proscriptls_engine.js.
+<br><br>
+An example of the use of compilation is /examples/tiles.pl and /examples/tiles.html.
+tiles.pl is compiled by the proscriptls_state_tiles.js target of /examples/Makefile:
+<pre><code class='cli'>
+cd proscriptls/examples;
+node ../dist/node_compile.js `pwd`/tiles.pl `pwd`/proscriptls_state_tiles.js
+</code></pre>
+<br>
+The tiles.html web page uses the result of the compilation by loading the engine and state Javascript files:
+<pre><code class='html'>
+&lt;script type="text/javascript" src="../dist/proscriptls_engine.js"><&lt;/script>
+&lt;script type="text/javascript" src="proscriptls_state_tiles.js"><&lt;/script>
+</code></pre>

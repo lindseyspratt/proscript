@@ -39,6 +39,9 @@ code.html {
 code.prolog {
     background: #dedede;
 }
+code.cli {
+    background: #dedbc8;
+}
 code.inline {
     padding: 1px 5px;
                    font-size: 15px;
