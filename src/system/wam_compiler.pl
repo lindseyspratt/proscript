@@ -185,7 +185,7 @@ compile_clause_directive_nonmacro(meta_predicate(Term), Mode, Mode) :- compile_c
 
 compile_clause_directive_macro(if(Goal), ModeIn, ModeOut) :- compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut).
 compile_clause_directive_macro(else, ModeIn, ModeOut) :- compile_clause_compilation_directive(else, ModeIn, ModeOut).
-compile_clause_directive_macro(elseif(Goal), ModeIn, ModeOut) :- compile_clause_compilation_directive(elseif(Goal), ModeIn, ModeOut).
+compile_clause_directive_macro(elif(Goal), ModeIn, ModeOut) :- compile_clause_compilation_directive(elif(Goal), ModeIn, ModeOut).
 compile_clause_directive_macro(endif, ModeIn, ModeOut) :- compile_clause_compilation_directive(endif, ModeIn, ModeOut).
 
 % A compilation directive is evaluated immediately
@@ -209,8 +209,8 @@ compile_clause_compilation_directive(if(Goal), ModeIn, ModeOut) :-
         macro_if(Goal, ModeIn, ModeOut).
 compile_clause_compilation_directive(else, ModeIn, ModeOut) :-
         macro_else(ModeIn, ModeOut).
-compile_clause_compilation_directive(elseif(Goal), ModeIn, ModeOut) :-
-        macro_elseif(Goal, ModeIn, ModeOut).
+compile_clause_compilation_directive(elif(Goal), ModeIn, ModeOut) :-
+        macro_elif(Goal, ModeIn, ModeOut).
 compile_clause_compilation_directive(endif, ModeIn, ModeOut) :-
         macro_endif(ModeIn, ModeOut).
 
@@ -226,7 +226,7 @@ macro_if(Goal, ModeIn, ModeOut) :-
          call(Goal)
            -> ModeOut = mode(IfLevelNext, compile(IfLevelNext))
          ;
-         ModeOut = mode(IfLevelNext, skip(IfLevelNext)) % look for else, elseif, endif directives.
+         ModeOut = mode(IfLevelNext, skip(IfLevelNext)) % look for else, elif, endif directives.
         ).
 
 macro_else(ModeIn, ModeOut) :-
@@ -251,7 +251,7 @@ macro_else(ModeIn, ModeOut) :-
           -> throw('else ifLevel less than compileLevel')
         ).
 
-macro_elseif(Goal, ModeIn, ModeOut) :-
+macro_elif(Goal, ModeIn, ModeOut) :-
         ModeIn = mode(IfLevel, Action), % IfLevel = 0 outside outermost :- if...
         (Action = compile(CompileLevel), IfLevel > CompileLevel
            -> throw('else ifLevel greater than compileLevel')
@@ -266,12 +266,12 @@ macro_elseif(Goal, ModeIn, ModeOut) :-
           -> ModeOut = mode(IfLevel, skip(SkipLevel))
         ;
         Action = skip(SkipLevel), SkipLevel > IfLevel
-          -> throw('elseif skip level > iflevel')
+          -> throw('elif skip level > iflevel')
         ;
         call(Goal)
           -> ModeOut = mode(IfLevel, compile(IfLevel))
         ;
-        ModeOut = mode(IfLevel, skip(IfLevel)) % look for else, elseif, endif directives.
+        ModeOut = mode(IfLevel, skip(IfLevel)) % look for else, elif, endif directives.
         ).
 
 macro_endif(ModeIn, ModeOut) :-

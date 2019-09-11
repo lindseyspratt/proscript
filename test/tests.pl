@@ -14,22 +14,22 @@ macro2(else).
 
 :- if(false).
 macro3(if).
-:- elseif(true).
-macro3(elseif).
+:- elif(true).
+macro3(elif).
 :- else.
 macro3(else).
 :- endif.
 
 :- if(false).
 macro4(if).
-:- elseif(true).
-macro4(elseif).
+:- elif(true).
+macro4(elif).
     :- if(false).
-    macro4(elseif-if).
-    :- elseif(false).
-    macro4(elseif-elseif).
+    macro4(elif-if).
+    :- elif(false).
+    macro4(elif-elif).
     :- else.
-    macro4(elseif-else).
+    macro4(elif-else).
     :- endif.
 :- else.
 macro4(else).
@@ -66,10 +66,10 @@ test(macro2, exit) :-
         findall(V, macro2(V), [else]).
 
 test(macro3, exit) :-
-        findall(V, macro3(V), [elseif]).
+        findall(V, macro3(V), [elif]).
 
 test(macro4, exit) :-
-        findall(V, macro4(V), [elseif, elseif-else]).
+        findall(V, macro4(V), [elif, elif-else]).
 
 test(cut, exit):-
         once_test_1,

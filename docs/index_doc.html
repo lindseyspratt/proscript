@@ -1417,32 +1417,32 @@ The directives supported by ProscriptLS include:
 <br>
 <code>:- else.</code>
 <br>
-<code>:- elseif(Goal).</code>
+<code>:- elif(Goal).</code>
 <br>
 <code>:- endif.</code>
 <br>
 These directives are used to optionally include or suppress compilation of clauses.
 If 'Goal' of <code>:- if(Goal).</code> evaluates to true then the clauses following the 'if' directive
-up to the next 'else', 'elseif', or 'endif' directive are compiled and the other clauses
+up to the next 'else', 'elif', or 'endif' directive are compiled and the other clauses
 up to the next 'endif' are suppressed.
 If 'Goal' of <code>:- if(Goal).</code> evaluates to false then the clauses up to the next
-'else', 'elseif', or 'endif' directive are suppressed.
+'else', 'elif', or 'endif' directive are suppressed.
 If the next macro directive is 'else' then the clauses following it (up to <code>:- endif.</code>)
-are compiled (and there must not be an 'elseif' directive).
-An 'elseif(GoalEI)' directive must follow an 'if(Goal)' or 'elseif(GoalEI1)' directive.
+are compiled (and there must not be an 'elif' directive).
+An 'elif(GoalEI)' directive must follow an 'if(Goal)' or 'elif(GoalEI1)' directive.
 If previous macro directive goals have failed and GoalEI succeeds then the clauses
-following this directive up to the next elseif, else, or endif directive are compiled with
+following this directive up to the next elif, else, or endif directive are compiled with
 subsequent clauses being suppressed up to the next endif directive.
 <br>
-Uses of the if/elseif/else/endif directives may be nested.
+Uses of the if/elif/else/endif directives may be nested.
 <br>
 Example:
 <pre><code>
 some_predicate(before).
 :- if(false).
 some_predicate(if).
-:- elseif(true).
-some_predicate(elseif).
+:- elif(true).
+some_predicate(elif).
 :- else.
 some_predicate(else).
 :- endif.
@@ -1451,7 +1451,7 @@ some_predicate(after).
 This program source fragment has the same effect as:
 <pre><code>
 some_predicate(before).
-some_predicate(elseif).
+some_predicate(elif).
 some_predicate(after).
 </code></pre>
 </li>
