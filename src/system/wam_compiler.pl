@@ -497,7 +497,8 @@ uppercase_letter_code(Code) :- member(Code, "ABCDEFGHIJKLMNOPQRSTUVWXYZ").
 
 compile_clause_system_directive(Goal) :-
         call(Goal),
-        generate_system_goal(Init),
+        current_compilation_module(Module),
+        generate_system_goal(Module, Init),
         Term = (Init :- Goal),
         compile_clause_2(Term),
         save_clause(Term).
@@ -516,9 +517,8 @@ compile_clause_initialization_directive(Goal) :-
         current_compilation_module(Module),
         transform_meta_expression(Goal, Module, TransformedGoal),
         assertz(delayed_initialization(TransformedGoal)),
-        generate_initialization_goal(Init),
-        transform_meta_expression(Init, Module, TransformedInit),
-        Term = (TransformedInit :- TransformedGoal),
+        generate_initialization_goal(Module, Init),
+        Term = (Init :- TransformedGoal),
         compile_clause_2(Term),
         save_clause(Term).
 
@@ -601,6 +601,11 @@ transform_body((Goal, Goals), Position, (NewGoal, NewGoals), ExtraClauses, Tail,
 transform_body(Module : (Goal, Goals), Position, NewBody, ExtraClauses, Tail, CutVariable):-
         !,
         transform_body((Module : Goal, Module : Goals), Position, NewBody, ExtraClauses, Tail, CutVariable).
+
+transform_body(once(Goal), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+        var(Goal),
+        !,
+        transform_body(once(call(Goal)), Position, NewBody, ExtraClauses, Tail, CutVariable).
 
 transform_body(once(Goal), _Position, aux_head(Aux, Variables), [aux_definition(Aux, Variables, local_cut(LocalCutVariable), (Goal1, !(LocalCutVariable)))|ExtraClauses], Tail, CutVariable):-
         !,
@@ -1414,21 +1419,14 @@ compile_stream(Stream, Mode):-
         %write('  '), writeln(read(Term)),
         compile_stream_term(Stream, Term, Mode).
 
-% Originally this used 'forall(retract(delayed_initialization(Goal)), call(Goal))'.
-% However, this caused some tests to perform very poorly. E.g. bench/nrev took almost 3 times longer (speed decreased from 3 Mlips to 1.2Mlips).
-% The slowdown is puzzling since there were no initialization goals defined in the test.
 compile_stream_term(_, end_of_file, Mode):-
         !,
         (Mode = mode(0, compile(0))
-          -> (retract(delayed_initialization(Goal)),
-              call_init(Goal),
-              fail
-             ;
-              true
-             )
+          -> true
         ;
         throw('macro error: missing endif directive.')
         ).
+
 compile_stream_term(Stream, Term, ModeIn):-
         compile_clause(Term, ModeIn, ModeNext),
         !,
@@ -1448,12 +1446,6 @@ save_compiled_state(BootCode, SavedStateFile) :-
         format(S1, '}~n', []),
         close(S1),
         !.
-
-call_init(Goal) :-
-    %writeln(init(Goal)),
-    call(Goal),
-    !.
-
 
 call_list([]).
 call_list([H|T]) :-
@@ -1503,6 +1495,12 @@ save_clause(Fact):-
         TransformedFact =.. [TransformedName|Args],
         add_clause_to_predicate(TransformedName/Arity, TransformedFact, true).
 
+
+consult_atom(Atom):-
+        % FIXME: Needs to abolish the old clauses!
+        compile_atom(Atom),
+        process_delayed_initializations.
+
 % first fetch all of the URLs, then compile them.
 % This allows the client to get the URLs in parallel.
 % The compile_results/1 predicate also auto-imports if the URL defines
@@ -1511,7 +1509,15 @@ save_clause(Fact):-
 consult(URLs) :-
   canonical_sources(URLs, CanonicalURLs),
   fetch_promises(CanonicalURLs, Ps),
-  compile_results(Ps).
+  compile_results(Ps),
+  process_delayed_initializations.
+
+process_delayed_initializations :-
+  retract(delayed_initialization(Goal)),
+  once(Goal),
+  fail
+  ;
+  true.
 
 canonical_sources([], []).
 canonical_sources([H|T], [HC|TC]) :-

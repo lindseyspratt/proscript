@@ -148,13 +148,11 @@
         <span style='color:red'>:-</span>&nbsp;module(tiles,&nbsp;[select_test/0]).<br>
 <br>
 <span style='color:red'>:-</span>&nbsp;use_module('../library/object').&nbsp;<span style='color:green'>%&nbsp;for&nbsp;>>/2.</span><br>
+<span style='color:red'>:-</span>&nbsp;use_module('../library/data_predicates').<br>
 <span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/listut2').&nbsp;<span style='color:green'>%&nbsp;for&nbsp;append_lists/2</span><br>
 <span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/dom').&nbsp;<span style='color:green'>%&nbsp;for&nbsp;dom_page_offset/2</span><br>
-<span style='color:red'>:-</span>&nbsp;ensure_loaded('../library/data_predicates').<br>
 <br>
 <span style='color:red'>:-</span>&nbsp;dynamic(is_selected/1).<br>
-<br>
-<span style='color:red'>:-</span>&nbsp;initialization(data_predicate_dynamics).<br>
 <br>
 <span style='color:green'>%&nbsp;For&nbsp;tiles&nbsp;the&nbsp;shadow&nbsp;tile&nbsp;structure&nbsp;functor&nbsp;is&nbsp;'ts'</span><br>
 <span style='color:green'>%&nbsp;and&nbsp;the&nbsp;arguments&nbsp;are&nbsp;'x',&nbsp;'y',&nbsp;etc.</span><br>
@@ -162,9 +160,11 @@
 <span style='color:green'>%&nbsp;and&nbsp;the&nbsp;arguments&nbsp;are&nbsp;'board_left',&nbsp;'turn',&nbsp;etc.</span><br>
 <span style='color:green'>%&nbsp;(Note&nbsp;that&nbsp;there&nbsp;is&nbsp;currently&nbsp;only&nbsp;one&nbsp;'game'&nbsp;so&nbsp;the&nbsp;ID&nbsp;is&nbsp;always&nbsp;'1'.)</span><br>
 <br>
-data_predicates(ts,&nbsp;tile,[x,&nbsp;y,bx,by,size,colors,container]).&nbsp;<span style='color:green'>%&nbsp;e.g.&nbsp;tile_x(ID,&nbsp;X),&nbsp;tile_y(ID,&nbsp;Y)...</span><br>
-data_predicates(g,&nbsp;game,[tile_size,&nbsp;board_left,&nbsp;board_top,&nbsp;board_width,&nbsp;board_height,&nbsp;board_translate,&nbsp;turn,&nbsp;replacements]).&nbsp;<span style='color:green'>%&nbsp;e.g.&nbsp;game_board_left(ID,&nbsp;X)...</span><br>
-data_predicates(lp,&nbsp;legal_position,&nbsp;[bx,&nbsp;by]).<br>
+<span style='color:red'>:-</span>&nbsp;initialization(data_predicate_dynamics([<br>
+data_predicates(ts,&nbsp;tile,[x,&nbsp;y,bx,by,size,colors,container]),&nbsp;<span style='color:green'>%&nbsp;e.g.&nbsp;tile_x(ID,&nbsp;X),&nbsp;tile_y(ID,&nbsp;Y)...</span><br>
+data_predicates(g,&nbsp;game,[tile_size,&nbsp;board_left,&nbsp;board_top,&nbsp;board_width,&nbsp;board_height,&nbsp;board_translate,&nbsp;turn,&nbsp;replacements]),&nbsp;<span style='color:green'>%&nbsp;e.g.&nbsp;game_board_left(ID,&nbsp;X)...</span><br>
+data_predicates(lp,&nbsp;legal_position,&nbsp;[bx,&nbsp;by])<br>
+])).<br>
 <br>
 draw_tile_test&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>],<br>

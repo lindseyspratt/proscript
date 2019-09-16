@@ -83,7 +83,7 @@ function consult_for_test()
     call_directives();
     initialize();
     let atom = lookup_atom(code_atom);
-    let ftor = VAL(lookup_functor("bootstrap_js:consult_atom", 1));
+    let ftor = VAL(lookup_functor("wam_compiler:consult_atom", 1));
     allocate_first_frame();
     var pred = predicates[ftor];
     var pi = predicates[ftor].clause_keys[0];

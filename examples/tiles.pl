@@ -1,13 +1,11 @@
 :- module(tiles, [select_test/0]).
 
 :- use_module('../library/object'). % for >>/2.
+:- use_module('../library/data_predicates').
 :- ensure_loaded('../library/listut2'). % for append_lists/2
 :- ensure_loaded('../library/dom'). % for dom_page_offset/2
-:- ensure_loaded('../library/data_predicates').
 
 :- dynamic(is_selected/1).
-
-:- initialization(data_predicate_dynamics).
 
 % For tiles the shadow tile structure functor is 'ts'
 % and the arguments are 'x', 'y', etc.
@@ -15,9 +13,11 @@
 % and the arguments are 'board_left', 'turn', etc.
 % (Note that there is currently only one 'game' so the ID is always '1'.)
 
-data_predicates(ts, tile,[x, y,bx,by,size,colors,container]). % e.g. tile_x(ID, X), tile_y(ID, Y)...
-data_predicates(g, game,[tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]). % e.g. game_board_left(ID, X)...
-data_predicates(lp, legal_position, [bx, by]).
+:- initialization(data_predicate_dynamics([
+data_predicates(ts, tile,[x, y,bx,by,size,colors,container]), % e.g. tile_x(ID, X), tile_y(ID, Y)...
+data_predicates(g, game,[tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]), % e.g. game_board_left(ID, X)...
+data_predicates(lp, legal_position, [bx, by])
+])).
 
 draw_tile_test :-
     _ >> [id -:> canvas, getContext('2d') *:> Ctx],

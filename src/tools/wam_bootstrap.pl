@@ -12,7 +12,7 @@
 ---------------------------------------------------------- */
 :- module(wam_bootstrap,
     [add_clause_to_predicate/3, emit_code/2,
-    generate_system_goal/1, generate_initialization_goal/1, define_dynamic_predicate/1,
+    generate_system_goal/2, generate_initialization_goal/2, define_dynamic_predicate/1,
     add_module_export/2, module_export/2, add_module_import/2, module_import/2, add_meta_predicate/3, pls_meta_predicate/3,
     handle_term_expansion/1,
     fetch_promise/2, promise_result/2, open_memory_file/3, reset/0, gc/0, reset_compile_buffer/0, dump_tables/1]).
@@ -21,18 +21,22 @@
 :- use_module('../system/wam_util').
 :- use_module('../system/wam_assemble').
 
-generate_system_goal(Init) :-
+generate_system_goal(Module, Init) :-
         flag(stable, N, N+1),
         number_codes(N, NCs),
-        append("$sys_", NCs, ICs),
+        atom_codes(Module, ModuleCodes),
+        append(ModuleCodes, ":$sys_", PrefixCodes),
+        append(PrefixCodes, NCs, ICs),
         atom_codes(Init, ICs),
         lookup_functor(Init, 0, FN),
         assert(stable(FN)).
 
-generate_initialization_goal(Init) :-
+generate_initialization_goal(Module, Init) :-
         flag(itable, N, N+1),
         number_codes(N, NCs),
-        append("$init_", NCs, ICs),
+        atom_codes(Module, ModuleCodes),
+        append(ModuleCodes, "$init_", PrefixCodes),
+        append(PrefixCodes, NCs, ICs),
         atom_codes(Init, ICs),
         lookup_functor(Init, 0, FN),
         assert(itable(FN)).
@@ -519,8 +523,8 @@ reset:-
         reserve_predicate(debug/0, predicate_debug),
         reserve_predicate(nodebug/0, predicate_nodebug),
         reserve_predicate('$jmp'/1, predicate_jmp),
-        reserve_predicate(generate_initialization_goal/1, predicate_generate_initialization_goal),
-        reserve_predicate(generate_system_goal/1, predicate_generate_system_goal),
+        reserve_predicate(generate_initialization_goal/2, predicate_generate_initialization_goal),
+        reserve_predicate(generate_system_goal/2, predicate_generate_system_goal),
         reserve_predicate(define_dynamic_predicate/1, predicate_define_dynamic_predicate),
         reserve_predicate(compiled_state_boot_code/1, predicate_compiled_state_boot_code),
         reserve_predicate(dump_tables/1, predicate_dump_tables),

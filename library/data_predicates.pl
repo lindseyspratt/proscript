@@ -19,6 +19,8 @@ For the address example we can assert an address using assert_datas([addr(nguyen
 This associates ID 1 with each of these attributes: address_name(1, nguyen), address_street_number(1, 15), etc.
 The default_asserted_id(Type, ID) is updated to the last data asserted which is 1 in this example.
 */
+:- module(data_predicates, [data_predicates/3, data_predicate_dynamics/1, assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2]).
+:- meta_predicate((data_predicate_dynamics((:)), data_predicates(?, (:), ?))).
 
 :- dynamic data_predicates/3.
 
@@ -71,16 +73,28 @@ default_asserted_id(Prefix, ID) :-
     retractall(GoalR),
     assertz(Goal).
 
-data_predicate_dynamics :-
+data_predicate_dynamics(M : DPs) :-
+    assert_dps(M : DPs),
     findall(Prefix-Suffixes, data_predicates(_, Prefix, Suffixes), All),
-    data_predicate_dynamics(All).
+    data_predicate_dynamics1(All).
 
-data_predicate_dynamics([]).
-data_predicate_dynamics([Prefix-Suffixes|T]) :-
+assert_dps(_M : []).
+assert_dps([]).
+assert_dps(M : [H|T]) :-
+    assert_dp(M : H),
+    assert_dps(M : T).
+
+assert_dp(M : data_predicates(F, P, S)) :-
+    atom_concat(M, ':', MC),
+    atom_concat(MC, P, MCP),
+    assertz(data_predicates(F, MCP, S)).
+
+data_predicate_dynamics1([]).
+data_predicate_dynamics1([Prefix-Suffixes|T]) :-
     data_predicate_dynamics(Suffixes, Prefix),
     atom_concat(Prefix, '_default_id', DefaultPredicate),
     (dynamic(DefaultPredicate / 1)),
-    data_predicate_dynamics(T).
+    data_predicate_dynamics1(T).
 
 data_predicate_dynamics([], _).
 data_predicate_dynamics([H|T], Prefix) :-

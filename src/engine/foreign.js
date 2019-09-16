@@ -645,25 +645,33 @@ function predicate_lookup_functor(fname, arity, index)
     return unify(index, i ^ (TAG_INT << WORD_BITS));
 }
 
-function predicate_generate_system_goal(Sys) {
+function predicate_generate_system_goal(Module, Sys) {
+    if (TAG(Module) !== TAG_ATM) {
+        return type_error('atom', Module);
+    }
     if (TAG(Sys) !== TAG_REF) {
         return instantiation_error(Sys);
     }
-    let n = stable.length;
-    let functor = lookup_functor('$sys_' + n, 0);
-    stable.push(functor);
+    let n = system.length;
+    let moduleJS = PL_get_atom_chars(Module);
+    let functor = lookup_functor(moduleJS + ':$sys_' + n, 0);
+    system.push(VAL(functor));
     let nameID = ftable[VAL(functor)][0];
     let namePL = PL_put_atom(nameID);
     return unify(namePL, Sys);
 }
 
-function predicate_generate_initialization_goal(Init) {
+function predicate_generate_initialization_goal(Module, Init) {
+    if (TAG(Module) !== TAG_ATM) {
+        return type_error('atom', Module);
+    }
     if (TAG(Init) !== TAG_REF) {
         return instantiation_error(Init);
     }
-    let n = itable.length;
-    let functor = lookup_functor('$init_' + n, 0);
-    itable.push(functor);
+    let n = initialization.length;
+    let moduleJS = PL_get_atom_chars(Module);
+    let functor = lookup_functor(moduleJS + ':$init_' + n, 0);
+    initialization.push(VAL(functor));
     let nameID = ftable[VAL(functor)][0];
     let namePL = PL_put_atom(nameID);
     return unify(namePL, Init);

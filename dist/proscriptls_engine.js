@@ -639,25 +639,33 @@ function predicate_lookup_functor(fname, arity, index)
     return unify(index, i ^ (TAG_INT << WORD_BITS));
 }
 
-function predicate_generate_system_goal(Sys) {
+function predicate_generate_system_goal(Module, Sys) {
+    if (TAG(Module) !== TAG_ATM) {
+        return type_error('atom', Module);
+    }
     if (TAG(Sys) !== TAG_REF) {
         return instantiation_error(Sys);
     }
-    let n = stable.length;
-    let functor = lookup_functor('$sys_' + n, 0);
-    stable.push(functor);
+    let n = system.length;
+    let moduleJS = PL_get_atom_chars(Module);
+    let functor = lookup_functor(moduleJS + ':$sys_' + n, 0);
+    system.push(VAL(functor));
     let nameID = ftable[VAL(functor)][0];
     let namePL = PL_put_atom(nameID);
     return unify(namePL, Sys);
 }
 
-function predicate_generate_initialization_goal(Init) {
+function predicate_generate_initialization_goal(Module, Init) {
+    if (TAG(Module) !== TAG_ATM) {
+        return type_error('atom', Module);
+    }
     if (TAG(Init) !== TAG_REF) {
         return instantiation_error(Init);
     }
-    let n = itable.length;
-    let functor = lookup_functor('$init_' + n, 0);
-    itable.push(functor);
+    let n = initialization.length;
+    let moduleJS = PL_get_atom_chars(Module);
+    let functor = lookup_functor(moduleJS + ':$init_' + n, 0);
+    initialization.push(VAL(functor));
     let nameID = ftable[VAL(functor)][0];
     let namePL = PL_put_atom(nameID);
     return unify(namePL, Init);
@@ -9417,7 +9425,7 @@ function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) 
 
     initialize();
 
-    call_directives();
+    call_directives('clear_directives');
 
     consult_scripts();
 
@@ -9504,7 +9512,7 @@ function consult_script_srcs(srcs) {
         debug("Failed to consult script srcs");
 }
 
-function call_directives() {
+function call_directives(mode) {
 
     let system_predicates = (! system || system.length === 0)
         ? undefined
@@ -9513,6 +9521,11 @@ function call_directives() {
     let initialization_predicates = (! initialization || initialization.length === 0)
         ? undefined
         : initialization.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
+
+    if(mode === 'clear_directives' ) {
+        system = [];
+        initialization = [];
+    }
 
     let extended_query = "";
 

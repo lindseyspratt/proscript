@@ -673,7 +673,7 @@ function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) 
 
     initialize();
 
-    call_directives();
+    call_directives('clear_directives');
 
     consult_scripts();
 
@@ -760,7 +760,7 @@ function consult_script_srcs(srcs) {
         debug("Failed to consult script srcs");
 }
 
-function call_directives() {
+function call_directives(mode) {
 
     let system_predicates = (! system || system.length === 0)
         ? undefined
@@ -769,6 +769,11 @@ function call_directives() {
     let initialization_predicates = (! initialization || initialization.length === 0)
         ? undefined
         : initialization.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
+
+    if(mode === 'clear_directives' ) {
+        system = [];
+        initialization = [];
+    }
 
     let extended_query = "";
 

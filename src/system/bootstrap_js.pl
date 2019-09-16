@@ -1,6 +1,6 @@
 :- module(bootstrap_js,
         [append/3, assert/1, reverse/2, reverse/3, save_clausea/1, handle_term_expansion/1,
-         include/1, (dynamic)/1, consult_atom/1, ensure_loaded/1, format/2,
+         include/1, (dynamic)/1, ensure_loaded/1, format/2,
          module/2, use_module/1,
          compile_message/1, (??) / 1, (?) / 1, otherwise/0, end_block/2, findall/3, setof/3, bagof/3,
          asserta/1, assertz/1, retract/1,
@@ -99,10 +99,6 @@ dynamic([H|T]) :-
 dynamic((A,B)) :-
         dynamic(A),
         dynamic(B).
-
-consult_atom(Atom):-
-        % FIXME: Needs to abolish the old clauses!
-        wam_compiler:compile_atom(Atom).
 
 ensure_loaded(URL) :-
   wam_compiler:canonical_source(URL, CanonicalURL),
