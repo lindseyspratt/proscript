@@ -1366,7 +1366,7 @@ followed by the use_module directives.
 <br><br>
 The meta-predicates defined in a module are all declared in a single use of the meta_predicate directive.
 <pre><code class='prolog'>
-:- meta_predicate((p(?,0), q(:,?,?), r(?,^,?)).
+:- meta_predicate((p(?,0), q(:,?,?), r(?,^,?))).
 </code></pre>
 The above directive defines three meta-predicates: p/2, q/3, and r/3.
 The arguments specify the types of the respective parameters:
@@ -1387,7 +1387,7 @@ q(Module : X, Y, Z) :- G =.. [X, Y, Z], call(Module : G).
 
 r(X, Y, Z) :- setof(X, Y, Z).
 </code></pre>
-Module 'bar' can use module foo.
+Module bar can use module foo.
 A program in 'bar' can call p/2, q/3, or r/3 and pass in a reference to a predicate local to 'bar'.
 This reference will be given the 'bar' module qualification due to the meta-predicate declaration.
 <pre><code class='prolog'>
@@ -1475,6 +1475,8 @@ Example: <code>:- op(200, fx, *).</code>
 <br>
 The dynamic/1 directive identifies PredicateIndicator predicate as dynamic: it can be the subject of assert and retract goals.
 The PredicateIndicator is of the form 'Name/Arity'.
+A dynamic predicate can be defined in a specific module different than the source file module using the ':' operator:
+<code>:- dynamic(Module : (PredicateIndicator)).</code>
 <br>
 Example: <code>:- dynamic(special_things/3).</code>
 <br>
@@ -1594,7 +1596,7 @@ This directive has no effect. It is allowed in ProscriptLS source but are otherw
         <hr>
         <table style="width:100%">
         <tr>
-        <td>Version 1.1.0, September 2019.</td>
+        <td>Version 1.2.0, September 2019.</td>
         <td style="text-align:right">Powered by ProscriptLS Prolog - Logic at Your Service.</td>
         </tr>
         </table>

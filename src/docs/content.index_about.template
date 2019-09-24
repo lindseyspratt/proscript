@@ -9,6 +9,6 @@
     <li>support for modules.</li>
     </ul>
     <br>
-    The original Proscript project implemented the bulk of the system, particularly the WAM, the WAM compiler, and the basic
+    The original Proscript project implemented the core of the system, particularly the WAM, the WAM compiler, and the basic
     architecture of the system.
 </div>
