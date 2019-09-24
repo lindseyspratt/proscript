@@ -307,8 +307,7 @@ define_dynamic_predicates((A,B)) :-
 
 define_dynamic_predicate1(Functor/Arity) :-
         current_compilation_module(Module),
-        transform_predicate_name(Functor, Arity, Module, TransformedFunctor),
-        define_dynamic_predicate(TransformedFunctor/Arity).
+        define_dynamic_predicate(Module : (Functor/Arity)).
 
 
 define_current_module(Name, Exports) :-
@@ -522,7 +521,9 @@ compile_clause_initialization_directive(Goal) :-
         compile_clause_2(Term),
         save_clause(Term).
 
-
+compile_clause_2(Module: (?- Body)):-
+        !,
+        compile_clause_2((?- (Module : Body))).
 compile_clause_2(?- Body):-
         !,
         transform_body(Body, first, Transformed1, ExtraClauses, [], CutVariable),
@@ -537,7 +538,9 @@ compile_clause_2(?- Body):-
         compile_auxiliary_goals(ExtraClauses, ModuleName, O2, []),
         reset_compile_buffer,
         assemble(Opcodes, 2). % Note that a query is just compiled into the buffer and left there
-
+compile_clause_2(Module: (Head :- Body)):-
+        !,
+        compile_clause_2( (Module:Head) :- Body).
 compile_clause_2(Head :- Body):-
         !,
         transform_body(Body, first, Transformed1, ExtraClauses, [], CutVariable),
@@ -561,8 +564,6 @@ compile_clause_2(Head :- Body):-
         ;
         true
         ).
-
-
 compile_clause_2(Head):-
         compile_head(Head, 0, no_cut, [], none, _State, Opcodes, [proceed]),
         reset_compile_buffer,
@@ -891,8 +892,17 @@ variable_is_in_list(Var, [_|Vars]):- variable_is_in_list(Var, Vars).
 
 %% compile_head(+Head, +BodyArgCount +HasCut, +PermanentVariables, +EnvSize, -State, -Opcodes, +Tail)
 compile_head(Head, BodyArgCount, HasCut, PermanentVariables, EnvSize, State, Opcodes, Tail):-
+        \+ var(Head),
+        Head = _M:SubHead,
+        !,
+        compile_head(SubHead, BodyArgCount, HasCut, PermanentVariables, EnvSize, State, Opcodes, Tail).
+compile_head(Head, BodyArgCount, HasCut, PermanentVariables, EnvSize, State, Opcodes, Tail):-
         allocate_environment(EnvSize, HasCut, PermanentVariables, Opcodes, O1, [next(Reserved)], S1),
-        Head =.. [_Functor|Args],
+        (Head = _M : SubHead
+            -> SubHead =.. [_Functor|Args]
+        ;
+         Head =.. [_Functor|Args]
+        ),
         list_length(Args, Arity),
         Reserved is Arity + BodyArgCount,
         compile_head_args(Args, S1, State, 0, PermanentVariables, O1, Tail).
@@ -1158,8 +1168,10 @@ compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariable
         compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, _).
 
 compile_body_arg(Arg, (:), ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
-       \+ var(Arg),
-       \+ functor(Arg, (:), 2)
+       (var(Arg)
+       ;
+        \+ functor_is_qualified(Arg)
+       )
            -> TransformedArgs = [ModuleName, Arg],
               TransformedFunctor = (:),
               TransformedArity = 2,
@@ -1191,6 +1203,11 @@ compile_body_arg(Arg, _MetaArgType, _ModuleName, Position, Dest, PermanentVariab
 compile_body_arg([Head|Tail], _MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, OpcodesTail, GUV):-
         !,
         compile_body_unification([Head, Tail], ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_list(Dest)|R], R, OpcodesTail, GUV).
+compile_body_arg((TestHead :- Body), _MetaArgType, _ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
+        \+ var(TestHead),
+        Module:Head = TestHead,
+        !,
+        compile_body_unification([Module:Head, Body], Module, Position, State, S1, PermanentVariables, Opcodes, [put_structure((:-)/2, Dest)|R], R, Tail, GUV).
 compile_body_arg((Head :- Body), MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
         !,
         (\+ callable(Head)
@@ -1200,9 +1217,10 @@ compile_body_arg((Head :- Body), MetaArgType, ModuleName, Position, Dest, Perman
         ;
         Head =.. [HeadFunctor|Args],
         list_length(Args, Arity),
-        (MetaArgType = (:), HeadFunctor \= (:)
-           -> TransformedArgs = [ModuleName, (Head :- Body)],
-              TransformedFunctor = (:),
+        (MetaArgType = (:),
+         \+ functor_is_qualified(Head)
+           -> TransformedArgs = [((ModuleName:Head) :- Body)],
+              TransformedFunctor = (:-),
               TransformedArity = 2
          ;
          integer(MetaArgType) % 0..9
@@ -1255,6 +1273,19 @@ compile_body_arg(Arg, MetaArgType, ModuleName, Position, Dest, PermanentVariable
         ),
         compile_body_unification(TransformedArgs, ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_structure(TransformedFunctor/TransformedArity, Dest)|R], R, Tail, GUV).
 
+functor_is_qualified(Term) :-
+        functor(Term, Functor, Arity),
+        (Functor = (:),
+         Arity = 2
+         -> true
+        ;
+         atom_codes(Functor, FunctorCodes),
+         ":" = [ColonCode],
+         append(FunctorModuleNameCodes, [ColonCode|_FunctorNameCodes], FunctorCodes),
+         plausible_module_name(FunctorModuleNameCodes)
+         -> true
+        ).
+
 transform_meta_expression((A, B), ModuleName, (TransformedA, TransformedB)) :-
         !,
         transform_meta_expression(A, ModuleName, TransformedA),
@@ -1301,6 +1332,9 @@ transform_meta_expression((A; B), ModuleName, (TransformedA; TransformedB)) :-
 transform_meta_expression(\+(A), ModuleName, \+(TransformedA)) :-
         !,
         transform_meta_expression(A, ModuleName, TransformedA).
+transform_meta_expression(ModuleLocal:Expression, _ModuleName, TransformedExpression) :-
+        !,
+        transform_meta_expression(Expression, ModuleLocal, TransformedExpression).
 transform_meta_expression(Expression, ModuleName, TransformedExpression) :-
         Expression =.. [Functor|Args],
         list_length(Args, Arity),
@@ -1477,6 +1511,23 @@ compile_memory_file(MemoryFile) :-
 %        wam_duration(D2),
 %write('Finish compile '), write(MemoryFile), write(': WAM duration = '), writeln(D2).
 
+
+save_clause((_M1 : M2 :Head):-Body):-
+        !,
+        save_clause((M2 :Head):-Body).
+save_clause((ModuleName :Head):-Body):-
+        !,
+        Head =.. [Name|Args],
+        length(Args, Arity),
+        transform_predicate_name(Name, Arity, ModuleName, TransformedName),
+        TransformedHead =.. [TransformedName|Args],
+        add_clause_to_predicate(TransformedName/Arity, TransformedHead, Body).
+save_clause(_M1:M2:(Head:-Body)):-
+        !,
+        save_clause(M2:(Head:-Body)).
+save_clause(M:(Head:-Body)):-
+        !,
+        save_clause((M:Head):-Body).
 save_clause(Head:-Body):-
         !,
         Head =.. [Name|Args],
@@ -1485,7 +1536,13 @@ save_clause(Head:-Body):-
         transform_predicate_name(Name, Arity, ModuleName, TransformedName),
         TransformedHead =.. [TransformedName|Args],
         add_clause_to_predicate(TransformedName/Arity, TransformedHead, Body).
-
+save_clause(ModuleName:Fact):-
+        !,
+        Fact =.. [Name|Args],
+        length(Args, Arity),
+        transform_predicate_name(Name, Arity, ModuleName, TransformedName),
+        TransformedFact =.. [TransformedName|Args],
+        add_clause_to_predicate(TransformedName/Arity, TransformedFact, true).
 save_clause(Fact):-
         !,
         Fact =.. [Name|Args],

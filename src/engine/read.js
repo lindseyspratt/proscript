@@ -719,7 +719,7 @@ function format_term(value, options)
 }
 
 function is_punctuation_charAt(object, position) {
-    return typeof object.chartAt === 'function' && is_punctuation(object.charAt(position));
+    return typeof object.charAt === 'function' && is_punctuation(object.charAt(position));
 }
 
 function expression_to_term(s, varmap, singletons)

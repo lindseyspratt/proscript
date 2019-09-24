@@ -13,11 +13,15 @@
 % and the arguments are 'board_left', 'turn', etc.
 % (Note that there is currently only one 'game' so the ID is always '1'.)
 
-:- initialization(data_predicate_dynamics([
-data_predicates(ts, tile,[x, y,bx,by,size,colors,container]), % e.g. tile_x(ID, X), tile_y(ID, Y)...
-data_predicates(g, game,[tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]), % e.g. game_board_left(ID, X)...
-data_predicates(lp, legal_position, [bx, by])
-])).
+:- initialization(init).
+
+init :-
+    data_predicate_dynamics([
+        data_predicates(g, game,[tile_size, board_left, board_top, board_width, board_height, board_translate, turn, replacements]), % e.g. game_board_left(ID, X)...
+        data_predicates(ts, tile,[x, y,bx,by,size,colors,container]), % e.g. tile_x(ID, X), tile_y(ID, Y)...
+        data_predicates(lp, legal_position, [bx, by])
+    ]).
+
 
 draw_tile_test :-
     _ >> [id -:> canvas, getContext('2d') *:> Ctx],

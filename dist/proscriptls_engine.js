@@ -677,27 +677,58 @@ function predicate_generate_initialization_goal(Module, Init) {
 
 
 function predicate_define_dynamic_predicate(indicator) {
+    let colon = lookup_functor(":", 2);
     var slash2 = lookup_functor("/", 2);
-    if (TAG(indicator) === TAG_STR && memory[VAL(indicator)] === slash2)
-    {
-        var name = deref(memory[VAL(indicator) + 1]);
-        var arity = deref(memory[VAL(indicator) + 2]);
-        if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT)
-        {
+    if (TAG(indicator) === TAG_STR && (memory[VAL(indicator)] === colon || memory[VAL(indicator)] === slash2)) {
+        let name;
+        let arity;
+
+        if (memory[VAL(indicator)] === colon) {
+            // :(ModuleName, /(Functor, Arity))
+            let moduleName = deref(memory[VAL(indicator) + 1]);
+            let slashStructure = deref(memory[VAL(indicator) + 2]);
+            if (TAG(slashStructure) !== TAG_STR) {
+                return type_error('predicate_indicator', slashStructure);
+            }
+            name = deref(memory[VAL(slashStructure) + 1]);
+            arity = deref(memory[VAL(slashStructure) + 2]);
+
+            if (TAG(moduleName) === TAG_REF) {
+                return instantiation_error(moduleName);
+            }
+
+            let moduleNameJS = PL_get_atom_chars(moduleName);
+            if (TAG(name) === TAG_ATM) {
+                let nameJS = PL_get_atom_chars(name);
+                if (!nameJS.includes(":")) {
+                    name = PL_put_atom_chars(moduleNameJS + ':' + nameJS);
+                } else {
+                    let prefix = nameJS.substring(0, nameJS,indexOf(":"));
+                    if(!plausibleModuleName(prefix)) {
+                        name = PL_put_atom_chars(moduleNameJS + ':' + nameJS);
+                    }
+                }
+            }
+        } else {
+            name = deref(memory[VAL(indicator) + 1]);
+            arity = deref(memory[VAL(indicator) + 2]);
+        }
+        if (TAG(name) === TAG_ATM && TAG(arity) === TAG_INT) {
             if (VAL(arity) < 0)
                 return domain_error("not_less_than_zero", arity);
             var ftor = VAL(lookup_dynamic_functor(atable[VAL(name)], VAL(arity)));
-            if (! predicates[ftor]){
-                predicates[ftor] = {clauses: {},
-                    key:ftor,
+            if (!predicates[ftor]) {
+                predicates[ftor] = {
+                    clauses: {},
+                    key: ftor,
                     clause_keys: [],
                     is_public: true,
-                    next_key: 0};
-            } else if (! predicates[ftor].is_public)
+                    next_key: 0
+                };
+            } else if (!predicates[ftor].is_public)
                 return permission_error("modify", "static_procedure", indicator);
             return true;
-        }
-        else if (TAG(name) === TAG_REF)
+        } else if (TAG(name) === TAG_REF)
             return instantiation_error(name);
         else if (TAG(name) !== TAG_ATM)
             return type_error("atom", name);
@@ -712,6 +743,14 @@ function predicate_define_dynamic_predicate(indicator) {
         return type_error("predicate_indicator", indicator);
 }
 
+function plausibleModuleName(name) {
+    let first = name.substring(0,1);
+    if(first !== first.toUpperCase() && first === first.toLowerCase()) {
+        return name.match(/\w+/);
+    } else {
+        return false;
+    }
+}
 /**
  The predicateIndicator is a structure of Name/Arity or op(Precedence, Associativity, Operator).
  In the first case, Name is the unqualified name of a predicate (i.e. does not have a module
@@ -2813,6 +2852,7 @@ function predicate_retract_clause(head, body)
 {
     var ftor;
     var index;
+    let sub_head = head;
     if (TAG(head) === TAG_REF)
         return instantiation_error(head);
     else if (TAG(head) === TAG_ATM)
@@ -2825,6 +2865,49 @@ function predicate_retract_clause(head, body)
     }
     else
         return type_error("callable", head);
+
+    if( ftor === VAL(lookup_functor(":", 2))) {
+        // foo : bar(a)
+        // -> 'foo:bar'(a)
+        let moduleName = deref(memory[VAL(head) + 1]);
+        sub_head = deref(memory[VAL(head) + 2]);
+
+        let moduleNameJS = PL_get_atom_chars(moduleName);
+
+        if (TAG(sub_head) === TAG_REF)
+            return instantiation_error(sub_head);
+        else if (TAG(sub_head) === TAG_ATM)
+        {
+            let functorJS = atable[VAL(sub_head)];
+            if(! functorJS.includes(':')) {
+                functorJS = moduleNameJS + ":" + functorJS;
+            } else {
+                let prefix = functorJS.substring(0, functorJS,indexOf(":"));
+                if(!plausibleModuleName(prefix)) {
+                    functorJS = PL_put_atom_chars(moduleNameJS + ':' + nameJS);
+                }
+            }
+            ftor = VAL(lookup_functor(functorJS, 0));
+        }
+        else if (TAG(sub_head) === TAG_STR)
+        {
+            ftor = VAL(memory[VAL(sub_head)]);
+            let arity = ftable[ftor][1];
+            let functorJS = atable[ftable[ftor][0]];
+            if(! functorJS.includes(':')) {
+                functorJS = moduleNameJS + ":" + functorJS;
+            } else {
+                let prefix = functorJS.substring(0, functorJS.indexOf(":"));
+                if(!plausibleModuleName(prefix)) {
+                    functorJS = PL_put_atom_chars(moduleNameJS + ':' + functorJS);
+                }
+            }
+            ftor = VAL(lookup_functor(functorJS, arity));
+        }
+        else
+            return type_error("callable", sub_head);
+    }
+
     if (predicates[ftor].is_public !== true)
         return permission_error("access", "static_procedure", head);
     if (!state.foreign_retry)
@@ -2848,8 +2931,12 @@ function predicate_retract_clause(head, body)
     // print('retract: ' + atable[functor] + ', key ' + key + ' at index ' + index);
     // print('  predicate: ' + JSON.stringify(predicates[ftor]));
 
+    // With the use of modules, the head_ref and head structures may differ
+    // where head_ref = 'bar:foo'(a,b) while head = bar : foo(a,b).
+    // In this example, the functor for 'head' is ':' (the module operator).
+
     var head_ref = recall_term(predicates[ftor].clauses[key].head, varmap);
-    if (unify(head_ref, head))
+    if (unify_head_args(head_ref, sub_head, ftable[ftor][1]))
     {
         var body_ref = recall_term(predicates[ftor].clauses[key].body, varmap);
         if (unify(body_ref, body))
@@ -2925,6 +3012,26 @@ function predicate_retract_clause(head, body)
         }
     }
     return false; // Nothing to retract
+}
+
+// With the use of modules, the concatenatedHead and moduleHead structures may differ
+// where concatenatedHead = 'bar:foo'(a,b) while moduleHead = bar : foo(a,b).
+// In this example, the functor for 'moduleHead' is ':' (the module operator).
+
+function unify_head_args(concatenatedHead, moduleHead, arity) {
+    // Assume that the concatenatedHead and moduleHead are two forms of reference
+    // to the same functor 'bar:foo'/2.
+    // These heads unify if their corresponding arguments unify.
+
+    let cBase = VAL(concatenatedHead);
+    let mBase = VAL(moduleHead);
+
+         for(let ofst = 0;ofst < arity;ofst++) {
+            if(! unify(deref(cBase + 1 + ofst), deref(mBase + 1 + ofst))) {
+                return false;
+            }
+        }
+        return true;
 }
 
 function predicate_sub_atom(source, start, length, remaining, subatom)
@@ -6200,7 +6307,7 @@ function format_term(value, options)
 }
 
 function is_punctuation_charAt(object, position) {
-    return typeof object.chartAt === 'function' && is_punctuation(object.charAt(position));
+    return typeof object.charAt === 'function' && is_punctuation(object.charAt(position));
 }
 
 function expression_to_term(s, varmap, singletons)

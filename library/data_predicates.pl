@@ -19,8 +19,17 @@ For the address example we can assert an address using assert_datas([addr(nguyen
 This associates ID 1 with each of these attributes: address_name(1, nguyen), address_street_number(1, 15), etc.
 The default_asserted_id(Type, ID) is updated to the last data asserted which is 1 in this example.
 */
-:- module(data_predicates, [data_predicates/3, data_predicate_dynamics/1, assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2]).
-:- meta_predicate((data_predicate_dynamics((:)), data_predicates(?, (:), ?))).
+:- module(data_predicates,
+    [data_predicates/3, data_predicate_dynamics/1,
+    assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2]).
+
+:- meta_predicate((
+    data_predicate_dynamics((:)),
+    assert_data((:),?),
+    assert_id_datas((:)),
+    assert_datas((:), ?),
+    assert_datas((:)),
+    data_predicates(?, (:), ?))).
 
 :- dynamic data_predicates/3.
 
@@ -32,88 +41,107 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
 assert_datas(Datas) :-
     assert_datas(Datas, 1).
 
-assert_datas([], _).
-assert_datas([H|T], J) :-
-    assert_data(H, J),
+assert_datas(_M1:M2:Term, ID) :-
+    !,
+    assert_datas(M2:Term, ID).
+assert_datas(Term, ID) :-
+    assert_datas1(Term, ID).
+
+assert_datas1(_M:[], _).
+assert_datas1(M:[H|T], J) :-
+    assert_data1(M:H, J),
     K is J + 1,
-    assert_datas(T, K).
+    assert_datas1(M:T, K).
 
-assert_id_datas([]).
-assert_id_datas([H-ID|T]) :-
-    assert_data(H, ID),
-    assert_id_datas(T).
+assert_id_datas(_M1:M2:Term) :-
+    !,
+    assert_id_datas(M2:Term).
+assert_id_datas(Term) :-
+    assert_id_datas1(Term).
 
+assert_id_datas1(_M:[]).
+% This predicate body usew assert_data1/2 instead of assert_data/2.
+% This is valid because of explicit Module info (in M:H).
+% This is desireable because it is more efficient by avoiding the extra layer of predicate invocation.
+assert_id_datas1(M:[H-ID|T]) :-
+    assert_data1(M:H, ID),
+    assert_id_datas1(M:T).
+
+assert_data(_M1:M2:ShadowData, ID) :-
+    !,
+    assert_data(M2:ShadowData, ID).
 assert_data(ShadowData, ID) :-
+    assert_data1(ShadowData, ID).
+
+assert_data1(M:ShadowData, ID) :-
     ShadowData =.. [F|Args],
-    data_predicates(F, Prefix, Suffixes),
+    data_predicates(F, M:Prefix, Suffixes),
     (length(Suffixes, ArgCount),
      length(Args, ArgCount)
-       -> assert_shadow_arguments(Args, Prefix, Suffixes, ID),
-          default_asserted_id(Prefix, ID)
+       -> assert_shadow_arguments(Args, M:Prefix, Suffixes, ID),
+          default_asserted_id(M:Prefix, ID)
     ;
      throw('tile shadow argument count different from count of shadow argument tile_predicates')
     ).
 
 assert_shadow_arguments([], _, [], _).
-assert_shadow_arguments([H|T], Prefix, [HP|TP], ID) :-
-    assert_shadow_argument(H, Prefix, HP, ID),
-    assert_shadow_arguments(T, Prefix, TP, ID).
+assert_shadow_arguments([H|T], MPrefix, [HP|TP], ID) :-
+    assert_shadow_argument(H, MPrefix, HP, ID),
+    assert_shadow_arguments(T, MPrefix, TP, ID).
 
-assert_shadow_argument(Arg, Prefix, Suffix, ID) :-
+assert_shadow_argument(Arg, M:Prefix, Suffix, ID) :-
     construct_data_predicate(Prefix, Suffix, Predicate),
     GoalR =.. [Predicate, ID, _],
     Goal =.. [Predicate, ID, Arg],
-    retractall(GoalR),
-    assertz(Goal).
+    retractall(M:GoalR),
+    assertz(M:Goal).
 
-default_asserted_id(Prefix, ID) :-
+default_asserted_id(M:Prefix, ID) :-
     atom_concat(Prefix, '_default_id', Predicate),
     GoalR =.. [Predicate, _],
     Goal =.. [Predicate, ID],
-    retractall(GoalR),
-    assertz(Goal).
+    retractall(M:GoalR),
+    assertz(M:Goal).
 
 data_predicate_dynamics(M : DPs) :-
     assert_dps(M : DPs),
-    findall(Prefix-Suffixes, data_predicates(_, Prefix, Suffixes), All),
-    data_predicate_dynamics1(All).
+    findall(Prefix-Suffixes, data_predicates(_, M:Prefix, Suffixes), All),
+    data_predicate_dynamics1a(M:All).
 
 assert_dps(_M : []).
-assert_dps([]).
 assert_dps(M : [H|T]) :-
     assert_dp(M : H),
     assert_dps(M : T).
 
 assert_dp(M : data_predicates(F, P, S)) :-
-    atom_concat(M, ':', MC),
-    atom_concat(MC, P, MCP),
-    assertz(data_predicates(F, MCP, S)).
+    assertz(data_predicates(F, M:P, S)).
 
-data_predicate_dynamics1([]).
-data_predicate_dynamics1([Prefix-Suffixes|T]) :-
-    data_predicate_dynamics(Suffixes, Prefix),
+data_predicate_dynamics1a(_M:[]).
+data_predicate_dynamics1a(M:[Prefix-Suffixes|T]) :-
+    data_predicate_dynamics(Suffixes, M:Prefix),
     atom_concat(Prefix, '_default_id', DefaultPredicate),
-    (dynamic(DefaultPredicate / 1)),
-    data_predicate_dynamics1(T).
+    (dynamic(M:(DefaultPredicate / 1))),
+    data_predicate_dynamics1a(M:T).
 
 data_predicate_dynamics([], _).
-data_predicate_dynamics([H|T], Prefix) :-
-    data_predicate_dynamic(H, Prefix),
-    data_predicate_dynamics(T, Prefix).
+data_predicate_dynamics([H|T], MPrefix) :-
+    data_predicate_dynamic(H, MPrefix),
+    data_predicate_dynamics(T, MPrefix).
 
-data_predicate_dynamic(Suffix, Prefix) :-
+data_predicate_dynamic(Suffix, M:Prefix) :-
     construct_data_predicate(Prefix, Suffix, Predicate),
-    (dynamic(Predicate / 2)), % BUG: 'dynamic(Predicate/2), foo' is being parsed as dynamic (Predicate/2, foo).
-    data_predicate_default_dynamic(Prefix, Predicate).
+    (dynamic(M:(Predicate / 2))), % BUG: 'dynamic(Predicate/2), foo' is being parsed as dynamic (Predicate/2, foo).
+    data_predicate_default_dynamic(M:Prefix, Predicate).
 
-data_predicate_default_dynamic(Prefix, Predicate) :-
-    (dynamic(Predicate /1)), % BUG: 'dynamic(Predicate/1), foo' is being parsed as dynamic (Predicate/1, foo).
+data_predicate_default_dynamic(M:Prefix, Predicate) :-
+    (dynamic(M:(Predicate /1))), % BUG: 'dynamic(Predicate/1), foo' is being parsed as dynamic (Predicate/1, foo).
     Head =.. [Predicate, Value],
-    retractall((Head :- _)),
+
+    retractall(M:Head :- _),
     atom_concat(Prefix, '_default_id', DefaultPredicate),
     DefaultGoal =.. [DefaultPredicate, DefaultID],
     BinaryGoal =.. [Predicate, DefaultID, Value],
-    asserta((Head :- DefaultGoal, BinaryGoal)).
+    asserta((M:Head :- M:DefaultGoal, M:BinaryGoal)).
 
 construct_data_predicate(Prefix, Suffix, Predicate) :-
     atom_concat(Prefix, '_', PrefixExtended),

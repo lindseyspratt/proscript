@@ -19,8 +19,9 @@
 
 :- meta_predicate((
             call(0), call(1,?), call(2,?, ?), call(3, ?, ?, ?), call(4, ?, ?, ?, ?), call(5, ?, ?, ?, ?, ?), call(6, ?, ?, ?, ?, ?, ?), call(7, ?, ?, ?, ?, ?, ?, ?),
-            retractall(0), asserta(0), assertz(0), retract(0),
-            findall(?, ^, ?), setof(?, ^, ?), bagof(?, ^, ?)
+            retractall(:), asserta(:), assertz(:), retract(:),
+            findall(?, ^, ?), setof(?, ^, ?), bagof(?, ^, ?),
+            dynamic((:))
             )).
 
 module(Name, Exports) :-
@@ -32,7 +33,33 @@ use_module(Spec) :-
 assert(Term):-
         assertz(Term).
 
-save_clausea(Head:-Body):-
+save_clausea(_M1: M2: Term) :-
+        !,
+        save_clausea(M2 : Term).
+save_clausea(M: (Head :- Body)) :-
+        !,
+        save_clausea((M: Head) :- (M:Body)).
+save_clausea((_M1: M2: Head) :- Body) :-
+        !,
+        save_clausea((M2: Head) :- Body).
+save_clausea(MH:Head:-(_MB1: MB2 :Body)):-
+        !,
+        save_clausea(MH:Head:-(MB2 :Body)).
+save_clausea(ModuleName:Head:-(BodyModule:Body)):-
+        !,
+        wam_compiler:transform_meta_expression(Body, BodyModule, TransformedBody),
+        save_clausea1(ModuleName:Head:-TransformedBody).
+save_clausea(Term) :-
+        save_clausea1(Term).
+
+save_clausea1(ModuleName:Head:-Body):-
+       !,
+       Head =.. [Name|Args],
+       length(Args, Arity),
+       wam_compiler:transform_predicate_name(Name, Arity, ModuleName, TransformedName),
+       TransformedHead =.. [TransformedName|Args],
+       prepend_clause_to_predicate(TransformedName/Arity, TransformedHead, Body).
+save_clausea1(Head:-Body):-
        !,
        Head =.. [Name|Args],
        length(Args, Arity),
@@ -40,8 +67,14 @@ save_clausea(Head:-Body):-
        wam_compiler:transform_predicate_name(Name, Arity, ModuleName, TransformedName),
        TransformedHead =.. [TransformedName|Args],
        prepend_clause_to_predicate(TransformedName/Arity, TransformedHead, Body).
-
-save_clausea(Fact):-
+save_clausea1(ModuleName:Fact):-
+        !,
+        Fact =.. [Name|Args],
+        length(Args, Arity),
+        wam_compiler:transform_predicate_name(Name, Arity, ModuleName, TransformedName),
+        TransformedFact =.. [TransformedName|Args],
+        prepend_clause_to_predicate(TransformedName/Arity, TransformedFact, true).
+save_clausea1(Fact):-
         !,
         Fact =.. [Name|Args],
         length(Args, Arity),
@@ -88,17 +121,18 @@ call_with_module(Module, Goal) :-
         ).
 
 
-dynamic(Name/Arity) :-
+dynamic(Module : Name/Arity) :-
         !,
-        define_dynamic_predicate(Name/Arity).
+        define_dynamic_predicate(Module : Name/Arity).
+dynamic(Module : []).
 dynamic([]).
-dynamic([H|T]) :-
+dynamic(Module : [H|T]) :-
         !,
-        dynamic(H),
-        dynamic(T).
-dynamic((A,B)) :-
-        dynamic(A),
-        dynamic(B).
+        dynamic(Module : H),
+        dynamic(Module : T).
+dynamic(Module : (A,B)) :-
+        dynamic(Module : A),
+        dynamic(Module : B).
 
 ensure_loaded(URL) :-
   wam_compiler:canonical_source(URL, CanonicalURL),
@@ -325,10 +359,25 @@ number(X):- (integer(X)-> true; float(X)).
 % current_predicate/1 (foreign)
 
 % 8.9
+
 asserta(Term):- wam_compiler:compile_clause_2(Term), save_clausea(Term).
 assertz(Term):- wam_compiler:compile_clause_2(Term), wam_compiler:save_clause(Term).
-retract(Head:-Body):- !, retract_clause(Head, Body).
-retract(Fact):- !, retract_clause(Fact, true).
+
+% separate the meta-predicate retract/1 predicate from the underlying
+% implementation retract1/1. This prevents a cycle of the compiled
+% code adding in a Module on the input term when trimming out modules (in retract1/1).
+
+retract(Clause) :- retract1(Clause).
+
+retract1(_M1 : _M2 : M3 : Term) :- !, retract1(M3 : Term).
+retract1(_M1 : M2 : Term) :- !, retract1(M2 : Term).
+retract1(M1 : ((M2:Head) :- Body)) :- !, retract1((M2 : Head) :- Body).
+retract1(M : (Head :- Body)) :- !, retract1((M : Head) :- Body).
+retract1((_M1 : (M2 : Head)) :- Body) :- !, retract1((M2 : Head) :- Body).
+
+retract1(Head:-Body):- !, retract_clause(Head, Body).
+retract1(Fact):- !, retract_clause(Fact, true).
+
 % abolish/1 (foreign)
 
 % 8.10
@@ -425,8 +474,13 @@ callable(X):- (atom(X) -> true ; compound(X)).
 % subsumes_term/2 (foreign)
 % acyclic_term/1 (foreign)
 % term_variables/2 (foreign)
-retractall(Goal):- retract(Goal), fail.
-retractall(_).
+
+retractall(Clause) :- retractall1(Clause).
+
+retractall1(_M1 : (_M2 : (M3 : Goal))):- !, retractall1(M3 : Goal), fail.
+retractall1(_M1 : (M2 : Goal)):- !, retractall1(M2 : Goal), fail.
+retractall1(Goal):- retract1(Goal), fail. % Use the non-meta-predicate version of retract/1. retractall/1 already added Module info if appropriate.
+retractall1(_).
 
 
 sort([X|Xs],Ys) :-

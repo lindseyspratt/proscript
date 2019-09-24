@@ -160,11 +160,15 @@
 <span style='color:green'>%&nbsp;and&nbsp;the&nbsp;arguments&nbsp;are&nbsp;'board_left',&nbsp;'turn',&nbsp;etc.</span><br>
 <span style='color:green'>%&nbsp;(Note&nbsp;that&nbsp;there&nbsp;is&nbsp;currently&nbsp;only&nbsp;one&nbsp;'game'&nbsp;so&nbsp;the&nbsp;ID&nbsp;is&nbsp;always&nbsp;'1'.)</span><br>
 <br>
-<span style='color:red'>:-</span>&nbsp;initialization(data_predicate_dynamics([<br>
-data_predicates(ts,&nbsp;tile,[x,&nbsp;y,bx,by,size,colors,container]),&nbsp;<span style='color:green'>%&nbsp;e.g.&nbsp;tile_x(ID,&nbsp;X),&nbsp;tile_y(ID,&nbsp;Y)...</span><br>
-data_predicates(g,&nbsp;game,[tile_size,&nbsp;board_left,&nbsp;board_top,&nbsp;board_width,&nbsp;board_height,&nbsp;board_translate,&nbsp;turn,&nbsp;replacements]),&nbsp;<span style='color:green'>%&nbsp;e.g.&nbsp;game_board_left(ID,&nbsp;X)...</span><br>
-data_predicates(lp,&nbsp;legal_position,&nbsp;[bx,&nbsp;by])<br>
-])).<br>
+<span style='color:red'>:-</span>&nbsp;initialization(init).<br>
+<br>
+init&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;data_predicate_dynamics([<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data_predicates(g,&nbsp;game,[tile_size,&nbsp;board_left,&nbsp;board_top,&nbsp;board_width,&nbsp;board_height,&nbsp;board_translate,&nbsp;turn,&nbsp;replacements]),&nbsp;<span style='color:green'>%&nbsp;e.g.&nbsp;game_board_left(ID,&nbsp;X)...</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data_predicates(ts,&nbsp;tile,[x,&nbsp;y,bx,by,size,colors,container]),&nbsp;<span style='color:green'>%&nbsp;e.g.&nbsp;tile_x(ID,&nbsp;X),&nbsp;tile_y(ID,&nbsp;Y)...</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data_predicates(lp,&nbsp;legal_position,&nbsp;[bx,&nbsp;by])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;]).<br>
+<br>
 <br>
 draw_tile_test&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>],<br>

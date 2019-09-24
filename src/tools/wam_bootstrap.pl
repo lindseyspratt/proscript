@@ -45,8 +45,9 @@ generate_initialization_goal(Module, Init) :-
 % the is_public flag will be set to true in the saved state
 % for predicate Name/Arity.
 
-define_dynamic_predicate(Name/Arity) :-
-        lookup_dynamic_functor(Name, Arity, Predicate),
+define_dynamic_predicate(Module : (Name/Arity)) :-
+        wam_compiler:transform_predicate_name(Name, Arity, Module, TransformedFunctor),
+        lookup_dynamic_functor(TransformedFunctor, Arity, Predicate),
         (clause_table(Predicate, _, _, _, _)
           -> true
         ;
