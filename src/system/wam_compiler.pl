@@ -1247,31 +1247,57 @@ compile_body_arg((Head :- Body), MetaArgType, ModuleName, Position, Dest, Perman
         compile_body_unification(TransformedArgs, ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_structure(TransformedFunctor/TransformedArity, Dest)|R], R, Tail, GUV).
 
 compile_body_arg(Arg, MetaArgType, ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
+        Info = info(Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV),
         Arg =.. [Functor|Args],
         list_length(Args, Arity),
         (MetaArgType = (:), Functor \= (:)
-           -> TransformedArgs = [ModuleName, Arg],
-              TransformedFunctor = (:),
-              TransformedArity = 2
-         ;
+           -> complete_compile_body_arg((:), 2, [ModuleName, Arg], ModuleName, Info)
+        ;
          integer(MetaArgType) % 0..9
-           -> MetaArity is Arity + MetaArgType,
-              transform_predicate_name(Functor, MetaArity, ModuleName, TransformedFunctor),
-              TransformedArgs = Args,
-              TransformedArity = Arity
-         ;
+           -> (Functor = (:), Arity = 2
+                -> Args = [LocalModuleName, ColonArg],
+                   (\+ callable(ColonArg)
+                     -> compile_body_arg(ColonArg, (:), LocalModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV)
+                   ;
+                    ColonArg =.. [SubFunctor|SubArgs],
+                    list_length(SubArgs, SubArity),
+                    complete_compile_body_arg_integer(SubFunctor, SubArity, SubArgs, LocalModuleName, MetaArgType, Info)
+                   )
+              ;
+               complete_compile_body_arg_integer(Functor, Arity, Args, ModuleName, MetaArgType, Info)
+              )
+        ;
          MetaArgType = (^) % Arg is assumed to be MetaArgType of 0 - no extra args to be applied.
-           -> existential_variables(Arg, Vars, Expression),
-              transform_meta_expression(Expression, ModuleName, TransformedExpression),
-              existential_variables(TransformedArg, Vars, TransformedExpression),
-              TransformedArg =.. [TransformedFunctor|TransformedArgs],
-              list_length(TransformedArgs, TransformedArity)
-         ;
-         Functor = TransformedFunctor,
-         TransformedArgs = Args,
-         TransformedArity = Arity
-        ),
+           -> (Functor = (:), Arity = 2
+                 -> Args = [LocalModuleName, SubArg],
+                    (\+ callable(SubArg)
+                       -> compile_body_arg(SubArg, (:), LocalModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV)
+                    ;
+                     complete_compile_body_arg_tilde(SubArg, LocalModuleName, Info)
+                    )
+              ;
+               complete_compile_body_arg_tilde(Arg, ModuleName, Info)
+              )
+        ;
+         complete_compile_body_arg(Functor, Arity, Args, ModuleName, Info)
+        ).
+
+complete_compile_body_arg_integer(Functor, Arity, Args, ModuleName, MetaArgType, Info) :-
+       MetaArity is Arity + MetaArgType,
+       transform_predicate_name(Functor, MetaArity, ModuleName, TransformedFunctor),
+       complete_compile_body_arg(TransformedFunctor, Arity, Args, ModuleName, Info).
+
+complete_compile_body_arg_tilde(Arg, ModuleName, Info) :-
+       existential_variables(Arg, Vars, Expression),
+       transform_meta_expression(Expression, ModuleName, TransformedExpression),
+       existential_variables(TransformedArg, Vars, TransformedExpression),
+       TransformedArg =.. [TransformedFunctor|TransformedArgs],
+       list_length(TransformedArgs, TransformedArity),
+       complete_compile_body_arg(TransformedFunctor, TransformedArity, TransformedArgs, ModuleName, Info).
+
+complete_compile_body_arg(TransformedFunctor, TransformedArity, TransformedArgs, ModuleName, info(Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV)) :-
         compile_body_unification(TransformedArgs, ModuleName, Position, State, S1, PermanentVariables, Opcodes, [put_structure(TransformedFunctor/TransformedArity, Dest)|R], R, Tail, GUV).
+
 
 functor_is_qualified(Term) :-
         functor(Term, Functor, Arity),

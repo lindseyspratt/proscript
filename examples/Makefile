@@ -22,5 +22,5 @@ proscriptls_state_demo.js: demo.pl $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_SY
 dump-state: $(ENGINE) proscriptls_state_demo.js ../test/standalone.js $(SRC_TOOLS)/dump.js
 		$(JSC) $(ENGINE) proscriptls_state_demo.js ../test/standalone.js $(SRC_TOOLS)/dump.js  -e "dump()"
 
-proscriptls_state_tiles.js:  ../dist/proscriptls_for_compile.js tiles.pl ../dist/node_compile.js
+proscriptls_state_tiles.js:  ../dist/proscriptls_for_compile.js tiles.pl ../library/data_predicates.pl ../library/object.pl ../dist/node_compile.js
 		node ../dist/node_compile.js `pwd`/tiles.pl `pwd`/proscriptls_state_tiles.js

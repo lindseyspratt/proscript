@@ -21,7 +21,8 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
 */
 :- module(data_predicates,
     [data_predicates/3, data_predicate_dynamics/1,
-    assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2]).
+    assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2,
+    labelled_values/3]).
 
 :- meta_predicate((
     data_predicate_dynamics((:)),
@@ -29,7 +30,8 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
     assert_id_datas((:)),
     assert_datas((:), ?),
     assert_datas((:)),
-    data_predicates(?, (:), ?))).
+    data_predicates(?, (:), ?),
+    labelled_values((:), ?, ?))).
 
 :- dynamic data_predicates/3.
 
@@ -146,3 +148,17 @@ data_predicate_default_dynamic(M:Prefix, Predicate) :-
 construct_data_predicate(Prefix, Suffix, Predicate) :-
     atom_concat(Prefix, '_', PrefixExtended),
     atom_concat(PrefixExtended, Suffix, Predicate).
+
+labelled_values(M:Prefix, ID, Values) :-
+    data_predicates(_, M:Prefix, Suffixes),
+    data_values(Suffixes, M:Prefix, ID, Values).
+
+data_values([], _, _, []).
+data_values([H|T], M:Prefix, ID, [H-HV|TV]) :-
+    data_value(H, M:Prefix, ID, HV),
+    data_values(T, M:Prefix, ID, TV).
+
+data_value(Suffix, M:Prefix, ID, Value) :-
+    construct_data_predicate(Prefix, Suffix, Predicate),
+    Goal =.. [Predicate, ID, Value],
+    call(M:Goal).
