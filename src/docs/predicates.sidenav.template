@@ -1,0 +1,35 @@
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_dom, 'index_doc.html', 'dom']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_alert_1, 'index_doc.html', 'alert/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_append_dom_node_child_2, 'index_doc.html', 'append_dom_node_child/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_create_dom_element_2, 'index_doc.html', 'create_dom_element/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_create_dom_text_node_2, 'index_doc.html', 'create_dom_text_node/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_create_object_2, 'index_doc.html', 'dom_create_object/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_create_object_3, 'index_doc.html', 'dom_create_object/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_element_attribute_value_3, 'index_doc.html', 'dom_element_attribute_value/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_object_method_2, 'index_doc.html', 'dom_object_method/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_object_method_3, 'index_doc.html', 'dom_object_method/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_object_property_4, 'index_doc.html', 'dom_object_property/4']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_object_type_2, 'index_doc.html', 'dom_object_type/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_release_object_1, 'index_doc.html', 'dom_release_object/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_select_all_elements_2, 'index_doc.html', 'dom_select_all_elements/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_select_element_2, 'index_doc.html', 'dom_select_element/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_type_method_5, 'index_doc.html', 'dom_type_method/5']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_type_parent_2, 'index_doc.html', 'dom_type_parent/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_type_property_4, 'index_doc.html', 'dom_type_property/4']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_type_reference_4, 'index_doc.html', 'dom_type_reference/4']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_dom_window_1, 'index_doc.html', 'dom_window/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_insert_before_dom_node_3, 'index_doc.html', 'insert_before_dom_node/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_remove_dom_element_class_2, 'index_doc.html', 'remove_dom_element_class/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_replace_dom_element_class_2, 'index_doc.html', 'replace_dom_element_class/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_dom_element_attribute_value_3, 'index_doc.html', 'set_dom_element_attribute_value/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_dom_object_property_3, 'index_doc.html', 'set_dom_object_property/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_dom_object_property_4, 'index_doc.html', 'set_dom_object_property/4']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_toggle_dom_element_class_3, 'index_doc.html', 'toggle_dom_element_class/3']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_terms, 'index_doc.html', 'terms']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_acyclic_term_1, 'index_doc.html', 'acyclic_term/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_subsumes_term_2, 'index_doc.html', 'subsumes_term/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_var_1, 'index_doc.html', 'var/1']}}</li>
+</ul></li>

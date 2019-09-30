@@ -33,10 +33,11 @@ $(TOP_HTML): $(DIST_DOC)/index.html
 		sed '1d' $(DIST_DOC)/index.html > $(TOP_HTML)
 
 $(DIST_DOC)/index_doc.html: type_references.template library.doc.template objects.doc.template debugger.doc.template \
-				compilation.doc.template syntax.doc.template
+				compilation.doc.template syntax.doc.template items.predicates.doc.template predicates.doc.template
 
 $(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template api.sidenav.template anchor.sidenav.template \
-				framework.index.template ../../version.txt ../../version_date.txt ../../library/template.pl
+				predicates.sidenav.template framework.index.template \
+				../../version.txt ../../version_date.txt ../../library/template.pl
 		$(SWIPL) -q -f ../../library/template.pl\
 		    -g "substitute_template('$<', '$@'), halt"
 
@@ -56,6 +57,12 @@ dump-state: $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools
 
 proscriptls_doc_node.js:    $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_init.js
 		cat $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_init.js > proscriptls_doc_node.js
+
+items.predicates.doc.template:  proscriptls_doc_node.js ../tools/node_goal.js ../tools/generate_predicate_doc.pl predicate_doc.pl
+		$(SWIPL) -q -f ../tools/generate_predicate_doc.pl -g "generate_predicate_doc('$@'), halt"
+
+predicates.sidenav.template:  proscriptls_doc_node.js ../tools/node_goal.js ../tools/generate_predicate_doc.pl predicate_doc.pl
+		$(SWIPL) -q -f ../tools/generate_predicate_doc.pl -g "generate_pred_cat_sidenav('$@'), halt"
 
 type_references.template:  proscriptls_doc_node.js ../tools/node_goal.js
 		node ../tools/node_goal.js ../docs/proscriptls_doc_node "generate_type_references('../docs/type_references.template')"

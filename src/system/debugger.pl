@@ -427,22 +427,22 @@ pad_codes1([], _).
 pad_codes1([B|T], B) :-
     pad_codes1(T, B).
 
-capitalize(A, CA) :-
-    atom_codes(A, Xs),
-    Xs = [X|Codes],
-    capitalize_code(X, CX),
-    atom_codes(CA, [CX|Codes]).
-
-capitalize_code(X, CX) :-
-    "a" = [AC],
-    "z" = [ZC],
-    (AC =< X, X =< ZC ->
-      "A" = [AAC],
-      K is X - AC,
-      CX is K + AAC
-     ;
-     CX = X
-    ).
+%capitalize(A, CA) :-
+%    atom_codes(A, Xs),
+%    Xs = [X|Codes],
+%    capitalize_code(X, CX),
+%    atom_codes(CA, [CX|Codes]).
+%
+%capitalize_code(X, CX) :-
+%    "a" = [AC],
+%    "z" = [ZC],
+%    (AC =< X, X =< ZC ->
+%      "A" = [AAC],
+%      K is X - AC,
+%      CX is K + AAC
+%     ;
+%     CX = X
+%    ).
 
 
 reverse(L, R) :-

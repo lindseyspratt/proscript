@@ -638,12 +638,6 @@ trace_unify(A, A).
 flush_stdout.
 gc.
 
-% The module/2 predicate is a no-op to allow the wam_compiler.pl source to be compiled
-% where the wam_compiler:compile_clause_2/N predicate attempts to call the directives
-% it encounters.
-
-%module(_,_).
-
 concat_list(L, A) :-
     concat_list(L, '', A).
 

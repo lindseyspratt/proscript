@@ -1,0 +1,5 @@
+<h3>Predicates:</h3>
+There are many builin-in predicates defined for ProscriptLS.
+These include standard ISO Prolog predicates and predicates unique to ProscriptLS.
+The unique predicates include several predicates for working with HTML documents and Javascript.
+{{template_file('items.predicates.doc.template', [])}}

@@ -27,7 +27,12 @@
                     <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, library, 'index_doc.html', 'Library']}}</li>
                     <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, compilation, 'index_doc.html', 'Compilation']}}</li>
                     <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, syntax, 'index_doc.html', 'Syntax']}}</li>
-                </ul>
+                    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, predicates, 'index_doc.html', 'Predicates']}}
+                        <ul class='nested'>
+                            {{1 @ Type & 'predicates.sidenav.template' # [Type]}}
+                        </ul>
+                    </li>
+               </ul>
             </li>
             <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, examples, 'index_doc.html', 'Examples']}}
                 <ul class="nested">

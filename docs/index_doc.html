@@ -84,7 +84,47 @@
                     <li><a  class="index" id="library_index" href="#library"> Library </a></li>
                     <li><a  class="index" id="compilation_index" href="#compilation"> Compilation </a></li>
                     <li><a  class="index" id="syntax_index" href="#syntax"> Syntax </a></li>
-                </ul>
+                    <li><span class="caret"></span><a  class="index" id="predicates_index" href="#predicates"> Predicates </a>
+                        <ul class='nested'>
+                            <li><span class="caret"></span><a  class="index" id="pred_cat_dom_index" href="#pred_cat_dom"> dom </a>
+<ul class='nested'>
+<li><a  class="index" id="pred_alert_1_index" href="#pred_alert_1"> alert/1 </a></li>
+<li><a  class="index" id="pred_append_dom_node_child_2_index" href="#pred_append_dom_node_child_2"> append_dom_node_child/2 </a></li>
+<li><a  class="index" id="pred_create_dom_element_2_index" href="#pred_create_dom_element_2"> create_dom_element/2 </a></li>
+<li><a  class="index" id="pred_create_dom_text_node_2_index" href="#pred_create_dom_text_node_2"> create_dom_text_node/2 </a></li>
+<li><a  class="index" id="pred_dom_create_object_2_index" href="#pred_dom_create_object_2"> dom_create_object/2 </a></li>
+<li><a  class="index" id="pred_dom_create_object_3_index" href="#pred_dom_create_object_3"> dom_create_object/3 </a></li>
+<li><a  class="index" id="pred_dom_element_attribute_value_3_index" href="#pred_dom_element_attribute_value_3"> dom_element_attribute_value/3 </a></li>
+<li><a  class="index" id="pred_dom_object_method_2_index" href="#pred_dom_object_method_2"> dom_object_method/2 </a></li>
+<li><a  class="index" id="pred_dom_object_method_3_index" href="#pred_dom_object_method_3"> dom_object_method/3 </a></li>
+<li><a  class="index" id="pred_dom_object_property_4_index" href="#pred_dom_object_property_4"> dom_object_property/4 </a></li>
+<li><a  class="index" id="pred_dom_object_type_2_index" href="#pred_dom_object_type_2"> dom_object_type/2 </a></li>
+<li><a  class="index" id="pred_dom_release_object_1_index" href="#pred_dom_release_object_1"> dom_release_object/1 </a></li>
+<li><a  class="index" id="pred_dom_select_all_elements_2_index" href="#pred_dom_select_all_elements_2"> dom_select_all_elements/2 </a></li>
+<li><a  class="index" id="pred_dom_select_element_2_index" href="#pred_dom_select_element_2"> dom_select_element/2 </a></li>
+<li><a  class="index" id="pred_dom_type_method_5_index" href="#pred_dom_type_method_5"> dom_type_method/5 </a></li>
+<li><a  class="index" id="pred_dom_type_parent_2_index" href="#pred_dom_type_parent_2"> dom_type_parent/2 </a></li>
+<li><a  class="index" id="pred_dom_type_property_4_index" href="#pred_dom_type_property_4"> dom_type_property/4 </a></li>
+<li><a  class="index" id="pred_dom_type_reference_4_index" href="#pred_dom_type_reference_4"> dom_type_reference/4 </a></li>
+<li><a  class="index" id="pred_dom_window_1_index" href="#pred_dom_window_1"> dom_window/1 </a></li>
+<li><a  class="index" id="pred_insert_before_dom_node_3_index" href="#pred_insert_before_dom_node_3"> insert_before_dom_node/3 </a></li>
+<li><a  class="index" id="pred_remove_dom_element_class_2_index" href="#pred_remove_dom_element_class_2"> remove_dom_element_class/2 </a></li>
+<li><a  class="index" id="pred_replace_dom_element_class_2_index" href="#pred_replace_dom_element_class_2"> replace_dom_element_class/2 </a></li>
+<li><a  class="index" id="pred_set_dom_element_attribute_value_3_index" href="#pred_set_dom_element_attribute_value_3"> set_dom_element_attribute_value/3 </a></li>
+<li><a  class="index" id="pred_set_dom_object_property_3_index" href="#pred_set_dom_object_property_3"> set_dom_object_property/3 </a></li>
+<li><a  class="index" id="pred_set_dom_object_property_4_index" href="#pred_set_dom_object_property_4"> set_dom_object_property/4 </a></li>
+<li><a  class="index" id="pred_toggle_dom_element_class_3_index" href="#pred_toggle_dom_element_class_3"> toggle_dom_element_class/3 </a></li>
+</ul></li>
+<li><span class="caret"></span><a  class="index" id="pred_cat_terms_index" href="#pred_cat_terms"> terms </a>
+<ul class='nested'>
+<li><a  class="index" id="pred_acyclic_term_1_index" href="#pred_acyclic_term_1"> acyclic_term/1 </a></li>
+<li><a  class="index" id="pred_subsumes_term_2_index" href="#pred_subsumes_term_2"> subsumes_term/2 </a></li>
+<li><a  class="index" id="pred_var_1_index" href="#pred_var_1"> var/1 </a></li>
+</ul></li>
+
+                        </ul>
+                    </li>
+               </ul>
             </li>
             <li><span class="caret"></span><a  class="index" id="examples_index" href="#examples"> Examples </a>
                 <ul class="nested">
@@ -1519,6 +1559,287 @@ foo becomes 'mod_a : foo' when the calling module is 'mod_a'.
 This directive has no effect. It is allowed in ProscriptLS source but are otherwise ignored.
 </li>
 </ul>
+
+            </li>
+            <li class="indexed" id="predicates">
+                <h3>Predicates:</h3>
+There are many builin-in predicates defined for ProscriptLS.
+These include standard ISO Prolog predicates and predicates unique to ProscriptLS.
+The unique predicates include several predicates for working with HTML documents and Javascript.
+<div class="indexed" id="pred_cat_dom">
+<h4>dom</h4>
+<ul>
+<li class="indexed" id="pred_alert_1">
+<h5>alert/1</h5>
+<br><b>alert</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_append_dom_node_child_2">
+<h5>append_dom_node_child/2</h5>
+<br><b>append_dom_node_child</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_create_dom_element_2">
+<h5>create_dom_element/2</h5>
+<br><b>create_dom_element</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_create_dom_text_node_2">
+<h5>create_dom_text_node/2</h5>
+<br><b>create_dom_text_node</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_create_object_2">
+<h5>dom_create_object/2</h5>
+<br><b>dom_create_object</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_create_object_3">
+<h5>dom_create_object/3</h5>
+<br><b>dom_create_object</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_element_attribute_value_3">
+<h5>dom_element_attribute_value/3</h5>
+<br><b>dom_element_attribute_value</b>(+<i>Element</i>:object_id,+<i>Attribute</i>:atom,+<i>Value</i>:atom) is det
+<br><b>dom_element_attribute_value</b>(+<i>Element</i>:object_id,+<i>Attribute</i>:atom,-<i>Value</i>:atom) is nondet
+<br><b>dom_element_attribute_value</b>(+<i>Element</i>:object_id,-<i>Attribute</i>:atom,+<i>Value</i>:atom) is nondet
+<br><b>dom_element_attribute_value</b>(-<i>Element</i>:object_id,+<i>Attribute</i>:atom,+<i>Value</i>:atom) is nondet
+<br><b>dom_element_attribute_value</b>(+<i>Element</i>:object_id,-<i>Attribute</i>:atom,-<i>Value</i>:atom) is nondet
+<br><b>dom_element_attribute_value</b>(-<i>Element</i>:object_id,+<i>Attribute</i>:atom,-<i>Value</i>:atom) is nondet
+<br><b>dom_element_attribute_value</b>(-<i>Element</i>:object_id,-<i>Attribute</i>:atom,+<i>Value</i>:atom) is nondet
+<br><b>dom_element_attribute_value</b>(-<i>Element</i>:object_id,-<i>Attribute</i>:atom,-<i>Value</i>:atom) is nondet
+<br><br>There may be any combination of bindings of Element, Attribute, Value, including none bound.
+     If Element is unbound and Attribute and Value are bound then dom_element_attribute_value/3 has two
+     strategies for finding Element: if Attribute and Value are bound and Attribute is 'id', 'name', or 'class'
+     then use specific Javascript document getElementById(Value), getElementsByName(Value), or getElementsByClass(Value) method
+     where Attribute is 'id', 'name', or 'class', respectively; otherwise, get all
+     elements using document.querySelectorAll('*') and check each one using element.getAttribute(Attribute)=Value.
+
+     If Attribute is unbound then dom_element_attribute_value/3 checks each possible Element
+     using Javascript element.getAttributeNames() to generate all values for Attribute for each Element. For each Attribute and Element value
+     the value is checked/retrieved. As above, 'id', 'name',
+     and 'class' attributes are handled specially; all other attributes are handled
+     using element.getAttribute(Attribute)=Value.
+<br>
+<br><b>arg</b>: <i>Element</i>.  DOM Element object identifier.
+<br><b>arg</b>: <i>Attribute</i>. an atom naming an attribute.
+<br><b>arg</b>: <i>Value</i>. an atom specifying the value to be assigned to the attribute.
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_object_method_2">
+<h5>dom_object_method/2</h5>
+<br><b>dom_object_method</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_object_method_3">
+<h5>dom_object_method/3</h5>
+<br><b>dom_object_method</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_object_property_4">
+<h5>dom_object_property/4</h5>
+<br><b>dom_object_property</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_object_type_2">
+<h5>dom_object_type/2</h5>
+<br><b>dom_object_type</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_release_object_1">
+<h5>dom_release_object/1</h5>
+<br><b>dom_release_object</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_select_all_elements_2">
+<h5>dom_select_all_elements/2</h5>
+<br><b>dom_select_all_elements</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_select_element_2">
+<h5>dom_select_element/2</h5>
+<br><b>dom_select_element</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_type_method_5">
+<h5>dom_type_method/5</h5>
+<br><b>dom_type_method</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_type_parent_2">
+<h5>dom_type_parent/2</h5>
+<br><b>dom_type_parent</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_type_property_4">
+<h5>dom_type_property/4</h5>
+<br><b>dom_type_property</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_type_reference_4">
+<h5>dom_type_reference/4</h5>
+<br><b>dom_type_reference</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_dom_window_1">
+<h5>dom_window/1</h5>
+<br><b>dom_window</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_insert_before_dom_node_3">
+<h5>insert_before_dom_node/3</h5>
+<br><b>insert_before_dom_node</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_remove_dom_element_class_2">
+<h5>remove_dom_element_class/2</h5>
+<br><b>remove_dom_element_class</b>(<i>Element</i>,<i>Class</i>)
+<br><br>Remove Class from classes defined for Element.
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_replace_dom_element_class_2">
+<h5>replace_dom_element_class/2</h5>
+<br><b>replace_dom_element_class</b>(<i>Element</i>,<i>Class</i>)
+<br><br>Replace Class in classes defined for Element.
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_set_dom_element_attribute_value_3">
+<h5>set_dom_element_attribute_value/3</h5>
+<br><b>set_dom_element_attribute_value</b>(+<i>Element</i>:object_id,+<i>Attribute</i>:atom,+<i>Value</i>:atom)
+<br><br>Set DOM element attribute to value.
+<br>
+<br><b>arg</b>: <i>Element</i>.  DOM Element object identifier.
+<br><b>arg</b>: <i>Attribute</i>. an atom naming an attribute.
+<br><b>arg</b>: <i>Value</i>. an atom specifying the value to be assigned to the attribute.
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_set_dom_object_property_3">
+<h5>set_dom_object_property/3</h5>
+<br><b>set_dom_object_property</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_set_dom_object_property_4">
+<h5>set_dom_object_property/4</h5>
+<br><b>set_dom_object_property</b>(<i>A</i>)
+<br><br>replace_dom_element_class
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+<li class="indexed" id="pred_toggle_dom_element_class_3">
+<h5>toggle_dom_element_class/3</h5>
+<br><b>toggle_dom_element_class</b>(<i>Element</i>,<i>Class</i>,<i>Mode</i>)
+<br><br>Toggle Class in classes defined for Element with Mode of either 'add' or 'remove'.
+<br>
+<br><b>cat</b>: dom.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_terms">
+<h4>terms</h4>
+<ul>
+<li class="indexed" id="pred_acyclic_term_1">
+<h5>acyclic_term/1</h5>
+<br><b>acyclic_term</b>(?<i>Term</i>:term) is det
+<br><br>Term is a acyclic.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_subsumes_term_2">
+<h5>subsumes_term/2</h5>
+<br><b>subsumes_term</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 subsumes Term2.
+<br>
+<br><b>arg</b>: <i>Term1</i>. any Prolog term.
+<br><b>arg</b>: <i>Term2</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_var_1">
+<h5>var/1</h5>
+<br><b>var</b>(?<i>Term</i>:term) is det
+<br><br>Term is a variable.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+</ul>
+</div>
+
 
             </li>
         </ul>

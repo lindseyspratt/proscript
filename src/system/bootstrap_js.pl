@@ -11,8 +11,7 @@
          halt/0,
          callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
          call_with_module/2,
-         call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8,
-         write_list/2, write_list/3
+         call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8
          ]).
 
 :- use_module(not).
@@ -598,18 +597,3 @@ call_extension_with_module(_, M : A, ExtensionArgs):-
 call_extension_with_module(M, A, ExtensionArgs):-
         add_args(A, ExtensionArgs, AA),
         call_with_module(M, AA).
-
-write_list(List, Separator) :-
-    current_output(Stream),
-    write_list(List, Separator, Stream).
-
-write_list([], _, _).
-write_list([H|T], Separator, Stream) :-
-        write(Stream, H),
-        write_list1(T, Separator, Stream).
-
-write_list1([], _, _).
-write_list1([H|T], Separator, Stream) :-
-        write(Stream, Separator),
-        write(Stream, H),
-        write_list1(T, Separator, Stream).

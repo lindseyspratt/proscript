@@ -1,4 +1,6 @@
-:- module(wam_util, [transform_predicate_name1/4, path_to_module_name/2, list_length/2, library_name_to_path/2, library_path/1, existential_variables/3]).
+:- module(wam_util,
+    [transform_predicate_name1/4, path_to_module_name/2, list_length/2,
+     library_name_to_path/2, library_path/1, existential_variables/3]).
 
 transform_predicate_name1(ModuleName, ColonCode, FunctorCodes, TransformedFunctor) :-
          atom_codes(ModuleName, ModuleNameCodes),

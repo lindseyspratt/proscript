@@ -52,6 +52,9 @@
             <li class="indexed" id="syntax">
                 {{template_file('syntax.doc.template', [])}}
             </li>
+            <li class="indexed" id="predicates">
+                {{template_file('predicates.doc.template', [])}}
+            </li>
         </ul>
     </div>
     <div class="indexed" id="examples">

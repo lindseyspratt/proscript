@@ -75,6 +75,7 @@ Some gotchas:
     :- use_module('../tools/wam_bootstrap').
     :- use_module('../tools/wam_bootstrap_util').
     :- use_module(url). % in proscriptls system.
+    :- use_module(system_util). % in proscriptls system.
 :- endif.
 
 :- use_module(wam_assemble).
