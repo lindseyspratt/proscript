@@ -218,10 +218,6 @@ function convert_method_spec(specTerm, resultContainer) {
         return type_error("list", specTerm);
     }
 
-    if (TAG(specTerm) !== TAG_LST) {
-        return type_error("list", specTerm);
-    }
-
     let methodNamePL = deref(memory[VAL(specTerm)]);
 
     let methodNameContainer = {};
@@ -329,10 +325,6 @@ function convert_type_term(typePL, container) {
 function convert_property_spec(specTerm, resultContainer) {
     if(TAG(specTerm) === TAG_ATM) {
         return getAtomPropertyValue(specTerm, resultContainer, true);
-    }
-
-    if (TAG(specTerm) !== TAG_LST) {
-        return type_error("list", specTerm);
     }
 
     if (TAG(specTerm) !== TAG_LST) {

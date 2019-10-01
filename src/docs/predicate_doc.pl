@@ -85,27 +85,141 @@ doc(dom_element_attribute_value/3,
      and 'class' attributes are handled specially; all other attributes are handled
      using element.getAttribute(Attribute)=Value.",
     [arg(element, " DOM Element object identifier"),
-          arg(attribute, "an atom naming an attribute"),
-          arg(value, "an atom specifying the value to be assigned to the attribute"),
-          cat(dom)]).
-doc(create_dom_element/2, create_dom_element(a), "replace_dom_element_class", [cat(dom)]).
-doc(create_dom_text_node/2, create_dom_text_node(a), "replace_dom_element_class", [cat(dom)]).
-doc(append_dom_node_child/2, append_dom_node_child(a), "replace_dom_element_class", [cat(dom)]).
-doc(insert_before_dom_node/3, insert_before_dom_node(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_select_element/2, dom_select_element(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_select_all_elements/2, dom_select_all_elements(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_object_property/4, dom_object_property(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_object_method/2, dom_object_method(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_object_method/3, dom_object_method(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_object_type/2, dom_object_type(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_create_object/2, dom_create_object(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_create_object/3, dom_create_object(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_type_reference/4, dom_type_reference(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_release_object/1, dom_release_object(a), "replace_dom_element_class", [cat(dom)]).
-doc(set_dom_object_property/3, set_dom_object_property(a), "replace_dom_element_class", [cat(dom)]).
-doc(set_dom_object_property/4, set_dom_object_property(a), "replace_dom_element_class", [cat(dom)]).
-doc(alert/1, alert(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_window/1, dom_window(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_type_property/4, dom_type_property(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_type_method/5, dom_type_method(a), "replace_dom_element_class", [cat(dom)]).
-doc(dom_type_parent/2, dom_type_parent(a), "replace_dom_element_class", [cat(dom)]).
+     arg(attribute, "an atom naming an attribute"),
+     arg(value, "an atom specifying the value to be assigned to the attribute"),
+     cat(dom)]).
+doc(create_dom_element/2, create_dom_element(+ < tag * atom, - < element * object_id),
+    "Create a DOM element object with tag Tag.",
+    [arg(tag, "an HTML tag name (any case)"),
+     arg(element, "an object ID structure for an HTML element object."),
+     cat(dom)]).
+doc(create_dom_text_node/2, create_dom_text_node(+ < text * character_code_list, - < element * object_id),
+    "Create a DOM text node object.",
+    [arg(text, "a string (represented as a character code list)"),
+     arg(element, "an object ID structure for an HTML text node object"),
+     cat(dom)]).
+doc(append_dom_node_child/2, append_dom_node_child(+ < element * object_id, + < child * object_id),
+    "Append a DOM node as a child node.",
+    [arg(element, "an object ID structure for an HTML node object"),
+     arg(child, "an object ID structure for an HTML node object"),
+     cat(dom)]).
+doc(insert_before_dom_node/3, insert_before_dom_node(+ < parent * object_id, + < element * object_id, + < before * object_id),
+    "Insert child Element before Before element with parent Parent element.",
+    [arg(parent, "an object ID structure for an HTML node object"),
+     arg(element, "an object ID structure for an HTML node object"),
+     arg(before, "an object ID structure for an HTML node object"),
+     cat(dom)]).
+doc(dom_select_element/2, dom_select_element(+ < query * character_code_list, ? < element * object_id),
+    "Select an HTML Element that satisfies the specified Query.",
+    [arg(query, "a string (represented as a character code list)"),
+     arg(element, "an object ID structure for an HTML element object"),
+     cat(dom)]).
+doc(dom_select_all_elements/2, dom_select_all_elements(query, element) is nondet,
+    "Select each HTML Element that satisfies the specified Query.",
+    [arg(query, "a string (represented as a character code list)"),
+     arg(element, "an object ID structure for an HTML element object"),
+     cat(dom)]).
+doc(dom_object_property/4,
+    [dom_object_property(+ < type * atom, + < object * object_id, + < property * atom, - < value * term) is nondet,
+     dom_object_property(+ < type * atom, - < object * object_id, + < property * atom, + < value * term) is nondet,
+     dom_object_property(- < type * atom, + < object * object_id, + < property * atom, + < value * term) is det,
+     dom_object_property(+ < type * atom, + < object * object_id, + < property * atom, + < value * term) is det
+    ],
+    "Determine each Value of Property of Object of Type.
+     Property must be a ground value.
+     At least two of Type, Object, and Value must be ground.",
+    [arg(type, "an atom specifying the object type"),
+     arg(object, "an object ID structure for a Web API (or other Javascript) object"),
+     arg(property, "an atom naming a defined property for the related object"),
+     arg(value, "a term specifying the value of the named property of the related object"),
+     cat(dom)]).
+doc(dom_object_method/3, dom_object_method(+ < object * object_id, : < methodStructure * callable_term, + < specTerm * list),
+    "Evaluate a Javascript method applied to a Javascript Web API object.
+     The result of the method (if any) is unified with the last argument
+     of the Method structure.
+     The Method argument may be qualified with a module name or
+     an argument of the Method structure may be qualified. For example:
+     dom_object_method(Element, add_event_listener(click, 'foo:bar'(thing)))
+     or
+     dom_object_method(Element, foo : add_event_listener(click, bar(thing))).
+     In the second case, the 'foo' module name is used in conjunction with
+     the meta-argument type definition for 'add_event_listener' second argument
+     (of '0') to determine
+     that 'bar(thing)' should be qualified as 'foo:bar'(thing).
+     If the foo module had imported bar/1 from the quux module, then this
+     qualification would be 'quux:bar'(thing).
+     The SpecTerm is used to define the method call when it is not already defined.
+     The SpecTerm has the form [MethodName, ArgTypes, ReturnType] or [MethodName, ArgTypes] if no return.
+     ",
+    [arg(object, "an object ID structure for a Web API (or other Javascript) object"),
+     arg(methodStructure, "a term of the form 'methodName(arg1, arg2, ..)'"),
+     arg(specTerm, "either [] or the form [MethodName, ArgTypes, ReturnType] or [MethodName, ArgTypes] if no return"),
+     cat(dom)]).
+doc(dom_object_method/2, dom_object_method(+ < object * object_id, : < methodStructure * callable_term),
+    "This predicate is the same as dom_object_method/3 with a SpecTerm = [].", [cat(dom)]).
+doc(dom_object_type/2, dom_object_type(+ < object * object_id, ? < type * atom),
+    "Relate a Javascript object to its ProscriptLS type.
+    A Web API object that is an instance of HTMLElement has the type 'htmlelement'.",
+    [arg(object, "an object ID structure for a Web API (or other Javascript) object"),
+     arg(type, "an atom naming the type of the associated object"),
+     cat(dom)]).
+doc(dom_create_object/3, dom_create_object(+ < type * atom, - < object * object_id, + < spec * list),
+    "Create a Javascript object specified by the Type.
+    The Type term is the constructor name and arguments (if any).
+    The type argument may be of the form ModuleName : Type.
+    An argument may be a goal_function type, in which case the ModuleName (inferred or explicit)
+    is needed to determine what module holds the predicate(s) of the goal_functor.
+    Argument types include: object, string, string_codes, integer, number, boolean, position, goal_function,
+    event, and options. Also a type may specify a list or array of items of the same type as 'array(Type)', e.g.
+    'array(integer)' for an array/list of integers.",
+    [arg(type, "an atom or structure that specifies the kind of object to create"),
+     arg(object, "an object ID structure for a Web API (or other Javascript) object"),
+     arg(spec, "a list specifying the types of the arguments of the Type structure (if any)."),
+     cat(dom)]).
+doc(dom_create_object/2, dom_create_object(+ < type * atom, - < object * object_id),
+    "Same as dom_create_object/3 with Spec = [].",
+     [arg(type, "an atom that specifies the kind of object to create"),
+      arg(object, "an object ID structure for a Web API (or other Javascript) object"),
+      cat(dom)]).
+doc(dom_release_object/1, dom_release_object(+ < object * object_id),
+    "Release internal registration of Javascript structure for Object",
+    [arg(object, "an object ID structure for a Web API (or other Javascript) object"), cat(dom)]).
+doc(dom_type_reference/4, dom_type_reference(? < type * atom, ? < name * atom, ? < standard * atom, ? < mdn * atom),
+    "Relates DOM Web API type and name with reference URLs in W3C standards and Mozilla MDN. This predicate is used in generating ProscriptLS documentation.",
+    [arg(type, "an atom that is the ProscriptLS name (all lowercase) of the Web API interface"),
+     arg(name, "an atom that is the Web API interface name (proper case)"),
+     arg(standard, "an atom that is the URL to a W3C reference for the associated Web API name"),
+     arg(mdn, "an atom that is the URL to a Mozilla MDN reference for the associated Web API name"),
+    cat(dom)]).
+doc(set_dom_object_property/3, set_dom_object_property(object, property, value),
+    "Set Property of Object to Value. Property must be in a defined Web API interface for
+    ProscriptLS for the interface type for Object or one of its parent types.",
+    [arg(object, "object_id of a Javascript object that is an instance of a Web API interface"),
+     arg(property, "an atom naming a defined property for the associated object Web API interface"),
+     arg(value, "a term of a type appropriate to the associated property"),
+     cat(dom)]).
+doc(alert/1, alert(+ < term * term), "Display Term in a browser alert dialog.", [arg(term, "any term"), cat(dom)]).
+doc(dom_window/1, dom_window(? < window * object_id) is det, "Window is the object ID for the Web API interface HTML Window object.", [arg(window, "the object ID for the HTML window object"), cat(dom)]).
+doc(dom_type_property/4, dom_type_property(? < objectType * atom, ? < propertyName * atom, ? < jsName * atom, ? < valueType * atom),
+    "Find the related values for a WebInterface API ObjectType, a PropertyName implemented for that type, the Javascript Web API function JsName used
+     to implement that property, and the ValueType for that property.
+    ",
+    [arg(objectType, "an atom naming a Web API interface"),
+     arg(propertyName, "an atom naming a property of a Web API interface"),
+     arg(jsName, "an atom naming the Javascript function that implements getting the value of a property of a Web API interface"),
+     arg(valueType, "an atom specifying the data type returned by a Javascript method"),
+     cat(dom)]).
+doc(dom_type_method/5, dom_type_method(? < objectType * atom, ? < methodName * atom, ? < implementationName * atom, ? < argumentTypes * list, ? < resultType * atom),
+    "Find the related values for a WebInterface API object type, a method name implemented for that type, the Javascript Web API function name used
+     to implement that method, the types of arguments for that method, and the result type (possibly undefined).",
+    [arg(objectType, "an atom naming a Web API interface"),
+     arg(methodName, "an atom naming a method of a Web API interface"),
+     arg(implementationName, "an atom naming Javascript function that implements a method of a Web API interface"),
+     arg(argumentTypes, "a list of data type specifications for the inputs of an API method."),
+     arg(resultType, "an atom specifying the result data type (if any) of an API method"),
+     cat(dom)]).
+doc(dom_type_parent/2, dom_type_parent(? < objectType * atom, ? < parentType * atom),
+    "Web API interface ObjectType has parent interface ParentType.",
+    [arg(objectType, "an atom naming a Web API interface"),
+     arg(parentType, "an atom naming a Web API interface"),
+     cat(dom)]).

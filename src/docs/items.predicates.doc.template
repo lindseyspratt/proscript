@@ -3,49 +3,68 @@
 <ul>
 <li class="indexed" id="pred_alert_1">
 <h5>alert/1</h5>
-<br><b>alert</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>alert</b>(+<i>Term</i>:term)
+<br><br>Display Term in a browser alert dialog.
 <br>
+<br><b>arg</b>: <i>Term</i>. any term.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_append_dom_node_child_2">
 <h5>append_dom_node_child/2</h5>
-<br><b>append_dom_node_child</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>append_dom_node_child</b>(+<i>Element</i>:object_id,+<i>Child</i>:object_id)
+<br><br>Append a DOM node as a child node.
 <br>
+<br><b>arg</b>: <i>Element</i>. an object ID structure for an HTML node object.
+<br><b>arg</b>: <i>Child</i>. an object ID structure for an HTML node object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_create_dom_element_2">
 <h5>create_dom_element/2</h5>
-<br><b>create_dom_element</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>create_dom_element</b>(+<i>Tag</i>:atom,-<i>Element</i>:object_id)
+<br><br>Create a DOM element object with tag Tag.
 <br>
+<br><b>arg</b>: <i>Tag</i>. an HTML tag name (any case).
+<br><b>arg</b>: <i>Element</i>. an object ID structure for an HTML element object..
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_create_dom_text_node_2">
 <h5>create_dom_text_node/2</h5>
-<br><b>create_dom_text_node</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>create_dom_text_node</b>(+<i>Text</i>:character_code_list,-<i>Element</i>:object_id)
+<br><br>Create a DOM text node object.
 <br>
+<br><b>arg</b>: <i>Text</i>. a string (represented as a character code list).
+<br><b>arg</b>: <i>Element</i>. an object ID structure for an HTML text node object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_create_object_2">
 <h5>dom_create_object/2</h5>
-<br><b>dom_create_object</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_create_object</b>(+<i>Type</i>:atom,-<i>Object</i>:object_id)
+<br><br>Same as dom_create_object/3 with Spec = [].
 <br>
+<br><b>arg</b>: <i>Type</i>. an atom that specifies the kind of object to create.
+<br><b>arg</b>: <i>Object</i>. an object ID structure for a Web API (or other Javascript) object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_create_object_3">
 <h5>dom_create_object/3</h5>
-<br><b>dom_create_object</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_create_object</b>(+<i>Type</i>:atom,-<i>Object</i>:object_id,+<i>Spec</i>:list)
+<br><br>Create a Javascript object specified by the Type.
+    The Type term is the constructor name and arguments (if any).
+    The type argument may be of the form ModuleName : Type.
+    An argument may be a goal_function type, in which case the ModuleName (inferred or explicit)
+    is needed to determine what module holds the predicate(s) of the goal_functor.
+    Argument types include: object, string, string_codes, integer, number, boolean, position, goal_function,
+    event, and options. Also a type may specify a list or array of items of the same type as 'array(Type)', e.g.
+    'array(integer)' for an array/list of integers.
 <br>
+<br><b>arg</b>: <i>Type</i>. an atom or structure that specifies the kind of object to create.
+<br><b>arg</b>: <i>Object</i>. an object ID structure for a Web API (or other Javascript) object.
+<br><b>arg</b>: <i>Spec</i>. a list specifying the types of the arguments of the Type structure (if any)..
 <br><b>cat</b>: dom.
 </li>
 
@@ -80,105 +99,163 @@
 
 <li class="indexed" id="pred_dom_object_method_2">
 <h5>dom_object_method/2</h5>
-<br><b>dom_object_method</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_object_method</b>(+<i>Object</i>:object_id,:<i>MethodStructure</i>:callable_term)
+<br><br>This predicate is the same as dom_object_method/3 with a SpecTerm = [].
 <br>
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_object_method_3">
 <h5>dom_object_method/3</h5>
-<br><b>dom_object_method</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_object_method</b>(+<i>Object</i>:object_id,:<i>MethodStructure</i>:callable_term,+<i>SpecTerm</i>:list)
+<br><br>Evaluate a Javascript method applied to a Javascript Web API object.
+     The result of the method (if any) is unified with the last argument
+     of the Method structure.
+     The Method argument may be qualified with a module name or
+     an argument of the Method structure may be qualified. For example:
+     dom_object_method(Element, add_event_listener(click, 'foo:bar'(thing)))
+     or
+     dom_object_method(Element, foo : add_event_listener(click, bar(thing))).
+     In the second case, the 'foo' module name is used in conjunction with
+     the meta-argument type definition for 'add_event_listener' second argument
+     (of '0') to determine
+     that 'bar(thing)' should be qualified as 'foo:bar'(thing).
+     If the foo module had imported bar/1 from the quux module, then this
+     qualification would be 'quux:bar'(thing).
+     The SpecTerm is used to define the method call when it is not already defined.
+     The SpecTerm has the form [MethodName, ArgTypes, ReturnType] or [MethodName, ArgTypes] if no return.
+     
 <br>
+<br><b>arg</b>: <i>Object</i>. an object ID structure for a Web API (or other Javascript) object.
+<br><b>arg</b>: <i>MethodStructure</i>. a term of the form 'methodName(arg1, arg2, ..)'.
+<br><b>arg</b>: <i>SpecTerm</i>. either [] or the form [MethodName, ArgTypes, ReturnType] or [MethodName, ArgTypes] if no return.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_object_property_4">
 <h5>dom_object_property/4</h5>
-<br><b>dom_object_property</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_object_property</b>(+<i>Type</i>:atom,+<i>Object</i>:object_id,+<i>Property</i>:atom,-<i>Value</i>:term) is nondet
+<br><b>dom_object_property</b>(+<i>Type</i>:atom,-<i>Object</i>:object_id,+<i>Property</i>:atom,+<i>Value</i>:term) is nondet
+<br><b>dom_object_property</b>(-<i>Type</i>:atom,+<i>Object</i>:object_id,+<i>Property</i>:atom,+<i>Value</i>:term) is det
+<br><b>dom_object_property</b>(+<i>Type</i>:atom,+<i>Object</i>:object_id,+<i>Property</i>:atom,+<i>Value</i>:term) is det
+<br><br>Determine each Value of Property of Object of Type.
+     Property must be a ground value.
+     At least two of Type, Object, and Value must be ground.
 <br>
+<br><b>arg</b>: <i>Type</i>. an atom specifying the object type.
+<br><b>arg</b>: <i>Object</i>. an object ID structure for a Web API (or other Javascript) object.
+<br><b>arg</b>: <i>Property</i>. an atom naming a defined property for the related object.
+<br><b>arg</b>: <i>Value</i>. a term specifying the value of the named property of the related object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_object_type_2">
 <h5>dom_object_type/2</h5>
-<br><b>dom_object_type</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_object_type</b>(+<i>Object</i>:object_id,?<i>Type</i>:atom)
+<br><br>Relate a Javascript object to its ProscriptLS type.
+    A Web API object that is an instance of HTMLElement has the type 'htmlelement'.
 <br>
+<br><b>arg</b>: <i>Object</i>. an object ID structure for a Web API (or other Javascript) object.
+<br><b>arg</b>: <i>Type</i>. an atom naming the type of the associated object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_release_object_1">
 <h5>dom_release_object/1</h5>
-<br><b>dom_release_object</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_release_object</b>(+<i>Object</i>:object_id)
+<br><br>Release internal registration of Javascript structure for Object
 <br>
+<br><b>arg</b>: <i>Object</i>. an object ID structure for a Web API (or other Javascript) object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_select_all_elements_2">
 <h5>dom_select_all_elements/2</h5>
-<br><b>dom_select_all_elements</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_select_all_elements</b>(<i>Query</i>,<i>Element</i>) is nondet
+<br><br>Select each HTML Element that satisfies the specified Query.
 <br>
+<br><b>arg</b>: <i>Query</i>. a string (represented as a character code list).
+<br><b>arg</b>: <i>Element</i>. an object ID structure for an HTML element object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_select_element_2">
 <h5>dom_select_element/2</h5>
-<br><b>dom_select_element</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_select_element</b>(+<i>Query</i>:character_code_list,?<i>Element</i>:object_id)
+<br><br>Select an HTML Element that satisfies the specified Query.
 <br>
+<br><b>arg</b>: <i>Query</i>. a string (represented as a character code list).
+<br><b>arg</b>: <i>Element</i>. an object ID structure for an HTML element object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_type_method_5">
 <h5>dom_type_method/5</h5>
-<br><b>dom_type_method</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_type_method</b>(?<i>ObjectType</i>:atom,?<i>MethodName</i>:atom,?<i>ImplementationName</i>:atom,?<i>ArgumentTypes</i>:list,?<i>ResultType</i>:atom)
+<br><br>Find the related values for a WebInterface API object type, a method name implemented for that type, the Javascript Web API function name used
+     to implement that method, the types of arguments for that method, and the result type (possibly undefined).
 <br>
+<br><b>arg</b>: <i>ObjectType</i>. an atom naming a Web API interface.
+<br><b>arg</b>: <i>MethodName</i>. an atom naming a method of a Web API interface.
+<br><b>arg</b>: <i>ImplementationName</i>. an atom naming Javascript function that implements a method of a Web API interface.
+<br><b>arg</b>: <i>ArgumentTypes</i>. a list of data type specifications for the inputs of an API method..
+<br><b>arg</b>: <i>ResultType</i>. an atom specifying the result data type (if any) of an API method.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_type_parent_2">
 <h5>dom_type_parent/2</h5>
-<br><b>dom_type_parent</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_type_parent</b>(?<i>ObjectType</i>:atom,?<i>ParentType</i>:atom)
+<br><br>Web API interface ObjectType has parent interface ParentType.
 <br>
+<br><b>arg</b>: <i>ObjectType</i>. an atom naming a Web API interface.
+<br><b>arg</b>: <i>ParentType</i>. an atom naming a Web API interface.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_type_property_4">
 <h5>dom_type_property/4</h5>
-<br><b>dom_type_property</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_type_property</b>(?<i>ObjectType</i>:atom,?<i>PropertyName</i>:atom,?<i>JsName</i>:atom,?<i>ValueType</i>:atom)
+<br><br>Find the related values for a WebInterface API ObjectType, a PropertyName implemented for that type, the Javascript Web API function JsName used
+     to implement that property, and the ValueType for that property.
+    
 <br>
+<br><b>arg</b>: <i>ObjectType</i>. an atom naming a Web API interface.
+<br><b>arg</b>: <i>PropertyName</i>. an atom naming a property of a Web API interface.
+<br><b>arg</b>: <i>JsName</i>. an atom naming the Javascript function that implements getting the value of a property of a Web API interface.
+<br><b>arg</b>: <i>ValueType</i>. an atom specifying the data type returned by a Javascript method.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_type_reference_4">
 <h5>dom_type_reference/4</h5>
-<br><b>dom_type_reference</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_type_reference</b>(?<i>Type</i>:atom,?<i>Name</i>:atom,?<i>Standard</i>:atom,?<i>Mdn</i>:atom)
+<br><br>Relates DOM Web API type and name with reference URLs in W3C standards and Mozilla MDN. This predicate is used in generating ProscriptLS documentation.
 <br>
+<br><b>arg</b>: <i>Type</i>. an atom that is the ProscriptLS name (all lowercase) of the Web API interface.
+<br><b>arg</b>: <i>Name</i>. an atom that is the Web API interface name (proper case).
+<br><b>arg</b>: <i>Standard</i>. an atom that is the URL to a W3C reference for the associated Web API name.
+<br><b>arg</b>: <i>Mdn</i>. an atom that is the URL to a Mozilla MDN reference for the associated Web API name.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_dom_window_1">
 <h5>dom_window/1</h5>
-<br><b>dom_window</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>dom_window</b>(?<i>Window</i>:object_id) is det
+<br><br>Window is the object ID for the Web API interface HTML Window object.
 <br>
+<br><b>arg</b>: <i>Window</i>. the object ID for the HTML window object.
 <br><b>cat</b>: dom.
 </li>
 
 <li class="indexed" id="pred_insert_before_dom_node_3">
 <h5>insert_before_dom_node/3</h5>
-<br><b>insert_before_dom_node</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>insert_before_dom_node</b>(+<i>Parent</i>:object_id,+<i>Element</i>:object_id,+<i>Before</i>:object_id)
+<br><br>Insert child Element before Before element with parent Parent element.
 <br>
+<br><b>arg</b>: <i>Parent</i>. an object ID structure for an HTML node object.
+<br><b>arg</b>: <i>Element</i>. an object ID structure for an HTML node object.
+<br><b>arg</b>: <i>Before</i>. an object ID structure for an HTML node object.
 <br><b>cat</b>: dom.
 </li>
 
@@ -211,17 +288,13 @@
 
 <li class="indexed" id="pred_set_dom_object_property_3">
 <h5>set_dom_object_property/3</h5>
-<br><b>set_dom_object_property</b>(<i>A</i>)
-<br><br>replace_dom_element_class
+<br><b>set_dom_object_property</b>(<i>Object</i>,<i>Property</i>,<i>Value</i>)
+<br><br>Set Property of Object to Value. Property must be in a defined Web API interface for
+    ProscriptLS for the interface type for Object or one of its parent types.
 <br>
-<br><b>cat</b>: dom.
-</li>
-
-<li class="indexed" id="pred_set_dom_object_property_4">
-<h5>set_dom_object_property/4</h5>
-<br><b>set_dom_object_property</b>(<i>A</i>)
-<br><br>replace_dom_element_class
-<br>
+<br><b>arg</b>: <i>Object</i>. object_id of a Javascript object that is an instance of a Web API interface.
+<br><b>arg</b>: <i>Property</i>. an atom naming a defined property for the associated object Web API interface.
+<br><b>arg</b>: <i>Value</i>. a term of a type appropriate to the associated property.
 <br><b>cat</b>: dom.
 </li>
 
