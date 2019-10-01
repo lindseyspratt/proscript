@@ -1965,9 +1965,12 @@ function unmark_top_choicepoint()
 
 function predicate_copy_term(t1, t2)
 {
-    return unify(t2, recall_term(record_term(t1), {}));
+    return unify(t2, copy_term(t1));
 }
 
+function copy_term(term) {
+    return recall_term(record_term(term), {});
+}
 
 function predicate_repeat()
 {
@@ -2466,6 +2469,24 @@ function predicate_subsumes_term(a, b)
     return (after.length === before.length);
 }
 
+function predicate_numbervars(term, start, end) {
+    if(TAG(start) !== TAG_INT) {
+        return type_error('integer', start);
+    }
+    let startID = VAL(start);
+    let vars = term_variables(term);
+    for(let ofst = 0;ofst < vars.length;ofst++) {
+        unify(vars[ofst], construct_var_term(startID + ofst));
+    }
+    return unify(end, PL_put_integer(startID + vars.length));
+}
+
+function construct_var_term(id) {
+    let ftor = lookup_functor('$VAR', 1);
+    let var_structure = alloc_structure(ftor);
+    memory[state.H++] = PL_put_integer(id);
+    return var_structure;
+}
 
 function predicate_current_op(precedence, fixity, name)
 {

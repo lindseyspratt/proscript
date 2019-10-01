@@ -280,7 +280,12 @@ function convert_method_argument(term, spec, module, resultContainer, reportErro
         if (TAG(term) === TAG_ATM) {
             goal = PL_atom_chars(term);
         } else if (TAG(term) === TAG_STR) {
-            goal = format_term(term, {quoted: true});
+            // create a 'goal' string with canonical naming of variables.
+            let copyTerm = copy_term(term);
+            if(! predicate_numbervars(copyTerm, PL_put_integer(1), alloc_var())) {
+                return false;
+            }
+            goal = format_term(copyTerm, {quoted: true, numbervars: true});
         } else {
             return reportError && type_error('atom or structure', term);
         }

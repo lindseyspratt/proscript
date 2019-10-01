@@ -1946,9 +1946,12 @@ function unmark_top_choicepoint()
 
 function predicate_copy_term(t1, t2)
 {
-    return unify(t2, recall_term(record_term(t1), {}));
+    return unify(t2, copy_term(t1));
 }
 
+function copy_term(term) {
+    return recall_term(record_term(term), {});
+}
 
 function predicate_repeat()
 {
@@ -2443,6 +2446,24 @@ function predicate_subsumes_term(a, b)
     return (after.length === before.length);
 }
 
+function predicate_numbervars(term, start, end) {
+    if(TAG(start) !== TAG_INT) {
+        return type_error('integer', start);
+    }
+    let startID = VAL(start);
+    let vars = term_variables(term);
+    for(let ofst = 0;ofst < vars.length;ofst++) {
+        unify(vars[ofst], construct_var_term(startID + ofst));
+    }
+    return unify(end, PL_put_integer(startID + vars.length));
+}
+
+function construct_var_term(id) {
+    let ftor = lookup_functor('$VAR', 1);
+    let var_structure = alloc_structure(ftor);
+    memory[state.H++] = PL_put_integer(id);
+    return var_structure;
+}
 
 function predicate_current_op(precedence, fixity, name)
 {
@@ -6222,9 +6243,11 @@ function format_term(value, options)
         return floats[VAL(value)] + "";
     case TAG_STR:
         var ftor = VAL(memory[VAL(value)]);
-        if (options.numbervars === true && ftor === lookup_functor('$VAR', 1) && TAG(memory[VAL(value)+1]) === TAG_INT)
+        let arg = memory[VAL(value)+1];
+
+        if (options.numbervars === true && ftor === VAL(lookup_functor('$VAR', 1)) && TAG(arg) === TAG_INT)
         {
-            var index = VAL(memory[VAL(value)+1]);
+            var index = VAL(arg);
             result = String.fromCharCode(65 + (index % 26));
             if (index >= 26)
                 result = result + Math.floor(index / 26);
@@ -13618,7 +13641,12 @@ function convert_method_argument(term, spec, module, resultContainer, reportErro
         if (TAG(term) === TAG_ATM) {
             goal = PL_atom_chars(term);
         } else if (TAG(term) === TAG_STR) {
-            goal = format_term(term, {quoted: true});
+            // create a 'goal' string with canonical naming of variables.
+            let copyTerm = copy_term(term);
+            if(! predicate_numbervars(copyTerm, PL_put_integer(1), alloc_var())) {
+                return false;
+            }
+            goal = format_term(copyTerm, {quoted: true, numbervars: true});
         } else {
             return reportError && type_error('atom or structure', term);
         }

@@ -510,6 +510,7 @@ reset:-
         reserve_predicate(flag/3, predicate_flag),
         reserve_predicate(memory_file_description/2, predicate_memory_file_description),
         reserve_predicate(absolute_file_name/3, predicate_absolute_file_name),
+        reserve_predicate(numbervars/3, predicate_numbervars),
 
         % Stuff related to actually compiling
         reserve_predicate(reset_compile_buffer/0, reset_compile_buffer),

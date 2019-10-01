@@ -634,9 +634,11 @@ function format_term(value, options)
         return floats[VAL(value)] + "";
     case TAG_STR:
         var ftor = VAL(memory[VAL(value)]);
-        if (options.numbervars === true && ftor === lookup_functor('$VAR', 1) && TAG(memory[VAL(value)+1]) === TAG_INT)
+        let arg = memory[VAL(value)+1];
+
+        if (options.numbervars === true && ftor === VAL(lookup_functor('$VAR', 1)) && TAG(arg) === TAG_INT)
         {
-            var index = VAL(memory[VAL(value)+1]);
+            var index = VAL(arg);
             result = String.fromCharCode(65 + (index % 26));
             if (index >= 26)
                 result = result + Math.floor(index / 26);
