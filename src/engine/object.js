@@ -70,6 +70,9 @@ function get_object_container(term, container) {
     }
     container.value = idsToObjects.get(objectIDContainer.value);
     container.type = idsToTypes.get(objectIDContainer.value);
+    if(! container.value) {
+        return domain_error("no such object", term);
+    }
     return true;
 }
 
