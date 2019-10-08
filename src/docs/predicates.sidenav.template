@@ -26,9 +26,28 @@
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_dom_object_property_3, 'index_doc.html', 'set_dom_object_property/3']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_toggle_dom_element_class_3, 'index_doc.html', 'toggle_dom_element_class/3']}}</li>
 </ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_runtime, 'index_doc.html', 'runtime']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_prolog_flag_2, 'index_doc.html', 'current_prolog_flag/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_halt_0, 'index_doc.html', 'halt/0']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_repeat_0, 'index_doc.html', 'repeat/0']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_prolog_flag_2, 'index_doc.html', 'set_prolog_flag/2']}}</li>
+</ul></li>
 <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_terms, 'index_doc.html', 'terms']}}
 <ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_=_2, 'index_doc.html', '(=)/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_=.._2, 'index_doc.html', '(=..)/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_==_2, 'index_doc.html', '(==)/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_acyclic_term_1, 'index_doc.html', 'acyclic_term/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_arg_3, 'index_doc.html', 'arg/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_1, 'index_doc.html', 'atom/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_compare_3, 'index_doc.html', 'compare/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_compound_1, 'index_doc.html', 'compound/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_copy_term_2, 'index_doc.html', 'copy_term/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_float_1, 'index_doc.html', 'float/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_functor_3, 'index_doc.html', 'functor/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_ground_1, 'index_doc.html', 'ground/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_integer_1, 'index_doc.html', 'integer/1']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_subsumes_term_2, 'index_doc.html', 'subsumes_term/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_var_1, 'index_doc.html', 'var/1']}}</li>
 </ul></li>

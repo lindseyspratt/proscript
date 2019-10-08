@@ -308,13 +308,196 @@
 
 </ul>
 </div>
+<div class="indexed" id="pred_cat_runtime">
+<h4>runtime</h4>
+<ul>
+<li class="indexed" id="pred_current_prolog_flag_2">
+<h5>current_prolog_flag/2</h5>
+<br><b>current_prolog_flag</b>(+<i>Flag</i>:term,?<i>Value</i>:term) is det
+<br><b>current_prolog_flag</b>(-<i>Flag</i>:term,?<i>Value</i>:term) is nondet
+<br><br>Prolog Flag has Value. The defined flags are: bounded,
+    max_integer, min_integer, integer_rounding_function,
+    char_conversion, debug, max_arity, unknown, double_quotes, and dialect.
+<br>
+<br><b>arg</b>: <i>Flag</i>. a defined flag atom.
+<br><b>arg</b>: <i>Value</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: runtime.
+</li>
+
+<li class="indexed" id="pred_halt_0">
+<h5>halt/0</h5>
+<br><b>halt</b>() is det
+<br><br>Halt the WAM engine. The engine may be restarted - typically after evaluating the backtrack Javascript function.
+<br>
+<br><b>compat</b>: iso.
+<br><b>cat</b>: runtime.
+</li>
+
+<li class="indexed" id="pred_repeat_0">
+<h5>repeat/0</h5>
+<br><b>repeat</b>() is nondet
+<br><br>Always succeeds on initial call and on all redo calls (it backtracks without bound).
+<br>
+<br><b>compat</b>: iso.
+<br><b>cat</b>: runtime.
+</li>
+
+<li class="indexed" id="pred_set_prolog_flag_2">
+<h5>set_prolog_flag/2</h5>
+<br><b>set_prolog_flag</b>(+<i>Flag</i>:term,?<i>Value</i>:term) is det
+<br><br>Set Prolog Flag to Value. Only certain flags are settable: char_conversion, debug, unknown, and double_quotes.
+<br>
+<br><b>arg</b>: <i>Flag</i>. a defined flag atom.
+<br><b>arg</b>: <i>Value</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: runtime.
+</li>
+
+</ul>
+</div>
 <div class="indexed" id="pred_cat_terms">
 <h4>terms</h4>
 <ul>
+<li class="indexed" id="pred_=_2">
+<h5>(=)/2</h5>
+<br><b>=</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 unifies with Term2.
+<br>
+<br><b>arg</b>: <i>Term1</i>. any Prolog term.
+<br><b>arg</b>: <i>Term2</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_=.._2">
+<h5>(=..)/2</h5>
+<br><b>=..</b>(?<i>Term</i>:term,?<i>List</i>:list) is det
+<br><br>Term univ List. List is a list [Functor|Args] where functor(Term, Functor, Arity)
+     and Args are the arguments of Term (if any):
+     forall(between(1, Arity, N), (arg(N, Term, Arg), nth1(N, Args, Arg))).
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>arg</b>: <i>List</i>. a list.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_==_2">
+<h5>(==)/2</h5>
+<br><b>==</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 matches Term2. Two terms match if they are equal without binding any variables.
+<br>
+<br><b>arg</b>: <i>Term1</i>. any Prolog term.
+<br><b>arg</b>: <i>Term2</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
 <li class="indexed" id="pred_acyclic_term_1">
 <h5>acyclic_term/1</h5>
 <br><b>acyclic_term</b>(?<i>Term</i>:term) is det
 <br><br>Term is a acyclic.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_arg_3">
+<h5>arg/3</h5>
+<br><b>arg</b>(+<i>Position</i>:integer,+<i>Term</i>:term,?<i>Arg</i>:term) is det
+<br><br>Argument at Position of Term is Arg. 
+<br>
+<br><b>arg</b>: <i>Position</i>. an integer.
+<br><b>arg</b>: <i>Term</i>. a term.
+<br><b>arg</b>: <i>Arg</i>. a term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_atom_1">
+<h5>atom/1</h5>
+<br><b>atom</b>(?<i>Term</i>:term) is det
+<br><br>Term is an atom.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_compare_3">
+<h5>compare/3</h5>
+<br><b>compare</b>(?<i>Indicator</i>:integer,?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Indicator describes Term1 comparison with Term2. Any two Prolog terms are comparable.
+    Indicator is -1 if Term1 is less than Term 2, 0 if Term1 is identical to Term2, and 1 if Term1 is greater than Term2. 
+<br>
+<br><b>arg</b>: <i>Indicator</i>. -1, 0, or 1.
+<br><b>arg</b>: <i>Term1</i>. any Prolog term.
+<br><b>arg</b>: <i>Term2</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_compound_1">
+<h5>compound/1</h5>
+<br><b>compound</b>(?<i>Term</i>:term) is det
+<br><br>Term is compound - either a structure or a list.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_copy_term_2">
+<h5>copy_term/2</h5>
+<br><b>copy_term</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term2 is the same as Term1 but with distinct variables such that Term1 and Term2 subsume each other and the
+    variables of Term2 have not appeared in the proof tree before evaluating this predicate.
+<br>
+<br><b>arg</b>: <i>Term1</i>. a Prolog term.
+<br><b>arg</b>: <i>Term2</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_float_1">
+<h5>float/1</h5>
+<br><b>float</b>(?<i>Term</i>:term) is det
+<br><br>Term is a float (i.e. a number represented with a decimal point).
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_functor_3">
+<h5>functor/3</h5>
+<br><b>functor</b>(+<i>Term</i>:integer,?<i>Name</i>:term,?<i>Arity</i>:term) is det
+<br><b>functor</b>(-<i>Term</i>:integer,+<i>Name</i>:term,+<i>Arity</i>:term) is det
+<br><br>Term has functor Name and Arity arguments. 
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>arg</b>: <i>Name</i>. an atom.
+<br><b>arg</b>: <i>Arity</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_ground_1">
+<h5>ground/1</h5>
+<br><b>ground</b>(?<i>Term</i>:term) is det
+<br><br>Term is ground - is not a variable nor is it a compound containing a variable.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_integer_1">
+<h5>integer/1</h5>
+<br><b>integer</b>(?<i>Term</i>:term) is det
+<br><br>Term is an integer.
 <br>
 <br><b>arg</b>: <i>Term</i>. any Prolog term.
 <br><b>compat</b>: iso.

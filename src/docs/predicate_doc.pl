@@ -36,13 +36,61 @@
 
 :- module(predicate_doc, [doc/4]).
 
+% Terms
 doc(acyclic_term/1,
     acyclic_term(? < term * term) is det,
     "Term is a acyclic.",
     [arg(term, "any Prolog term"), compat(iso), cat(terms)] ).
 doc(subsumes_term/2, subsumes_term(? < term1 * term, ? < term2 * term) is det, "Term1 subsumes Term2.",
     [arg(term1, "any Prolog term"), arg(term2, "any Prolog term"), compat(iso), cat(terms)]).
+doc(compare/3, compare(? < indicator * integer, ? < term1 * term, ? < term2 * term) is det,
+    "Indicator describes Term1 comparison with Term2. Any two Prolog terms are comparable.
+    Indicator is -1 if Term1 is less than Term 2, 0 if Term1 is identical to Term2, and 1 if Term1 is greater than Term2. ",
+    [arg(indicator, "-1, 0, or 1"), arg(term1, "any Prolog term"), arg(term2, "any Prolog term"), compat(iso), cat(terms)]).
 doc(var/1, var(? < term * term) is det, "Term is a variable.", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
+doc(atom/1, atom(? < term * term) is det, "Term is an atom.", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
+doc(integer/1, integer(? < term * term) is det, "Term is an integer.", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
+doc(float/1, float(? < term * term) is det, "Term is a float (i.e. a number represented with a decimal point).", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
+doc(compound/1, compound(? < term * term) is det, "Term is compound - either a structure or a list.", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
+doc(ground/1, ground(? < term * term) is det, "Term is ground - is not a variable nor is it a compound containing a variable.", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
+doc(= /2, =(? < term1 * term, ? < term2 * term) is det, "Term1 unifies with Term2.",
+    [arg(term1, "any Prolog term"), arg(term2, "any Prolog term"), compat(iso), cat(terms)]).
+doc(== /2, ==(? < term1 * term, ? < term2 * term) is det, "Term1 matches Term2. Two terms match if they are equal without binding any variables.",
+    [arg(term1, "any Prolog term"), arg(term2, "any Prolog term"), compat(iso), cat(terms)]).
+doc(functor/3,
+    [functor(+ < term * integer, ? < name * term, ? < arity * term) is det,
+     functor(- < term * integer, + < name * term, + < arity * term) is det
+    ],
+    "Term has functor Name and Arity arguments. ",
+    [arg(term, "any Prolog term"), arg(name, "an atom"), arg(arity, "an integer"), compat(iso), cat(terms)]).
+doc(arg/3, arg(+ < position * integer, + < term * term, ? < arg * term) is det,
+    "Argument at Position of Term is Arg. ",
+    [arg(position, "an integer"), arg(term, "a term"), arg(arg, "a term"), compat(iso), cat(terms)]).
+doc(=.. /2, =..(? < term * term, ? < list * list) is det,
+    "Term univ List. List is a list [Functor|Args] where functor(Term, Functor, Arity)
+     and Args are the arguments of Term (if any):
+     forall(between(1, Arity, N), (arg(N, Term, Arg), nth1(N, Args, Arg))).",
+    [arg(term, "any Prolog term"), arg(list, "a list"), compat(iso), cat(terms)]).
+doc(copy_term/2, copy_term(? < term1 * term, ? < term2 * term) is det,
+    "Term2 is the same as Term1 but with distinct variables such that Term1 and Term2 subsume each other and the
+    variables of Term2 have not appeared in the proof tree before evaluating this predicate.",
+    [arg(term1, "a Prolog term"), arg(term2, "a Prolog term"), compat(iso), cat(terms)]).
+
+% Runtime
+doc(halt/0, halt is det, "Halt the WAM engine. The engine may be restarted - typically after evaluating the backtrack Javascript function.",
+    [compat(iso), cat(runtime)]).
+doc(current_prolog_flag/2,
+    [current_prolog_flag(+ < flag * term, ? < value * term) is det,
+     current_prolog_flag(- < flag * term, ? < value * term) is nondet],
+    "Prolog Flag has Value. The defined flags are: bounded,
+    max_integer, min_integer, integer_rounding_function,
+    char_conversion, debug, max_arity, unknown, double_quotes, and dialect.",
+    [arg(flag, "a defined flag atom"), arg(value, "a Prolog term"), compat(iso), cat(runtime)]).
+doc(set_prolog_flag/2, set_prolog_flag(+ < flag * term, ? < value * term) is det,
+    "Set Prolog Flag to Value. Only certain flags are settable: char_conversion, debug, unknown, and double_quotes.",
+    [arg(flag, "a defined flag atom"), arg(value, "a Prolog term"), compat(iso), cat(runtime)]).
+doc(repeat/0, repeat is nondet, "Always succeeds on initial call and on all redo calls (it backtracks without bound).",
+    [compat(iso), cat(runtime)]).
 
 % DOM
 doc(remove_dom_element_class/2,
