@@ -4388,7 +4388,7 @@ function wam_create_choicepoint(nextCP, prefix) {
     } else {
         // In this case, the top frame is a choicepoint. This is a bit easier: A choicepoint contains 7 saved special-purpose registers, the N root arguments
         // for the goal, and, happily, the value of N as the very first argument. Therefore, we can read the 0th entry of the current frame (at state.B)
-        // and add 9 to it to get the top of the stack.
+        // and add CP_SIZE (=10) to it to get the top of the stack.
         newB = state.B + memory[state.B] + CP_SIZE;
     }
 
