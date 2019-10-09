@@ -4562,14 +4562,32 @@ function wam1()
             {
                 let tmpE;
                 if (state.E > state.B) {
-                    tmpE = state.E + state.CP.code[state.CP.offset - 1] + 2;
+                    let nextEnvironmentOfst = state.CP.code[state.CP.offset - 1] + 2;
+                    // if(nextEnvironmentOfst > 10000) {
+                    //     dump_environments();
+                    //     dump_choicepoints();
+                    //     gcWrite('very large environment. size='+ nextEnvironmentOfst);
+                    // }
+                    tmpE = state.E + nextEnvironmentOfst;
                 } else {
                     tmpE = state.B + memory[state.B] + CP_SIZE;
                 }
+
+                // if(tmpE > HEAP_SIZE + 60000) {
+                //     dump_environments();
+                //     dump_choicepoints();
+                //     gcWrite('environment for large stack. new E='+tmpE);
+                // }
+
                 if (tmpE === undefined || isNaN(tmpE))
                     abort("Top of frame is garbage: " + tmpE);
-                if (tmpE < HEAP_SIZE || tmpE > HEAP_SIZE + STACK_SIZE)
-                    abort("Top of frame exceeds bounds in allocate: " + hex(tmpE));
+                if (tmpE < HEAP_SIZE ) {
+                    abort("Top of frame less than minimum stack address (HEAP_SIZE=" + HEAP_SIZE + ") in allocate: " + hex(tmpE));
+                } else if (tmpE > HEAP_SIZE + STACK_SIZE) {
+                    // dump_environments();
+                    // dump_choicepoints();
+                    abort("Top of frame greater than maximum stack address (HEAP_SIZE+STACK_SIZE="+HEAP_SIZE+"+"+STACK_SIZE+"="+(HEAP_SIZE+STACK_SIZE) + ") in allocate: " + hex(tmpE));
+                }
 
                 // Save old environment and continuation
                 memory[tmpE] = state.E;
@@ -8244,6 +8262,8 @@ function toUTF8Array(str) {
     return utf8;
 }
 // File gc.js
+let gc_environment = 'browser'; // 'console'
+
 function predicate_gc()
 {
     let msgIn = "Before GC, heap is " + state.H;
@@ -8882,6 +8902,75 @@ function display_gc_log() {
     // for(let msg of gc_log) {
     //     stdout('gc_debug: ' + msg + '\n');
     // }
+}
+
+function dump_environments(initial, envsize, cp)
+{
+    if(! initial){
+        dump_environments(state.E, state.CP.code[state.CP.offset - 1], state.CP);
+        return;
+    }
+
+    let e = initial;
+    let envcp = cp;
+    while (e !== HEAP_SIZE)
+    {
+        let predicate = functor_offset_to_predicate_string(envcp.predicate.key);
+
+        gcWrite('environment at ' + e + ' has ' + envsize + ' slots. predicate=' + predicate + ', cp.predicate.key=' + envcp.predicate.key + ', cp.offset=' + envcp.offset);
+        envcp = memory[e+1];
+        // work out the size of the previous environment, using the CP pointer saved in THIS environment.
+        // This is why we had to pass size in to mark_environments()
+        envsize = envcp.code[envcp.offset-1];
+        e = memory[e];
+    }
+}
+
+function functor_offset_to_predicate_string(ftor) {
+    let functorPair = ftable[ftor];
+    let predicate;
+    if(functorPair) {
+        let predicateName = atable[functorPair[0]];
+        let predicateArity = functorPair[1];
+        predicate = predicateName + '/' + predicateArity;
+    }
+    return predicate;
+}
+
+function dump_choicepoints()
+{
+    let b = state.B;
+    while (b !== 0)
+    {
+        b = dump_choicepoint(b);
+    }
+}
+
+function dump_choicepoint(b) {
+    let dynamicPortionSize = memory[b];
+
+    let backtrack_cp = memory[b + dynamicPortionSize + CP_CP];
+    var backtrack_envsize = backtrack_cp.code[backtrack_cp.offset-1];
+    //dump_environments(memory[b + dynamicPortionSize + CP_E], envsize, backtrack_cp);
+    let backtrack_predicate = functor_offset_to_predicate_string(backtrack_cp.predicate.key);
+    let backtrack_offset = backtrack_cp.offset;
+
+    let choice_cp = memory[b + dynamicPortionSize + CP_Next];
+    var choice_envsize = choice_cp.code[choice_cp.offset-1];
+    let choice_predicate = functor_offset_to_predicate_string(choice_cp.predicate.key);
+    let choice_offset = choice_cp.offset;
+
+    gcWrite('choicepoint at ' + b + ' has ' + dynamicPortionSize + ' dynamic slots. choice predicate=' + choice_predicate + ' (offset ' + choice_offset + '), backtrack predicate=' + backtrack_predicate + ' (offset ' + backtrack_offset + '), backtrack environment=' + memory[b + dynamicPortionSize + CP_E]);
+
+    return memory[b + dynamicPortionSize + CP_B];
+}
+
+function gcWrite(msg) {
+    if(gc_environment === 'console') {
+        print(msg);
+    } else if(gc_environment === 'browser') {
+        console.log(msg);
+    }
 }
 // File dom.js
 'use strict';

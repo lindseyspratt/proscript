@@ -724,16 +724,34 @@ function wam1()
                 let tmpE;
                 if (state.E > state.B) {
                     debug_msg("P=" + state.P + " Top frame is an environment, at " + state.E + " with previous environment of " + memory[state.E] + " and CP of " + memory[state.E + E_CP]);
-                    tmpE = state.E + state.CP.code[state.CP.offset - 1] + 2;
+                    let nextEnvironmentOfst = state.CP.code[state.CP.offset - 1] + 2;
+                    // if(nextEnvironmentOfst > 10000) {
+                    //     dump_environments();
+                    //     dump_choicepoints();
+                    //     gcWrite('very large environment. size='+ nextEnvironmentOfst);
+                    // }
+                    tmpE = state.E + nextEnvironmentOfst;
                 } else {
                     debug_msg("Top frame is a choicepoint, at " + state.B);
                     tmpE = state.B + memory[state.B] + CP_SIZE;
                 }
+
+                // if(tmpE > HEAP_SIZE + 60000) {
+                //     dump_environments();
+                //     dump_choicepoints();
+                //     gcWrite('environment for large stack. new E='+tmpE);
+                // }
+
                 debug_msg("Environment size is: " + state.CP.code[state.CP.offset - 1]);
                 if (tmpE === undefined || isNaN(tmpE))
                     abort("Top of frame is garbage: " + tmpE);
-                if (tmpE < HEAP_SIZE || tmpE > HEAP_SIZE + STACK_SIZE)
-                    abort("Top of frame exceeds bounds in allocate: " + hex(tmpE));
+                if (tmpE < HEAP_SIZE ) {
+                    abort("Top of frame less than minimum stack address (HEAP_SIZE=" + HEAP_SIZE + ") in allocate: " + hex(tmpE));
+                } else if (tmpE > HEAP_SIZE + STACK_SIZE) {
+                    // dump_environments();
+                    // dump_choicepoints();
+                    abort("Top of frame greater than maximum stack address (HEAP_SIZE+STACK_SIZE="+HEAP_SIZE+"+"+STACK_SIZE+"="+(HEAP_SIZE+STACK_SIZE) + ") in allocate: " + hex(tmpE));
+                }
 
                 debug_msg("Allocating an environment at " + tmpE + " Y0 is at " + (tmpE + 2) + " state.B is " + state.B);
                 // Save old environment and continuation

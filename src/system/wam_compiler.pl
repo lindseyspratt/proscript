@@ -948,6 +948,7 @@ compile_head_arg(Arg, State, S1, Ai, PermanentVariables, Opcodes, Tail):-
         get_variable(Arg, Ai, PermanentVariables, State, S1, Opcodes, Tail).
 
 compile_head_arg([Head|Tail], State, S2, Ai, PermanentVariables, [get_list(Ai)|O1], OpcodesTail):-
+        !,
         compile_head_unification([Head, Tail], State, S1, PermanentVariables, O1, O2, Unifications),
         complete_head_unification(Unifications, S1, S2, PermanentVariables, O2, OpcodesTail).
 
