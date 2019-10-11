@@ -387,6 +387,81 @@ function decode_instruction(predicateID, codePosition) {
             instructionSize = 3;
             break;
         }
+        case 44: // switch_on_term: [44, V, C, L, S]
+        {
+            let V = code[codePosition + 1];
+            let C = code[codePosition + 2];
+            let L = code[codePosition + 3];
+            let S = code[codePosition + 4];
+
+            instruction = 'switch_on_term(' + V + ', ' + C + ', ' + L + ', ' + S + ')';
+            instructionSize = 5;
+            break;
+        }
+        case 45: // switch_on_constant: [45, N, K1, V1, ..., KN, VN]
+        {
+            let N = code[codePosition + 1];
+            let table = '';
+            for(let ofst = 0;ofst < 2*N;ofst+=2) {
+                let K = code[codePosition + 1 + ofst];
+                let V = code[codePosition + 1 + ofst + 1];
+
+                let C = atable[VAL(K)];
+
+                table += ((table !== '') ? ', ' : '') + C + ' - ' + V;
+            }
+            instruction = 'switch_on_constant(' + N + ', [' + table + '])';
+            instructionSize = 2 + 2*N;
+            break;
+        }
+        case 46: // switch_on_structure: [46, N, K1, V1, ..., KN, VN]
+        {
+            let N = code[codePosition + 1];
+            let table = '';
+            for(let ofst = 0;ofst < 2*N;ofst+=2) {
+                let K = code[codePosition + 1 + ofst];
+                let V = code[codePosition + 1 + ofst + 1];
+
+                // K = k ^ (TAG_ATM << WORD_BITS)
+                let k = VAL(K);
+                let nameID = ftable[k][0];
+                let functor = atable[nameID];
+                let arity = ftable[k][1];
+
+                table += ((table !== '') ? ', ' : '') + functor + '/' + arity + ' - ' + V;
+            }
+            instruction = 'switch_on_structure(' + N + ', [' + table + '])';
+            instructionSize = 2 + 2*N;
+            break;
+        }
+        case 71: // try: [71, L]
+        {
+            let L = code[codePosition + 1];
+            instruction = 'try(' + L + ')';
+            instructionSize = 2;
+            break;
+        }
+        case 72: // retry: [72, L]
+        {
+            let L = code[codePosition + 1];
+            instruction = 'retry(' + L + ')';
+            instructionSize = 2;
+            break;
+        }
+        case 73: // trust: [73, L]
+        {
+            let L = code[codePosition + 1];
+            instruction = 'trust(' + L + ')';
+            instructionSize = 2;
+            break;
+        }
+        case 74: // goto_clause: [74, L]
+        {
+            let L = code[codePosition + 1];
+            instruction = 'goto_clause(' + L + ')';
+            instructionSize = 2;
+            break;
+        }
         case 254: // nop2: [254, 0]
         {
             instruction = 'nop2(0)';

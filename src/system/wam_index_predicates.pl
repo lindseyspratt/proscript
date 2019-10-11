@@ -1,6 +1,9 @@
 :-module(wam_index_predicates, [wam_index_predicates/0]).
 
+:- use_module('../tools/wam_bootstrap').
 :- use_module('../tools/wam_bootstrap_util').
+:- use_module(wam_assemble).
+
 /*
 Compiled predicates are currently represented as
 {PredicateID : {is_public:Flag, clauses:{Key0 : {code: Codes, key:Key0}, Key1 : {code: Codes1, key:Key1}}, clause_keys:[Key0, Key1], next_key:Key2, key:PredicateID}, ...}
@@ -26,18 +29,99 @@ baz(f(b)) :- sb.
 baz(f(c)) :- sc.
 
 index pseudo-clause:
-[try_me_else(4),
-switch_on_term(0,fail,2,3),
-[switch_on_list(1,[clause_offset(1)]),
-switch_on_structure(1,[0-clause_offset(0)])],
-retry_me_else(6),
-goto_clause(2-[29,3,15,1,1,0,4,4]),
+
+abstract instructions:
+[
+% Sequence 1
+label(_46724),
+try_me_else(_46756),
+switch_on_term(0,fail,clause_offset(1),_46746),
+label(_46746),
+switch_on_structure(1,[0-clause_offset(0)]),
+
+% Sequence 2
+label(_46756),
+retry_me_else(_47082),
+goto_clause(2),
+
+% Sequence 3
+label(_47082),
 trust_me,
-switch_on_term(3,8,fail,9),
-[switch_on_constant(1,[14-clause_offset(3)]),
-switch_on_structure(1,[0-sequence_offset(10,0)]),
+switch_on_term(3,_47110,fail,_47114),
+label(_47110),
+switch_on_constant(1,[14-clause_offset(3)]),
+label(_47114),
+switch_on_structure(1,[0-_47698]),
+label(_47698),
 try(4),
-trust(5)]]
+trust(5)
+]
+
+labelled instruction words:
+
+% 0x80000000 = 2147483648
+% 2147483659 - 0x80000000 = 11
+
+[
+% Sequence 1
+% try_me_else(_46756)
+0-28,
+1-2147483659, -> offset 11
+
+% switch_on_term(0,fail,clause_offset(1),_46746)
+2-44,
+3-0,
+4-0,
+5-1,
+6-2147483655, -> offset 7
+
+% switch_on_structure(1,[0-clause_offset(0)]),
+7-46,
+8-1,
+9-0,
+10-0,
+
+% Sequence 2
+% retry_me_else(_47082),
+11-29,
+12-2147483663, % -> offset 15
+
+% goto_clause(2),
+13-74,
+14-2,
+
+% Sequence 3
+% trust_me,
+15-30,
+16-0,
+
+% switch_on_term(3,_47110,fail,_47114),
+17-44,
+18-3,
+19-2147483670, % -> offset 22
+20-0,
+21-2147483674, % -> offset 26
+
+% switch_on_constant(1,[14-clause_offset(3)]),
+22-45,
+23-1,
+24-14,
+25-3,
+
+% switch_on_structure(1,[0-_47698]),
+26-46,
+27-1,
+28-0,
+29-2147483678, % -> offset 30
+
+% try(4),
+30-71,
+31-4,
+
+% trust(5)
+32-73,
+33-5]
+
 */
 
 wam_index_predicates :-
@@ -71,7 +155,11 @@ wam_index_clauses1(Clauses, _PredicateID) :-
     clause_sequences(Clauses, Sequence, SequencesTail),
     trim_sequences(Sequences, TrimmedSequences),
     index_sequences(TrimmedSequences, 0, _, IndexedSequences),
-    writeln(IndexedSequences).
+    writeln(IndexedSequences),
+    reset_compile_buffer,
+    assemble(IndexedSequences, 0),
+    setof(N-Code, ctable(N, Code), Codes),
+    writeln(Codes).
 
 
 % clause_sequences(Clauses, Sequences).
@@ -184,12 +272,11 @@ index_sequences1([H|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, switch_on_
 index_sequence([H|T], Ctr, CtrOut, ClauseOffset, C, L, S, SeqIndexed, SeqIndexedTailFinal) :-
     H = ClauseOffset-_,
     analyze([H|T], Constants, Lists, Structures),
-    group(Constants, constant, GroupedConstants, SwitchCtrOut, 0, GroupCtrNext1, GroupInstructions, GroupTail1),
-    group(Lists, list, GroupedLists, SwitchCtrOut, GroupCtrNext1, GroupCtrNext2, GroupTail1, GroupTail2),
-    group(Structures, structure, GroupedStructures, SwitchCtrOut, GroupCtrNext2, GroupCtrOut, GroupTail2, SeqIndexedTailFinal),
+    group(Constants, constant, GroupedConstants,    0,              GroupCtrNext1,  GroupInstructions,  GroupTail1),
+    group(Lists, list, [L],                        GroupCtrNext1,  GroupCtrNext2,  GroupTail1,         GroupTail2),
+    group(Structures, structure, GroupedStructures, GroupCtrNext2,  GroupCtrOut,    GroupTail2,         SeqIndexedTailFinal),
     switch_instruction(GroupedConstants, constant, C, Ctr, CtrNext1, SeqIndexed, SeqIndexedTail1),
-    switch_instruction(GroupedLists,list,  L, CtrNext1, CtrNext2, SeqIndexedTail1, SeqIndexedTail2),
-    switch_instruction(GroupedStructures, structure, S, CtrNext2, SwitchCtrOut, SeqIndexedTail2, GroupInstructions),
+    switch_instruction(GroupedStructures, structure, S, CtrNext1, SwitchCtrOut, SeqIndexedTail1, GroupInstructions),
     CtrOut is GroupCtrOut + SwitchCtrOut.
 
 analyze([], [], [], []).
@@ -207,10 +294,10 @@ analyze([H|T], Constants, Lists, [H|Structures]) :-
     analyze(T, Constants, Lists, Structures).
 
 % group(ClauseInfos, Type, GroupedTypes, GroupInstructions, GroupTail).
-group(ClauseInfos, list, GroupedConstants, Base, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
+group(ClauseInfos, list, GroupedConstants, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
     !,
-    list_group_instruction(ClauseInfos, GroupedConstants, Base, CtrIn, CtrOut, GroupInstructions, GroupTail).
-group(ClauseInfos, Type, GroupedConstants, Base, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
+    list_group_instruction(ClauseInfos, GroupedConstants, CtrIn, CtrOut, GroupInstructions, GroupTail).
+group(ClauseInfos, Type, GroupedConstants, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
     (Type = constant
       -> constants(ClauseInfos, ConstantClauses)
     ;
@@ -218,7 +305,7 @@ group(ClauseInfos, Type, GroupedConstants, Base, CtrIn, CtrOut, GroupInstruction
       -> structures(ClauseInfos, ConstantClauses)
     ),
     (setof(Value-Clauses, setof(Clause, member(Value-Clause, ConstantClauses), Clauses), Groups)
-      -> group_instructions(Groups, GroupedConstants, Base, CtrIn, CtrOut, GroupInstructions, GroupTail)
+      -> group_instructions(Groups, GroupedConstants, CtrIn, CtrOut, GroupInstructions, GroupTail)
     ;
      CtrIn = CtrOut,
      GroupInstructions = GroupTail
@@ -236,20 +323,20 @@ structures([H|T], [V-H|TC]) :-
     clause_structure_in_first_arg(Clause, V),
     structures(T, TC).
 
-list_group_instruction([], [], _, Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
-list_group_instruction([Offset-_], [clause_offset(Offset)], _, Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
-list_group_instruction([C1,C2|CT], [sequence_offset(Base, CtrIn)], Base, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
+list_group_instruction([], [fail], Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
+list_group_instruction([Offset-_], [clause_offset(Offset)], Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
+list_group_instruction([C1,C2|CT], [GroupLabel], CtrIn, CtrOut, [label(GroupLabel)|GroupInstructions], GroupTail) :-
     % try C1, retry C2, ... , trust Cn
     group_instruction1([C1,C2|CT], CtrIn, CtrOut, GroupInstructions, GroupTail).
 
 % group_instructions(Groups, GroupedConstants, GroupInstructions, GroupTail)
-group_instructions([], [], _Base, Ctr, Ctr, GroupInstructions, GroupInstructions).
-group_instructions([H|T], [HG|TG], Base, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
-    group_instruction(H, HG, Base, CtrIn, CtrNext, GroupInstructions, GroupNext),
-    group_instructions(T, TG, Base, CtrNext, CtrOut, GroupNext, GroupTail).
+group_instructions([], [], Ctr, Ctr, GroupInstructions, GroupInstructions).
+group_instructions([H|T], [HG|TG], CtrIn, CtrOut, GroupInstructions, GroupTail) :-
+    group_instruction(H, HG, CtrIn, CtrNext, GroupInstructions, GroupNext),
+    group_instructions(T, TG, CtrNext, CtrOut, GroupNext, GroupTail).
 
-group_instruction(Value-[Offset-_], Value-clause_offset(Offset), _, Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
-group_instruction(Value-[C1,C2|CT], Value-GroupLabel, _Base, CtrIn, CtrOut, [label(GroupLabel)|GroupInstructions], GroupTail) :-
+group_instruction(Value-[Offset-_], Value-clause_offset(Offset), Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
+group_instruction(Value-[C1,C2|CT], Value-GroupLabel, CtrIn, CtrOut, [label(GroupLabel)|GroupInstructions], GroupTail) :-
     % try C1, retry C2, ... , trust Cn
     group_instruction1([C1,C2|CT], CtrIn, CtrOut, GroupInstructions, GroupTail).
 
@@ -273,23 +360,8 @@ switch_instruction(GroupedTerms, Type, Label, K, L, [label(Label), Instruction|S
     length(GroupedTerms, N),
     type_instruction(Type, N, GroupedTerms, Instruction).
 
-type_instruction(constant, N, GroupedTerms, switch_on_constant(N, GroupedTerms)).
-type_instruction(structure, N, GroupedTerms, switch_on_structure(N, GroupedTerms)).
-type_instruction(list, N, GroupedTerms, switch_on_list(N, GroupedTerms)).
-
-switch_instruction1([], _Type, []).
-switch_instruction1([Address-Clause|T], Type, [HC-Address|TC]) :-
-    (Type = constant
-      -> clause_constant_in_first_arg(Clause, HC)
-     ;
-     Type = list
-      -> clause_list_in_first_arg(Clause, HC)
-     ;
-     Type = structure
-      -> clause_structure_in_first_arg(Clause, HC)
-    ),
-    switch_instruction1(T, Type, TC).
-
+type_instruction(constant, N, GroupedTerms, switch_on_constant(N, SortedGroupedTerms)) :- sort(GroupedTerms, SortedGroupedTerms).
+type_instruction(structure, N, GroupedTerms, switch_on_structure(N, SortedGroupedTerms)) :- sort(GroupedTerms, SortedGroupedTerms).
 
 clause_has_var_in_first_arg(_ClauseOffset-[_,_,15,_,_,_|_]).
 
