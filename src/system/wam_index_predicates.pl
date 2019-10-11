@@ -70,7 +70,7 @@ wam_index_clauses1(Clauses, _PredicateID) :-
     Sequences = [Sequence|SequencesTail],
     clause_sequences(Clauses, Sequence, SequencesTail),
     trim_sequences(Sequences, TrimmedSequences),
-    index_sequences(TrimmedSequences, 0, IndexedSequences),
+    index_sequences(TrimmedSequences, 0, _, IndexedSequences),
     writeln(IndexedSequences).
 
 
@@ -138,53 +138,55 @@ trim_sequence([H|T], [[H|T]|TrimmedTail], TrimmedTail).
 % instructions targets a base clause (plus 1 instruction).
 
 index_sequences([], _, _, []).
-index_sequences([[H]|T], Ctr, [Instruction, goto_clause(H)|TI]) :-
+index_sequences([[H]|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, goto_clause(Offset)|TI]) :-
     clause_has_var_in_first_arg(H),
     !,
+    H = Offset-_,
     (T = [_|_]
-       -> Instruction = try_me_else(CtrOut)
+       -> Instruction = try_me_else(NextSeqLabel)
      ;
      Instruction = trust_me
     ),
     CtrOut is Ctr + 2, % '2' for Instruction and goto_clause
-    index_sequences1(T, CtrOut, TI).
-index_sequences([H|T], Ctr, [Instruction, switch_on_term(V, C, L, S), HI|TI]) :-
+    index_sequences1(T, CtrOut, NextSeqLabel, TI).
+index_sequences([H|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, switch_on_term(V, C, L, S)|HI]) :-
     (T = [_|_]
-       -> Instruction = try_me_else(CtrOut)
+       -> Instruction = try_me_else(NextSeqLabel)
      ;
      Instruction = trust_me
     ),
     CtrNext is Ctr + 2, % '2' for Instruction and switch_on_term
-    index_sequence(H, CtrNext, CtrOut, V, C, L, S, HI),
-    index_sequences1(T, CtrOut, TI).
+    index_sequence(H, CtrNext, CtrOut, V, C, L, S, HI, TI),
+    index_sequences1(T, CtrOut, NextSeqLabel, TI).
 
-index_sequences1([], _, []).
-index_sequences1([[H]|T], Ctr, [Instruction, goto_clause(H)|TI]) :-
+index_sequences1([], _, _, []).
+index_sequences1([[H]|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, goto_clause(Offset)|TI]) :-
     clause_has_var_in_first_arg(H),
     !,
+     H = Offset-_,
     (T = [_|_]
-       -> Instruction = retry_me_else(CtrOut)
+       -> Instruction = retry_me_else(NextSeqLabel)
      ;
      Instruction = trust_me
     ),
     CtrOut is Ctr + 2, % '2' for Instruction and goto_clause
-    index_sequences1(T, CtrOut, TI).
-index_sequences1([H|T], Ctr, [Instruction, switch_on_term(V, C, L, S), HI|TI]) :-
+    index_sequences1(T, CtrOut, NextSeqLabel, TI).
+index_sequences1([H|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, switch_on_term(V, C, L, S)|HI]) :-
     (T = [_|_]
-       -> Instruction = retry_me_else(CtrOut)
+       -> Instruction = retry_me_else(NextSeqLabel)
      ;
      Instruction = trust_me
     ),
     CtrNext is Ctr + 2, % '2' for Instruction and switch_on_term
-    index_sequence(H, CtrNext, CtrOut, V, C, L, S, HI),
-    index_sequences1(T, CtrOut, TI).
+    index_sequence(H, CtrNext, CtrOut, V, C, L, S, HI, TI),
+    index_sequences1(T, CtrOut, NextSeqLabel, TI).
 
-index_sequence([H|T], Ctr, CtrOut, ClauseOffset, C, L, S, SeqIndexed) :-
+index_sequence([H|T], Ctr, CtrOut, ClauseOffset, C, L, S, SeqIndexed, SeqIndexedTailFinal) :-
     H = ClauseOffset-_,
     analyze([H|T], Constants, Lists, Structures),
     group(Constants, constant, GroupedConstants, SwitchCtrOut, 0, GroupCtrNext1, GroupInstructions, GroupTail1),
     group(Lists, list, GroupedLists, SwitchCtrOut, GroupCtrNext1, GroupCtrNext2, GroupTail1, GroupTail2),
-    group(Structures, structure, GroupedStructures, SwitchCtrOut, GroupCtrNext2, GroupCtrOut, GroupTail2, []),
+    group(Structures, structure, GroupedStructures, SwitchCtrOut, GroupCtrNext2, GroupCtrOut, GroupTail2, SeqIndexedTailFinal),
     switch_instruction(GroupedConstants, constant, C, Ctr, CtrNext1, SeqIndexed, SeqIndexedTail1),
     switch_instruction(GroupedLists,list,  L, CtrNext1, CtrNext2, SeqIndexedTail1, SeqIndexedTail2),
     switch_instruction(GroupedStructures, structure, S, CtrNext2, SwitchCtrOut, SeqIndexedTail2, GroupInstructions),
@@ -247,7 +249,7 @@ group_instructions([H|T], [HG|TG], Base, CtrIn, CtrOut, GroupInstructions, Group
     group_instructions(T, TG, Base, CtrNext, CtrOut, GroupNext, GroupTail).
 
 group_instruction(Value-[Offset-_], Value-clause_offset(Offset), _, Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
-group_instruction(Value-[C1,C2|CT], Value-sequence_offset(Base, CtrIn), Base, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
+group_instruction(Value-[C1,C2|CT], Value-GroupLabel, _Base, CtrIn, CtrOut, [label(GroupLabel)|GroupInstructions], GroupTail) :-
     % try C1, retry C2, ... , trust Cn
     group_instruction1([C1,C2|CT], CtrIn, CtrOut, GroupInstructions, GroupTail).
 
@@ -266,7 +268,7 @@ group_instruction2([Offset-_], CtrIn, CtrOut, [trust(Offset)|GroupTail], GroupTa
     CtrOut is CtrIn + 1.
 
 switch_instruction([], _, fail, K, K, SeqIndexed, SeqIndexed) :- !.
-switch_instruction(GroupedTerms, Type, K, K, L, [Instruction|SeqIndexedTail], SeqIndexedTail) :-
+switch_instruction(GroupedTerms, Type, Label, K, L, [label(Label), Instruction|SeqIndexedTail], SeqIndexedTail) :-
     L is K + 1,
     length(GroupedTerms, N),
     type_instruction(Type, N, GroupedTerms, Instruction).
