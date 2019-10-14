@@ -136,7 +136,8 @@ function initialize()
 {
     let trace_ftor = VAL(lookup_functor('debugger:$traceR', 3));
     let trace_predicate = predicates[trace_ftor];
-    let trace_code = trace_predicate.clauses[trace_predicate.clause_keys[0]].code;
+    let key = (trace_predicate.index) ? trace_predicate.index : trace_predicate.clause_keys[0];
+    let trace_code = trace_predicate.clauses[key].code;
 
     state = {H: 0,
              HB: 0,
@@ -482,7 +483,8 @@ function wam_complete_call_or_execute(predicate) {
         state.B0 = state.B;
         state.num_of_args = ftable[code[state.P + 1]][1];
         state.current_predicate = predicate;
-        code = predicate.clauses[predicate.clause_keys[0]].code;
+        let key = (predicate.index) ? predicate.index : predicate.clause_keys[0];
+        code = predicate.clauses[key].code;
        if(! code) {
            throw 'code is undefined';
        }
@@ -1524,27 +1526,188 @@ function wam1()
             state.P += 3;
         }
             continue;
-         // All the floating point operations are here because I added them as an afterthought!
-        case 50: // get_float I from Ai            
-            sym = deref(register[code[state.P+2]]);
-            arg = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
-            state.P += 3;
-            if (TAG(sym) === TAG_REF)
-            {
-                // If Ai is variable, then we need to bind. This is when foo(7) is called like foo(X).
-                bind(sym, arg);
+
+        case 44: // switch_on_term: [44, V, C, L, S]
+        {
+            let codePosition = state.P;
+            let argument1 = deref(register[0]);
+
+            let V = code[codePosition + 1];
+            let C = code[codePosition + 2];
+            let L = code[codePosition + 3];
+            let S = code[codePosition + 4];
+
+            switch(TAG(argument1)) {
+                case TAG_REF:
+                    gotoAddress(V); break;
+                case TAG_ATM:
+                case TAG_FLT:
+                case TAG_INT:
+                    gotoAddress(C); break;
+                case TAG_LST:
+                    gotoAddress(L); break;
+                case TAG_STR:
+                    gotoAddress(S); break;
+                default:
+                    throw('invalid TAG ' + TAG(argument1) + ' on argument1 with value ' + VAL(argument1));
             }
-            else if (sym !== arg)
-            {
-                debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
-                if (!backtrack())
-                    return wamExit(false);
+        }
+        continue;
+
+        case 45: // switch_on_constant: [45, N, K1, V1, ..., KN, VN]
+        {
+            let codePosition = state.P;
+            let argument1 = deref(register[0]);
+            let tableStartPosition = codePosition + 2; // points at K1.
+            let N = code[codePosition + 1];
+            let result = search_table(argument1, tableStartPosition, N);
+            if(result.found) {
+                gotoAddress(result.inst);
+            } else {
+                backtrack();
             }
+        }
+        continue;
+
+        case 46: // switch_on_structure: [46, N, K1, V1, ..., KN, VN]
+        {
+            let codePosition = state.P;
+            let argument1 = deref(register[0]);
+            let predicateIndicator = memory[VAL(argument1)];
+            let tableStartPosition = codePosition + 2; // points at K1.
+            let N = code[codePosition + 1];
+            let result = search_table(predicateIndicator, tableStartPosition, N);
+            if(result.found) {
+                gotoAddress(result.inst);
+            } else {
+                backtrack();
+            }
+        }
             continue;
+
+        case 71: // try: [71, L]
+        {
+            let codePosition = state.P;
+            let nextCP = {
+                code: code,
+                predicate: state.current_predicate,
+                offset: state.P + 2
+            };
+            wam_create_choicepoint(nextCP, []);
+            gotoAddress(L);
+        }
+        continue;
+
+        case 72: // retry: [72, L]
+        {
+            // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
+            let arity = memory[state.B];
+            debug_msg("retry: " + state.B + " with saved register count " + memory[state.B] + " and retry point " + code[state.P + 1]);
+            for (let i = 0; i < arity; i++)
+                register[i] = memory[state.B + i + 1];
+            // Now restore all the special-purpose registers
+            if (memory[state.B + arity + CP_E] < HEAP_SIZE)
+                abort("Top of frame contains E which is in the heap");
+            if (memory[state.B + arity + CP_E] > HEAP_SIZE + STACK_SIZE)
+                abort("Top of frame contains E which exceeds the stack");
+            debug_msg("top of frame at " + state.B + " is OK");
+            state.E = memory[state.B + arity + CP_E];
+            state.CP = memory[state.B + arity + CP_CP];
+            let next = state.P + 2;
+
+            debug_msg("Retry: Set CP to " + state.CP);
+
+            memory[state.B + arity + CP_Next] = {
+                    code: code,
+                    predicate: state.current_predicate,
+                    offset: next
+                };
+
+            unwind_trail(memory[state.B + arity + CP_TR], state.TR);
+
+            state.TR = memory[state.B + arity + CP_TR];
+            state.H = memory[state.B + arity + CP_H];
+            debug_msg("case 72: state.HB <- " + state.HB);
+            state.HB = state.H;
+            if (state.trace_call !== 'no_trace') {
+                let traceCallPL = memory[state.B + arity + CP_TC];
+                state.trace_call = atable[VAL(traceCallPL)];
+                if(! state.trace_call) {
+                    throw 'retry backtrack trace_call is undefined';
+                }
+                debug_msg("Set state.trace_call " + state.trace_call + " from choicepoint at " + state.B);
+                state.trace_info = memory[state.B + arity + CP_TI];
+            }
+            gotoAddress(code[state.P+1]);
+        }
+            continue;
+
+        case 73: // trust(L)
+        {
+            // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
+            let n = memory[state.B];
+            debug_msg("trusting last clause: " + state.B + " with saved register count " + memory[state.B] + " and HB was " + state.HB + ". Choicepoint has " + n + " saved registers.");
+            for (let i = 0; i < n; i++) {
+                debug_msg("Restoring register " + i + " to " + hex(memory[state.B + i + 1]));
+                register[i] = memory[state.B + i + 1];
+            }
+            // Now restore all the special-purpose registers
+            if (memory[state.B + n + CP_E] < HEAP_SIZE || memory[state.B + n + CP_E] > HEAP_SIZE + STACK_SIZE)
+                abort("Top of frame exceeds bounds in trust. Read from memory[" + (state.B + n + CP_E) + "]. State.B is " + state.B);
+            state.E = memory[state.B + n + CP_E];
+            state.CP = memory[state.B + n + CP_CP];
+            debug_msg("trust: Set CP to " + state.CP);
+            unwind_trail(memory[state.B + n + CP_TR], state.TR);
+            state.TR = memory[state.B + n + CP_TR];
+            state.H = memory[state.B + n + CP_H];
+            if (state.trace_call !== 'no_trace') {
+                let traceCallPL = memory[state.B + n + CP_TC];
+                state.trace_call = atable[VAL(traceCallPL)];
+                if(! state.trace_call) {
+                    throw 'trust backtrack trace_call is undefined';
+                }
+                debug_msg("state.trace_call is now set back to " + state.trace_call + " from choicepoint at " + state.B);
+                state.trace_info = memory[state.B + n + CP_TI];
+            }
+            state.B = memory[state.B + n + CP_B];
+            state.HB = memory[state.B + memory[state.B] + CP_H];
+            debug_msg("state.B is now set back to " + state.B + " and state.HB is set back to " + state.HB);
+            debug_msg("state.E is now set back to " + state.E);
+            //state.HB = memory[state.B + n + CP_H];
+            debug_msg("case 73: state.HB reset to " + state.HB);
+            gotoAddress(code[state.P + 1]);
+        }
+            continue;
+
+            // All the floating point operations are here because I added them as an afterthought!
+        case 50: // get_float I from Ai
+        sym = deref(register[code[state.P+2]]);
+        arg = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
+        state.P += 3;
+        if (TAG(sym) === TAG_REF)
+        {
+            // If Ai is variable, then we need to bind. This is when foo(7) is called like foo(X).
+            bind(sym, arg);
+        }
+        else if (sym !== arg)
+        {
+            debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
+            if (!backtrack())
+                return wamExit(false);
+        }
+        continue;
+
+        case 74: //    goto_clause: [74, L]
+        {
+            gotoAddress(code[state.P + 1]);
+        }
+        continue;
+
         case 51: // put_float I into Ai
             register[code[state.P+2]] = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
             state.P += 3;
-            continue;           
+            continue;
+
         case 52: // unify_float
             if (state.mode === READ)
             {
@@ -1590,6 +1753,42 @@ function wam1()
         }        
     }
     return wamExit(true);
+}
+
+function gotoAddress(address) {
+    if((address & 0x80000000) === 0) {
+        // address is a clause index in current predicate. 'Go' to that clause and set the
+        // program pointer to skip the first instruction (two words): this
+        // instruction is always NOP, try_me_else, retry_me_else, or trust_me.
+        code = state.current_predicate.clauses[address].code;
+        if(! code) {
+            throw('code is undefined for gotoAddress '+ address + '.');
+        }
+        state.P = 2; // skip the opening instruction.
+    } else {
+        // address is a position in the current clause code.
+        state.P = address ^ 0x80000000;
+        if(! code[state.P]) {
+            throw('instruction ' + state.P + ' undefined for code of gotoAddress.');
+        }
+    }
+}
+
+function search_table(value, tableStartPosition, tableSize) {
+    // The table is a sequence of tableSize pairs of key-value words
+    // starting at code[tableStartPosition].
+    // The pairs are in Prolog term order by keys.
+    // For a large table this function can use a binary search.
+    // For small tables it is sufficient to do a linear search.
+
+    for(let searchPosition = tableStartPosition;searchPosition < tableSize;searchPosition+=2) {
+        let key = code[searchPosition];
+        if(key === value) {
+            return {found: true, value: code[searchPosition+1]};
+        }
+    }
+
+    return {found: false};
 }
 
 function predicate_suspend_set(value) {

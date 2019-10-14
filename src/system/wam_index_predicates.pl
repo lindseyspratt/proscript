@@ -150,7 +150,7 @@ wam_index_clauses([_], _PredicateID).
 wam_index_clauses([H1, H2|T], PredicateID) :-
     wam_index_clauses1([H1, H2|T], PredicateID).
 
-wam_index_clauses1(Clauses, _PredicateID) :-
+wam_index_clauses1(Clauses, PredicateID) :-
     Sequences = [Sequence|SequencesTail],
     clause_sequences(Clauses, Sequence, SequencesTail),
     trim_sequences(Sequences, TrimmedSequences),
@@ -159,7 +159,19 @@ wam_index_clauses1(Clauses, _PredicateID) :-
     reset_compile_buffer,
     assemble(IndexedSequences, 0),
     setof(N-Code, ctable(N, Code), Codes),
-    writeln(Codes).
+    writeln(Codes),
+    sequences_ids(TrimmedSequences, SequenceIDs),
+    edit_clauses_for_index_sequences(SequenceIDs, PredicateID),
+    add_index_clause_to_predicate(PredicateID).
+
+sequences_ids([], []).
+sequences_ids([H|T], [HI|TI]) :-
+    sequence_ids(H, HI),
+    sequences_ids(T, TI).
+
+sequence_ids([], []).
+sequence_ids([ID-_|T], [ID|TIDs]) :-
+    sequence_ids(T, TIDs).
 
 
 % clause_sequences(Clauses, Sequences).

@@ -1,6 +1,7 @@
 :- module(wam_bootstrap_util, [lookup_atom/2, lookup_float/2, lookup_functor/3, lookup_dynamic_functor/3, emit_code/2, compile_message/1,
     ftable/2, fltable/2, atable/2, clause_table/5, fptable/2, ctable/2, itable/1, stable/1, dtable/1,
     'pls$module_export'/3, 'pls$import'/2, 'pls$meta_predicate'/3,
+    add_index_clause_to_predicate/1, edit_clauses_for_index_sequences/2,
     add_clause_to_predicate/3, add_clause_to_aux/4, add_clause_to_existing/2]).
 
 :-dynamic(ftable/2). % functors
@@ -62,6 +63,36 @@ compile_message(A):-
     writeln(A).
 */
 compile_message(_).
+
+add_index_clause_to_predicate(Predicate) :-
+        setof(N-Code, T^(ctable(T, Code), N is T /\ 0x7fffffff), SortedCodes),
+        findall(Code, member(_-Code, SortedCodes), Codes),
+        setof(ID, OtherCodes^Head^Body^clause_table(Predicate, ID, OtherCodes, Head, Body), IDs),
+        append(_, [MaxID], IDs),
+        IndexID is MaxID + 1,
+        assertz(clause_table(Predicate, IndexID, Codes, index, index)).
+
+edit_clauses_for_index_sequences([], _).
+edit_clauses_for_index_sequences([H|T], Predicate) :-
+        edit_clauses_for_index_sequence(H, Predicate),
+        edit_clauses_for_index_sequences(T, Predicate).
+
+edit_clauses_for_index_sequence([Only], Predicate) :-
+        modify_clause_control_instruction(Only, [30,0], Predicate). % trust_me
+edit_clauses_for_index_sequence([First, Second|Rest], Predicate) :-
+        modify_clause_control_instruction(First, [28,Second], Predicate), % try_me_else
+        edit_clauses_for_index_sequence1([Second|Rest], Predicate).
+
+edit_clauses_for_index_sequence1([Last], Predicate) :-
+        modify_clause_control_instruction(Last, [30,0], Predicate). % trust_me
+edit_clauses_for_index_sequence1([First, Second|Rest], Predicate) :-
+        modify_clause_control_instruction(First, [29,Second], Predicate), % retry_me_else
+        edit_clauses_for_index_sequence1([Second|Rest], Predicate).
+
+modify_clause_control_instruction(Index, Control, Predicate) :-
+        retract(clause_table(Predicate, Index, [_,_|BodyCodes], Head, Body)),
+        append(Control, BodyCodes, FullCodes),
+        assertz(clause_table(Predicate, Index, FullCodes, Head, Body)).
 
 add_clause_to_predicate(Name/Arity, Head, Body):-
         setof(N-Code, T^(ctable(T, Code), N is T /\ 0x7fffffff), SortedCodes),

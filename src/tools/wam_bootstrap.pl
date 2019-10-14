@@ -323,7 +323,9 @@ dump_predicate(PredicateAtom) :-
        )
        ,
        (dtable(Functor) -> Dynamic = 'true';Dynamic = 'false'),
-       format(atom(PredicateAtom), '~w: {is_public:~w, clauses:{~w}, clause_keys:[~w], next_key:~w, key:~w}', [Functor, Dynamic, ClauseAtom, IndexAtom, I, Functor]).
+       (clause_table(Functor, IndexID, _Clause, index, index) -> format(atom(IndexClauseAtom), ', index: ~w', [IndexID]); IndexClauseAtom = ''),
+       format(atom(PredicateAtom), '~w: {is_public:~w, clauses:{~w}, clause_keys:[~w], next_key:~w, key:~w~w}',
+        [Functor, Dynamic, ClauseAtom, IndexAtom, I, Functor, IndexClauseAtom]).
 
 % add_meta_predicate(Functor, Arity, ArgTypes)
 
