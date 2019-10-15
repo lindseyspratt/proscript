@@ -407,6 +407,7 @@ reset_compile_buffer:-
 reset:-
         retractall(ctable(_, _)),
         retractall(clause_table(_,_,_,_,_)),
+        retractall(indexed_predicate(_)),
         retractall(atable(_,_)),
         retractall(ftable(_,_)),
         retractall(fptable(_,_)),
@@ -658,3 +659,4 @@ concat_list([H|T], A, B) :-
     atom_concat(A, HA, X)
     ),
     concat_list(T, X, B).
+

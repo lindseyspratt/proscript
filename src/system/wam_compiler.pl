@@ -80,6 +80,7 @@ Some gotchas:
 
 :- use_module(wam_assemble).
 :- use_module(wam_util).
+:- use_module(wam_index_predicates).
 
 
 :-ensure_loaded('../tools/testing').
@@ -1439,7 +1440,9 @@ compile_files([File|Files]):-
         !,
         compile_files(Files).
 
-
+compile_file(index(Mode)) :-
+    !,
+    set_index_mode(Mode).
 compile_file(Source):-
   %writeln(compile_file(Source)),
   canonical_source(Source, CanonicalSource),
@@ -1469,6 +1472,7 @@ pop_current_compilation_stream(Stream) :-
 compile_stream(Stream) :-
         push_current_compilation_stream(Stream),
         compile_stream(Stream, mode(0, compile(0))),
+        wam_index_predicates,
         pop_current_compilation_stream(Stream), % should pop the same stream that was pushed.
         (current_compilation_module(Module, Stream)
           -> pop_current_compilation_module(Module, Stream)

@@ -1,6 +1,7 @@
 :- module(wam_bootstrap_util, [lookup_atom/2, lookup_float/2, lookup_functor/3, lookup_dynamic_functor/3, emit_code/2, compile_message/1,
     ftable/2, fltable/2, atable/2, clause_table/5, fptable/2, ctable/2, itable/1, stable/1, dtable/1,
     'pls$module_export'/3, 'pls$import'/2, 'pls$meta_predicate'/3,
+    indexable_compiled_predicates/1, compiled_clauses/2, register_indexed_predicate/1,
     add_index_clause_to_predicate/1, edit_clauses_for_index_sequences/2,
     add_clause_to_predicate/3, add_clause_to_aux/4, add_clause_to_existing/2]).
 
@@ -8,6 +9,7 @@
 :-dynamic(fltable/2). % floats
 :-dynamic(atable/2). % atoms
 :-dynamic(clause_table/5). % clauses
+:-dynamic(indexed_predicate/1). % predicate has been indexed (perhaps trivially - with no indexing changes).
 :-dynamic(fptable/2). % foreign predicates
 :-dynamic(ctable/2). % code
 :-dynamic(itable/1). % initialization directive predicates
@@ -63,6 +65,21 @@ compile_message(A):-
     writeln(A).
 */
 compile_message(_).
+
+indexable_compiled_predicates(Ps) :-
+    setof(P, A ^ B ^ C ^ D ^ Functor ^ Arity ^ (clause_table(P, A, B, C, D), \+ indexed_predicate(P), ftable(Functor/Arity, P), Arity > 0), Ps)
+      -> true
+    ;
+    Ps = [].
+
+register_indexed_predicate(P) :-
+    retractall(indexed_predicate(P)),
+    assertz(indexed_predicate(P)).
+
+compiled_clauses(PredicateID, Clauses) :-
+    setof(ClauseOffset-Head/ClauseCodes,
+        Body^clause_table(PredicateID, ClauseOffset, ClauseCodes, Head, Body),
+        Clauses).
 
 add_index_clause_to_predicate(Predicate) :-
         setof(N-Code, T^(ctable(T, Code), N is T /\ 0x7fffffff), SortedCodes),

@@ -1,7 +1,12 @@
-:-module(wam_index_predicates, [wam_index_predicates/0]).
+:-module(wam_index_predicates, [wam_index_predicates/0, set_index_mode/1]).
 
-:- use_module('../tools/wam_bootstrap').
-:- use_module('../tools/wam_bootstrap_util').
+:- if(\+ (current_predicate(wam_compiler:current_compile_url/1), wam_compiler:current_compile_url(_))).
+    :- use_module('../tools/wam_bootstrap').
+    :- use_module('../tools/wam_bootstrap_util').
+    :- use_module(url). % in proscriptls system.
+    :- use_module(system_util). % in proscriptls system.
+:- endif.
+
 :- use_module(wam_assemble).
 
 /*
@@ -123,13 +128,24 @@ labelled instruction words:
 33-5]
 
 */
+:-dynamic('$indexing_mode'/1).
+
+set_index_mode(New) :-
+    mark_predicates_indexed,
+    retractall('$indexing_mode'(_)),
+    assertz('$indexing_mode'(New)).
+
+mark_predicates_indexed :-
+    indexable_compiled_predicates(Ps),
+    forall(member(P, Ps), register_indexed_predicate(P)).
 
 wam_index_predicates :-
-    predicates(Ps),
-    wam_index_predicates(Ps).
-
-predicates(Ps) :-
-    setof(P, A ^ B ^ C ^ D ^ clause_table(P, A, B, C, D), Ps).
+    ('$indexing_mode'(basic)
+      -> indexable_compiled_predicates(Ps),
+         wam_index_predicates(Ps)
+    ;
+    true
+    ).
 
 wam_index_predicates([]).
 wam_index_predicates([H|T]) :-
@@ -139,22 +155,24 @@ wam_index_predicates([H|T]) :-
 % {173: {is_public:false, clauses:{0:{code:[254,0,4,172], key:0}}, clause_keys:[0], next_key:1, key:173}, ... }
 % clause_table(PredicateID, ClauseOffset, ClauseCodes, Head, Body)
 wam_index_predicate(PredicateID) :-
-    setof(ClauseOffset-ClauseCodes,
-        Head^Body^clause_table(PredicateID, ClauseOffset, ClauseCodes, Head, Body),
-        Clauses),
+    ftable(Functor/Arity, PredicateID),
+    writeln('==='),
+    writeln(indexing(Functor/Arity)),
+    compiled_clauses(PredicateID, Clauses),
     wam_index_clauses(Clauses, PredicateID).
 
 % wam_index_clauses(Clauses, PredicateID)
-wam_index_clauses([], _PredicateID).
-wam_index_clauses([_], _PredicateID).
+wam_index_clauses([], _PredicateID) :- !.
+wam_index_clauses([_], PredicateID) :- !, register_indexed_predicate(PredicateID).
 wam_index_clauses([H1, H2|T], PredicateID) :-
-    wam_index_clauses1([H1, H2|T], PredicateID).
+    wam_index_clauses1([H1, H2|T], PredicateID),
+    register_indexed_predicate(PredicateID).
 
 wam_index_clauses1(Clauses, PredicateID) :-
     Sequences = [Sequence|SequencesTail],
     clause_sequences(Clauses, Sequence, SequencesTail),
     trim_sequences(Sequences, TrimmedSequences),
-    index_sequences(TrimmedSequences, 0, _, IndexedSequences),
+    index_sequences(TrimmedSequences, _, IndexedSequences),
     writeln(IndexedSequences),
     reset_compile_buffer,
     assemble(IndexedSequences, 0),
@@ -186,12 +204,12 @@ clause_sequences([H|T], Sequence, OtherSequences) :-
 % Clause has var in first arg so it belongs on its own in a sequence.
 % Start a new sequence and add it to the list of Sequences.
 clause_sequence(Clause, [], NewSequence, [[Clause], NewSequence|SequencesTail], SequencesTail) :-
-    clause_has_var_in_first_arg(Clause),
+    head_has_var_in_first_arg(Clause),
     !.
 % Clause does not have a var in first arg so it is added to the current sequence.
 % Add it to the current sequence and leave the overall list of Sequences unchanged.
 clause_sequence(Clause, [Clause|SequenceTail], SequenceTail, Sequences, Sequences) :-
-    \+ clause_has_var_in_first_arg(Clause).
+    \+ head_has_var_in_first_arg(Clause).
 
 % trim_sequences(Sequences, TrimmedSequences).
 % Empty sequences are introduced by consecutive var-in-first-arg clauses.
@@ -237,31 +255,29 @@ trim_sequence([H|T], [[H|T]|TrimmedTail], TrimmedTail).
 % Otherwise the sequence contains a try/retry/trust sequence where each of these
 % instructions targets a base clause (plus 1 instruction).
 
-index_sequences([], _, _, []).
-index_sequences([[H]|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, goto_clause(Offset)|TI]) :-
-    clause_has_var_in_first_arg(H),
+index_sequences([], _, []).
+index_sequences([[H]|T], SeqLabel, [label(SeqLabel), Instruction, goto_clause(Offset)|TI]) :-
+    head_has_var_in_first_arg(H),
     !,
     H = Offset-_,
     (T = [_|_]
        -> Instruction = try_me_else(NextSeqLabel)
      ;
-     Instruction = trust_me
+     Instruction = nop2
     ),
-    CtrOut is Ctr + 2, % '2' for Instruction and goto_clause
-    index_sequences1(T, CtrOut, NextSeqLabel, TI).
-index_sequences([H|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, switch_on_term(V, C, L, S)|HI]) :-
+    index_sequences1(T, NextSeqLabel, TI).
+index_sequences([H|T], SeqLabel, [label(SeqLabel), Instruction, switch_on_term(V, CA, CI, CF, L, S)|HI]) :-
     (T = [_|_]
        -> Instruction = try_me_else(NextSeqLabel)
      ;
-     Instruction = trust_me
+     Instruction = nop2
     ),
-    CtrNext is Ctr + 2, % '2' for Instruction and switch_on_term
-    index_sequence(H, CtrNext, CtrOut, V, C, L, S, HI, TI),
-    index_sequences1(T, CtrOut, NextSeqLabel, TI).
+    index_sequence(H, V, CA, CI, CF, L, S, HI, TI),
+    index_sequences1(T, NextSeqLabel, TI).
 
-index_sequences1([], _, _, []).
-index_sequences1([[H]|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, goto_clause(Offset)|TI]) :-
-    clause_has_var_in_first_arg(H),
+index_sequences1([], _, []).
+index_sequences1([[H]|T], SeqLabel, [label(SeqLabel), Instruction, goto_clause(Offset)|TI]) :-
+    head_has_var_in_first_arg(H),
     !,
      H = Offset-_,
     (T = [_|_]
@@ -269,106 +285,111 @@ index_sequences1([[H]|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, goto_cla
      ;
      Instruction = trust_me
     ),
-    CtrOut is Ctr + 2, % '2' for Instruction and goto_clause
-    index_sequences1(T, CtrOut, NextSeqLabel, TI).
-index_sequences1([H|T], Ctr, SeqLabel, [label(SeqLabel), Instruction, switch_on_term(V, C, L, S)|HI]) :-
+    index_sequences1(T, NextSeqLabel, TI).
+index_sequences1([H|T], SeqLabel, [label(SeqLabel), Instruction, switch_on_term(V, CA, CI, CF, L, S)|HI]) :-
     (T = [_|_]
        -> Instruction = retry_me_else(NextSeqLabel)
      ;
      Instruction = trust_me
     ),
-    CtrNext is Ctr + 2, % '2' for Instruction and switch_on_term
-    index_sequence(H, CtrNext, CtrOut, V, C, L, S, HI, TI),
-    index_sequences1(T, CtrOut, NextSeqLabel, TI).
+    index_sequence(H, V, CA, CI, CF, L, S, HI, TI),
+    index_sequences1(T, NextSeqLabel, TI).
 
-index_sequence([H|T], Ctr, CtrOut, ClauseOffset, C, L, S, SeqIndexed, SeqIndexedTailFinal) :-
+index_sequence([H|T], ClauseOffset, CA, CI, CF, L, S, SeqIndexed, SeqIndexedTailFinal) :-
     H = ClauseOffset-_,
-    analyze([H|T], Constants, Lists, Structures),
-    group(Constants, constant, GroupedConstants,    0,              GroupCtrNext1,  GroupInstructions,  GroupTail1),
-    group(Lists, list, [L],                        GroupCtrNext1,  GroupCtrNext2,  GroupTail1,         GroupTail2),
-    group(Structures, structure, GroupedStructures, GroupCtrNext2,  GroupCtrOut,    GroupTail2,         SeqIndexedTailFinal),
-    switch_instruction(GroupedConstants, constant, C, Ctr, CtrNext1, SeqIndexed, SeqIndexedTail1),
-    switch_instruction(GroupedStructures, structure, S, CtrNext1, SwitchCtrOut, SeqIndexedTail1, GroupInstructions),
-    CtrOut is GroupCtrOut + SwitchCtrOut.
+    analyze([H|T], Atoms, Integers, Floats, Lists, Structures),
 
-analyze([], [], [], []).
-analyze([H|T], [H|Constants], Lists, Structures) :-
-    clause_has_constant_in_first_arg(H),
+    group(Atoms, atom, GroupedAtoms,                GroupInstructions,  GroupTail1),
+    group(Integers, integer, GroupedIntegers,       GroupTail1,         GroupTail2),
+    group(Floats, float, GroupedFloats,             GroupTail2,         GroupTail3),
+    group(Lists, list, [L],                         GroupTail3,         GroupTail4),
+    group(Structures, structure, GroupedStructures, GroupTail4,         SeqIndexedTailFinal),
+
+    switch_instruction(GroupedAtoms, constant, CA, SeqIndexed, SeqIndexedTail1),
+    switch_instruction(GroupedIntegers, constant, CI, SeqIndexedTail1, SeqIndexedTail2),
+    switch_instruction(GroupedFloats, constant, CF, SeqIndexedTail2, SeqIndexedTail3),
+    switch_instruction(GroupedStructures, structure, S, SeqIndexedTail3, GroupInstructions).
+
+analyze([], [], [], [], [], []).
+analyze([H|T], [H|Atoms], Integers, Floats, Lists, Structures) :-
+    head_has_atom_in_first_arg(H),
     !,
-    analyze(T, Constants, Lists, Structures).
-analyze([H|T], Constants, [H|Lists], Structures) :-
-    clause_has_list_in_first_arg(H),
+    analyze(T, Atoms, Integers, Floats, Lists, Structures).
+analyze([H|T], Atoms, [H|Integers], Floats, Lists, Structures) :-
+    head_has_integer_in_first_arg(H),
     !,
-    analyze(T, Constants, Lists, Structures).
-analyze([H|T], Constants, Lists, [H|Structures]) :-
-    clause_has_structure_in_first_arg(H),
+    analyze(T, Atoms, Integers, Floats, Lists, Structures).
+analyze([H|T], Atoms, Integers, [H|Floats], Lists, Structures) :-
+    head_has_float_in_first_arg(H),
     !,
-    analyze(T, Constants, Lists, Structures).
+    analyze(T, Atoms, Integers, Floats, Lists, Structures).
+analyze([H|T], Atoms, Integers, Floats, [H|Lists], Structures) :-
+    head_has_list_in_first_arg(H),
+    !,
+    analyze(T, Atoms, Integers, Floats, Lists, Structures).
+analyze([H|T], Atoms, Integers, Floats, Lists, [H|Structures]) :-
+    head_has_structure_in_first_arg(H),
+    !,
+    analyze(T, Atoms, Integers, Floats, Lists, Structures).
 
 % group(ClauseInfos, Type, GroupedTypes, GroupInstructions, GroupTail).
-group(ClauseInfos, list, GroupedConstants, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
+group(ClauseInfos, list, GroupedConstants, GroupInstructions, GroupTail) :-
     !,
-    list_group_instruction(ClauseInfos, GroupedConstants, CtrIn, CtrOut, GroupInstructions, GroupTail).
-group(ClauseInfos, Type, GroupedConstants, CtrIn, CtrOut, GroupInstructions, GroupTail) :-
-    (Type = constant
+    list_group_instruction(ClauseInfos, GroupedConstants, GroupInstructions, GroupTail).
+group(ClauseInfos, Type, GroupedConstants, GroupInstructions, GroupTail) :-
+    ((Type = atom; Type = integer; Type = float)
       -> constants(ClauseInfos, ConstantClauses)
     ;
      Type = structure
       -> structures(ClauseInfos, ConstantClauses)
     ),
     (setof(Value-Clauses, setof(Clause, member(Value-Clause, ConstantClauses), Clauses), Groups)
-      -> group_instructions(Groups, GroupedConstants, CtrIn, CtrOut, GroupInstructions, GroupTail)
+      -> group_instructions(Groups, GroupedConstants, GroupInstructions, GroupTail)
     ;
-     CtrIn = CtrOut,
      GroupInstructions = GroupTail
     ).
 
 constants([], []).
 constants([H|T], [V-H|TC]) :-
-    H = _-Clause,
-    clause_constant_in_first_arg(Clause, V),
+    H = _-Head/_Codes,
+    head_constant_in_first_arg(Head, V),
     constants(T, TC).
 
 structures([], []).
 structures([H|T], [V-H|TC]) :-
-    H = _-Clause,
-    clause_structure_in_first_arg(Clause, V),
+    H = _-Head/_Codes,
+    head_structure_in_first_arg(Head, V),
     structures(T, TC).
 
-list_group_instruction([], [fail], Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
-list_group_instruction([Offset-_], [clause_offset(Offset)], Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
-list_group_instruction([C1,C2|CT], [GroupLabel], CtrIn, CtrOut, [label(GroupLabel)|GroupInstructions], GroupTail) :-
+list_group_instruction([], [fail], GroupInstructions, GroupInstructions) :- !.
+list_group_instruction([Offset-_], [clause_offset(Offset)], GroupInstructions, GroupInstructions) :- !.
+list_group_instruction([C1,C2|CT], [GroupLabel], [label(GroupLabel)|GroupInstructions], GroupTail) :-
     % try C1, retry C2, ... , trust Cn
-    group_instruction1([C1,C2|CT], CtrIn, CtrOut, GroupInstructions, GroupTail).
+    group_instruction1([C1,C2|CT], GroupInstructions, GroupTail).
 
 % group_instructions(Groups, GroupedConstants, GroupInstructions, GroupTail)
-group_instructions([], [], Ctr, Ctr, GroupInstructions, GroupInstructions).
-group_instructions([H|T], [HG|TG], CtrIn, CtrOut, GroupInstructions, GroupTail) :-
-    group_instruction(H, HG, CtrIn, CtrNext, GroupInstructions, GroupNext),
-    group_instructions(T, TG, CtrNext, CtrOut, GroupNext, GroupTail).
+group_instructions([], [], GroupInstructions, GroupInstructions).
+group_instructions([H|T], [HG|TG], GroupInstructions, GroupTail) :-
+    group_instruction(H, HG, GroupInstructions, GroupNext),
+    group_instructions(T, TG, GroupNext, GroupTail).
 
-group_instruction(Value-[Offset-_], Value-clause_offset(Offset), Ctr, Ctr, GroupInstructions, GroupInstructions) :- !.
-group_instruction(Value-[C1,C2|CT], Value-GroupLabel, CtrIn, CtrOut, [label(GroupLabel)|GroupInstructions], GroupTail) :-
+group_instruction(Value-[Offset-_], Value-clause_offset(Offset), GroupInstructions, GroupInstructions) :- !.
+group_instruction(Value-[C1,C2|CT], Value-GroupLabel, [label(GroupLabel)|GroupInstructions], GroupTail) :-
     % try C1, retry C2, ... , trust Cn
-    group_instruction1([C1,C2|CT], CtrIn, CtrOut, GroupInstructions, GroupTail).
+    group_instruction1([C1,C2|CT], GroupInstructions, GroupTail).
 
-group_instruction1([Offset - _,C2|CT], CtrIn, CtrOut, [try(Offset)|GroupNext], GroupTail) :-
+group_instruction1([Offset - _,C2|CT], [try(Offset)|GroupNext], GroupTail) :-
     !,
-    CtrNext is CtrIn + 1,
-    group_instruction2([C2|CT], CtrNext, CtrOut, GroupNext, GroupTail).
-group_instruction1([Offset-_], CtrIn, CtrOut, [trust(Offset)|GroupTail], GroupTail) :-
-    CtrOut is CtrIn + 1.
+    group_instruction2([C2|CT], GroupNext, GroupTail).
+group_instruction1([Offset-_], [trust(Offset)|GroupTail], GroupTail).
 
-group_instruction2([Offset-_, C2|CT], CtrIn, CtrOut, [retry(Offset)|GroupNext], GroupTail) :-
+group_instruction2([Offset-_, C2|CT], [retry(Offset)|GroupNext], GroupTail) :-
     !,
-    CtrNext is CtrIn + 1,
-    group_instruction2([C2|CT], CtrNext, CtrOut, GroupNext, GroupTail).
-group_instruction2([Offset-_], CtrIn, CtrOut, [trust(Offset)|GroupTail], GroupTail) :-
-    CtrOut is CtrIn + 1.
+    group_instruction2([C2|CT], GroupNext, GroupTail).
+group_instruction2([Offset-_], [trust(Offset)|GroupTail], GroupTail).
 
-switch_instruction([], _, fail, K, K, SeqIndexed, SeqIndexed) :- !.
-switch_instruction(GroupedTerms, Type, Label, K, L, [label(Label), Instruction|SeqIndexedTail], SeqIndexedTail) :-
-    L is K + 1,
+switch_instruction([], _, fail, SeqIndexed, SeqIndexed) :- !.
+switch_instruction(GroupedTerms, Type, Label, [label(Label), Instruction|SeqIndexedTail], SeqIndexedTail) :-
     length(GroupedTerms, N),
     type_instruction(Type, N, GroupedTerms, Instruction).
 
@@ -386,8 +407,49 @@ clause_constant_in_first_arg([_,_,Code,K,_|_], K) :-
 
 clause_has_list_in_first_arg(_ClauseOffset-[_,_,20,_|_]).
 
-clause_list_in_first_arg([_,_,20,K|_], K).
-
 clause_has_structure_in_first_arg(_ClauseOffset-[_,_,19,_,_|_]).
 
 clause_structure_in_first_arg([_,_,19,P,_|_],P).
+
+head_has_var_in_first_arg(_ClauseOffset-Head/_Codes) :-
+    arg(1, Head, Arg),
+    var(Arg).
+
+head_has_atom_in_first_arg(_ClauseOffset-Head/_Codes) :-
+    arg(1, Head, Arg),
+    atom(Arg).
+
+head_has_integer_in_first_arg(_ClauseOffset-Head/_Codes) :-
+    arg(1, Head, Arg),
+    integer(Arg).
+
+head_has_float_in_first_arg(_ClauseOffset-Head/_Codes) :-
+    arg(1, Head, Arg),
+    float(Arg).
+
+head_constant_in_first_arg(Head, ID) :-
+    arg(1, Head, Arg),
+    (atom(Arg)
+     -> lookup_atom(Arg, ID)
+    ;
+    integer(Arg)
+     -> ID = Arg
+    ;
+    float(Arg)
+     -> lookup_float(Arg, ID)
+    ;
+    Arg == []
+     -> Arg = ID
+    ),
+    !.
+
+head_has_list_in_first_arg(_ClauseOffset-Head/_Codes) :-
+    Head =.. [_Functor, [_|_]|_].
+
+head_has_structure_in_first_arg(_ClauseOffset-Head/_Codes) :-
+    head_structure_in_first_arg(Head, _).
+
+head_structure_in_first_arg(Head, FunctorID) :-
+    arg(1, Head, Structure),
+    functor(Structure, Functor, Arity),
+    lookup_functor(Functor, Arity, FunctorID).

@@ -1,4 +1,4 @@
-let environment = 'browser'; // 'console'
+let environment =  'console'; // 'browser';
 
 function dump(filter) {
     if(environment === 'console') {

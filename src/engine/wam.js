@@ -1527,44 +1527,68 @@ function wam1()
         }
             continue;
 
-        case 44: // switch_on_term: [44, V, C, L, S]
+            case 44: // switch_on_term: [44, V, CA, CI, CF, L, S]
         {
             let codePosition = state.P;
             let argument1 = deref(register[0]);
 
             let V = code[codePosition + 1];
-            let C = code[codePosition + 2];
-            let L = code[codePosition + 3];
-            let S = code[codePosition + 4];
+            let CA = code[codePosition + 2];
+            let CI = code[codePosition + 3];
+            let CF = code[codePosition + 4];
+            let L = code[codePosition + 5];
+            let S = code[codePosition + 6];
 
             switch(TAG(argument1)) {
                 case TAG_REF:
                     gotoAddress(V); break;
                 case TAG_ATM:
+                    if(CA !== 0) {
+                        gotoAddress(CA);
+                    } else if (!backtrack())
+                        return wamExit(false);
+                    break;
                 case TAG_FLT:
+                    if(CF !== 0) {
+                        gotoAddress(CF);
+                    } else if (!backtrack())
+                        return wamExit(false);
+                    break;
                 case TAG_INT:
-                    gotoAddress(C); break;
+                    if(CI !== 0) {
+                        gotoAddress(CI);
+                    } else if (!backtrack())
+                        return wamExit(false);
+                    break;
                 case TAG_LST:
-                    gotoAddress(L); break;
+                    if(L !== 0) {
+                        gotoAddress(L);
+                    } else if (!backtrack())
+                        return wamExit(false);
+                    break;
                 case TAG_STR:
-                    gotoAddress(S); break;
+                    if(S !== 0) {
+                        gotoAddress(S);
+                    } else if (!backtrack())
+                        return wamExit(false);
+                    break;
                 default:
                     throw('invalid TAG ' + TAG(argument1) + ' on argument1 with value ' + VAL(argument1));
             }
         }
         continue;
 
-        case 45: // switch_on_constant: [45, N, K1, V1, ..., KN, VN]
+            case 45: // switch_on_constant: [45, N, K1, V1, ..., KN, VN]
         {
             let codePosition = state.P;
-            let argument1 = deref(register[0]);
+            let argument1 = VAL(deref(register[0])); // the table is all of one data type: atom, integer, or float.
             let tableStartPosition = codePosition + 2; // points at K1.
             let N = code[codePosition + 1];
             let result = search_table(argument1, tableStartPosition, N);
             if(result.found) {
-                gotoAddress(result.inst);
-            } else {
-                backtrack();
+                gotoAddress(result.value);
+            } else  if (!backtrack()) {
+                return wamExit(false);
             }
         }
         continue;
@@ -1573,14 +1597,14 @@ function wam1()
         {
             let codePosition = state.P;
             let argument1 = deref(register[0]);
-            let predicateIndicator = memory[VAL(argument1)];
+            let predicateIndicator = VAL(memory[VAL(argument1)]);
             let tableStartPosition = codePosition + 2; // points at K1.
             let N = code[codePosition + 1];
             let result = search_table(predicateIndicator, tableStartPosition, N);
             if(result.found) {
-                gotoAddress(result.inst);
-            } else {
-                backtrack();
+                gotoAddress(result.value);
+            } else if (!backtrack()) {
+                return wamExit(false);
             }
         }
             continue;
@@ -1588,6 +1612,7 @@ function wam1()
         case 71: // try: [71, L]
         {
             let codePosition = state.P;
+            let L = code[codePosition + 1];
             let nextCP = {
                 code: code,
                 predicate: state.current_predicate,
@@ -1600,6 +1625,8 @@ function wam1()
 
         case 72: // retry: [72, L]
         {
+            let codePosition = state.P;
+            let L = code[codePosition + 1];
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
             let arity = memory[state.B];
             debug_msg("retry: " + state.B + " with saved register count " + memory[state.B] + " and retry point " + code[state.P + 1]);
@@ -1638,12 +1665,14 @@ function wam1()
                 debug_msg("Set state.trace_call " + state.trace_call + " from choicepoint at " + state.B);
                 state.trace_info = memory[state.B + arity + CP_TI];
             }
-            gotoAddress(code[state.P+1]);
+            gotoAddress(L);
         }
             continue;
 
         case 73: // trust(L)
         {
+            let codePosition = state.P;
+            let L = code[codePosition + 1];
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
             let n = memory[state.B];
             debug_msg("trusting last clause: " + state.B + " with saved register count " + memory[state.B] + " and HB was " + state.HB + ". Choicepoint has " + n + " saved registers.");
@@ -1675,7 +1704,7 @@ function wam1()
             debug_msg("state.E is now set back to " + state.E);
             //state.HB = memory[state.B + n + CP_H];
             debug_msg("case 73: state.HB reset to " + state.HB);
-            gotoAddress(code[state.P + 1]);
+            gotoAddress(L);
         }
             continue;
 
@@ -1781,7 +1810,7 @@ function search_table(value, tableStartPosition, tableSize) {
     // For a large table this function can use a binary search.
     // For small tables it is sufficient to do a linear search.
 
-    for(let searchPosition = tableStartPosition;searchPosition < tableSize;searchPosition+=2) {
+    for(let searchPosition = tableStartPosition;searchPosition < tableSize+tableStartPosition;searchPosition+=2) {
         let key = code[searchPosition];
         if(key === value) {
             return {found: true, value: code[searchPosition+1]};

@@ -93,10 +93,10 @@ encode_opcodes_1([retry_me_else(Label)|As], N, L, L1, [aux_address_of(Label, NN)
         NNN is N+2,
         encode_opcodes_1(As, NNN, L, L1, D, D1).
 
-encode_opcodes_1([switch_on_term(VarClauseOffset, ConstantLabelOrFail, ListLabelOrFail, StructureLabelOrFail)|As],
+encode_opcodes_1([switch_on_term(VarClauseOffset, AtomLabelOrFail, IntegerLabelOrFail, FloatLabelOrFail, ListLabelOrFail, StructureLabelOrFail)|As],
             N, L, L1, D, D1):-
         !,
-        compile_message(switch_on_term(VarClauseOffset, ConstantLabelOrFail, ListLabelOrFail, StructureLabelOrFail, N)),
+        compile_message(switch_on_term(VarClauseOffset, AtomLabelOrFail, IntegerLabelOrFail, FloatLabelOrFail, ListLabelOrFail, StructureLabelOrFail, N)),
         N1 is N+1,
         emit_codes(N, [44]),
         (VarClauseOffset = fail
@@ -104,11 +104,13 @@ encode_opcodes_1([switch_on_term(VarClauseOffset, ConstantLabelOrFail, ListLabel
         ;
          emit_code(N1, VarClauseOffset)
         ),
-        encode_label_or_fail(N1, N2, ConstantLabelOrFail, D, DT1),
-        encode_label_or_fail(N2, N3, ListLabelOrFail, DT1, DT2),
-        encode_label_or_fail(N3, N4, StructureLabelOrFail, DT2, DT3),
-        N5 is N4 + 1,
-        encode_opcodes_1(As, N5, L, L1, DT3, D1).
+        encode_label_or_fail(N1, N2, AtomLabelOrFail, D, DT1),
+        encode_label_or_fail(N2, N3, IntegerLabelOrFail, DT1, DT2),
+        encode_label_or_fail(N3, N4, FloatLabelOrFail, DT2, DT3),
+        encode_label_or_fail(N4, N5, ListLabelOrFail, DT3, DT4),
+        encode_label_or_fail(N5, N6, StructureLabelOrFail, DT4, DT5),
+        N7 is N6 + 1,
+        encode_opcodes_1(As, N7, L, L1, DT5, D1).
 
 encode_opcodes_1([switch_on_constant(Count, Targets)|As],
             N, L, L1, D, D1):-
