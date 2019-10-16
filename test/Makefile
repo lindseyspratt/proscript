@@ -39,7 +39,7 @@ proscriptls_index_state.js: index_test.pl $(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM
             $(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
             $(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl\
             $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
-		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', [index(basic), '$<'], '$@', baz(f(c1))), halt"
+		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', [index(basic), '$<'], '$@', baz(f(c))), halt"
 
 proscriptls_index_test.js:    $(ENGINE) proscriptls_index_state.js $(SRC_TOOLS)/node_standalone.js $(SRC_TOOLS)/node_exports_toplevel.js
 		cat $(ENGINE) proscriptls_index_state.js $(SRC_TOOLS)/node_standalone.js $(SRC_TOOLS)/node_exports_toplevel.js > proscriptls_index_test.js

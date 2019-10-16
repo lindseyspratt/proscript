@@ -1,4 +1,7 @@
-var compile_buffer = [];
+let compilation_environment = {
+    buffer: [],
+    indexing_mode: 'none'
+};
 
 // Round toward zero by default
 function round(a)
@@ -614,12 +617,31 @@ function lookup_dynamic_functor(name, arity) {
 function emit_code(address, c)
 {
     // Not checking. Lets assume we know what we are doing!
-    compile_buffer[VAL(address)] = VAL(c);
+    compilation_environment.buffer[VAL(address)] = VAL(c);
     return true;
 }
 
 function predicate_lookup_atom(atom, index)
 {
+    if(TAG(index) !== TAG_REF) {
+        if(TAG(index) !== TAG_INT) {
+            return type_error('integer', index);
+        }
+        let indexJS = PL_get_integer(index);
+        if(indexJS < 0 || indexJS >= atable.length) {
+            return domain_error("atom ID > 0 and < " + atable.length, index);
+        }
+        return unify(atom, PL_put_atom(indexJS));
+    }
+
+    if(TAG(atom) === TAG_REF) {
+        return instantiation_error('atom or index ground', atom);
+    }
+
+    if(TAG(atom) !== TAG_ATM) {
+        return type_error('atom', atom);
+    }
+
     return unify(VAL(atom) ^ (TAG_INT << WORD_BITS), index);
 }
 
@@ -630,19 +652,53 @@ function predicate_lookup_float(f, index)
 
 function predicate_lookup_functor(fname, arity, index)
 {
-    if (atable[VAL(fname)] === undefined)
-        abort("Atom out of range: " + hex(deref(fname)));
-    var i;
-    for (i = 0; i < ftable.length; i++)
-    {
-        if (ftable[i][0] === VAL(fname) && ftable[i][1] === VAL(arity))
-        {
-            return unify(index, i ^ (TAG_INT << WORD_BITS));            
+    if(TAG(index) === TAG_REF) {
+        if(TAG(fname) === TAG_REF) {
+            return instantiation_error('atom', fname);
         }
+
+        if(TAG(fname) !== TAG_ATM) {
+            return type_error('atom', fname);
+        }
+
+        if(TAG(arity) === TAG_REF) {
+            return instantiation_error('integer', arity);
+        }
+
+        if(TAG(arity) !== TAG_INT) {
+            return type_error('integer', arity);
+        }
+
+        if (atable[VAL(fname)] === undefined)
+            abort("Atom out of range: " + hex(deref(fname)));
+        var i;
+        for (i = 0; i < ftable.length; i++) {
+            if (ftable[i][0] === VAL(fname) && ftable[i][1] === VAL(arity)) {
+                return unify(index, i ^ (TAG_INT << WORD_BITS));
+            }
+        }
+        i = ftable.length;
+        ftable[i] = [VAL(fname), VAL(arity)];
+        return unify(index, i ^ (TAG_INT << WORD_BITS));
+    } else {
+        if(TAG(index) !== TAG_INT) {
+            return type_error('integer', index);
+        }
+
+        let indexJS = PL_get_integer(index);
+        let pair = ftable[indexJS];
+        if(typeof pair === 'undefined') {
+            return domain_error('functor identifier', index);
+        }
+
+        let nameID = pair[0];
+        let lookupFName = PL_put_atom(nameID);
+
+        let arityJS = pair[1];
+        let lookupArity = PL_put_integer(arityJS);
+
+        return unify(fname, lookupFName) && unify(arity, lookupArity);
     }
-    i = ftable.length;
-    ftable[i] = [VAL(fname), VAL(arity)];
-    return unify(index, i ^ (TAG_INT << WORD_BITS));
 }
 
 function predicate_generate_system_goal(Module, Sys) {
@@ -1307,6 +1363,57 @@ function atom_or_var_list_to_term_array(listPL) {
     }
 }
 
+
+function integer_list_to_term_array(listPL) {
+
+    let result = [];
+    var head = memory[VAL(listPL)];
+    var tail = memory[VAL(listPL)+1];
+    while (true)
+    {
+        if(TAG(head) !== TAG_INT) {
+            throw('Invalid integer list. Item is not an integer.');
+        }
+
+        result.push(VAL(head));
+
+        if (tail === NIL)
+            return result;
+        else if (TAG(tail) === TAG_LST)
+        {
+            head = memory[VAL(tail)];
+            tail = memory[VAL(tail)+1];
+        }
+        else
+            throw('Invalid integer list. Last item was not NIL.');
+    }
+}
+
+function integer_list_list_to_term_array(listPL) {
+
+    let result = [];
+    var head = memory[VAL(listPL)];
+    var tail = memory[VAL(listPL)+1];
+    while (true)
+    {
+        if(TAG(head) !== TAG_LST) {
+            throw('Invalid integer list list. Item is not a list.');
+        }
+
+        result.push(integer_list_to_term_array(head));
+
+        if (tail === NIL)
+            return result;
+        else if (TAG(tail) === TAG_LST)
+        {
+            head = memory[VAL(tail)];
+            tail = memory[VAL(tail)+1];
+        }
+        else
+            throw('Invalid integer list list. Last item was not NIL.');
+    }
+}
+
 function create_indicator_structure(name, arity) {
     var ftor = lookup_functor('/', 2);
     var structure = alloc_structure(ftor);
@@ -1317,17 +1424,6 @@ function create_indicator_structure(name, arity) {
 
 
 function predicate_dump_tables(streamPL) {
-    /*
-            format(S, 'atable = [~w];~n', [AtomAtom]),
-        format(S, 'floats = [~w];~n', [FloatAtom]),
-       format(S, 'ftable = [~w];~n', [FunctorAtom]),
-        format(S, 'dtable = [~w];~n', [DynamicFunctorAtom]),
-         format(S, 'predicates = {~w};~n', [PredicatesAtom]),
-        format(S, 'foreign_predicates = {~w};~n', [FPredicatesAtom]),
-        format(S, 'system = [~w];~n', [SystemAtom]),
-        format(S, 'initialization = [~w];~n', [InitializationAtom]).
-        format(S, 'exports = [~w];~n', [ModuleExportsAtom]).
-     */
     let streamContainer = {};
     if (!get_stream(streamPL, streamContainer))
         return false;
@@ -1337,6 +1433,7 @@ function predicate_dump_tables(streamPL) {
     write_to_stream(streamValue, 'ftable =' + JSON.stringify(ftable) + ';\n');
     write_to_stream(streamValue, 'dtable =' + JSON.stringify(dtable) + ';\n');
     write_to_stream(streamValue, 'predicates =' + JSON.stringify(predicates) + ';\n');
+    write_to_stream(streamValue, 'indexed_predicates =' + JSON.stringify(indexed_predicates) + ';\n');
     write_to_stream(streamValue, 'foreign_predicates ={' );
     let isFirst = true;
     for(let predKey of Object.keys(foreign_predicates)) {
@@ -1476,9 +1573,9 @@ function prepend_clause_to_predicate(predicate, head, body)
     if (predicates[predicateJS] === undefined || (predicates[predicateJS].is_public && predicates[predicateJS].clause_keys.length === 0))
     {
         // Easy case. New predicate or empty predicate. Add it to the table then set up the <NOP,0> header
-        compile_buffer[0] = 254;
-        compile_buffer[1] = 0;
-        predicates[predicateJS] = {clauses: {0:{code:compile_buffer.slice(0),
+        compilation_environment.buffer[0] = 254;
+        compilation_environment.buffer[1] = 0;
+        predicates[predicateJS] = {clauses: {0:{code:compilation_environment.buffer.slice(0),
                                               key:0, 
                                               head:record_term(head), 
                                               body:record_term(body)}},
@@ -1494,11 +1591,11 @@ function prepend_clause_to_predicate(predicate, head, body)
         if (first_clause.code[0] === 254)
         {
             // First clause was NOP - ie only clause. Make it trust_me, and the new clause is try_me_else
-            compile_buffer[0] = 28;
-            compile_buffer[1] = first_key;
+            compilation_environment.buffer[0] = 28;
+            compilation_environment.buffer[1] = first_key;
             first_clause.code[0] = 30;
             first_clause.code[1] = 0;
-            predicates[predicateJS].clauses[predicates[predicateJS].next_key] = {code:compile_buffer.slice(0),
+            predicates[predicateJS].clauses[predicates[predicateJS].next_key] = {code:compilation_environment.buffer.slice(0),
                                                                              key: predicates[predicateJS].next_key,
                                                                              head:record_term(head), 
                                                                              body:record_term(body)};
@@ -1510,10 +1607,10 @@ function prepend_clause_to_predicate(predicate, head, body)
         {
             // first clause was try_me_else. It becomes retry_me_else
             // Our new clause is try_me_else
-            compile_buffer[0] = 28;
-            compile_buffer[1] = first_key;
+            compilation_environment.buffer[0] = 28;
+            compilation_environment.buffer[1] = first_key;
             first_clause.code[0] = 29;
-            predicates[predicateJS].clauses[predicates[predicateJS].next_key] = {code:compile_buffer.slice(0),
+            predicates[predicateJS].clauses[predicates[predicateJS].next_key] = {code:compilation_environment.buffer.slice(0),
                                                                              key: predicates[predicateJS].next_key,
                                                                              head:record_term(head), 
                                                                              body:record_term(body)};
@@ -1529,16 +1626,139 @@ function prepend_clause_to_predicate(predicate, head, body)
 function check_compile_buffer(head, body)
 {
     // Paranoia
-    for (var z = 0; z < compile_buffer.length; z++)
+    for (var z = 0; z < compilation_environment.buffer.length; z++)
     {
-        if (compile_buffer[z] === null)
+        if (compilation_environment.buffer[z] === null)
         {
             debug(term_to_string(head) + ":- " + term_to_string(body));
-            debug(JSON.stringify(compile_buffer));
+            debug(JSON.stringify(compilation_environment.buffer));
             abort("Illegal compile buffer: Address " + z + " is null!");
         }
     }
 }
+
+function predicate_indexable_compiled_predicates(result) {
+    let indexables = state.H ^ (TAG_LST << WORD_BITS);
+    let count = 0;
+    for(let predicateID of Object.keys(predicates)) {
+        let predicate = predicates[predicateID];
+        if(! indexed_predicates[predicate.key] && ftable[predicate.key][1] > 0 && ! predicate.is_public
+        && typeof predicate.clause_keys[0] !== "undefined" &&
+            typeof predicate.clauses[predicate.clause_keys[0]] !== "undefined" &&
+            typeof predicate.clauses[predicate.clause_keys[0]].head !== "undefined") {
+            count++;
+            // add to indexables
+            memory[state.H] = PL_put_integer(predicate.key);
+            // If there are no more items we will overwrite the last entry with [] when we exit the loop
+            memory[state.H+1] = ((state.H+2) ^ (TAG_LST << WORD_BITS));
+            state.H += 2;
+        }
+    }
+    
+    if(count > 0) {
+        memory[state.H - 1] = NIL;
+    } else {
+        indexables = NIL;
+    }
+
+    return unify(result,indexables );
+}
+
+function predicate_register_indexed_predicate(predicateP) {
+    indexed_predicates[VAL(predicateP)] = true;
+    return true;
+}
+
+function predicate_compiled_clauses(predicateP, clauseInfos) {
+    // create list of ClauseInfo = ClauseOffset - (Head/ClauseCodes)
+    let predicate = predicates[VAL(predicateP)];
+    if(! predicate) {
+        return existence_error('predicate', predicateP);
+    }
+
+    let terms = [];
+
+    for(let ofst = 0;ofst < predicate.clause_keys.length;ofst++) {
+        let clause = predicate.clauses[predicate.clause_keys[ofst]];
+        let head = recall_term(clause.head, {});
+        let clauseCodes = integers_to_list(clause.code);
+        let slashFtor = lookup_functor('/', 2);
+        let headCodeInfo = alloc_structure(slashFtor);
+        memory[state.H++] = head;
+        memory[state.H++] = clauseCodes;
+
+        let dashFtor = lookup_functor('-', 2);
+        let clauseInfo = alloc_structure(dashFtor);
+        memory[state.H++] = PL_put_integer(ofst);
+        memory[state.H++] = headCodeInfo;
+
+        terms.push(clauseInfo);
+    }
+
+    let clauseInfoList = terms_to_list(terms);
+    return unify(clauseInfos, clauseInfoList);
+}
+
+function predicate_add_index_clause_to_predicate(predicateP) {
+    let predicate = VAL(predicateP);
+    if(! predicates[predicate]) {
+        abort("predicate to be indexed is undefined: " + atable[VAL(deref(memory[VAL(predicateP)+1]))] + "/" + VAL(deref(memory[VAL(predicateP)+2])));
+    }
+
+    let indexIndicator = PL_put_atom_chars("index");
+
+    predicates[predicate].clauses[predicates[predicate].next_key] =
+        {
+            code:   compilation_environment.buffer.slice(0),
+            index:  predicates[predicate].next_key,
+            key:    predicates[predicate].next_key,
+            head:   record_term(indexIndicator),
+            body:   record_term(indexIndicator)
+        };
+
+    predicates[predicate].clause_keys.push(predicates[predicate].next_key);
+    predicates[predicate].next_key++;
+
+    return true;
+}
+
+function predicate_edit_clauses_for_index_sequences(sequencesP, predicateP) {
+    let sequences = integer_list_list_to_term_array(sequencesP);
+    for(let ofst = 0;ofst < sequences.length; ofst++) {
+        edit_clauses_for_index_sequence(sequences[ofst], predicateP);
+    }
+    return true;
+}
+
+function edit_clauses_for_index_sequence(sequence, predicateP) {
+    let predicate = VAL(predicateP);
+    if(sequence.length === 0) {
+        abort("invalid empty sequence. A sequence must not be empty.")
+    } else if(sequence.length === 1) {
+        let clauseCode = predicates[predicate].clauses[predicates[predicate].clause_keys[sequence[0]]].code;
+        clauseCode[0] = 254;
+        clauseCode[1] = 0;
+    } else {
+        // first clause of sequence has try_me_else(second_clause)
+        // clauses after first and before last have retry_me_else(next_clause)
+        // last clause of sequence has trust_me(0).
+
+        let clauseCode = predicates[predicate].clauses[predicates[predicate].clause_keys[sequence[0]]].code;
+        clauseCode[0] = 28;
+        clauseCode[1] = sequence[1];
+
+        for(let ofst = 1;ofst < sequence.length-1;ofst++) {
+            clauseCode = predicates[predicate].clauses[predicates[predicate].clause_keys[sequence[ofst]]].code;
+            clauseCode[0] = 29;
+            clauseCode[1] = sequence[ofst+1];
+        }
+
+        clauseCode = predicates[predicate].clauses[predicates[predicate].clause_keys[sequence[sequence.length-1]]].code;
+        clauseCode[0] = 30;
+        clauseCode[1] = 0;
+    }
+}
+
 function add_clause_to_predicate(predicateP, head, body)
 {
     // if(atable[VAL(deref(memory[VAL(predicateP)+1]))] === 'select_test') {
@@ -1549,16 +1769,18 @@ function add_clause_to_predicate(predicateP, head, body)
     if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))
     {
         // Easy case. New or empty predicate. Add it to the table then set up the <NOP,0> header
-        compile_buffer[0] = 254;
-        compile_buffer[1] = 0;
+        compilation_environment.buffer[0] = 254;
+        compilation_environment.buffer[1] = 0;
         check_compile_buffer(head, body);
-        predicates[predicate] = {clauses: {0:{code:compile_buffer.slice(0), 
+        // If this predicate was defined as a dynamic predicate then it will have is_public already set to true.
+        let is_public = predicates[predicate] && predicates[predicate].is_public;
+        predicates[predicate] = {clauses: {0:{code:compilation_environment.buffer.slice(0),
                                               key:0, 
                                               head:record_term(head), 
                                               body:record_term(body)}},
                                  key:predicate,
                                  clause_keys: [0],
-                                 is_public: true,
+                                 is_public: is_public,
                                  next_key: 1};
     }
     else
@@ -1570,10 +1792,10 @@ function add_clause_to_predicate(predicateP, head, body)
             // Last clause was NOP - ie only clause. Make it try_me_else, and the new clause is trust_me
             last_clause.code[0] = 28;
             last_clause.code[1] = predicates[predicate].next_key;
-            compile_buffer[0] = 30;
-            compile_buffer[1] = 0;
+            compilation_environment.buffer[0] = 30;
+            compilation_environment.buffer[1] = 0;
             check_compile_buffer(head, body);            
-            predicates[predicate].clauses[predicates[predicate].next_key] = {code:compile_buffer.slice(0),
+            predicates[predicate].clauses[predicates[predicate].next_key] = {code:compilation_environment.buffer.slice(0),
                                                                              key: predicates[predicate].next_key,
                                                                              head:record_term(head), 
                                                                              body:record_term(body)};
@@ -1586,11 +1808,11 @@ function add_clause_to_predicate(predicateP, head, body)
             // last clause was trust_me, so there is already a try_me_else. Make it retry_me_else and add new clause as trust_me
             last_clause.code[0] = 29;
             last_clause.code[1] = predicates[predicate].next_key;
-            compile_buffer[0] = 30;
-            compile_buffer[1] = 0;
-            //compile_buffer.unshift(predicates[predicate].next_key); WHAT?
+            compilation_environment.buffer[0] = 30;
+            compilation_environment.buffer[1] = 0;
+            //compilation_environment.buffer.unshift(predicates[predicate].next_key); WHAT?
             check_compile_buffer(head, body);            
-            predicates[predicate].clauses[predicates[predicate].next_key] = {code:compile_buffer.slice(0),
+            predicates[predicate].clauses[predicates[predicate].next_key] = {code:compilation_environment.buffer.slice(0),
                                                                              key: predicates[predicate].next_key,
                                                                              head:record_term(head), 
                                                                              body:record_term(body)};
@@ -1617,8 +1839,8 @@ function add_clause_to_aux(label, n, l, lt)
     else
     {
         debug_msg("Adding first clause");
-        compile_buffer[VAL(n)] = 254;
-        compile_buffer[VAL(n)+1] = 0;
+        compilation_environment.buffer[VAL(n)] = 254;
+        compilation_environment.buffer[VAL(n)+1] = 0;
         var ptr = state.H;
         memory[state.H++] = lookup_functor("defined", 1);
         memory[state.H++] = n;
@@ -1647,31 +1869,31 @@ function add_clause_to_existing(address, offset)
 {
     while(true)
     {
-        debug_msg("Examining address " + address + " with value " + compile_buffer[address] + " and offset " + offset) ;
-        switch(compile_buffer[address])
+        debug_msg("Examining address " + address + " with value " + compilation_environment.buffer[address] + " and offset " + offset) ;
+        switch(compilation_environment.buffer[address])
         {
         case 254:
             // Change <NOP,0> -> try_me_else offset
-            compile_buffer[address] = 28;
-            compile_buffer[address+1] = offset;
+            compilation_environment.buffer[address] = 28;
+            compilation_environment.buffer[address+1] = offset;
             // Add <trust_me,0> for new clause
-            compile_buffer[offset ^ 0x80000000] = 30;
-            compile_buffer[(offset ^ 0x80000000)+1] = 0;
+            compilation_environment.buffer[offset ^ 0x80000000] = 30;
+            compilation_environment.buffer[(offset ^ 0x80000000)+1] = 0;
             return;
         case 30:
             // Change <trust_me,0> -> <retry_me_else, N>
-            compile_buffer[address] = 29;
-            compile_buffer[address+1] = offset;
+            compilation_environment.buffer[address] = 29;
+            compilation_environment.buffer[address+1] = offset;
             // Add <trust_me,0> for new clause
-            compile_buffer[offset ^ 0x80000000] = 30;
-            compile_buffer[(offset ^ 0x80000000)+1] = 0;
+            compilation_environment.buffer[offset ^ 0x80000000] = 30;
+            compilation_environment.buffer[(offset ^ 0x80000000)+1] = 0;
             return;
         case 28:
         case 29:
-            address = compile_buffer[address+1] ^ 0x80000000;
+            address = compilation_environment.buffer[address+1] ^ 0x80000000;
             break;
         default:
-            abort("Garbage in code array: " + compile_buffer[address]);
+            abort("Garbage in code array: " + compilation_environment.buffer[address]);
         }        
     }
 }
@@ -1761,7 +1983,7 @@ function predicate_jmp(vars)
     }
 
     state.P = -1; // PC will be incremented by 3 after this if we succeed to 2. This is where queries are compiled from, since the first two bytes are for try/retry/trust
-    code = compile_buffer.slice(0);
+    code = compilation_environment.buffer.slice(0);
     register[0] = vars;
     return true;
 }
@@ -3248,11 +3470,32 @@ function predicate_absolute_file_name(relative, absolute, options) {
 /* errors */
 function type_error(expected, got)
 {
+    let ref_in;
+
+    if(state.current_predicate !== null) {
+        // var ftor_predicate = lookup_functor('/', 2);
+        // var ref_predicate = state.H ^ (TAG_STR << WORD_BITS);
+        // memory[state.H++] = ftor_predicate;
+        // memory[state.H++] = PL_put_atom(ftable[state.current_predicate.key][0]);
+        // memory[state.H++] = PL_put_integer(ftable[state.current_predicate.key][1]);
+
+        let instruction = decode_instruction(state.current_predicate, state.P);
+
+        var ftor_in = lookup_functor('in', 1);
+        ref_in = state.H ^ (TAG_STR << WORD_BITS);
+        memory[state.H++] = ftor_in;
+//        memory[state.H++] = ref_predicate;
+        memory[state.H++] = PL_put_atom_chars(instruction.string);
+    } else {
+        ref_in = PL_put_atom_chars("no current predicate");
+    }
+
     var ftor = lookup_functor('type_error', 2);
     var ref = state.H ^ (TAG_STR << WORD_BITS);
     memory[state.H++] = ftor;
     memory[state.H++] = lookup_atom(expected);
     memory[state.H++] = got;
+    memory[state.H++] = ref_in;
     return predicate_throw(ref);
 }
 

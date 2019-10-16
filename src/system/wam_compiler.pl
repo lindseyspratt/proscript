@@ -1442,7 +1442,7 @@ compile_files([File|Files]):-
 
 compile_file(index(Mode)) :-
     !,
-    set_index_mode(Mode).
+    set_indexing_mode(Mode).
 compile_file(Source):-
   %writeln(compile_file(Source)),
   canonical_source(Source, CanonicalSource),

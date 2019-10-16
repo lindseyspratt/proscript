@@ -1,4 +1,4 @@
-:-module(wam_index_predicates, [wam_index_predicates/0, set_index_mode/1]).
+:-module(wam_index_predicates, [wam_index_predicates/0]).
 
 :- if(\+ (current_predicate(wam_compiler:current_compile_url/1), wam_compiler:current_compile_url(_))).
     :- use_module('../tools/wam_bootstrap').
@@ -128,19 +128,13 @@ labelled instruction words:
 33-5]
 
 */
-:-dynamic('$indexing_mode'/1).
-
-set_index_mode(New) :-
-    mark_predicates_indexed,
-    retractall('$indexing_mode'(_)),
-    assertz('$indexing_mode'(New)).
 
 mark_predicates_indexed :-
     indexable_compiled_predicates(Ps),
     forall(member(P, Ps), register_indexed_predicate(P)).
 
 wam_index_predicates :-
-    ('$indexing_mode'(basic)
+    (indexing_mode(basic)
       -> indexable_compiled_predicates(Ps),
          wam_index_predicates(Ps)
     ;
@@ -155,7 +149,7 @@ wam_index_predicates([H|T]) :-
 % {173: {is_public:false, clauses:{0:{code:[254,0,4,172], key:0}}, clause_keys:[0], next_key:1, key:173}, ... }
 % clause_table(PredicateID, ClauseOffset, ClauseCodes, Head, Body)
 wam_index_predicate(PredicateID) :-
-    ftable(Functor/Arity, PredicateID),
+    lookup_functor(Functor, Arity, PredicateID),
     writeln('==='),
     writeln(indexing(Functor/Arity)),
     compiled_clauses(PredicateID, Clauses),
@@ -176,7 +170,7 @@ wam_index_clauses1(Clauses, PredicateID) :-
     writeln(IndexedSequences),
     reset_compile_buffer,
     assemble(IndexedSequences, 0),
-    setof(N-Code, ctable(N, Code), Codes),
+    compile_buffer_codes(Codes),
     writeln(Codes),
     sequences_ids(TrimmedSequences, SequenceIDs),
     edit_clauses_for_index_sequences(SequenceIDs, PredicateID),

@@ -60,6 +60,7 @@ let dtable = [];
 let atable = ['[]']; // Reserve first atom as [].
 let floats = [];
 let predicates = {};
+let indexed_predicates = [];
 let exception = null;
 let itable = [];
 let stable = [];
@@ -1789,7 +1790,7 @@ function gotoAddress(address) {
         // address is a clause index in current predicate. 'Go' to that clause and set the
         // program pointer to skip the first instruction (two words): this
         // instruction is always NOP, try_me_else, retry_me_else, or trust_me.
-        code = state.current_predicate.clauses[address].code;
+        code = state.current_predicate.clauses[state.current_predicate.clause_keys[address]].code;
         if(! code) {
             throw('code is undefined for gotoAddress '+ address + '.');
         }
@@ -2034,11 +2035,49 @@ function undefined_predicate(ftor)
     return true;
 }
 
-// End exceptions cod
+// End exceptions code
 
 function reset_compile_buffer()
 {
-    compile_buffer = [];
+    compilation_environment.buffer = [];
+    return true;
+}
+
+function predicate_compile_buffer_codes(codes) {
+    let currentCodes;
+    if(typeof compilation_environment.buffer === 'undefined' || compilation_environment.buffer.length === 0) {
+        currentCodes = NIL;
+    } else {
+        currentCodes = integers_to_list(compilation_environment.buffer);
+    }
+
+    return unify(codes, currentCodes);
+}
+
+function predicate_indexing_mode(mode) {
+    if(typeof compilation_environment.indexing_mode === 'undefined') {
+        return unify(mode, PL_new_atom('none'));
+    }
+
+    return unify(mode, PL_new_atom(compilation_environment.indexing_mode));
+}
+
+function predicate_set_indexing_mode(mode) {
+    if(TAG(mode) === TAG_REF) {
+        return instantiation_error('indexing mode atom', mode);
+    }
+
+    if(TAG(mode) !== TAG_ATM) {
+        return type_error('indexing mode atom', mode);
+    }
+
+    let modeJS = PL_atom_chars(mode);
+
+    if(modeJS !== 'none' && modeJS !== 'basic') {
+        return domain_error('indexing mode atom = "none" or "basic"', mode);
+    }
+
+    compilation_environment.indexing_mode = modeJS;
     return true;
 }
 

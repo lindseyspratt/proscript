@@ -243,6 +243,10 @@ dump_tables(S):-
                 Predicates),
         atomic_list_concat(Predicates, ', ', PredicatesAtom),
         format(S, 'predicates = {~w};~n', [PredicatesAtom]),
+        findall(IPA,
+                (indexed_predicate(IP), format(atom(IPA), '~w: true', [IP])), IPAs),
+        atomic_list_concat(IPAs, ', ', IPAsAtom),
+        format(S, 'indexed_predicates = {~w};~n', [IPAsAtom]),
         findall(PredicateAtom,
                 ( fptable(Predicate, Symbol),
                   format(atom(PredicateAtom), '~w: ~w', [Predicate, Symbol])
@@ -533,12 +537,22 @@ reset:-
         reserve_predicate(define_dynamic_predicate/1, predicate_define_dynamic_predicate),
         reserve_predicate(compiled_state_boot_code/1, predicate_compiled_state_boot_code),
         reserve_predicate(dump_tables/1, predicate_dump_tables),
+        reserve_predicate(compile_buffer_codes/1, predicate_compile_buffer_codes),
+
         reserve_predicate(add_module_export/2, predicate_add_module_export),
         reserve_predicate(module_export/2, predicate_module_export),
         reserve_predicate(add_module_import/2, predicate_add_module_import),
         reserve_predicate(module_import/2, predicate_module_import),
         reserve_predicate(add_meta_predicate/3, predicate_add_meta_predicate),
         reserve_predicate(pls_meta_predicate/3, predicate_pls_meta_predicate),
+
+        reserve_predicate(indexing_mode/1, predicate_indexing_mode),
+        reserve_predicate(set_indexing_mode/1, predicate_set_indexing_mode),
+        reserve_predicate(indexable_compiled_predicates/1, predicate_indexable_compiled_predicates),
+        reserve_predicate(register_indexed_predicate/1, predicate_register_indexed_predicate),
+        reserve_predicate(compiled_clauses/2, predicate_compiled_clauses),
+        reserve_predicate(add_index_clause_to_predicate/1, predicate_add_index_clause_to_predicate),
+        reserve_predicate(edit_clauses_for_index_sequences/2, predicate_edit_clauses_for_index_sequences),
 
         % Promises
         reserve_predicate(request_result/1, predicate_request_result),

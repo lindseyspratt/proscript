@@ -1,7 +1,8 @@
-:- module(wam_bootstrap_util, [lookup_atom/2, lookup_float/2, lookup_functor/3, lookup_dynamic_functor/3, emit_code/2, compile_message/1,
+:- module(wam_bootstrap_util, [lookup_atom/2, lookup_float/2, lookup_functor/3, lookup_dynamic_functor/3, emit_code/2,
+    compile_buffer_codes/1, compile_message/1,
     ftable/2, fltable/2, atable/2, clause_table/5, fptable/2, ctable/2, itable/1, stable/1, dtable/1,
-    'pls$module_export'/3, 'pls$import'/2, 'pls$meta_predicate'/3,
-    indexable_compiled_predicates/1, compiled_clauses/2, register_indexed_predicate/1,
+    'pls$module_export'/3, 'pls$import'/2, 'pls$meta_predicate'/3, 'indexing_mode'/1,
+    indexable_compiled_predicates/1, compiled_clauses/2, register_indexed_predicate/1, indexed_predicate/1,
     add_index_clause_to_predicate/1, edit_clauses_for_index_sequences/2,
     add_clause_to_predicate/3, add_clause_to_aux/4, add_clause_to_existing/2]).
 
@@ -18,8 +19,13 @@
 :-dynamic('pls$module_export'/3).
 :-dynamic('pls$import'/2).
 :-dynamic('pls$meta_predicate'/3).
+:-dynamic('indexing_mode'/1).
 
 lookup_functor(Functor, Arity, N):-
+        integer(N)
+          -> ftable(F/Arity, N),
+             lookup_atom(Functor, F)
+        ;
         lookup_atom(Functor, F),
         ( ftable(F/Arity, N)->
             true
@@ -40,7 +46,7 @@ lookup_atom([], 0):- !.
 lookup_atom(Atom, N):-
         ( atable(Atom, N)->
             true
-        ; otherwise->
+        ; var(N)->
             flag(atable, N, N+1),
             assert(atable(Atom, N))
         ).
@@ -48,13 +54,16 @@ lookup_atom(Atom, N):-
 lookup_float(Float, N):-
         ( fltable(Float, N)->
             true
-        ; otherwise->
+        ; var(N)->
             flag(fltable, N, N+1),
             assert(fltable(Float, N))
         ).
 
 emit_code(N, Code):-
         assert(ctable(N, Code)).
+
+compile_buffer_codes(Codes) :-
+    setof(N-Code, ctable(N, Code), Codes).
 
 /*
 compile_message(A):-
@@ -65,6 +74,11 @@ compile_message(A):-
     writeln(A).
 */
 compile_message(_).
+
+set_indexing_mode(New) :-
+    mark_predicates_indexed,
+    retractall('indexing_mode'(_)),
+    assertz('indexing_mode'(New)).
 
 indexable_compiled_predicates(Ps) :-
     setof(P, A ^ B ^ C ^ D ^ Functor ^ Arity ^ (clause_table(P, A, B, C, D), \+ indexed_predicate(P), ftable(Functor/Arity, P), Arity > 0), Ps)
@@ -95,7 +109,7 @@ edit_clauses_for_index_sequences([H|T], Predicate) :-
         edit_clauses_for_index_sequences(T, Predicate).
 
 edit_clauses_for_index_sequence([Only], Predicate) :-
-        modify_clause_control_instruction(Only, [30,0], Predicate). % trust_me
+        modify_clause_control_instruction(Only, [254,0], Predicate). % nop2
 edit_clauses_for_index_sequence([First, Second|Rest], Predicate) :-
         modify_clause_control_instruction(First, [28,Second], Predicate), % try_me_else
         edit_clauses_for_index_sequence1([Second|Rest], Predicate).
