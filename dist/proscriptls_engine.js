@@ -4190,6 +4190,7 @@ const F_BIT = 1 << 31;
 const NV_MASK = M_BIT | F_BIT | (TAG_MASK << WORD_BITS);
 
 const NIL = (TAG_ATM << WORD_BITS); // atable[0] = '[]', so NIL is 0 xor TAG_ATM, which is just TAG_ATM.
+const FAIL_ADDRESS = 1000000; // used in switch_on_term to recognize an address that 'fails'.
 
 let memory = new Array(HEAP_SIZE + STACK_SIZE + TRAIL_SIZE);
 let code = [255];
@@ -5546,33 +5547,33 @@ function wam1()
 
             switch(TAG(argument1)) {
                 case TAG_REF:
-                    gotoAddress(V); break;
+                    gotoAddress(V, 0); break; // offset = 0 directs gotoAddress to start with control instruction of 'address' (clause index) V.
                 case TAG_ATM:
-                    if(CA !== 0) {
+                    if(CA !== FAIL_ADDRESS) {
                         gotoAddress(CA);
                     } else if (!backtrack())
                         return wamExit(false);
                     break;
                 case TAG_FLT:
-                    if(CF !== 0) {
+                    if(CF !== FAIL_ADDRESS) {
                         gotoAddress(CF);
                     } else if (!backtrack())
                         return wamExit(false);
                     break;
                 case TAG_INT:
-                    if(CI !== 0) {
+                    if(CI !== FAIL_ADDRESS) {
                         gotoAddress(CI);
                     } else if (!backtrack())
                         return wamExit(false);
                     break;
                 case TAG_LST:
-                    if(L !== 0) {
+                    if(L !== FAIL_ADDRESS) {
                         gotoAddress(L);
                     } else if (!backtrack())
                         return wamExit(false);
                     break;
                 case TAG_STR:
-                    if(S !== 0) {
+                    if(S !== FAIL_ADDRESS) {
                         gotoAddress(S);
                     } else if (!backtrack())
                         return wamExit(false);
@@ -5775,7 +5776,7 @@ function wam1()
     return wamExit(true);
 }
 
-function gotoAddress(address) {
+function gotoAddress(address, offset) {
     if((address & 0x80000000) === 0) {
         // address is a clause index in current predicate. 'Go' to that clause and set the
         // program pointer to skip the first instruction (two words): this
@@ -5784,7 +5785,13 @@ function gotoAddress(address) {
         if(! code) {
             throw('code is undefined for gotoAddress '+ address + '.');
         }
-        state.P = 2; // skip the opening instruction.
+        let skip;
+        if(typeof offset === 'undefined') {
+            skip = 2; // skip the opening control instruction (e.g. try_me_else).
+        } else {
+            skip = offset;
+        }
+        state.P = skip;
     } else {
         // address is a position in the current clause code.
         state.P = address ^ 0x80000000;
@@ -5801,7 +5808,8 @@ function search_table(value, tableStartPosition, tableSize) {
     // For a large table this function can use a binary search.
     // For small tables it is sufficient to do a linear search.
 
-    for(let searchPosition = tableStartPosition;searchPosition < tableSize+tableStartPosition;searchPosition+=2) {
+    let limit = (tableSize*2)+tableStartPosition;
+    for(let searchPosition = tableStartPosition;searchPosition < limit;searchPosition+=2) {
         let key = code[searchPosition];
         if(key === value) {
             return {found: true, value: code[searchPosition+1]};

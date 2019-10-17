@@ -20,20 +20,26 @@
 
 
 crypt(ShowResult) :-
+    c([A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]),
+    (   ShowResult = true ->
+        write(' '), write(A), write(B), write(C), nl,
+        write('  '), write(D), write(E), nl,
+        write(F), write(G), write(H), write(I), nl,
+        write(J), write(K), write(L), nl,
+        write(M), write(N), write(O), write(P), nl
+    ;   true).
+
+crypt1 :-
+ c([3, 4, 8, 2, 8, 2, 7, 8, 4, 6, 9, 6, 9, 7, 4, 4]).
+
+c([A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]) :-
 	odd(A), even(B), even(C), even(E),
 	mult([C, B, A], E, [I, H, G, F | X]),
 	lefteven(F), odd(G), even(H), even(I), zero(X), lefteven(D),
 	mult([C, B, A], D, [L, K, J | Y]),
 	lefteven(J), odd(K), even(L), zero(Y),
 	sum2([I, H, G, F], [0, L, K, J], [P, O, N, M | Z]),
-	odd(M), odd(N), even(O), even(P), zero(Z),
-	(   ShowResult = true ->
-	    write(' '), write(A), write(B), write(C), nl,
-	    write('  '), write(D), write(E), nl,
-	    write(F), write(G), write(H), write(I), nl,
-	    write(J), write(K), write(L), nl,
-	    write(M), write(N), write(O), write(P), nl
-	;   true).
+	odd(M), odd(N), even(O), even(P), zero(Z).
 
 % In the usual source this predicate is named sum. However, sum is a
 % language construct in NU-Prolog, and cannot be defined as a predicate.
@@ -96,6 +102,7 @@ lefteven(8).
 % benchmark interface
 
 benchmark(ShowResult) :-
-	crypt(ShowResult).
+%	crypt(ShowResult).
+	crypt1.
 
 :- include(common).

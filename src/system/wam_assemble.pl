@@ -100,7 +100,7 @@ encode_opcodes_1([switch_on_term(VarClauseOffset, AtomLabelOrFail, IntegerLabelO
         N1 is N+1,
         emit_codes(N, [44]),
         (VarClauseOffset = fail
-          -> emit_code(N1, 0)
+          -> emit_code(N1, 100000) % 'fail' indicator in WAM switch_on_term implementation.
         ;
          emit_code(N1, VarClauseOffset)
         ),

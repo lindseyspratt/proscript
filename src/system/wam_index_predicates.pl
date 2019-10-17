@@ -129,10 +129,6 @@ labelled instruction words:
 
 */
 
-mark_predicates_indexed :-
-    indexable_compiled_predicates(Ps),
-    forall(member(P, Ps), register_indexed_predicate(P)).
-
 wam_index_predicates :-
     (indexing_mode(basic)
       -> indexable_compiled_predicates(Ps),

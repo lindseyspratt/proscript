@@ -1,7 +1,7 @@
 :- module(wam_bootstrap_util, [lookup_atom/2, lookup_float/2, lookup_functor/3, lookup_dynamic_functor/3, emit_code/2,
     compile_buffer_codes/1, compile_message/1,
     ftable/2, fltable/2, atable/2, clause_table/5, fptable/2, ctable/2, itable/1, stable/1, dtable/1,
-    'pls$module_export'/3, 'pls$import'/2, 'pls$meta_predicate'/3, 'indexing_mode'/1,
+    'pls$module_export'/3, 'pls$import'/2, 'pls$meta_predicate'/3, indexing_mode/1, set_indexing_mode/1,
     indexable_compiled_predicates/1, compiled_clauses/2, register_indexed_predicate/1, indexed_predicate/1,
     add_index_clause_to_predicate/1, edit_clauses_for_index_sequences/2,
     add_clause_to_predicate/3, add_clause_to_aux/4, add_clause_to_existing/2]).
@@ -79,6 +79,10 @@ set_indexing_mode(New) :-
     mark_predicates_indexed,
     retractall('indexing_mode'(_)),
     assertz('indexing_mode'(New)).
+
+mark_predicates_indexed :-
+    indexable_compiled_predicates(Ps),
+    forall(member(P, Ps), register_indexed_predicate(P)).
 
 indexable_compiled_predicates(Ps) :-
     setof(P, A ^ B ^ C ^ D ^ Functor ^ Arity ^ (clause_table(P, A, B, C, D), \+ indexed_predicate(P), ftable(Functor/Arity, P), Arity > 0), Ps)
