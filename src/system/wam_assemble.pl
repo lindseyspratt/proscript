@@ -45,6 +45,7 @@ emit_codes(N, [Code|Codes]):-
 encode_register(y(N), [0, N|T], T).
 encode_register(x(N), [1, N|T], T).
 
+encode_fail(1000000).
 
 encode_opcodes_1([], _, L, L, D, D):- !.
 
@@ -100,7 +101,8 @@ encode_opcodes_1([switch_on_term(VarClauseOffset, AtomLabelOrFail, IntegerLabelO
         N1 is N+1,
         emit_codes(N, [44]),
         (VarClauseOffset = fail
-          -> emit_code(N1, 100000) % 'fail' indicator in WAM switch_on_term implementation.
+          -> encode_fail(Fail),
+             emit_code(N1, Fail) % 'fail' indicator in WAM switch_on_term implementation.
         ;
          emit_code(N1, VarClauseOffset)
         ),
@@ -118,9 +120,9 @@ encode_opcodes_1([switch_on_constant(Count, Targets)|As],
         compile_message(switch_on_constant(Count, Targets, N)),
         N1 is N+1,
         emit_codes(N, [45]),
-        encode_switch_table(Count, Targets, N1, D, Dx),
-        Nnext is N1 + 2*Count + 1,
-        encode_opcodes_1(As, Nnext, L, L1, Dx, D1).
+        encode_switch_table_typed(Count, Targets, N1, NNext, L, Lx, D, Dx),
+        % Nnext is N1 + 2*Count + 1,
+        encode_opcodes_1(As, NNext, Lx, L1, Dx, D1).
 
 encode_opcodes_1([switch_on_structure(Count, Targets)|As],
             N, L, L1, D, D1):-
@@ -128,9 +130,9 @@ encode_opcodes_1([switch_on_structure(Count, Targets)|As],
         compile_message(switch_on_structure(Count, Targets, N)),
         N1 is N+1,
         emit_codes(N, [46]),
-        encode_switch_table(Count, Targets, N1, D, Dx),
-        Nnext is N1 + 2*Count + 1,
-        encode_opcodes_1(As, Nnext, L, L1, Dx, D1).
+        encode_switch_table_hash(Count, Targets, N1, NNext, L, Lx, D, Dx),
+        % Nnext is N1 + 2*Count + 1,
+        encode_opcodes_1(As, NNext, Lx, L1, Dx, D1).
 
 encode_opcodes_1([label(Label)|As], N, [label(Label, N)|L], L1, D, D1):-
         !,
@@ -149,7 +151,8 @@ encode_label_or_fail(N, N1, LabelOrFail, D, DT) :-
         (var(LabelOrFail)
           -> D = [aux_address_of(LabelOrFail, N1)|DT]
         ; LabelOrFail = fail
-          -> emit_code(N1, 0),
+          -> encode_fail(Fail),
+             emit_code(N1, Fail), % 'fail' indicator in WAM switch_on_term implementation.
              D = DT
         ; LabelOrFail = clause_offset(X)
           -> emit_code(N1, X),
@@ -158,16 +161,111 @@ encode_label_or_fail(N, N1, LabelOrFail, D, DT) :-
          throw(invalid_address(LabelOrFail))
         ).
 
-encode_switch_table(Count, Targets, N, D, D1) :-
+encode_switch_table_typed(Count, Targets, N, NOut, L, L1, D, D1) :-
+        Count > 15
+          -> emit_code(N, 1), % 1 is hash table type
+             N1 is N + 1,
+             encode_switch_table_hash(Count, Targets, N1, NOut, L, L1, D, D1)
+        ;
+        emit_code(N, 0), % 0 is key/value sequence table type
+        N1 is N + 1,
+        L = L1,
+        encode_switch_table(Count, Targets, N1, NOut, D, D1).
+
+% [BucketCount, B1, B2, ..., BCount, B1Size, label(B1), K1B1, V1B1, ..., KB1SizeB1, VB1SizeB1, label(B2), B2Size, K1B2, V1B2, ...]
+% encode_switch_table_hash(3, [1-clause_offset(10), 2-clause_offset(20), 3-clause_offset(30)], 0, L, L1, D, D1).
+
+encode_switch_table_hash(Count, Targets, N, NOut, L, L1, D, D1) :-
+        N1 is N + 1,
+        BucketPower is min(floor(log(Count) / log(2)) + 1, 8),
+        BucketCount is 1 << BucketPower,
+        emit_code(N, BucketCount),
+        Mask is BucketCount - 1,
+        label_targets(Targets, Mask, LabelledTargets),
+        setof(BucketID-BucketTargets, setof(BucketTarget, member(BucketID-BucketTarget, LabelledTargets), BucketTargets), Buckets),
+        complete_buckets(Buckets, BucketCount, CompletedBuckets),
+        bucket_labels(CompletedBuckets, BucketLabels),
+        encode_switch_bucket_labels(BucketLabels, N1, NX, D, DInterim),
+        % NX is N1 + BucketCount + 1,
+        encode_switch_bucket_tables(CompletedBuckets, BucketLabels, NX, NOut, L, L1, DInterim, D1).
+
+label_targets([], _Mask, []).
+label_targets([K-V|T], Mask, [BucketID-(K-V)|BT]) :-
+        hash(K, Mask, BucketID),
+        label_targets(T, Mask, BT).
+
+hash(Key, Mask, BucketID) :-
+        BucketID is (Key /\ Mask) + 1.
+
+complete_buckets(Buckets, BucketCount, CompletedBuckets) :-
+        complete_buckets(Buckets, 0, BucketCount, CompletedBuckets).
+
+complete_buckets([], SoFar, BucketCount, CompletedBuckets) :-
+        complete_buckets1(SoFar, BucketCount, CompletedBuckets).
+complete_buckets([ID-Targets|T], SoFar, BucketCount, CompletedBuckets) :-
+        Next is SoFar + 1,
+        (ID = Next
+          -> CompletedBuckets = [ID-Targets|CompletedBucketsTail],
+             NextBuckets = T
+        ;
+        ID > Next
+          -> CompletedBuckets = [Next-[]|CompletedBucketsTail],
+             [ID-Targets|T] = NextBuckets
+        ;
+        ID < Next
+          -> throw(invalid_bucket_id(ID))
+        ),
+        complete_buckets(NextBuckets, Next, BucketCount, CompletedBucketsTail).
+
+complete_buckets1(BucketCount, BucketCount, []) :- !.
+complete_buckets1(SoFar, BucketCount, [Next-[]|CompletedBucketsTail]) :-
+        SoFar < BucketCount,
+        Next is SoFar + 1,
+        complete_buckets1(Next, BucketCount, CompletedBucketsTail).
+
+bucket_labels([], []).
+bucket_labels([_-Targets|T], [BH|BT]) :-
+        (Targets = []
+          -> BH = fail
+        ;
+        true
+        ),
+        bucket_labels(T, BT).
+
+encode_switch_bucket_labels([], NOut, NOut, D, D).
+encode_switch_bucket_labels([H|T], N, NOut, D, D1) :-
+        (var(H)
+          -> D = [aux_address_of(H, N)|DInterim]
+        ;
+        D = DInterim,
+        encode_fail(Fail),
+        emit_code(N, Fail) % 'fail' indicator in WAM switch_on_term implementation.
+        ),
+        N1 is N + 1,
+        encode_switch_bucket_labels(T, N1, NOut, DInterim, D1).
+
+encode_switch_bucket_tables([], [], NOut, NOut, L, L, D, D).
+encode_switch_bucket_tables([_-BucketTargets|T], [LH|LT], N, NOut, [label(LH, N)|L], L1, D, D1) :-
+        var(LH),
+        !,
+        length(BucketTargets, BucketTargetCount),
+        encode_switch_table(BucketTargetCount, BucketTargets, N, NInterim, D, DInterim),
+        % NX is N + 2 * BucketTargetCount + 1,
+        encode_switch_bucket_tables(T, LT, NInterim, NOut ,L, L1, DInterim, D1).
+encode_switch_bucket_tables([_|T], [LH|LT], N, NOut, L, L1, D, D1) :-
+        LH == fail,
+        !,
+        encode_switch_bucket_tables(T, LT, N, NOut, L, L1, D, D1).
+
+encode_switch_table(Count, Targets, N, NOut, D, D1) :-
         emit_code(N, Count),
         N1 is N + 1,
-        encode_switch_table_targets(Targets, N1, D, D1).
+        encode_switch_table_targets(Targets, N1, NOut, D, D1).
 
-encode_switch_table_targets([], _, D, D).
-encode_switch_table_targets([H|T], N, D, D1) :-
-        encode_switch_table_target(H, N, D, DInterim),
-        N2 is N + 2,
-        encode_switch_table_targets(T, N2, DInterim, D1).
+encode_switch_table_targets([], NOut, NOut, D, D).
+encode_switch_table_targets([H|T], N, NOut, D, D1) :-
+        encode_switch_table_target(H, N, NNext, D, DInterim),
+        encode_switch_table_targets(T, NNext, NOut, DInterim, D1).
 
 % codes: K, v
 % where V is a constant (from a clause_offset) or it is a label
@@ -175,9 +273,10 @@ encode_switch_table_targets([H|T], N, D, D1) :-
 % K (the key) is an encoding of some Prolog term (generally a
 % atom or a predicate (functor/arity)).
 
-encode_switch_table_target(K - V, N, D, D1) :-
+encode_switch_table_target(K - V, N, NOut, D, D1) :-
         emit_code(N, K),
         N1 is N + 1,
+        NOut is N1 + 1,
         (var(V) % wait to emit code when label V is resolved by link/2 predicate.
           -> D = [aux_address_of(V, N1)|D1]
         ;

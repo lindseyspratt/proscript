@@ -162,6 +162,9 @@ wam_index_clauses1(Clauses, PredicateID) :-
     Sequences = [Sequence|SequencesTail],
     clause_sequences(Clauses, Sequence, SequencesTail),
     trim_sequences(Sequences, TrimmedSequences),
+    (degenerate_sequences(TrimmedSequences)
+        -> writeln(degenerate(TrimmedSequences))
+    ;
     index_sequences(TrimmedSequences, _, IndexedSequences),
     writeln(IndexedSequences),
     reset_compile_buffer,
@@ -170,7 +173,12 @@ wam_index_clauses1(Clauses, PredicateID) :-
     writeln(Codes),
     sequences_ids(TrimmedSequences, SequenceIDs),
     edit_clauses_for_index_sequences(SequenceIDs, PredicateID),
-    add_index_clause_to_predicate(PredicateID).
+    add_index_clause_to_predicate(PredicateID)
+    ).
+
+degenerate_sequences([]).
+degenerate_sequences([[_]|T]) :-
+    degenerate_sequences(T).
 
 sequences_ids([], []).
 sequences_ids([H|T], [HI|TI]) :-

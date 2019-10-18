@@ -3,6 +3,7 @@
 :- dynamic(test_counter/1).
 :- dynamic(test_pass_count/1).
 :- dynamic(test_fail_info/4).
+:- dynamic(test/3).
 
 
 run_tests :-

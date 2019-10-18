@@ -1580,13 +1580,13 @@ function wam1()
         }
         continue;
 
-            case 45: // switch_on_constant: [45, N, K1, V1, ..., KN, VN]
+            case 45: // switch_on_constant: [45, T, ...]
         {
             let codePosition = state.P;
             let argument1 = VAL(deref(register[0])); // the table is all of one data type: atom, integer, or float.
-            let tableStartPosition = codePosition + 2; // points at K1.
-            let N = code[codePosition + 1];
-            let result = search_table(argument1, tableStartPosition, N);
+            let T = code[codePosition + 1];
+            let result = search_table_type(T, argument1, codePosition + 2);
+
             if(result.found) {
                 gotoAddress(result.value);
             } else  if (!backtrack()) {
@@ -1595,14 +1595,13 @@ function wam1()
         }
         continue;
 
-        case 46: // switch_on_structure: [46, N, K1, V1, ..., KN, VN]
+            case 46: // switch_on_structure: [46, T, ...]
         {
             let codePosition = state.P;
             let argument1 = deref(register[0]);
             let predicateIndicator = VAL(memory[VAL(argument1)]);
-            let tableStartPosition = codePosition + 2; // points at K1.
-            let N = code[codePosition + 1];
-            let result = search_table(predicateIndicator, tableStartPosition, N);
+            let T = code[codePosition + 1];
+            let result = search_table_type(predicateIndicator, codePosition + 2);
             if(result.found) {
                 gotoAddress(result.value);
             } else if (!backtrack()) {
@@ -1811,12 +1810,30 @@ function gotoAddress(address, offset) {
     }
 }
 
+function search_table_type(type, value, tableStartPosition) {
+    // There are two types of tables: hash and key/value pair sequence.
+
+    let tableSize = code[tableStartPosition];
+    if(type === 0) {
+        // key/value pair sequence
+        return search_table(value, tableStartPosition+1, tableSize);
+    } else if(type === 1) {
+        return search_table_hash(value, tableStartPosition+1, tableSize);
+    } else {
+        throw('invalid search table type: ' + T);
+    }
+}
+
 function search_table(value, tableStartPosition, tableSize) {
     // The table is a sequence of tableSize pairs of key-value words
     // starting at code[tableStartPosition].
     // The pairs are in Prolog term order by keys.
     // For a large table this function can use a binary search.
     // For small tables it is sufficient to do a linear search.
+
+    if(tableSize > 15) {
+        return search_table_binary(value, tableStartPosition, tableSize);
+    }
 
     let limit = (tableSize*2)+tableStartPosition;
     for(let searchPosition = tableStartPosition;searchPosition < limit;searchPosition+=2) {
@@ -1827,6 +1844,73 @@ function search_table(value, tableStartPosition, tableSize) {
     }
 
     return {found: false};
+}
+
+function search_table_binary(value, tableStartPosition, tableSize) {
+    // The table is a sequence of tableSize pairs of key-value words
+    // starting at code[tableStartPosition].
+    // The pairs are in Prolog term order by keys.
+    // For a large table this function can use a binary search.
+    // For small tables it is sufficient to do a linear search.
+
+    let searchLimit = tableSize;
+    let searchLimitSuccessor = searchLimit + 1;
+    let searchID = searchLimitSuccessor / 2;
+    let reducedTableStartPosition = tableStartPosition - 2;
+    let found;
+    let searchPosition;
+    while(true) {
+        searchPosition = searchID*2 + reducedTableStartPosition;
+        let key = code[searchPosition];
+        let comparison = value - key;
+        if(comparison < 0) {
+            if(searchID === 1) {
+                found = false;
+                break;
+            }
+            searchID = (searchID-1) / 2;
+        } else if(comparison > 0) {
+            if(searchID === searchLimit) {
+                found = false;
+                break;
+            }
+            searchID = (searchID + searchLimitSuccessor) / 2;
+        } else {
+            // comparison === 0 -> value === key
+            found = true;
+            break;
+        }
+    }
+
+    if(found) {
+        return {found: true, value: code[searchPosition+1]};
+    }
+    return {found: false};
+}
+
+function search_table_hash(value, tableStartPosition, tableSize) {
+    // The table is in two layers.
+    // The top layer is a sequence of tableSize 'buckets' (tableSize is a power of 2) - each
+    // bucket is an address of a second layer table.
+    // A second layer table has a word at code[address] with tableSize followed
+    // by a sequence of tableSize pairs of key-value words
+    // starting at code[address+1].
+    // The pairs are in Prolog term order by keys.
+    // For a large table this function can use a binary search.
+    // For small tables it is sufficient to do a linear search.
+
+    // tableSize bucket hash. Key is 0 to tableSize-1.
+    // hash is low order log2(tableSize) bits.
+
+    let mask = tableSize - 1;
+
+    let bucketID = (value & mask) + 1;
+    let bucketOfst = bucketID - 1;
+    let bucketPosition = tableStartPosition + bucketOfst;
+    let subtableAddress = code[bucketPosition] ^ 0x80000000; // subtableAddress in code is from 'linking' a label.
+    let subtableSize = code[subtableAddress];
+    let subtableStartPosition = subtableAddress + 1;
+    return search_table(value, subtableStartPosition, subtableSize)
 }
 
 function predicate_suspend_set(value) {
