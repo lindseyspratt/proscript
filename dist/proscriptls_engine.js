@@ -5605,7 +5605,7 @@ function wam1()
             let argument1 = deref(register[0]);
             let predicateIndicator = VAL(memory[VAL(argument1)]);
             let T = code[codePosition + 1];
-            let result = search_table_type(predicateIndicator, codePosition + 2);
+            let result = search_table_type(T, predicateIndicator, codePosition + 2);
             if(result.found) {
                 gotoAddress(result.value);
             } else if (!backtrack()) {
@@ -5810,7 +5810,7 @@ function search_table_type(type, value, tableStartPosition) {
     } else if(type === 1) {
         return search_table_hash(value, tableStartPosition+1, tableSize);
     } else {
-        throw('invalid search table type: ' + T);
+        throw('invalid search table type: ' + type);
     }
 }
 

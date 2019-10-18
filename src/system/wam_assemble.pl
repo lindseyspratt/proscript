@@ -130,7 +130,7 @@ encode_opcodes_1([switch_on_structure(Count, Targets)|As],
         compile_message(switch_on_structure(Count, Targets, N)),
         N1 is N+1,
         emit_codes(N, [46]),
-        encode_switch_table_hash(Count, Targets, N1, NNext, L, Lx, D, Dx),
+        encode_switch_table_typed(Count, Targets, N1, NNext, L, Lx, D, Dx),
         % Nnext is N1 + 2*Count + 1,
         encode_opcodes_1(As, NNext, Lx, L1, Dx, D1).
 

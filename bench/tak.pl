@@ -17,6 +17,7 @@ tak(ShowResult) :-
 
 tak(X,Y,Z,A):-
         X =< Y,
+        !,
         Z = A.
 
 tak(X,Y,Z,A):-
