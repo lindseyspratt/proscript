@@ -85,7 +85,7 @@ mark_predicates_indexed :-
     forall(member(P, Ps), register_indexed_predicate(P)).
 
 indexable_compiled_predicates(Ps) :-
-    setof(P, A ^ B ^ C ^ D ^ Functor ^ Arity ^ (clause_table(P, A, B, C, D), \+ indexed_predicate(P), ftable(Functor/Arity, P), Arity > 0), Ps)
+    setof(P, A ^ B ^ C ^ D ^ Functor ^ Arity ^ (clause_table(P, A, B, C, D), \+dtable(P), \+ indexed_predicate(P), ftable(Functor/Arity, P), Arity > 0), Ps)
       -> true
     ;
     Ps = [].

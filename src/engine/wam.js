@@ -387,6 +387,10 @@ function backtrack()
     }
 
     state.current_predicate = next.predicate;
+    if(state.current_predicate) {
+        state.num_of_args = ftable[state.current_predicate.key][1];
+    }
+
     if(state.trace_call !== 'no_trace') {
         let traceCallPL = memory[state.B + memory[state.B] + CP_TC];
         state.trace_call = atable[VAL(traceCallPL)];
@@ -541,7 +545,7 @@ function wam_create_choicepoint(nextCP, prefix) {
         // -----------
         debug_msg("P=" + state.P + " Top frame is an environment. Starts at " + state.E + " and has length = " + state.CP.code[state.CP.offset - 1] + " + 2. Previous is " + memory[state.E]);
         debug_msg("Top choicepoint is " + state.B);
-        newB = state.E + state.CP.code[state.CP.offset - 1] + 2;
+        newB = state.E + state.CP.code[state.CP.offset - 1] + 2; // this is corrected according to Ait-Kaci wamerratum.txt.
     } else {
         // In this case, the top frame is a choicepoint. This is a bit easier: A choicepoint contains 7 saved special-purpose registers, the N root arguments
         // for the goal, and, happily, the value of N as the very first argument. Therefore, we can read the 0th entry of the current frame (at state.B)
@@ -728,7 +732,7 @@ function wam1()
                 let tmpE;
                 if (state.E > state.B) {
                     debug_msg("P=" + state.P + " Top frame is an environment, at " + state.E + " with previous environment of " + memory[state.E] + " and CP of " + memory[state.E + E_CP]);
-                    let nextEnvironmentOfst = state.CP.code[state.CP.offset - 1] + 2;
+                    let nextEnvironmentOfst = state.CP.code[state.CP.offset - 1] + 2; // this is as corrected by Ait-Kaci in wamerratum.txt.
                     // if(nextEnvironmentOfst > 10000) {
                     //     dump_environments();
                     //     dump_choicepoints();
@@ -911,6 +915,9 @@ function wam1()
             case 5: // proceed
                 state.P = state.CP.offset;
                 state.current_predicate = state.CP.predicate;
+                if(state.current_predicate) {
+                    state.num_of_args = ftable[state.current_predicate.key][1];
+                }
                 code = state.CP.code;
                 if (!code) {
                     throw 'code is undefined';
@@ -1245,7 +1252,7 @@ function wam1()
         case 26: // unify_constant
             if (state.mode === READ)
             {
-                let sym = deref(memory[state.S++]);
+                let sym = deref(memory[state.S++]); // the state.s++ increment is as indicated by Ait-Kaci wamerratum.txt.
                 let arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
                 state.P += 2;
                 debug_msg("sym: " + hex(sym) + ", arg: " + hex(arg));
@@ -1416,8 +1423,10 @@ function wam1()
                     cleanups.shift();
                 }
                 state.B = state.B0;
-                if (state.B > 0)
+                if (state.B > 0) {
+                    //state.HB = memory[state.B + memory[state.B] + CP_H]; // fix from wamerratum.txt
                     tidy_trail();
+                }
             }
             if (result)
                 state.P += 1;
@@ -1439,8 +1448,10 @@ function wam1()
                     cleanups.shift();
                 }
                 state.B = y;
-                if (state.B > 0)
+                if (state.B > 0) {
+                    //state.HB = memory[state.B + memory[state.B] + CP_H]; // fix from wamerratum.txt
                     tidy_trail();
+                }
             } else {
                 debug_msg("... has no effect");
             }
@@ -1490,6 +1501,10 @@ function wam1()
             }
 
             state.current_predicate = memory[state.B + FCP_C].current_predicate;
+            if(state.current_predicate) {
+                state.num_of_args = ftable[state.current_predicate.key][1];
+            }
+
             let n = memory[state.B];
             debug_msg("State has " + n + " saved registers including the two special");
             state.foreign_retry = true;

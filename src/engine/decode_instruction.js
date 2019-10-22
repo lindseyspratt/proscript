@@ -370,7 +370,7 @@ function decode_instruction(predicateID, codePosition) {
             instructionSize = 3;
             break;
         }
-        // retry_foreign is for foreign predicates with nondeterministic behaviour
+        // retry_foreign is for foreign predicates with non-deterministic behaviour
         case 42: // retry_foreign: [42]
         {
             instruction = 'retry_foreign';
@@ -387,51 +387,53 @@ function decode_instruction(predicateID, codePosition) {
             instructionSize = 3;
             break;
         }
-        case 44: // switch_on_term: [44, V, C, L, S]
+        case 44: // switch_on_term: [44, V, CA, CI, CF, L, S]
         {
             let V = code[codePosition + 1];
-            let C = code[codePosition + 2];
-            let L = code[codePosition + 3];
-            let S = code[codePosition + 4];
+            let CA = decode_address(code[codePosition + 2]);
+            let CI = decode_address(code[codePosition + 3]);
+            let CF = decode_address(code[codePosition + 4]);
+            let L = decode_address(code[codePosition + 5]);
+            let S = decode_address(code[codePosition + 6]);
 
-            instruction = 'switch_on_term(' + V + ', ' + C + ', ' + L + ', ' + S + ')';
-            instructionSize = 5;
+            instruction = 'switch_on_term(' + V + ', ' + CA + ', ' + CI + ', ' + CF + ', ' + L + ', ' + S + ')';
+            instructionSize = 7;
             break;
         }
-        case 45: // switch_on_constant: [45, N, K1, V1, ..., KN, VN]
+        case 45: // switch_on_constant: [45, T...]
         {
-            let N = code[codePosition + 1];
-            let table = '';
-            for(let ofst = 0;ofst < 2*N;ofst+=2) {
-                let K = code[codePosition + 1 + ofst];
-                let V = code[codePosition + 1 + ofst + 1];
-
-                let C = atable[VAL(K)];
-
-                table += ((table !== '') ? ', ' : '') + C + ' - ' + V;
+            let T = code[codePosition + 1];
+            let table;
+            let size;
+            if(T === 0) {
+                let decoding = decode_switch_table_sequence('constant',codePosition + 2);
+                size = decoding.size;
+                table = 'seq(' + decoding.string + ')';
+            } else if(T === 1) {
+                let decoding = decode_switch_table_hash('constant',codePosition + 2);
+                size = decoding.size;
+                table = 'hash(' + decoding.string + ')';
             }
-            instruction = 'switch_on_constant(' + N + ', [' + table + '])';
-            instructionSize = 2 + 2*N;
+            instruction = 'switch_on_constant(' + table + ')';
+            instructionSize = 2 + size;
             break;
         }
-        case 46: // switch_on_structure: [46, N, K1, V1, ..., KN, VN]
+        case 46: // switch_on_structure: [46, T...]
         {
-            let N = code[codePosition + 1];
+            let T = code[codePosition + 1];
             let table = '';
-            for(let ofst = 0;ofst < 2*N;ofst+=2) {
-                let K = code[codePosition + 1 + ofst];
-                let V = code[codePosition + 1 + ofst + 1];
-
-                // K = k ^ (TAG_ATM << WORD_BITS)
-                let k = VAL(K);
-                let nameID = ftable[k][0];
-                let functor = atable[nameID];
-                let arity = ftable[k][1];
-
-                table += ((table !== '') ? ', ' : '') + functor + '/' + arity + ' - ' + V;
+            let size;
+            if(T === 0) {
+                let decoding = decode_switch_table_sequence('structure',codePosition + 2);
+                size = decoding.size;
+                table = 'seq(' + decoding.string + ')';
+            } else if(T === 1) {
+                let decoding = decode_switch_table_hash('structure',codePosition + 2);
+                size = decoding.size;
+                table = 'hash(' + decoding.string + ')';
             }
-            instruction = 'switch_on_structure(' + N + ', [' + table + '])';
-            instructionSize = 2 + 2*N;
+            instruction = 'switch_on_structure(' + T + ', ' + table + ')';
+            instructionSize = 2 + size;
             break;
         }
         case 71: // try: [71, L]
@@ -477,4 +479,64 @@ function decode_instruction(predicateID, codePosition) {
 
     return {string: (predicate + ':' + '(' + instruction + ',' + codePosition + ')'), size:instructionSize};
 
+}
+
+function decode_address(address) {
+    if( address === FAIL_ADDRESS) {
+        return 'fail';
+    }
+    if((address & 0x80000000) === 0) {
+        return 'clause_offset(' + address + ')';
+    } else {
+        return address ^ 0x80000000;
+    }
+}
+
+function decode_switch_table_sequence(dataType, codePosition) {
+    let N = code[codePosition];
+    let table = '';
+    for(let ofst = 0;ofst < 2*N;ofst+=2) {
+        let K = code[codePosition + 1 + ofst];
+        let V = decode_address(code[codePosition + ofst + 2]);
+        let C;
+        if(dataType === 'constant'){
+            C = K;
+        } else if(dataType === 'structure'){
+            // K = k ^ (TAG_ATM << WORD_BITS)
+            let k = VAL(K);
+            let nameID = ftable[k][0];
+            let functor = atable[nameID];
+            let arity = ftable[k][1];
+            C = functor + '/' + arity;
+        } else {
+            throw 'invalid data type: ' + dataType;
+        }
+
+        table += ((table !== '') ? ', ' : '') + C + ' - ' + V;
+    }
+    let size = 1+2*N;
+    return {size: size, string: table};
+}
+
+function decode_switch_table_hash(dataType, codePosition) {
+    // hash: Size, BA1, ..., BASize, B1N, B1K1, B1V1, ..., B1KN, B1VN, B2N, ...
+    // hash([a,b...],[c,d,...],...)
+
+    let N = code[codePosition];
+    let table = '';
+    let size = N + 1;
+    for(let ofst = 0;ofst < N;ofst++) {
+        let BA = code[codePosition + 1 + ofst];
+        let seq;
+        if(BA === FAIL_ADDRESS) {
+            seq = 'fail';
+        } else {
+            let BAX = BA ^ 0x80000000;
+            let decoding = decode_switch_table_sequence(dataType, BAX);
+            size += decoding.size;
+            seq = '[' + decoding.string + ']';
+        }
+        table += ((table !== '') ? ', ' : '') + seq ;
+    }
+    return {size: size, string: table};
 }
