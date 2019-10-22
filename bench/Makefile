@@ -9,7 +9,7 @@ all: cal.test chat_parser.test crypt.test ham.test meta_qsort.test nand.test nre
     queens.test queensn.test query.test reducer.test sendmore.test tak.test zebra.test boyer.test browse.test
 
 %.test: %.pl $(ENGINE) standalone.js $(SRC_SYSTEM)/wam_compiler.pl
-		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['common.pl', 'hook.pl', index(basic), '$<'], main_test(1)), halt"
+		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', [index(basic), 'common.pl', 'hook.pl', '$<'], main_test(1)), halt"
 		$(JSC) $(ENGINE) proscriptls_state.js standalone.js  -e "proscriptls_toplevel($(DEBUG))"
 
 
