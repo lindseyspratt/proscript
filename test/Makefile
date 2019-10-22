@@ -8,6 +8,10 @@ SRC_TOOLS=../src/tools
 
 all: node_test
 
+clean: clean_index
+		rm proscriptls_state.js
+		rm proscriptls_test.js
+
 jsc_test:		$(ENGINE) standalone.js proscriptls_state.js
 		$(JSC) $(ENGINE) proscriptls_state.js standalone.js  -e "proscriptls_toplevel($(DEBUG))"
 
@@ -17,7 +21,7 @@ proscriptls_state.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(
             $(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
             $(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl tests.pl\
             $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
-		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['tests.pl'], run_unit_tests), halt"
+		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', [index(basic), 'tests.pl'], run_unit_tests), halt"
 
 proscriptls_test.js:    $(ENGINE) proscriptls_state.js $(SRC_TOOLS)/node_standalone.js $(SRC_TOOLS)/node_exports_toplevel.js
 		cat $(ENGINE) proscriptls_state.js $(SRC_TOOLS)/node_standalone.js $(SRC_TOOLS)/node_exports_toplevel.js > proscriptls_test.js
