@@ -1,5 +1,9 @@
 :- module(url, [current_compile_url/1, push_current_compile_url/1, pop_current_compile_url/1, convert_URL_to_base/2, url_directory/2, resolve_url/3]).
 
+:- if((current_predicate(wam_compiler:current_compile_url/1), current_compile_url(_))).
+    :- use_module(bootstrap_js). % for append/3
+:- endif.
+
 :-dynamic('$current_compile_url'/1).
 
 current_compile_url(URL) :-

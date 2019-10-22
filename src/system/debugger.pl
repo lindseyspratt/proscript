@@ -1,4 +1,7 @@
 :- module(debugger, [trace/0, notrace/0, notrace_backtrackable/0, '$traceR'/1]).
+:- if((current_predicate(wam_compiler:current_compile_url/1), current_compile_url(_))).
+    :- use_module(bootstrap_js). % for reverse/2
+:- endif.
 
 :- use_module(system_util).
 
@@ -447,12 +450,12 @@ pad_codes1([B|T], B) :-
 %    ).
 
 
-reverse(L, R) :-
-    reverse(L, [], R).
-
-reverse([], R, R).
-reverse([H|T], X, R) :-
-    reverse(T, [H|X], R).
+%reverse(L, R) :-
+%    reverse(L, [], R).
+%
+%reverse([], R, R).
+%reverse([H|T], X, R) :-
+%    reverse(T, [H|X], R).
 
 
 concat_list(L, A) :-
