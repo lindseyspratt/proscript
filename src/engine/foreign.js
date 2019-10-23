@@ -1,6 +1,6 @@
 let compilation_environment = {
     buffer: [],
-    indexing_mode: 'none'
+    indexing_mode: 'basic'
 };
 
 // Round toward zero by default

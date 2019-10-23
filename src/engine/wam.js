@@ -2163,7 +2163,7 @@ function predicate_compile_buffer_codes(codes) {
 
 function predicate_indexing_mode(mode) {
     if(typeof compilation_environment.indexing_mode === 'undefined') {
-        return unify(mode, PL_new_atom('none'));
+        return unify(mode, PL_new_atom('basic'));
     }
 
     return unify(mode, PL_new_atom(compilation_environment.indexing_mode));

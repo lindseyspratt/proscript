@@ -130,7 +130,7 @@ labelled instruction words:
 */
 
 wam_index_predicates :-
-    (indexing_mode(basic)
+    (\+ indexing_mode(none)
       -> indexable_compiled_predicates(Ps),
          wam_index_predicates(Ps)
     ;
