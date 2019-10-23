@@ -1,9 +1,7 @@
 /* To do list
-    indexing
     Bignums?
     Modules for operators
     ISO exceptions
-    Fix the 0x80000000 hack. Just make new opcodes for try/retry/trust in aux clauses.
     Environment trimming is not quite right. We cannot trim the environment at the point where it gets deallocated, since
        then !(Var) will not work (since it cannot look up Var, as we deleted it). But at the same time, if we do NOT trim it, EnvSize is wrong
        though it is only too big, not too small, so at least it is just inefficient, rather than dangerous.
