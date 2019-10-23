@@ -102,7 +102,7 @@ lefteven(8).
 % benchmark interface
 
 benchmark(ShowResult) :-
-%	crypt(ShowResult).
-	crypt1.
+	crypt(ShowResult).
+%	crypt1.
 
 :- include(common).
