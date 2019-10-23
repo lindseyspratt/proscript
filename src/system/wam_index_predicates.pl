@@ -129,6 +129,10 @@ labelled instruction words:
 
 */
 
+%wam_index_writeln(Term) :-
+%    writeln(Term).
+wam_index_writeln(_).
+
 wam_index_predicates :-
     (\+ indexing_mode(none)
       -> indexable_compiled_predicates(Ps),
@@ -146,8 +150,8 @@ wam_index_predicates([H|T]) :-
 % clause_table(PredicateID, ClauseOffset, ClauseCodes, Head, Body)
 wam_index_predicate(PredicateID) :-
     lookup_functor(Functor, Arity, PredicateID),
-    writeln('==='),
-    writeln(indexing(Functor/Arity)),
+    wam_index_writeln('==='),
+    wam_index_writeln(indexing(Functor/Arity)),
     compiled_clauses(PredicateID, Clauses),
     wam_index_clauses(Clauses, PredicateID).
 
@@ -163,14 +167,14 @@ wam_index_clauses1(Clauses, PredicateID) :-
     clause_sequences(Clauses, Sequence, SequencesTail),
     trim_sequences(Sequences, TrimmedSequences),
     (degenerate_sequences(TrimmedSequences)
-        -> writeln(degenerate(TrimmedSequences))
+        -> wam_index_writeln(degenerate(TrimmedSequences))
     ;
     index_sequences(TrimmedSequences, _, IndexedSequences),
-    writeln(IndexedSequences),
+    wam_index_writeln(IndexedSequences),
     reset_compile_buffer,
     assemble(IndexedSequences, 0),
     compile_buffer_codes(Codes),
-    writeln(Codes),
+    wam_index_writeln(Codes),
     sequences_ids(TrimmedSequences, SequenceIDs),
     edit_clauses_for_index_sequences(SequenceIDs, PredicateID),
     add_index_clause_to_predicate(PredicateID)
