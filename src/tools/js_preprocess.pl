@@ -1,6 +1,7 @@
 preprocess(Files, Outfile, Defines):-
         setup_call_cleanup(open(Outfile, write, OutStream),
-                           preprocess_1(Files, OutStream, Defines),
+                           (writeln(OutStream, '/* This file generated automatically. It defines the runtime engine for ProscriptLS.*/'),
+                           preprocess_1(Files, OutStream, Defines)),
                            close(OutStream)).
 
 preprocess_1([], _OutStream, _Defines):- !.

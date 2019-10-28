@@ -4,6 +4,7 @@ function decode_instruction(predicateID, codePosition) {
     let op = code[codePosition];
     let instruction = '';
     let instructionSize = -1;
+    let goalPredicate = 'none';
 
     switch(op) {
         // Control instructions 1-5
@@ -28,6 +29,7 @@ function decode_instruction(predicateID, codePosition) {
 
             instruction = 'call(' + functor + '/' + arity + ',' + N + ')';
             instructionSize = 3;
+            goalPredicate = {functor: functor, arity: arity, predicate: i, type: 'call'};
             break;
         }
         case 4: // execute: [4, I]
@@ -42,6 +44,7 @@ function decode_instruction(predicateID, codePosition) {
 
             instruction = 'execute(' + functor + '/' + arity + ')';
             instructionSize = 2;
+            goalPredicate = {functor: functor, arity: arity, predicate: i, type: 'execute'};
             break;
         }
         case 5: // proceed
@@ -477,7 +480,7 @@ function decode_instruction(predicateID, codePosition) {
             break;
     }
 
-    return {string: (predicate + ':' + '(' + instruction + ',' + codePosition + ')'), size:instructionSize};
+    return {string: (predicate + ':' + '(' + instruction + ',' + codePosition + ')'), size:instructionSize, goalPredicate:goalPredicate};
 
 }
 

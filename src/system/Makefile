@@ -10,5 +10,5 @@ proscriptls_state.js:	../tools/wam_bootstrap_master.pl wam_compiler.pl wam_assem
             ../tools/wam_bootstrap.pl ../tools/wam_bootstrap_util.pl system.pl url.pl bootstrap_js.pl not.pl debugger.pl promise.pl
 		$(SWIPL) -q -f ../tools/wam_bootstrap_master.pl -g "build_saved_state([\
 			'system.pl', 'wam_compiler.pl'],\
-			'../../dist/proscriptls_state.js', 'foo'), halt"
+			'../../dist/proscriptls_state.js', 'true'), halt"
 # debugger, system_util, not, bootstrap_js, promise, url,

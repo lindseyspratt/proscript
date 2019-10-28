@@ -83,6 +83,7 @@ Some gotchas:
 
 :-ensure_loaded('../tools/testing').
 
+:-dynamic(bootstrap/0).
 :-dynamic(delayed_initialization/1).
 :-dynamic('$loaded'/1).
 :-dynamic('$current_compilation_module'/1).
@@ -587,12 +588,12 @@ commit_to_cut(has_cut(_)).
 first_goal_arity((A,_), N):- !, first_goal_arity(A, N).
 first_goal_arity(A, N):- functor(A, _, N).
 
-transform_body(Body, Position, NewBody, ExtraClauses, Tail, CutVariable):-
-        current_predicate(goal_expansion/2),
-        goal_expansion(Body, B1),
-        B1 \= Body,
-        !,
-        transform_body(B1, Position, NewBody, ExtraClauses, Tail, CutVariable).
+%transform_body(Body, Position, NewBody, ExtraClauses, Tail, CutVariable):-
+%        current_predicate(goal_expansion/2),
+%        goal_expansion(Body, B1),
+%        B1 \= Body,
+%        !,
+%        transform_body(B1, Position, NewBody, ExtraClauses, Tail, CutVariable).
 
 transform_body((Goal, Goals), Position, (NewGoal, NewGoals), ExtraClauses, Tail, CutVariable):-
         !,
@@ -1502,6 +1503,7 @@ save_compiled_state(SavedStateFile) :-
 
 save_compiled_state(BootCode, SavedStateFile) :-
         open(SavedStateFile, write, S1),
+        format(S1, '/* This file generated automatically. It defines the ProscriptLS system that is evaluated by the runtime engine. */', []),
         format(S1, 'function load_state() {~n', []),
         format(S1, 'bootstrap_code = ~w;~n', [BootCode]),
         format(S1, 'retry_foreign_offset = 7;~n', []),

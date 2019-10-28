@@ -426,7 +426,7 @@ put_byte(B):- current_output(S), put_byte(S, B).
 % 8.14 Term IO. 
 % read_term/3 (foreign)
 read_term(Term, Options):- current_input(S), read_term(S, Term, Options).
-read(Term):-current_input(S), read(S, Term, []).
+read(Term):-current_input(S), read_term(S, Term, []).
 read(Stream, Term):- read_term(Stream, Term, []).
 % write_term/3 (foreign)
 write_term(Term, Options):- current_output(Stream), write_term(Stream, Term, Options).

@@ -44,6 +44,9 @@ gc:		dist/proscriptls.js src/engine/standalone.js
 dump-state: dist/proscriptls.js src/engine/standalone.js src/tools/dump.js
 		$(JSC) dist/proscriptls.js src/engine/standalone.js src/tools/dump.js  -e "dumpPredicate('wam_compiler:adjust_unify_variable', 4)"
 
+dump-dangling: dist/proscriptls.js src/engine/standalone.js src/tools/dump.js
+		$(JSC) dist/proscriptls.js src/engine/standalone.js src/tools/dump.js  -e "danglingPredicates()"
+
 test_proscript:		dist/proscriptls.js src/engine/standalone.js
 		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "proscriptls(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"
 

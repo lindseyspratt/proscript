@@ -5,6 +5,8 @@
 
 :- use_module(system_util).
 
+:- dynamic('$trace_spy_specification'/3).
+
 trace :-
     '$trace_set'(trace).
 
@@ -218,10 +220,6 @@ notrace_backtrackable :-
 '$trace_spy_mode1'(skip_trace, all).
 '$trace_spy_mode1'(leap_trace, specified).
 '$trace_spy_mode1'(suspend_leap_trace, specified).
-
-
-
-% not supported: :- dynamic('$trace_spy_specification'/3).
 
 '$trace_prompt'(Port, Goal, Ancestors, ID) :-
     length(Ancestors, K),

@@ -45,20 +45,20 @@
 '\\=='(A,B) :-
     'bootstrap_js:\\=='(A,B).
 
-not(Goal) :-
-	free_variables(Goal, [], [], Vars),
-	Vars \== [], !,
-	telling(Old), tell(user),
-	nl, write('** '), write(not(Goal)),
-	nl, write('-- free variables '), write(Vars),
-	nl, break,
-	tell(Old), !,
-	call(Goal),
-	!, fail.
-not(Goal) :-
-	call(Goal),
-	!, fail.
-not(_).
+%not(Goal) :-
+%	free_variables(Goal, [], [], Vars),
+%	Vars \== [], !,
+%	telling(Old), tell(user),
+%	nl, write('** '), write(not(Goal)),
+%	nl, write('-- free variables '), write(Vars),
+%	nl, break,
+%	tell(Old), !,
+%	call(Goal),
+%	!, fail.
+%not(Goal) :-
+%	call(Goal),
+%	!, fail.
+%not(_).
 
 
 %   In order to handle variables properly, we have to find all the 
