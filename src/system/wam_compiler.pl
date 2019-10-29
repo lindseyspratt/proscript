@@ -577,7 +577,6 @@ compile_clause_2(Head):-
         true
         ).
 
-
 next_free_variable([next(A)|_], A):- !.
 next_free_variable([_|S], A):- next_free_variable(S, A).
 
@@ -1480,9 +1479,27 @@ compile_stream(Stream) :-
         ).
 
 compile_stream(Stream, Mode):-
-        read_term(Stream, Term, []),
+        read_term(Stream, TermBase, [singletons(Singletons),variable_names(VariableNames)]),
+        copy_term(TermBase, Term),
+        analyze_singletons(Singletons, VariableNames, TermBase),
         %write('  '), writeln(read(Term)),
         compile_stream_term(Stream, Term, Mode).
+
+analyze_singletons([], _VariableNames, _Term).
+analyze_singletons([H|T], VariableNames, Term) :-
+        (current_compilation_module(Module, _Stream) -> true;Module=none),
+        assign_variable_names(VariableNames),
+        trim_singletons([H|T], TrimmedSingletons),
+        writeln('WARNING'(Module, Term, has_singletons(TrimmedSingletons))).
+
+assign_variable_names([]).
+assign_variable_names([VariableName = Variable|T]) :-
+        VariableName = Variable,
+        assign_variable_names(T).
+
+trim_singletons([], []).
+trim_singletons([VN = _V|T], [VN|TT]) :-
+        trim_singletons(T, TT).
 
 compile_stream_term(_, end_of_file, Mode):-
         !,

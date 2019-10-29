@@ -52,8 +52,8 @@ proscriptls_state_doc.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.p
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g \
 			"bootstrap('$(SRC_SYSTEM)/', [index(basic), '$(SRC_TOOLS)/type_references.pl'], 'proscriptls_state_doc.js', true), halt"
 
-dump-state: $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js
-		$(JSC) $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js  -e "dump()"
+dump-state: $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js
+		$(JSC) $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js  -e "dump()"
 
 proscriptls_doc_node.js:    $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_init.js
 		cat $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_init.js > proscriptls_doc_node.js

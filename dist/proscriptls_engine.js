@@ -6742,7 +6742,7 @@ function read_term(stream, term, options)
         for (var i = 0; i < keys.length; i++)
         {
             var varname2 = keys[i];
-            if (singletons[varname2] === 1)
+            if (singletons[varname2] === 1 && ! varname2.startsWith('_'))
             {
                 if (!unify(state.H ^ (TAG_LST << WORD_BITS), options.singletons))
                     return false;
@@ -6756,7 +6756,7 @@ function read_term(stream, term, options)
             }
         }
         if (!unify(options.singletons, NIL))
-            return false;      
+            return false;
     }
     return unify(term, t1);
 }
@@ -6834,7 +6834,8 @@ function format_term(value, options)
     var result;
 
     if (value === undefined)
-        abort("Illegal memory access in format_term: " + hex(value) + ". Dumping...");
+        return lookup_atom('!undefined!');
+        //abort("Illegal memory access in format_term: " + hex(value) + ". Dumping...");
     value = deref(value);
     var lTop;
     switch(TAG(value))
@@ -14693,4 +14694,106 @@ function object_method_return() {
     let object_method = arguments[1];
     let method_arguments = arguments[2];
     return Reflect.apply(object[object_method], object, method_arguments);
+}
+// File dump.js
+let environment =  'node'; // 'browser';
+
+function dump(filter) {
+    if(environment === 'console') {
+        load_state();
+    }
+    for(var ofst = 0;ofst < ftable.length;ofst++) {
+        var functionPair = ftable[ofst];
+        var predicateName = atable[functionPair[0]];
+        let predicate = predicates[ofst];
+        if (!filter || (filter && ((filter === 'defined-predicate' && predicate)
+            || (filter === 'undefined-predicate' && !predicate)))) {
+            dumpWrite(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0] + ', ' + (predicate ? 'has' : 'no') + ' predicate clauses');
+        }
+    }
+}
+
+function dumpPredicate(targetPredicateName, targetArity) {
+    if(environment === 'console') {
+        load_state();
+    }
+
+    for(var ofst = 0;ofst < ftable.length;ofst++){
+        var functionPair = ftable[ofst];
+        var predicateName = atable[functionPair[0]];
+        if(predicateName === targetPredicateName && (! targetArity || functionPair[1] === targetArity)) {
+            dumpWrite(predicateName + '/' + functionPair[1]);
+            for(let clauseKey of predicates[ofst].clause_keys) {
+                dumpWrite('---');
+                dumpWrite('Clause ' + clauseKey);
+                dumpWrite(' ');
+                let clause = predicates[ofst].clauses[clauseKey];
+                code = clause.code;
+                let position = 0;
+                while(position < code.length) {
+                    let decoded = decode_instruction({key:ofst},position);
+                    dumpWrite(decoded.string);
+                    position += decoded.size;
+                }
+            }
+            return;
+        }
+    }
+}
+
+function danglingPredicates(mode) {
+    if((!mode && environment === 'console')
+    || (mode && mode === 'load')) {
+        load_state();
+    }
+
+    dumpWrite('Dangling predicates:');
+
+    let dangles = [];
+
+    for(let predicateKey of Object.keys(predicates)) {
+        let predicate = predicates[predicateKey];
+        for(let clauseKey of predicate.clause_keys) {
+            let clause = predicate.clauses[clauseKey];
+            code = clause.code;
+            let position = 0;
+            while(position < code.length) {
+                let decoded = decode_instruction({key:predicateKey},position);
+                if(decoded.goalPredicate !== 'none' && ! predicates[decoded.goalPredicate.predicate]
+                 && ! foreign_predicates[decoded.goalPredicate.predicate]) {
+                    let references = dangles[decoded.goalPredicate.predicate];
+                    if(typeof references === 'undefined') {
+                        references = [];
+                        dangles[decoded.goalPredicate.predicate] = references;
+                    }
+                    references.push({goalPredicate: decoded.goalPredicate, callingPredicate: predicateKey});
+                }
+                position += decoded.size;
+            }
+
+        }
+    }
+    for(let predicateKey of Object.keys(dangles)){
+        var functionPair = ftable[predicateKey];
+        var predicateName = atable[functionPair[0]];
+            dumpWrite('Undefined predicate: ' + predicateName + '/' + functionPair[1] + ' called by ');
+            let references = dangles[predicateKey];
+            for(let reference of references) {
+                let caller = reference.callingPredicate;
+                let callerFunctionPair = ftable[caller];
+                let callerPredicateName = atable[callerFunctionPair[0]];
+                dumpWrite(' ' + callerPredicateName + '/' + callerFunctionPair[1]);
+            }
+            dumpWrite('\n');
+     }
+}
+
+function dumpWrite(msg) {
+    if(environment === 'jsc') {
+        print(msg);
+    } else if(environment === 'node') {
+        console.log(msg);
+    } else if(environment === 'browser') {
+        console.log(msg);
+    }
 }

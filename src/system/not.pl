@@ -74,7 +74,7 @@ free_variables(Term, Bound, VarList, [Term|VarList]) :-
 	term_is_free_of(Bound, Term),
 	list_is_free_of(VarList, Term),
 	!.
-free_variables(Term, Bound, VarList, VarList) :-
+free_variables(Term, _Bound, VarList, VarList) :-
 	var(Term),
 	!.
 free_variables(Term, Bound, OldList, NewList) :-
@@ -85,7 +85,7 @@ free_variables(Term, Bound, OldList, NewList) :-
 	functor(Term, _, N),
 	free_variables(N, Term, Bound, OldList, NewList).
 
-free_variables(0, Term, Bound, VarList, VarList) :- !.
+free_variables(0, _Term, _Bound, VarList, VarList) :- !.
 free_variables(N, Term, Bound, OldList, NewList) :-
 	arg(N, Term, Argument),
 	free_variables(Argument, Bound, OldList, MidList),
@@ -95,8 +95,8 @@ free_variables(N, Term, Bound, OldList, NewList) :-
 %   explicit_binding checks for goals known to existentially quantify
 %   one or more variables.  In particular \+ is quite common.
 
-explicit_binding(\+ Goal,	       Bound, fail,	Bound      ) :- !.
-explicit_binding(not(Goal),	       Bound, fail,	Bound	   ) :- !.
+explicit_binding(\+ _Goal,	       Bound, fail,	Bound      ) :- !.
+explicit_binding(not(_Goal),	       Bound, fail,	Bound	   ) :- !.
 explicit_binding(Var^Goal,	       Bound, Goal,	Bound+Var) :- !.
 explicit_binding(setof(Var,Goal,Set),  Bound, Goal-Set, Bound+Var) :- !.
 explicit_binding(bagof(Var,Goal,Bag),  Bound, Goal-Bag, Bound+Var) :- !.
@@ -111,7 +111,7 @@ term_is_free_of(Term, Var) :-
 	functor(Term, _, N),
 	term_is_free_of(N, Term, Var).
 
-term_is_free_of(0, Term, Var) :- !.
+term_is_free_of(0, _Term, _Var) :- !.
 term_is_free_of(N, Term, Var) :-
 	arg(N, Term, Argument),
 	term_is_free_of(Argument, Var),

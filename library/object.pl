@@ -176,7 +176,7 @@
 >+>(Obj, <:(Property, V)) :-
     set_dom_object_property(Obj, Property, V).
 
->*>(_, Module : []) :-
+>*>(_, _Module : []) :-
     !.
 >*>(Obj, Module : [H|T]) :-
     !,

@@ -26,6 +26,9 @@ Builtins and support functions are also present in:
    * stream.js: Handles reading and writing to streams, and all the ISO predicates (the ones implemented anyway) like get_char/2 and put_code/2.
    * dom.js, object_method.js, object_property.js: Builtins for working with the DOM.
    * debugger.js: The interactive Prolog tracing debugger. (see also debugger.pl)
+   * dump.js: a debugging tool to analyze for dangling predicates (referenced in a call but not defined)
+   print out the predicates in a prosciptls_state.js file or to print out the WAM program
+   for a particular predicate.
 
 ### Engine functions that may be customized:
    * src/engine/standalone.js: Contains implementations of stdout and flush_stdout/1. You can either include this (in which case you will get output printed to a variable called stdout_buffer), or implement them yourself to do something /with/ the stuff written to stdout.
@@ -53,8 +56,6 @@ Some Prolog predicates are only used during the build. These are in:
    are used by docs/Makefile to generate proscriptls_doc_node.js,
    which in turn is used by docs/Makefile to evalutate generate_type_references/1 in type_references.pl
    to generate the docs/type_references.template. The type_references.template file is used in creating index_doc.html.
-   * dump.js: a debugging tool to print out the predicates in a prosciptls_state.js file or to print out the WAM program
-   for a particular predicate.
 
 #### src/docs/
 The HTML files in docs are generated from the *.template files in src/docs.

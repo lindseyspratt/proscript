@@ -508,7 +508,7 @@ function read_term(stream, term, options)
         for (var i = 0; i < keys.length; i++)
         {
             var varname2 = keys[i];
-            if (singletons[varname2] === 1)
+            if (singletons[varname2] === 1 && ! varname2.startsWith('_'))
             {
                 if (!unify(state.H ^ (TAG_LST << WORD_BITS), options.singletons))
                     return false;
@@ -522,7 +522,7 @@ function read_term(stream, term, options)
             }
         }
         if (!unify(options.singletons, NIL))
-            return false;      
+            return false;
     }
     debug_msg("A term has been created ( " + VAL(t1) + " ). Reading it back from the heap gives: " + term_to_string(t1));
     return unify(term, t1);
@@ -601,7 +601,8 @@ function format_term(value, options)
     var result;
 
     if (value === undefined)
-        abort("Illegal memory access in format_term: " + hex(value) + ". Dumping...");
+        return lookup_atom('!undefined!');
+        //abort("Illegal memory access in format_term: " + hex(value) + ". Dumping...");
     value = deref(value);
     var lTop;
     switch(TAG(value))

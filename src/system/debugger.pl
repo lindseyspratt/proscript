@@ -171,7 +171,7 @@ notrace_backtrackable :-
 '$trace_suspend_if_active'(_).
 
 
-'$trace_retry'(ID, B) :-
+'$trace_retry'(_ID, B) :-
     '$get_backtrack_frame'(B).
 
 '$trace_retry'(ID, B) :-
@@ -267,7 +267,7 @@ notrace_backtrackable :-
     !,
     '$trace_cmd_creep'(x, P, G, Anc, ID, B).
 
-'$trace_cmd'(y, P, G, Anc, ID, _) :-
+'$trace_cmd'(y, P, G, Anc, ID, B) :-
     !,
     '$trace_cmd_creep'(y, P, G, Anc, ID, B).
 
@@ -358,11 +358,11 @@ notrace_backtrackable :-
     '$trace_cmd_creep_wam'(Cmd),
     '$trace_set'(trace_next_jmp).
 
-'$trace_cmd_creep'(Cmd, exit, _, _, _, _) :- % _L \= call
+'$trace_cmd_creep'(_Cmd, exit, _, _, _, _) :- % _L \= call
     !,
     '$trace_set'(trace).
 
-'$trace_cmd_creep'(Cmd, _L, _, _, _, _) :- % _L \= call and \= exit
+'$trace_cmd_creep'(_Cmd, _L, _, _, _, _) :- % _L \= call and \= exit
     !.
 
 

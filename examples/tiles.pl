@@ -123,6 +123,16 @@ point_in_board_position(BX, BY, X, Y) :-
     board_position_top_left_coordinates(BX, BY, BCX, BCY),
     in_square(X, Y, BCX, BCY, Size).
 
+board_position_top_left_coordinates(GridX, GridY, X, Y) :-
+    game_tile_size(TileSize),
+    game_board_left(BoardLeft),
+    game_board_width(BoardWidth),
+    game_board_top(BoardTop),
+    game_board_height(BoardHeight),
+    game_board_translate(TranslateX > TranslateY),
+    X is BoardLeft + TranslateX + BoardWidth / 2 + (GridX - 0.5) * TileSize,
+    Y is BoardTop + TranslateY + BoardHeight / 2 + (GridY - 0.5) * TileSize.
+
 on_click_tile(ID, _X, _Y) :-
     %writeln(click(ID, X, Y)),
     (tile_in_active_hand(ID)

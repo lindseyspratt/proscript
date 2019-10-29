@@ -19,8 +19,14 @@ demo:	$(ENGINE) ../test/standalone.js proscriptls_state_demo.js
 proscriptls_state_demo.js: demo.pl $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/wam_compiler.pl
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['$<'], '$@', 'foo'), halt"
 
-dump-state: $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js $(SRC_TOOLS)/dump.js
-		$(JSC) $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js $(SRC_TOOLS)/dump.js  -e "dumpPredicate('tiles:setup_hands')"
+dump-state: $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js
+		$(JSC) $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js  -e "dumpPredicate('tiles:setup_hands')"
 
 proscriptls_state_tiles.js:  ../dist/proscriptls_for_compile.js tiles.pl ../library/data_predicates.pl ../library/object.pl ../dist/node_compile.js
 		node ../dist/node_compile.js `pwd`/tiles.pl `pwd`/proscriptls_state_tiles.js
+		cat ../dist/proscriptls_engine.js proscriptls_state_tiles.js $(SRC_TOOLS)/node_standalone.js $(SRC_TOOLS)/node_exports_init.js > temp_dangling_tiles.js
+		node $(SRC_TOOLS)/node_dangling_references.js `pwd`/temp_dangling_tiles.js
+		rm temp_dangling_tiles.js
+
+dump-dangling:  temp_dangling_tiles $(SRC_TOOLS)/node_dangling_references.js
+		node $(SRC_TOOLS)/node_dangling_references.js `pwd`/temp_dangling_tiles.js

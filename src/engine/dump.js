@@ -1,4 +1,4 @@
-let environment =  'console'; // 'browser';
+let environment =  'node'; // 'browser';
 
 function dump(filter) {
     if(environment === 'console') {
@@ -43,10 +43,13 @@ function dumpPredicate(targetPredicateName, targetArity) {
     }
 }
 
-function danglingPredicates() {
-    if(environment === 'console') {
+function danglingPredicates(mode) {
+    if((!mode && environment === 'console')
+    || (mode && mode === 'load')) {
         load_state();
     }
+
+    dumpWrite('Dangling predicates:');
 
     let dangles = [];
 
@@ -88,8 +91,10 @@ function danglingPredicates() {
 }
 
 function dumpWrite(msg) {
-    if(environment === 'console') {
+    if(environment === 'jsc') {
         print(msg);
+    } else if(environment === 'node') {
+        console.log(msg);
     } else if(environment === 'browser') {
         console.log(msg);
     }

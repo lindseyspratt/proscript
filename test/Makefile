@@ -29,11 +29,11 @@ proscriptls_test.js:    $(ENGINE) proscriptls_state.js $(SRC_TOOLS)/node_standal
 node_test: $(SRC_TOOLS)/node_toplevel.js proscriptls_test.js
 		node $(SRC_TOOLS)/node_toplevel.js ../../test/proscriptls_test.js
 
-dump-state: $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js $(SRC_TOOLS)/dump.js
-		$(JSC) $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js $(SRC_TOOLS)/dump.js  -e "dump('defined-predicate')" #Predicate('compile_body_args')"
+dump-state: $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js
+		$(JSC) $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js  -e "dump('defined-predicate')" #Predicate('compile_body_args')"
 
-dump-state-test: proscriptls_test.js $(SRC_TOOLS)/dump.js
-		$(JSC) proscriptls_test.js $(SRC_TOOLS)/dump.js  -e "dump('defined-predicate')" #Predicate('compile_body_args')"
+dump-state-test: proscriptls_test.js
+		$(JSC) proscriptls_test.js  -e "dump('defined-predicate')" #Predicate('compile_body_args')"
 
 clean_index:
 		rm -f proscriptls_index_state.js;

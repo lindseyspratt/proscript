@@ -1,1 +1,1 @@
-module.exports = {proscriptls_init};
+module.exports = {proscriptls_init: proscriptls_init, danglingPredicates: danglingPredicates};
