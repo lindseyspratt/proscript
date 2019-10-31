@@ -1365,6 +1365,16 @@ tiles.pl is compiled by the proscriptls_state_tiles.js target of /examples/Makef
 cd proscriptls/examples;
 node ../dist/node_compile.js `pwd`/tiles.pl `pwd`/proscriptls_state_tiles.js
 </code></pre>
+The state Javascript file created by compilation (e.g. proscriptls_state_tiles.js in the above example)
+can be checked that it loads cleanly by:
+<pre><code class='cli'>
+cd proscriptls/examples;
+node ../dist/node_compile.js `pwd`/tiles.pl `pwd`/proscriptls_state_tiles.js
+cat ../dist/proscriptls_engine.js proscriptls_state_tiles.js $(SRC_TOOLS)/node_standalone.js $(SRC_TOOLS)/node_exports_init.js > temp_dangling_tiles.js
+node $(SRC_TOOLS)/node_goal.js `pwd`/temp_dangling_tiles.js true
+rm temp_dangling_tiles.js
+</code></pre>
+
 <br>
 The tiles.html web page uses the result of the compilation by loading the engine and state Javascript files:
 <pre><code class='html'>

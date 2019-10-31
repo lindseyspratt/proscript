@@ -82,14 +82,14 @@ t_redex([_x,_g,_f,_k|cp], [_g,[_x|_f]|_k]).
 t_redex([_x,_g,_f|s], [[_xr|_g]|[_xr|_f]]) :- t_reduce(_x, _xr).
 t_redex([_x,_g,_f|b], [[_x|_g]|_f]).
 t_redex([_x,_g,_f|c], [_g,_x|_f]).
-t_redex([_y,_x|k], _x).
+t_redex([__y,_x|k], _x).
 t_redex([_x|i], _x).
 
 % Conditional:
-t_redex([_elsepart,_ifpart,_cond|cond], _ifpart) :-
+t_redex([__elsepart,_ifpart,_cond|cond], _ifpart) :-
 	t_reduce(_cond, _bool), _bool=true, !.
 	% Does NOT work if _bool is substituted in the call!
-t_redex([_elsepart,_ifpart,_cond|cond], _elsepart).
+t_redex([_elsepart,__ifpart,__cond|cond], _elsepart).
 
 % Apply:
 t_redex([_f|apply], _fr) :-
@@ -97,9 +97,9 @@ t_redex([_f|apply], _fr) :-
 
 % List operations:
 t_redex([_arg|hd], _x) :-
-	t_reduce(_arg, [_y,_x|'.']).
+	t_reduce(_arg, [__y,_x|'.']).
 t_redex([_arg|tl], _y) :-
-	t_reduce(_arg, [_y,_x|'.']).
+	t_reduce(_arg, [_y,__x|'.']).
 
 % Arithmetic:
 t_redex([_y,_x|_op], _res) :-
@@ -129,12 +129,12 @@ t_redex([_y,_x|=], _res) :-
 	(_xres=_yres -> _res=true; _res=false), !.
 
 % Arithmetic functions:
-t_redex([_x|_op], _res) :-
+t_redex([_x|_op], __res) :-
 	atom(_op),
 	member(_op, ['-']),
 	t_reduce(_x, _xres),
 	number(_xres),
-	eval1(_op, _t, _xres).
+	eval1(_op, __t, _xres).
 
 % Definitions:
 % Assumes a fact t_def(_func,_def) in the database for every
@@ -221,49 +221,49 @@ t_vars([_arg|_func], [_g,[_g1|_af1],[_g2|_af2]]) :-
 t_trans(_x, _a, _, [_a|k]) :- (atomic(_a); var(_a), _a\==_x), !.
 t_trans(_x, _y, _, i) :- _x==_y, !.
 t_trans(_x, _e, [_ve|_], [_e|k]) :- notinv(_x, _ve).
-t_trans(_x, [_f|_e], [_vef,_sf,_se], _res) :-
+t_trans(_x, [_f|_e], [__vef,_sf,_se], _res) :-
 	_sf=[_vf|_],
 	_se=[_ve|_other],
 	(atom(_e); _other=[_,[_ve1|_]], _ve1\==[]),
 	t_rule1(_x, _e, _ve, _se, _f, _vf, _sf, _res).
-t_trans(_x, [_g|[_f|_e]], [_vefg,_sg,_sef], _res) :-
+t_trans(_x, [_g|[_f|_e]], [__vefg,_sg,_sef], _res) :-
 	_sg=[_vg|_],
-	_sef=[_vef,_sf,_se],
-	_se=[_ve|_],
+	_sef=[__vef,_sf,_se],
+	_se=[__ve|_],
 	_sf=[_vf|_],
 	t_rule2(_x, _e, _f, _vf, _sf, _g, _vg, _sg, _res).
 
 % First complex rule of translation scheme T:
-t_rule1(_x, _e, _ve, _se, _f, _vf, _sf, _e) :-
+t_rule1(_x, _e, _ve, __se, _f, __vf, __sf, _e) :-
 	notinv(_x, _ve), _x==_f, !.
-t_rule1(_x, _e, _ve, _se, _f, _vf, _sf, [_resf,_e|b]) :-
+t_rule1(_x, _e, _ve, __se, _f, _vf, _sf, [_resf,_e|b]) :-
 	notinv(_x, _ve), inv(_x, _vf), _x\==_f, !,
 	t_trans(_x, _f, _sf, _resf).
-t_rule1(_x, _e, _ve, _se, _f, _vf, _sf, [_f,_rese|c]) :-
+t_rule1(_x, _e, __ve, _se, _f, _vf, __sf, [_f,_rese|c]) :-
 	/* inv(_x, _ve), */
 	notinv(_x, _vf), !,
 	t_trans(_x, _e, _se, _rese).
-t_rule1(_x, _e, _ve, _se, _f, _vf, _sf, [_resf,_rese|s]) :-
+t_rule1(_x, _e, __ve, _se, _f, __vf, _sf, [_resf,_rese|s]) :-
 	/* inv(_x, _ve), inv(_x, _vf), */
 	t_trans(_x, _e, _se, _rese),
 	t_trans(_x, _f, _sf, _resf).
 
 % Second complex rule of translation scheme T:
-t_rule2(_x, _e, _f, _vf, _sf, _g, _vg, _sg, [_g,_e|c]) :-
+t_rule2(_x, _e, _f, __vf, __sf, _g, _vg, __sg, [_g,_e|c]) :-
 	_x==_f, notinv(_x, _vg), !.
-t_rule2(_x, _e, _f, _vf, _sf, _g, _vg, _sg, [_resg,_e|s]) :-
+t_rule2(_x, _e, _f, __vf, __sf, _g, __vg, _sg, [_resg,_e|s]) :-
 	_x==_f, /* inv(_x, _vg), */ !,
 	t_trans(_x, _g, _sg, _resg).
-t_rule2(_x, _e, _f, _vf, _sf, _g, _vg, _sg, [_g,_resf,_e|cp]) :-
+t_rule2(_x, _e, _f, _vf, _sf, _g, _vg, __sg, [_g,_resf,_e|cp]) :-
 	/* _x\==_f, */ inv(_x, _vf), notinv(_x, _vg), !,
 	t_trans(_x, _f, _sf, _resf).
-t_rule2(_x, _e, _f, _vf, _sf, _g, _vg, _sg, [_resg,_resf,_e|sp]) :-
+t_rule2(_x, _e, _f, _vf, _sf, _g, __vg, _sg, [_resg,_resf,_e|sp]) :-
 	/* _x\==_f, */ inv(_x, _vf), /* inv(_x, _vg), */ !,
 	t_trans(_x, _f, _sf, _resf),
 	t_trans(_x, _g, _sg, _resg).
-t_rule2(_x, _e, _f, _vf, _sf, _g, _vg, _sg, [_f|_e]) :-
+t_rule2(_x, _e, _f, __vf, __sf, _g, __vg, __sg, [_f|_e]) :-
 	/* notinv(_x, _vf), */ _x==_g, !.
-t_rule2(_x, _e, _f, _vf, _sf, _g, _vg, _sg, [_resg,_f,_e|bp]) :-
+t_rule2(_x, _e, _f, __vf, __sf, _g, __vg, _sg, [_resg,_f,_e|bp]) :-
 	/* notinv(_x, _vf), inv(_x, _vg), _x\==_g, */
 	t_trans(_x, _g, _sg, _resg).
 

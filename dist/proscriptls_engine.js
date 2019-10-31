@@ -10253,6 +10253,8 @@ function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) 
 
     call_directives('clear_directives');
 
+    danglingPredicates();
+
     consult_scripts();
 
     if(queryJS && queryJS !== '') {
@@ -14747,7 +14749,7 @@ function danglingPredicates(mode) {
         load_state();
     }
 
-    dumpWrite('Dangling predicates:');
+//    dumpWrite('Dangling predicates:');
 
     let dangles = [];
 
@@ -14789,11 +14791,16 @@ function danglingPredicates(mode) {
 }
 
 function dumpWrite(msg) {
-    if(environment === 'jsc') {
+    if(typeof console === 'object' && typeof console.log === 'function') {
+        console.log(msg);
+    } else if(typeof print === 'function') {
         print(msg);
-    } else if(environment === 'node') {
-        console.log(msg);
-    } else if(environment === 'browser') {
-        console.log(msg);
     }
+    // if(environment === 'jsc') {
+    //     print(msg);
+    // } else if(environment === 'node') {
+    //     console.log(msg);
+    // } else if(environment === 'browser') {
+    //     console.log(msg);
+    //}
 }

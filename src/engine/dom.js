@@ -675,6 +675,8 @@ function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) 
 
     call_directives('clear_directives');
 
+    danglingPredicates();
+
     consult_scripts();
 
     if(queryJS && queryJS !== '') {

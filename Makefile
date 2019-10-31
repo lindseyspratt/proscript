@@ -5,8 +5,8 @@ SWIPL=/usr/local/bin/swipl --traditional
 SDK:=proscriptls_sdk_$(VERSION)
 
 
-all:	dist/proscriptls.js dist/proscriptls_for_compile.js\
-		dist/node_compile.js doc examples dist/node_dangling_references.js
+
+all:	dist/proscriptls.js dist/proscriptls_engine_for_node.js doc examples
 
 .PHONY: all clean doc examples gc dump-state test_proscript sdk test dump-dangling
 
@@ -15,8 +15,7 @@ clean:
 		cd src/system && make clean
 		cd src/docs && make clean
 		cd examples && make clean
-		rm -f dist/proscriptls.js dist/proscriptls_state.js dist/proscriptls_engine.js dist/proscriptls_for_compile.js\
-		 dist/node_compile.js dist/node_dangling_references.js
+		rm -f dist/proscriptls.js dist/proscriptls_state.js dist/proscriptls_engine.js dist/proscriptls_for_compile.js
 		rm -rf $(SDK)
 
 dist/proscriptls_state.js: src/system/* src/tools/wam_bootstrap.pl
@@ -25,20 +24,14 @@ dist/proscriptls_state.js: src/system/* src/tools/wam_bootstrap.pl
 dist/proscriptls_engine.js: src/engine/* src/tools/js_preprocess.pl
 		cd src/engine && make
 
-dist/proscriptls.js:	dist/proscriptls_engine.js dist/proscriptls_state.js dist/node_dangling_references.js
+# invoke node_goal.js to check that there are no dangling references in state recorded in dist/proscriptls_state.js.
+dist/proscriptls.js:	dist/proscriptls_engine.js dist/proscriptls_state.js dist/proscriptls_engine_for_node.js node_tools/node_goal.js\
+				node_tools/node_goal_module.js
 		cat dist/proscriptls_engine.js dist/proscriptls_state.js > dist/proscriptls.js
-		cat dist/proscriptls.js src/tools/node_standalone.js src/tools/node_exports_init.js > temp_dangling.js
-		node dist/node_dangling_references.js ../temp_dangling.js
-		rm temp_dangling.js
+		node node_tools/node_goal.js dist/proscriptls_state.js true
 
-dist/proscriptls_for_compile.js:    dist/proscriptls.js src/tools/node_standalone.js src/tools/node_exports_init.js
-		cat dist/proscriptls.js src/tools/node_standalone.js src/tools/node_exports_init.js > dist/proscriptls_for_compile.js
-
-dist/node_compile.js: src/tools/node_compile.js
-		cp src/tools/node_compile.js dist/node_compile.js
-
-dist/node_dangling_references.js: src/tools/node_compile.js
-		cp src/tools/node_dangling_references.js dist/node_dangling_references.js
+dist/proscriptls_engine_for_node.js:    dist/proscriptls_engine.js node_tools/node_standalone.js node_tools/node_exports_init.js
+		cat dist/proscriptls_engine.js node_tools/node_standalone.js node_tools/node_exports_init.js > dist/proscriptls_engine_for_node.js
 
 doc:
 		cd src/docs && make
@@ -52,11 +45,6 @@ gc:		dist/proscriptls.js src/engine/standalone.js
 dump-state: dist/proscriptls.js src/engine/standalone.js
 		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "dumpPredicate('wam_compiler:adjust_unify_variable', 4)"
 
-dump-dangling:  dist/node_dangling_references.js
-		cat dist/proscriptls.js src/tools/node_standalone.js src/tools/node_exports_init.js > temp_dangling.js
-		node dist/node_dangling_references.js ../../temp_dangling.js
-		rm temp_dangling.js
-
 test_proscript:		dist/proscriptls.js src/engine/standalone.js
 		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "proscriptls(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"
 
@@ -65,7 +53,7 @@ sdk:
 		mkdir $(SDK)
 		cp index.html $(SDK)
 		cp README.SDK.md $(SDK)
-		cp src/tools/simple_server.js $(SDK)
+		cp -r node_tools $(SDK)
 		cp -r dist $(SDK)/dist
 		cp -r examples $(SDK)/examples
 		cp -r docs $(SDK)/docs

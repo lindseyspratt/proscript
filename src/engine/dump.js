@@ -49,7 +49,7 @@ function danglingPredicates(mode) {
         load_state();
     }
 
-    dumpWrite('Dangling predicates:');
+//    dumpWrite('Dangling predicates:');
 
     let dangles = [];
 
@@ -91,11 +91,9 @@ function danglingPredicates(mode) {
 }
 
 function dumpWrite(msg) {
-    if(environment === 'jsc') {
+    if(typeof console === 'object' && typeof console.log === 'function') {
+        console.log(msg);
+    } else if(typeof print === 'function') {
         print(msg);
-    } else if(environment === 'node') {
-        console.log(msg);
-    } else if(environment === 'browser') {
-        console.log(msg);
     }
 }

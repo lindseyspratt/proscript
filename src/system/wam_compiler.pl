@@ -1480,17 +1480,17 @@ compile_stream(Stream) :-
 
 compile_stream(Stream, Mode):-
         read_term(Stream, TermBase, [singletons(Singletons),variable_names(VariableNames)]),
-        copy_term(TermBase, Term),
-        analyze_singletons(Singletons, VariableNames, TermBase),
+        analyze_singletons(Singletons, VariableNames, TermBase, Term),
         %write('  '), writeln(read(Term)),
         compile_stream_term(Stream, Term, Mode).
 
-analyze_singletons([], _VariableNames, _Term).
-analyze_singletons([H|T], VariableNames, Term) :-
+analyze_singletons([], _VariableNames, Term, Term).
+analyze_singletons([H|T], VariableNames, TermBase, Term) :-
+        copy_term(TermBase, Term),
         (current_compilation_module(Module, _Stream) -> true;Module=none),
         assign_variable_names(VariableNames),
         trim_singletons([H|T], TrimmedSingletons),
-        writeln('WARNING'(Module, Term, has_singletons(TrimmedSingletons))).
+        writeln('WARNING'(singleton_variables(TrimmedSingletons), in(Module:TermBase) )).
 
 assign_variable_names([]).
 assign_variable_names([VariableName = Variable|T]) :-
