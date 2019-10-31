@@ -6742,7 +6742,8 @@ function read_term(stream, term, options)
         for (var i = 0; i < keys.length; i++)
         {
             var varname2 = keys[i];
-            if (singletons[varname2] === 1 && ! varname2.startsWith('_'))
+            if (singletons[varname2] === 1 && (! varname2.startsWith('_')
+            || (varname2.length > 1 && is_lowercase(varname2.substr(1,1)))))
             {
                 if (!unify(state.H ^ (TAG_LST << WORD_BITS), options.singletons))
                     return false;
@@ -6759,6 +6760,10 @@ function read_term(stream, term, options)
             return false;
     }
     return unify(term, t1);
+}
+
+function is_lowercase(c) {
+    return c === c.toLowerCase() && c !== c.toUpperCase();
 }
 
 function predicate_write_term(stream, term, options)
@@ -14796,13 +14801,6 @@ function dumpWrite(msg) {
     } else if(typeof print === 'function') {
         print(msg);
     }
-    // if(environment === 'jsc') {
-    //     print(msg);
-    // } else if(environment === 'node') {
-    //     console.log(msg);
-    // } else if(environment === 'browser') {
-    //     console.log(msg);
-    //}
 }
 var stdout_buffer = "";
 
