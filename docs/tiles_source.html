@@ -227,52 +227,6 @@ init&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data_predicates(lp,&nbsp;legal_position,&nbsp;[bx,&nbsp;by])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;]).<br>
 <br>
-<span style='color:green'>%draw_tile_test&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;>>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;Ctx],</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(ts(20,&nbsp;20,&nbsp;1,&nbsp;1,&nbsp;50,&nbsp;[red,&nbsp;red,&nbsp;green,&nbsp;green],&nbsp;none),&nbsp;1),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_tile(Ctx,&nbsp;1).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%draw_all_tile_test&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;>>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;Ctx],</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(ts(20,&nbsp;20,&nbsp;1,&nbsp;1,&nbsp;50,&nbsp;[red,&nbsp;red,&nbsp;green,&nbsp;green],&nbsp;none),&nbsp;1),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_all_tile(1,&nbsp;Ctx).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%draw_all_tiles_test&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;setup_draw_all_tiles_test(Ctx,&nbsp;W,&nbsp;H,&nbsp;Tiles),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_all_tiles(Tiles,&nbsp;Ctx,&nbsp;W,&nbsp;H).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%setup_draw_all_tiles_test(Ctx,&nbsp;W,&nbsp;H,&nbsp;[Tile1,&nbsp;Tile2])&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;>>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;Ctx,&nbsp;width&nbsp;+:>&nbsp;W,&nbsp;height&nbsp;+:>&nbsp;H],</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;Tile1&nbsp;=&nbsp;1,</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;Tile2&nbsp;=&nbsp;2,</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(ts(20,&nbsp;20,&nbsp;1,&nbsp;1,&nbsp;50,&nbsp;[red,&nbsp;red,&nbsp;green,&nbsp;green],&nbsp;none),&nbsp;1),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(ts(70,&nbsp;20,&nbsp;2,&nbsp;1,&nbsp;50,&nbsp;[green,&nbsp;red,&nbsp;green,&nbsp;red],&nbsp;none),&nbsp;2),</span><br>
-<span style='color:green'>%%&nbsp;[tile_size,&nbsp;board_left,&nbsp;board_top,&nbsp;board_width,&nbsp;board_height,&nbsp;board_translate,&nbsp;turn,&nbsp;replacements]</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(g(50,&nbsp;0,&nbsp;0,&nbsp;800,&nbsp;800,&nbsp;0,&nbsp;1,&nbsp;[Tile2]),&nbsp;1),</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;retractall(is_selected(_)),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;asserta(is_selected(Tile1)).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%draw_legal_moves_test&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;setup_legal_moves(Ctx,&nbsp;LPs1,&nbsp;LPs2),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_moves(LPs1,&nbsp;LPs2,&nbsp;Ctx).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%setup_legal_moves(Ctx,&nbsp;[1],[Tile2])&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;>>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;Ctx],</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;Tile2&nbsp;=&nbsp;2,</span><br>
-<span style='color:green'>%%&nbsp;[tile_size,&nbsp;board_left,&nbsp;board_top,&nbsp;board_width,&nbsp;board_height,&nbsp;board_translate,&nbsp;turn,&nbsp;replacements]</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(g(50,&nbsp;10,&nbsp;10,&nbsp;200,&nbsp;200,&nbsp;1>1,&nbsp;1,&nbsp;[Tile2]),&nbsp;1),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(lp(1,1),&nbsp;1),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(lp(1,2),&nbsp;2).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%display_hands_test&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;>>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;Ctx,&nbsp;width&nbsp;+:>&nbsp;W,&nbsp;height&nbsp;+:>&nbsp;H],</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;assert_data(g(50,&nbsp;10,&nbsp;10,&nbsp;800,&nbsp;800,&nbsp;1>1,&nbsp;1,&nbsp;[]),&nbsp;1),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;initial_hands_expanded(2,&nbsp;Hands),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;setup_hands(Hands,&nbsp;TileIDs),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_all_tiles(TileIDs,&nbsp;Ctx,&nbsp;W,&nbsp;H).</span><br>
-<br>
 select_test&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>_Canvas</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>,<br>
@@ -288,7 +242,8 @@ select_test&nbsp;<span style='color:red'>:-</span><br>
 <br>
 dummy_reference&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;dummy_reference,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;select(<i>_</i>,<i>_</i>,<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;select(<i>_</i>,<i>_</i>,<i>_</i>),&nbsp;<span style='color:green'>%&nbsp;referenced&nbsp;indirectly&nbsp;in&nbsp;addEventListener/3&nbsp;call.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>%&nbsp;following&nbsp;are&nbsp;generated&nbsp;by&nbsp;data_predicate_dynamics/1.</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;tile_x(<i>_</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;tile_y(<i>_</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;tile_bx(<i>_</i>),<br>
@@ -600,53 +555,6 @@ draw_replacement_tile_mark(<i>Tile</i>,&nbsp;<i>Ctx</i>)&nbsp;<span style='color
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;restore<br>
 &nbsp;&nbsp;&nbsp;&nbsp;].<br>
 <br>
-<span style='color:green'>%draw_legal_moves(LegalPositions,&nbsp;LegalPositionsWithRotation,&nbsp;Ctx)&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;game_turn(GT),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;highlight_color(GT,&nbsp;Color),</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;Ctx&nbsp;>>&nbsp;[</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;save,</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beginPath,</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fillStyle&nbsp;&lt;:+&nbsp;Color,</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;strokeStyle&nbsp;&lt;:+&nbsp;Color,</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lineWidth&nbsp;&lt;:+&nbsp;3,</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;globalAlpha&nbsp;&lt;:+&nbsp;0.8</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;],</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;game_tile_size(TileSize),</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_positions_with_rotations(LegalPositionsWithRotation,&nbsp;Ctx,&nbsp;TileSize),</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_positions(LegalPositions,&nbsp;Ctx,&nbsp;TileSize),</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;Ctx&nbsp;>*>&nbsp;restore.</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%draw_legal_positions_with_rotations([],&nbsp;_,&nbsp;_).</span><br>
-<span style='color:green'>%draw_legal_positions_with_rotations([H|T],&nbsp;Ctx,&nbsp;TileSize)&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;legal_position_b(H,&nbsp;B),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;get_top_left_board_tile_coords(B,&nbsp;TileSize,&nbsp;X&nbsp;>&nbsp;Y),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;Ctx&nbsp;>*>&nbsp;[</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rect(X,&nbsp;Y,&nbsp;TileSize,&nbsp;TileSize),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stroke</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;],</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_positions_with_rotations(T,&nbsp;Ctx,&nbsp;TileSize).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%draw_legal_positions([],&nbsp;_,&nbsp;_).</span><br>
-<span style='color:green'>%draw_legal_positions([H|T],&nbsp;Ctx,&nbsp;TileSize)&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;legal_position_b(H,&nbsp;B),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;get_top_left_board_tile_coords(B,&nbsp;TileSize,&nbsp;X&nbsp;>&nbsp;Y),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;Ctx&nbsp;>*>&nbsp;fillRect(X,&nbsp;Y,&nbsp;TileSize,&nbsp;TileSize),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_positions(T,&nbsp;Ctx,&nbsp;TileSize).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%get_top_left_board_tile_coords(BX&nbsp;>&nbsp;BY,&nbsp;TileSize,&nbsp;X&nbsp;>&nbsp;Y)&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;game_board_left(Left),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;game_board_translate(TX&nbsp;>&nbsp;TY),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;game_board_width(W),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;game_board_top(Top),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;game_board_height(H),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;X&nbsp;&nbsp;is&nbsp;Left&nbsp;+&nbsp;TX&nbsp;+&nbsp;(W&nbsp;/&nbsp;2)&nbsp;+&nbsp;(BX&nbsp;-&nbsp;0.5)&nbsp;*&nbsp;TileSize,</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;Y&nbsp;&nbsp;is&nbsp;Top&nbsp;+&nbsp;TY&nbsp;+&nbsp;(H&nbsp;/&nbsp;2)&nbsp;+&nbsp;(BY&nbsp;-&nbsp;0.5)&nbsp;*&nbsp;TileSize.</span><br>
-<br>
 container_id(container(<i>ID</i>,&nbsp;<i>_Type</i>),&nbsp;<i>ID</i>).<br>
 container_type(container(<i>_ID</i>,&nbsp;<i>Type</i>),&nbsp;<i>Type</i>).<br>
 <br>
@@ -670,13 +578,6 @@ tile_in_active_hand(<i>Tile</i>)&nbsp;<span style='color:red'>:-</span><br>
 <br>
 highlight_color(1,&nbsp;'#CCFFCC').<br>
 highlight_color(2,&nbsp;'#CCCCFF').<br>
-<br>
-<span style='color:green'>%legal_position_bx(legal_position(BX,&nbsp;_BY),&nbsp;BX).</span><br>
-<span style='color:green'>%legal_position_by(legal_position(_BX,&nbsp;BY),&nbsp;BY).</span><br>
-<span style='color:green'>%</span><br>
-<span style='color:green'>%legal_position_b(T,&nbsp;BX&nbsp;>&nbsp;BY)&nbsp;:-</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;legal_position_bx(T,&nbsp;BX),</span><br>
-<span style='color:green'>%&nbsp;&nbsp;&nbsp;&nbsp;legal_position_by(T,&nbsp;BY).</span><br>
 
         </code>
     </div>

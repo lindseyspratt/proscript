@@ -1385,6 +1385,16 @@ The tiles.html web page uses the result of the compilation by loading the engine
             <li class="indexed" id="syntax">
                 <h3>Syntax:</h3>
 The syntax of a ProscriptLS source file is approximately the same as ISO Prolog.
+<h4>Coding Style</h4>
+ProscriptLS reports on two coding style issues: singleton variables and predicate references.
+<h5>Singleton</h5>
+A variable that is only mentioned once in a Prolog clause is a singleton.
+If it is an anonymous variable, '_', or an anonymized variable, '_X' where X is an proper variable name starting with an uppercase letter, then
+this is <i>not</i> reported.
+<h5>Undefined and Unused Predicates</h5>
+A predicate that is used as a goal but is not defined is reported as an undefined predicate.
+A predicate that has at least one clause defined but is not used as a goal, is not used in a retract/1 goal,
+and is not specified as an export of its containing module is reported as an unused predicate.
 <h4>Modules</h4>
 Modules in ProscriptLS are a subset of the SWI-Prolog module feature.
 Programs may be written without any reference to modules, in which case all of the
