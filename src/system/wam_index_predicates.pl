@@ -398,21 +398,6 @@ switch_instruction(GroupedTerms, Type, Label, [label(Label), Instruction|SeqInde
 type_instruction(constant, N, GroupedTerms, switch_on_constant(N, SortedGroupedTerms)) :- sort(GroupedTerms, SortedGroupedTerms).
 type_instruction(structure, N, GroupedTerms, switch_on_structure(N, SortedGroupedTerms)) :- sort(GroupedTerms, SortedGroupedTerms).
 
-clause_has_var_in_first_arg(_ClauseOffset-[_,_,15,_,_,_|_]).
-
-clause_has_constant_in_first_arg(_ClauseOffset-Clause) :-
-    clause_constant_in_first_arg(Clause, _).
-
-clause_constant_in_first_arg([_,_,Code,K,_|_], K) :-
-    member(Code, [17, 18, 21, 50]),
-    !.
-
-clause_has_list_in_first_arg(_ClauseOffset-[_,_,20,_|_]).
-
-clause_has_structure_in_first_arg(_ClauseOffset-[_,_,19,_,_|_]).
-
-clause_structure_in_first_arg([_,_,19,P,_|_],P).
-
 head_has_var_in_first_arg(_ClauseOffset-Head/_Codes) :-
     arg(1, Head, Arg),
     var(Arg).

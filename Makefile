@@ -43,7 +43,7 @@ gc:		dist/proscriptls.js src/engine/standalone.js
 		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "gc_test($(DEBUG))"
 
 dump-state: dist/proscriptls.js src/engine/standalone.js
-		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "dumpPredicate('wam_compiler:adjust_unify_variable', 4)"
+		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "dumpPredicate('wam_compiler:process_delayed_initializations', 0)"
 
 test_proscript:		dist/proscriptls.js src/engine/standalone.js
 		$(JSC) dist/proscriptls.js src/engine/standalone.js  -e "proscriptls(\"trace, mem(X,[a,b]), mem(X,[c,b]),writeln(X),notrace)\")"

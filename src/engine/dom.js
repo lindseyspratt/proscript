@@ -677,6 +677,8 @@ function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) 
 
     danglingPredicates();
 
+    unusedPredicates();
+
     consult_scripts();
 
     if(queryJS && queryJS !== '') {
@@ -772,11 +774,6 @@ function call_directives(mode) {
         ? undefined
         : initialization.map((V) => {return "'" + atable[ftable[V][0]] + "'"}).join(", ");
 
-    if(mode === 'clear_directives' ) {
-        system = [];
-        initialization = [];
-    }
-
     let extended_query = "";
 
     if(system_predicates){
@@ -791,6 +788,13 @@ function call_directives(mode) {
 
     if(extended_query !== "") {
         proscriptls(extended_query);
+    }
+
+    if(mode === 'clear_directives' ) {
+        for(let predicateID of system) {
+            delete predicates[predicateID];
+        }
+        system = [];
     }
 }
 

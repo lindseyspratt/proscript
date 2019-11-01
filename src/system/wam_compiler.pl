@@ -65,7 +65,7 @@ Some gotchas:
 
 */
 
-:-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/2, bootstrap_toplevel/1]).
+:-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/1, save_compiled_state/2, bootstrap_toplevel/1, consult_atom/1, repl/1, call_atom/2]).
 
 :- meta_predicate((compile_clause_system_directive(0),bootstrap_toplevel(0))).
 
@@ -162,8 +162,6 @@ compile_clause_save(Term, Mode, Mode) :-
         save_clause(Term).
 
 mode_skip(mode(_, skip(_))).
-
-mode_compile(mode(_, compile(_))).
 
 compile_clause_directive(Directive, ModeIn, ModeOut) :-
         compile_clause_directive_macro(Directive, ModeIn, ModeOut)
@@ -422,15 +420,6 @@ defined_meta_predicate(Functor, Arity, MetaArgTypes) :-
         \+ pls_meta_predicate(Functor, Arity, MetaArgTypes),
         list_length(MetaArgTypes, Arity),
         default_meta_arg_types(MetaArgTypes, (?)).
-
-clear_imports :-
-        retractall('$current_import'(_)).
-
-current_import(UnqualifiedPredicateName, Arity, ImportModuleName) :-
-        current_compilation_module(CurrentModuleName),
-        current_import(UnqualifiedPredicateName, Arity, CurrentModuleName, ImportModuleName),
-        !,
-        CurrentModuleName \= ImportModuleName.
 
 % The system module is implemented specially: it is assigned exported predicates directly by the
 % reserve_predicate/2 predicate, and it is assigned exported predicates by reexport of
@@ -1164,9 +1153,6 @@ compile_body_arg_adjust(GUV, OpcodesX, Opcodes) :-
         OpcodesX=Opcodes.
 compile_body_arg_adjust(_GUV, OpcodesX, Opcodes) :-
         adjust_unify_variable(OpcodesX, Opcodes).
-
-compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1) :-
-        compile_body_arg(Arg, MetaArgType, ModuleName, Position, x(I), PermanentVariables, S1, S2, OpcodesX, O1, _).
 
 compile_body_arg(Arg, (:), ModuleName, Position, Dest, PermanentVariables, State, S1, Opcodes, Tail, GUV):-
        (var(Arg)

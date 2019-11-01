@@ -81,4 +81,4 @@ function proscriptls_path(input) {
 
 }
 
-module.exports = {node_goal: node_goal, node_toplevel: node_toplevel};
+module.exports = {node_goal: node_goal, node_toplevel: node_toplevel, proscriptls_path: proscriptls_path};
