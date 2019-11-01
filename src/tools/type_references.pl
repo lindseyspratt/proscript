@@ -117,8 +117,8 @@ generate_type_property(Stream, p(Property, ImplementationName, DataType)) :-
     append(Prefix, ['</b>: <i>', DataType, '</i></li>\n'], Full),
     write_list(Full, '', Stream ).
 
-implementation_name_sublist(Property, Property, Sublist) :- !.
-implementation_name_sublist(Property, ImplementationName, [' (',  ImplementationName, ')']).
+implementation_name_sublist(Property, Property, _Sublist) :- !.
+implementation_name_sublist(_Property, ImplementationName, [' (',  ImplementationName, ')']).
 
 
 generate_type_methods(Stream, Type) :-
@@ -137,7 +137,7 @@ generate_type_methods1([H|T], Stream) :-
     generate_type_methods1(T, Stream).
 
 generate_type_method(Stream, p(Method, ImplementationName, Args, Result)) :-
-    implementation_name_sublist(Method, ImplementationName, Sublist),
+    implementation_name_sublist(Method, ImplementationName, _Sublist),
     (Method = ImplementationName
       -> ImplementationNote = []
      ;

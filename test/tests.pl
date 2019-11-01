@@ -120,10 +120,10 @@ test(subsumes_term(1), exit):-
         subsumes_term(a,a).
 
 test(subsumes_term(2), exit):-
-        subsumes_term(f(X,Y),f(Z,Z)).
+        subsumes_term(f(_X,_Y),f(Z,Z)).
 
 test(subsumes_term(3), fail):-
-        subsumes_term(f(Z,Z), f(X,Y)).
+        subsumes_term(f(Z,Z), f(_X,_Y)).
 
 test(subsumes_term(4), fail):-
         subsumes_term(g(X),g(f(X))).
@@ -198,7 +198,7 @@ test(arithmetic_test(2), exit):-
         Y == 28 .
 
 test(arithmetic_test(3), exception(type_error(evaluable,t/0))):-
-        Z is 3 + t .
+        _Z is 3 + t .
 
 test(arithmetic_test(4), exit):-
         Y is max(2, 7),
@@ -206,8 +206,8 @@ test(arithmetic_test(4), exit):-
 setup_call_catcher_cleanup(true,
                                    setup_call_catcher_cleanup(true,
                                                               true,
-                                                              C1,
-                                                              Cleanup = ok),
+                                                              _C1,
+                                                              _Cleanup = ok),
                                    C2,
                                    Cleanup2 = ok),
         !,

@@ -1,6 +1,6 @@
 
 function decode_instruction(predicateID, codePosition) {
-    let predicate = (predicateID == null) ? ("no predicate") : (atable[ftable[predicateID.key][0]] + "/" + ftable[predicateID.key][1]);
+    let predicate = (predicateID == null) ? ("no predicate") : (atable[ftable[parseInt(predicateID.key)][0]] + "/" + ftable[parseInt(predicateID.key)][1]);
     let op = code[codePosition];
     let instruction = '';
     let instructionSize = -1;
@@ -543,3 +543,99 @@ function decode_switch_table_hash(dataType, codePosition) {
     }
     return {size: size, string: table};
 }
+
+/*
+codePosition = 31, the call of bootstrap_js:retract/1.
+Argument 1 is in register[0] (= x(0)).
+Argument 1 = wam_compiler : delayed_initialization(Y0).
+x(0) -> structure :/2, arg 1 = wam_compiler, arg 2 = x(2)
+x(2) -> structure delayed_initialization/1, arg 1 = y(0).
+
+wam_compiler:process_delayed_initializations/0:(put_structure(delayed_initialization/1, x(2)),17)
+wam_compiler:process_delayed_initializations/0:(unify_local_value(y(0),20)
+wam_compiler:process_delayed_initializations/0:(put_structure(:/2, x(0)),23)
+wam_compiler:process_delayed_initializations/0:(unify_constant(wam_compiler),26)
+wam_compiler:process_delayed_initializations/0:(unify_value(x(2),28)
+wam_compiler:process_delayed_initializations/0:(call(bootstrap_js:retract/1,1),31)
+
+ */
+const PUT_STRUCTURE_OP = 12;
+const UNIFY_CONSTANT_OP = 26;
+const UNIFY_VALUE_OP = 24;
+
+function decode_retract_argument(callCodePosition, opCodePositions) {
+    let op = code[callCodePosition];
+    // op is either call or execute.
+    // In either case, argument 1 is held in x(0).
+    // Search back for codeb
+    let arg = register[0];
+    let ftor = VAL(memory[VAL(arg)]);
+    let nameID = ftable[ftor][0];
+    let functor = atable[nameID];
+    let arity = ftable[ftor][1];
+
+    let colonFunctorID = VAL(lookup_functor(':', 2));
+
+    // find prev put_structure for :/2
+    let callOfst = opCodePositions.indexOf(callCodePosition);
+    for(let ofst = callOfst-1;ofst >= 0; ofst--) {
+       let prevOpCP = opCodePositions[ofst];
+       let prevOp = code[prevOpCP];
+       if(prevOp === PUT_STRUCTURE_OP) { // [PUT_STRUCTURE_OP, F, I]
+           let F = code[prevOpCP + 1];
+           let I = code[prevOpCP + 2];
+
+           let f = VAL(F);
+           let nameID = ftable[f][0];
+           let functor = atable[nameID];
+           let arity = ftable[f][1];
+           //instruction = 'put_structure('  + functor + '/' + arity +  ', x(' + I + '))';
+           if(I === 0) {
+               if(f === colonFunctorID) {
+                   let moduleOpOfst = ofst + 1;
+                   let functorOpOfst = ofst + 2;
+
+                   let moduleOpCP = opCodePositions[moduleOpOfst];
+                   let moduleOp = code[moduleOpCP];
+                   if (moduleOp === UNIFY_CONSTANT_OP) { // unify_constant: [26, K]
+                       let moduleNameID = code[moduleOpCP + 1];
+                       let moduleName = atable[moduleNameID];
+
+                       let functorOpCP = opCodePositions[functorOpOfst];
+                       let functorOp = code[functorOpCP];
+                       if (functorOp === UNIFY_VALUE_OP) { // unify_value: [24, 0, N] or [24, 1, N]
+                           if (code[functorOpCP + 1] === 1) { // 1 -> X register, 0 -> Y register.
+                               let targetRegister = code[functorOpCP + 2];
+                               for (let subofst = functorOpOfst; subofst >= 0; subofst--) {
+                                   let subOpCP = opCodePositions[subofst];
+                                   let subOp = code[subOpCP];
+                                   if (subOp === PUT_STRUCTURE_OP && code[subOpCP + 2] === targetRegister) {
+                                       let targetF = code[subOpCP + 1];
+                                       let targetFtor = VAL(targetF);
+                                       return {module: moduleNameID, ftor: targetFtor};
+                                   }
+                               }
+                           }
+                       }
+                   }
+               }
+               return {};
+           } else if(prevOp === CALL_OP || prevOp === EXECUTE_OP) {
+               return {};
+           }
+       }
+    }
+    return {};
+}
+
+/*
+            let F = code[codePosition + 1];
+            let I = code[codePosition + 2];
+
+            let f = VAL(F);
+            let nameID = ftable[f][0];
+            let functor = atable[nameID];
+            let arity = ftable[f][1];
+            instruction = 'put_structure('  + functor + '/' + arity +  ', x(' + I + '))';
+
+ */

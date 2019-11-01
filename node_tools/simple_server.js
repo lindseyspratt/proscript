@@ -4,7 +4,7 @@ var http = require('http');
 var url = require('url');
 var fs = require('fs');
 var path = require('path');
-var baseDirectory = './';   // or whatever base directory you want
+var baseDirectory = '../';   // this base directory is the 'root' of ProscriptLS, which contains index.html.
 
 var port = 9615;
 

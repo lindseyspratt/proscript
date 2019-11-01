@@ -1,3 +1,7 @@
+dummy_reference :-
+    dummy_reference,
+    select_list(_, _, _, _).
+
 append_lists([], []).
 append_lists([L], L).
 append_lists([H1, H2|T], R) :-

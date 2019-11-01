@@ -227,53 +227,6 @@ init&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data_predicates(lp,&nbsp;legal_position,&nbsp;[bx,&nbsp;by])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;]).<br>
 <br>
-<br>
-draw_tile_test&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(ts(20,&nbsp;20,&nbsp;1,&nbsp;1,&nbsp;50,&nbsp;[red,&nbsp;red,&nbsp;green,&nbsp;green],&nbsp;none),&nbsp;1),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_tile(<i>Ctx</i>,&nbsp;1).<br>
-<br>
-draw_all_tile_test&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(ts(20,&nbsp;20,&nbsp;1,&nbsp;1,&nbsp;50,&nbsp;[red,&nbsp;red,&nbsp;green,&nbsp;green],&nbsp;none),&nbsp;1),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_all_tile(1,&nbsp;<i>Ctx</i>).<br>
-<br>
-draw_all_tiles_test&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;setup_draw_all_tiles_test(<i>Ctx</i>,&nbsp;<i>W</i>,&nbsp;<i>H</i>,&nbsp;<i>Tiles</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_all_tiles(<i>Tiles</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>W</i>,&nbsp;<i>H</i>).<br>
-<br>
-setup_draw_all_tiles_test(<i>Ctx</i>,&nbsp;<i>W</i>,&nbsp;<i>H</i>,&nbsp;[<i>Tile1</i>,&nbsp;<i>Tile2</i>])&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>,&nbsp;width&nbsp;+:>&nbsp;<i>W</i>,&nbsp;height&nbsp;+:>&nbsp;<i>H</i>],<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Tile1</i>&nbsp;=&nbsp;1,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Tile2</i>&nbsp;=&nbsp;2,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(ts(20,&nbsp;20,&nbsp;1,&nbsp;1,&nbsp;50,&nbsp;[red,&nbsp;red,&nbsp;green,&nbsp;green],&nbsp;none),&nbsp;1),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(ts(70,&nbsp;20,&nbsp;2,&nbsp;1,&nbsp;50,&nbsp;[green,&nbsp;red,&nbsp;green,&nbsp;red],&nbsp;none),&nbsp;2),<br>
-<span style='color:green'>%&nbsp;[tile_size,&nbsp;board_left,&nbsp;board_top,&nbsp;board_width,&nbsp;board_height,&nbsp;board_translate,&nbsp;turn,&nbsp;replacements]</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(g(50,&nbsp;0,&nbsp;0,&nbsp;800,&nbsp;800,&nbsp;0,&nbsp;1,&nbsp;[<i>Tile2</i>]),&nbsp;1),<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;retractall(is_selected(<i>_</i>)),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;asserta(is_selected(<i>Tile1</i>)).<br>
-<br>
-draw_legal_moves_test&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;setup_legal_moves(<i>Ctx</i>,&nbsp;<i>LPs1</i>,&nbsp;<i>LPs2</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_moves(<i>LPs1</i>,&nbsp;<i>LPs2</i>,&nbsp;<i>Ctx</i>).<br>
-<br>
-setup_legal_moves(<i>Ctx</i>,&nbsp;[1],[<i>Tile2</i>])&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Tile2</i>&nbsp;=&nbsp;2,<br>
-<span style='color:green'>%&nbsp;[tile_size,&nbsp;board_left,&nbsp;board_top,&nbsp;board_width,&nbsp;board_height,&nbsp;board_translate,&nbsp;turn,&nbsp;replacements]</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(g(50,&nbsp;10,&nbsp;10,&nbsp;200,&nbsp;200,&nbsp;1>1,&nbsp;1,&nbsp;[<i>Tile2</i>]),&nbsp;1),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(lp(1,1),&nbsp;1),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(lp(1,2),&nbsp;2).<br>
-<br>
-display_hands_test&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>_</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>,&nbsp;width&nbsp;+:>&nbsp;<i>W</i>,&nbsp;height&nbsp;+:>&nbsp;<i>H</i>],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;assert_data(g(50,&nbsp;10,&nbsp;10,&nbsp;800,&nbsp;800,&nbsp;1>1,&nbsp;1,&nbsp;[]),&nbsp;1),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;initial_hands_expanded(2,&nbsp;<i>Hands</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;setup_hands(<i>Hands</i>,&nbsp;<i>TileIDs</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_all_tiles(<i>TileIDs</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>W</i>,&nbsp;<i>H</i>).<br>
-<br>
 select_test&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>_Canvas</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[id&nbsp;-:>&nbsp;canvas,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getContext('2d')&nbsp;*:>&nbsp;<i>Ctx</i>,<br>
@@ -286,6 +239,20 @@ select_test&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;initial_hands_expanded(2,&nbsp;<i>Hands</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;setup_hands(<i>Hands</i>,&nbsp;<i>TileIDs</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;draw_all_tiles(<i>TileIDs</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>W</i>,&nbsp;<i>H</i>).<br>
+<br>
+dummy_reference&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;dummy_reference,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;select(<i>_</i>,<i>_</i>,<i>_</i>),&nbsp;<span style='color:green'>%&nbsp;referenced&nbsp;indirectly&nbsp;in&nbsp;addEventListener/3&nbsp;call.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>%&nbsp;following&nbsp;are&nbsp;generated&nbsp;by&nbsp;data_predicate_dynamics/1.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;tile_x(<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tile_y(<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tile_bx(<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tile_by(<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tile_size(<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tile_colors(<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tile_container(<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;legal_position_bx(<i>_</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;legal_position_by(<i>_</i>).<br>
 <br>
 &nbsp;<span style='color:green'>%&nbsp;clientX&nbsp;and&nbsp;clientY&nbsp;are&nbsp;coordinates&nbsp;within&nbsp;the&nbsp;containing&nbsp;HTMLCanvasElement</span><br>
 &nbsp;<span style='color:green'>%&nbsp;It&nbsp;appears&nbsp;that&nbsp;the&nbsp;rendering&nbsp;coordinates&nbsp;(e.g.&nbsp;moveTo(RX,&nbsp;RY))&nbsp;are&nbsp;coordinates</span><br>
@@ -327,6 +294,16 @@ point_in_board_position(<i>BX</i>,&nbsp;<i>BY</i>,&nbsp;<i>X</i>,&nbsp;<i>Y</i>)
 &nbsp;&nbsp;&nbsp;&nbsp;game_tile_size(<i>Size</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;board_position_top_left_coordinates(<i>BX</i>,&nbsp;<i>BY</i>,&nbsp;<i>BCX</i>,&nbsp;<i>BCY</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;in_square(<i>X</i>,&nbsp;<i>Y</i>,&nbsp;<i>BCX</i>,&nbsp;<i>BCY</i>,&nbsp;<i>Size</i>).<br>
+<br>
+board_position_top_left_coordinates(<i>GridX</i>,&nbsp;<i>GridY</i>,&nbsp;<i>X</i>,&nbsp;<i>Y</i>)&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;game_tile_size(<i>TileSize</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;game_board_left(<i>BoardLeft</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;game_board_width(<i>BoardWidth</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;game_board_top(<i>BoardTop</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;game_board_height(<i>BoardHeight</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;game_board_translate(<i>TranslateX</i>&nbsp;>&nbsp;<i>TranslateY</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>X</i>&nbsp;is&nbsp;<i>BoardLeft</i>&nbsp;+&nbsp;<i>TranslateX</i>&nbsp;+&nbsp;<i>BoardWidth</i>&nbsp;/&nbsp;2&nbsp;+&nbsp;(<i>GridX</i>&nbsp;-&nbsp;0.5)&nbsp;*&nbsp;<i>TileSize</i>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>Y</i>&nbsp;is&nbsp;<i>BoardTop</i>&nbsp;+&nbsp;<i>TranslateY</i>&nbsp;+&nbsp;<i>BoardHeight</i>&nbsp;/&nbsp;2&nbsp;+&nbsp;(<i>GridY</i>&nbsp;-&nbsp;0.5)&nbsp;*&nbsp;<i>TileSize</i>.<br>
 <br>
 on_click_tile(<i>ID</i>,&nbsp;<i>_X</i>,&nbsp;<i>_Y</i>)&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style='color:green'>%writeln(click(ID,&nbsp;X,&nbsp;Y)),</span><br>
@@ -578,53 +555,6 @@ draw_replacement_tile_mark(<i>Tile</i>,&nbsp;<i>Ctx</i>)&nbsp;<span style='color
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;restore<br>
 &nbsp;&nbsp;&nbsp;&nbsp;].<br>
 <br>
-draw_legal_moves(<i>LegalPositions</i>,&nbsp;<i>LegalPositionsWithRotation</i>,&nbsp;<i>Ctx</i>)&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;game_turn(<i>GT</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;highlight_color(<i>GT</i>,&nbsp;<i>Color</i>),<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Ctx</i>&nbsp;<span style='color:blue'>>></span>&nbsp;[<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;save,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beginPath,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fillStyle&nbsp;&lt;:+&nbsp;<i>Color</i>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;strokeStyle&nbsp;&lt;:+&nbsp;<i>Color</i>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lineWidth&nbsp;&lt;:+&nbsp;3,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;globalAlpha&nbsp;&lt;:+&nbsp;0.8<br>
-&nbsp;&nbsp;&nbsp;&nbsp;],<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;game_tile_size(<i>TileSize</i>),<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_positions_with_rotations(<i>LegalPositionsWithRotation</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>TileSize</i>),<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_positions(<i>LegalPositions</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>TileSize</i>),<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Ctx</i>&nbsp;<span style='color:blue'>>*></span>&nbsp;restore.<br>
-<br>
-draw_legal_positions_with_rotations([],&nbsp;<i>_</i>,&nbsp;<i>_</i>).<br>
-draw_legal_positions_with_rotations([<i>H</i>|<i>T</i>],&nbsp;<i>Ctx</i>,&nbsp;<i>TileSize</i>)&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;legal_position_b(<i>H</i>,&nbsp;<i>B</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;get_top_left_board_tile_coords(<i>B</i>,&nbsp;<i>TileSize</i>,&nbsp;<i>X</i>&nbsp;>&nbsp;<i>Y</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Ctx</i>&nbsp;<span style='color:blue'>>*></span>&nbsp;[<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rect(<i>X</i>,&nbsp;<i>Y</i>,&nbsp;<i>TileSize</i>,&nbsp;<i>TileSize</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stroke<br>
-&nbsp;&nbsp;&nbsp;&nbsp;],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_positions_with_rotations(<i>T</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>TileSize</i>).<br>
-<br>
-draw_legal_positions([],&nbsp;<i>_</i>,&nbsp;<i>_</i>).<br>
-draw_legal_positions([<i>H</i>|<i>T</i>],&nbsp;<i>Ctx</i>,&nbsp;<i>TileSize</i>)&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;legal_position_b(<i>H</i>,&nbsp;<i>B</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;get_top_left_board_tile_coords(<i>B</i>,&nbsp;<i>TileSize</i>,&nbsp;<i>X</i>&nbsp;>&nbsp;<i>Y</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Ctx</i>&nbsp;<span style='color:blue'>>*></span>&nbsp;fillRect(<i>X</i>,&nbsp;<i>Y</i>,&nbsp;<i>TileSize</i>,&nbsp;<i>TileSize</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_legal_positions(<i>T</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>TileSize</i>).<br>
-<br>
-get_top_left_board_tile_coords(<i>BX</i>&nbsp;>&nbsp;<i>BY</i>,&nbsp;<i>TileSize</i>,&nbsp;<i>X</i>&nbsp;>&nbsp;<i>Y</i>)&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;game_board_left(<i>Left</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;game_board_translate(<i>TX</i>&nbsp;>&nbsp;<i>TY</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;game_board_width(<i>W</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;game_board_top(<i>Top</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;game_board_height(<i>H</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>X</i>&nbsp;&nbsp;is&nbsp;<i>Left</i>&nbsp;+&nbsp;<i>TX</i>&nbsp;+&nbsp;(<i>W</i>&nbsp;/&nbsp;2)&nbsp;+&nbsp;(<i>BX</i>&nbsp;-&nbsp;0.5)&nbsp;*&nbsp;<i>TileSize</i>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Y</i>&nbsp;&nbsp;is&nbsp;<i>Top</i>&nbsp;+&nbsp;<i>TY</i>&nbsp;+&nbsp;(<i>H</i>&nbsp;/&nbsp;2)&nbsp;+&nbsp;(<i>BY</i>&nbsp;-&nbsp;0.5)&nbsp;*&nbsp;<i>TileSize</i>.<br>
-<br>
 container_id(container(<i>ID</i>,&nbsp;<i>_Type</i>),&nbsp;<i>ID</i>).<br>
 container_type(container(<i>_ID</i>,&nbsp;<i>Type</i>),&nbsp;<i>Type</i>).<br>
 <br>
@@ -648,13 +578,6 @@ tile_in_active_hand(<i>Tile</i>)&nbsp;<span style='color:red'>:-</span><br>
 <br>
 highlight_color(1,&nbsp;'#CCFFCC').<br>
 highlight_color(2,&nbsp;'#CCCCFF').<br>
-<br>
-<span style='color:green'>%legal_position_bx(legal_position(BX,&nbsp;_BY),&nbsp;BX).</span><br>
-<span style='color:green'>%legal_position_by(legal_position(_BX,&nbsp;BY),&nbsp;BY).</span><br>
-<br>
-legal_position_b(<i>T</i>,&nbsp;<i>BX</i>&nbsp;>&nbsp;<i>BY</i>)&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;legal_position_bx(<i>T</i>,&nbsp;<i>BX</i>),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;legal_position_by(<i>T</i>,&nbsp;<i>BY</i>).<br>
 
         </code>
     </div>

@@ -1,3 +1,7 @@
+dummy_reference :-
+    dummy_reference,
+    set_dom_name_path_value(_,_),
+    dom_page_offset(_,_,_).
 
 /*
 The 'name' path is not required to be sequential. A path of [a,b] names some node

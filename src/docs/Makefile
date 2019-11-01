@@ -13,12 +13,13 @@ ROOT_ENGINE=dist/proscriptls_engine.js
 ENGINE:=../../$(ROOT_ENGINE)
 SRC_SYSTEM=../system
 SRC_TOOLS=../tools
+NODE_TOOLS=../../node_tools
 
 
 all:	$(HTML) $(TOP_HTML) ../../README.SDK.md
 
 clean:		
-		rm -f $(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL) proscriptls_state_doc.js proscriptls_doc_node.js type_references.template
+		rm -f $(HTML) $(DOCS_LIB) $(DOCS_OBJECT_PL) proscriptls_state_doc.js type_references.template
 
 .PHONY: all clean dump-state
 
@@ -52,23 +53,20 @@ proscriptls_state_doc.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.p
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g \
 			"bootstrap('$(SRC_SYSTEM)/', [index(basic), '$(SRC_TOOLS)/type_references.pl'], 'proscriptls_state_doc.js', true), halt"
 
-dump-state: $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js
-		$(JSC) $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js ../tools/dump.js  -e "dump()"
+dump-state: $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js
+		$(JSC) $(ENGINE) proscriptls_state_doc.js ../../test/standalone.js  -e "dump()"
 
-proscriptls_doc_node.js:    $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_init.js
-		cat $(ENGINE) proscriptls_state_doc.js ../tools/node_standalone.js ../tools/node_exports_init.js > proscriptls_doc_node.js
-
-items.predicates.doc.template:  proscriptls_doc_node.js ../tools/node_goal.js ../tools/generate_predicate_doc.pl predicate_doc.pl
+items.predicates.doc.template:  ../tools/generate_predicate_doc.pl predicate_doc.pl
 		$(SWIPL) -q -f ../tools/generate_predicate_doc.pl -g "generate_predicate_doc('$@'), halt"
 
-predicates.sidenav.template:  proscriptls_doc_node.js ../tools/node_goal.js ../tools/generate_predicate_doc.pl predicate_doc.pl
+predicates.sidenav.template:  ../tools/generate_predicate_doc.pl predicate_doc.pl
 		$(SWIPL) -q -f ../tools/generate_predicate_doc.pl -g "generate_pred_cat_sidenav('$@'), halt"
 
-type_references.template:  proscriptls_doc_node.js ../tools/node_goal.js
-		node ../tools/node_goal.js ../docs/proscriptls_doc_node "generate_type_references('../docs/type_references.template')"
+type_references.template:  proscriptls_state_doc.js $(NODE_TOOLS)/node_goal.js
+		node $(NODE_TOOLS)/node_goal.js ../docs/proscriptls_state_doc.js "generate_type_references('../docs/type_references.template')"
 
-api.sidenav.template:  proscriptls_doc_node.js ../tools/node_goal.js
-		node ../tools/node_goal.js ../docs/proscriptls_doc_node "generate_type_sidenav('../docs/api.sidenav.template')"
+api.sidenav.template:  proscriptls_state_doc.js $(NODE_TOOLS)/node_goal.js
+		node $(NODE_TOOLS)/node_goal.js ../docs/proscriptls_state_doc.js "generate_type_sidenav('../docs/api.sidenav.template')"
 
 ../../README.SDK.md: README.SDK.md.template ../../version.txt ../../version_date.txt
 		$(SWIPL) -q -f ../../library/template.pl -g "substitute_template('$<', '$@'), halt"

@@ -5,9 +5,9 @@
          compile_message/1, (??) / 1, (?) / 1, otherwise/0, end_block/2, findall/3, setof/3, bagof/3,
          asserta/1, assertz/1, retract/1,
          unify_with_occurs_check/2, (\=) / 2, (\==) / 2, atomic/1, nonvar/1, number/1,
-         open/3, close/1, flush_output/0, stream_property/2, get_char/1, get_code/1, peek_char/1,
-         put_char/1, put_code/1, get_byte/1, peek_byte/1, put_byte/1, read_term/2, read/1, read/2,
-         write_term/2, write/1, write/2, writeq/2, write_canonical/1, write_canonical/2,
+         open/3, close/1, flush_output/0, stream_property/2, at_end_of_stream/0, get_char/1, get_code/1, peek_char/1,
+         put_char/1, peek_code/1, put_code/1, get_byte/1, peek_byte/1, put_byte/1, read_term/2, read/1, read/2,
+         write_term/2, write/1, write/2, writeq/1, writeq/2, write_canonical/1, write_canonical/2,
          halt/0,
          callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
          call_with_module/2,
@@ -82,7 +82,7 @@ save_clausea1(Fact):-
         TransformedFact =.. [TransformedName|Args],
         prepend_clause_to_predicate(TransformedName/Arity, TransformedFact, true).
 
-handle_term_expansion(Head) :- true.
+handle_term_expansion(_Head) :- true.
 
 include(_).
 
@@ -123,7 +123,7 @@ call_with_module(Module, Goal) :-
 dynamic(Module : Name/Arity) :-
         !,
         define_dynamic_predicate(Module : Name/Arity).
-dynamic(Module : []).
+dynamic(_Module : []).
 dynamic([]).
 dynamic(Module : [H|T]) :-
         !,
@@ -228,8 +228,7 @@ end_block(_, NewBlock):-
 
 
 findall(Template, Generator, List) :-
-	save_instances(-Template, Generator),
-	list_instances([], List).
+    findall(Template, Generator, [], List).
 
 findall(Template, Generator, SoFar, List) :-
 	save_instances(-Template, Generator),
@@ -370,7 +369,7 @@ retract(Clause) :- retract1(Clause).
 
 retract1(_M1 : _M2 : M3 : Term) :- !, retract1(M3 : Term).
 retract1(_M1 : M2 : Term) :- !, retract1(M2 : Term).
-retract1(M1 : ((M2:Head) :- Body)) :- !, retract1((M2 : Head) :- Body).
+retract1(_M1 : ((M2:Head) :- Body)) :- !, retract1((M2 : Head) :- Body).
 retract1(M : (Head :- Body)) :- !, retract1((M : Head) :- Body).
 retract1((_M1 : (M2 : Head)) :- Body) :- !, retract1((M2 : Head) :- Body).
 
