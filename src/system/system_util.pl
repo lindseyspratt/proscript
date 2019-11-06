@@ -4,7 +4,6 @@ member(X, [X|_]).
 member(X, [_|Tail]) :-
     member(X, Tail).
 
-
 write_list(List, Separator) :-
     current_output(Stream),
     write_list(List, Separator, Stream).

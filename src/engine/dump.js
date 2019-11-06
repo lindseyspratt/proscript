@@ -1,7 +1,5 @@
-let environment =  'console'; // 'browser';
-
-function dump(filter) {
-    if(environment === 'console') {
+function dump(filter, mode) {
+    if(mode && mode === 'load') {
         load_state();
     }
     for(var ofst = 0;ofst < ftable.length;ofst++) {
@@ -15,8 +13,8 @@ function dump(filter) {
     }
 }
 
-function dumpPredicate(targetPredicateName, targetArity) {
-    if(environment === 'console') {
+function dumpPredicate(targetPredicateName, targetArity, mode) {
+    if(mode && mode === 'load') {
         load_state();
     }
 
@@ -44,8 +42,7 @@ function dumpPredicate(targetPredicateName, targetArity) {
 }
 
 function danglingPredicates(mode) {
-    if((!mode && environment === 'console')
-    || (mode && mode === 'load')) {
+    if(mode && mode === 'load') {
         load_state();
     }
 
@@ -133,8 +130,7 @@ function danglingPredicates(mode) {
 }
 
 function unusedPredicates(mode) {
-    if((!mode && environment === 'console')
-        || (mode && mode === 'load')) {
+    if(mode && mode === 'load') {
         load_state();
     }
 

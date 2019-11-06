@@ -13,7 +13,6 @@ clean: clean_index
 		rm -f proscriptls_state.js
 		rm -f proscriptls_test.js
 		rm -f proscriptls_index_state.js
-		rm -f proscriptls_sccc_state.js
 
 jsc_test:		$(ENGINE) standalone.js proscriptls_state.js
 		$(JSC) $(ENGINE) proscriptls_state.js standalone.js  -e "proscriptls_toplevel($(DEBUG))"
@@ -46,9 +45,3 @@ proscriptls_index_state.js: index_test.pl $(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM
 
 node_index_test: $(NODE_TOOLS)/node_toplevel.js proscriptls_index_test.js
 		node $(NODE_TOOLS)/node_toplevel.js ../test/proscriptls_index_state.js
-
-node_goal_member:
-		node $(NODE_TOOLS)/node_goal.js proscriptls_state.js "member(a-Y, [p-1, a-3]), writeln(Y)"
-
-dump_sccc_test: proscriptls_sccc_state.js
-		$(JSC) $(ENGINE) proscriptls_sccc_state.js  -e "environment='console';dumpPredicate('user:test2')"
