@@ -1935,7 +1935,7 @@ function destroy_choicepoint()
 }
 
 // For testing only! Assumes -,+ mode
-function member(element, list)
+function predicate_member_test(element, list)
 {
     if (state.foreign_retry)
     {
@@ -1955,6 +1955,10 @@ function member(element, list)
             debug_msg("Unification succeeded. Setting choicepoint value @" +(state.B+FCP_V) + " to " + hex(memory[VAL(list)+1]));
             update_choicepoint_data(memory[VAL(list)+1]);
             return true;
+        } else {
+            // undo any bindings created by failed unify(head, element) call.
+            var n = memory[state.B];
+            unwind_trail(memory[state.B + n + CP_TR], state.TR);
         }
         list = memory[VAL(list)+1]
     }

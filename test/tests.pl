@@ -331,3 +331,9 @@ test(escapes, exit) :-
         atom_codes('\t', [9]),
         atom_codes('\u000a', [10]),
         atom_codes('\t\x000a\foo', [9, 10, 102, 111, 111]).
+
+% member/2 leaves a choicepoint on the stack, so the expected result for this test is '!' instead of just 'exit'.
+test(member, !) :-
+        member(a-_Y, [p-1, a-3]).
+
+

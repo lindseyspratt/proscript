@@ -1922,7 +1922,7 @@ function destroy_choicepoint()
 }
 
 // For testing only! Assumes -,+ mode
-function member(element, list)
+function predicate_member_test(element, list)
 {
     if (state.foreign_retry)
     {
@@ -1939,6 +1939,10 @@ function member(element, list)
         {
             update_choicepoint_data(memory[VAL(list)+1]);
             return true;
+        } else {
+            // undo any bindings created by failed unify(head, element) call.
+            var n = memory[state.B];
+            unwind_trail(memory[state.B + n + CP_TR], state.TR);
         }
         list = memory[VAL(list)+1]
     }
@@ -14803,7 +14807,7 @@ function object_method_return() {
     return Reflect.apply(object[object_method], object, method_arguments);
 }
 // File dump.js
-let environment =  'jsc'; // 'browser';
+let environment =  'console'; // 'browser';
 
 function dump(filter) {
     if(environment === 'console') {
