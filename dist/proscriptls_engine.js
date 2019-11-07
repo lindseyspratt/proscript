@@ -10357,7 +10357,33 @@ function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) 
     load_state();
 
     if(displayLoadInfo) {
-        stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
+        let indexedCount = 0;
+        let fullyIndexedCount = 0;
+        for(let key of Object.keys(predicates)) {
+            let predicate = predicates[key];
+            if(typeof predicate.index !== 'undefined') {
+                indexedCount++;
+
+                let sequenceCount = 0;
+                for(let clauseKey of predicate.clause_keys) {
+                    if(clauseKey !== predicate.index) {
+                        let clause = predicate.clauses[predicate.clause_keys[clauseKey]];
+                        let code = clause.code;
+                        if (code[0] === 30 || code[0] === 254) {
+                            // trust_me or nop2 instruction
+                            // trust_me indicates a sequence of 2 or more clauses,
+                            // nop2 indicates a sequence of one clause.
+                            sequenceCount++;
+                        }
+                    }
+                }
+
+                if(sequenceCount === 1) {
+                    fullyIndexedCount++;
+                }
+            }
+        }
+        stdout("Loaded " + Object.keys(predicates).length + " predicates (" + indexedCount + " indexed, " + fullyIndexedCount + " single sequence)\n");
         stdout("Loaded " + atable.length + " atoms\n");
         stdout("Loaded " + ftable.length + " functors\n");
     }
@@ -14915,15 +14941,99 @@ function dump(filter, mode) {
     if(mode && mode === 'load') {
         load_state();
     }
+
+    let indexedCount = 0;
+    let fullyIndexedCount = 0;
+    let switchOnTermArgInfos = [
+        {ofst: 2, label: 'atom', bit: 1},
+        {ofst: 3, label: 'integer', bit: 2},
+        {ofst: 4, label: 'float', bit: 4},
+        {ofst: 5, label: 'list', bit: 8},
+        {ofst: 6, label: 'structure', bit: 16}
+        ];
+    let counts = {};
+
+    for(let key of Object.keys(predicates)) {
+        let predicate = predicates[key];
+        if(typeof predicate.index !== 'undefined') {
+            indexedCount++;
+
+            let sequenceCount = 0;
+            for(let clauseKey of predicate.clause_keys) {
+                if(clauseKey !== predicate.index) {
+                    let clause = predicate.clauses[predicate.clause_keys[clauseKey]];
+                    let code = clause.code;
+                    if (code[0] === 30 || code[0] === 254) {
+                        // trust_me or nop2 instruction
+                        // trust_me indicates a sequence of 2 or more clauses,
+                        // nop2 indicates a sequence of one clause.
+                        sequenceCount++;
+                    }
+                }
+            }
+
+            if(sequenceCount === 1) {
+                fullyIndexedCount++;
+
+                // inspect switch_on_term instruction.
+                let clause = predicate.clauses[predicate.clause_keys[predicate.index]];
+                let code = clause.code;
+
+                // switch_on_term: [44, V, CA, CI, CF, L, S]
+
+                let codePosition = 2; //first two slots are for nop2 or try_me_else.
+
+                let maskName = '';
+                let maskBits = 0;
+
+                for (let info of switchOnTermArgInfos) {
+                    info.value = decode_address(code[codePosition + info.ofst]);
+                    if (info.value !== 'fail') {
+                        maskName += ((maskName !== '') ? '/' : '') + info.label;
+                        maskBits = maskBits | info.bit;
+                    }
+                }
+
+                if (counts[maskBits]) {
+                    counts[maskBits].counter++;
+                } else {
+                    counts[maskBits] = {counter: 1, name: maskName};
+                }
+            }
+        }
+    }
+
+    let indexTypes = '';
+
+    let typePad = '        ';
+    for(let countKey of Object.keys(counts)) {
+        let count = counts[countKey];
+        indexTypes += (indexTypes !== '' ? (',\n' + typePad) : '') + count.name + ': ' + count.counter;
+    }
+
+    indexTypes = typePad + indexTypes;
+
+    dumpWrite("Loaded " + Object.keys(predicates).length + " predicates");
+    dumpWrite("    " + indexedCount + " indexed, " + fullyIndexedCount + " single sequence");
+    dumpWrite("      single sequence types:\n" + indexTypes + "\n");
+    dumpWrite("Loaded " + atable.length + " atoms");
+    dumpWrite("Loaded " + ftable.length + " functors");
+
     for(var ofst = 0;ofst < ftable.length;ofst++) {
         var functionPair = ftable[ofst];
         var predicateName = atable[functionPair[0]];
         let predicate = predicates[ofst];
-        if (!filter || (filter && ((filter === 'defined-predicate' && predicate)
-            || (filter === 'undefined-predicate' && !predicate)))) {
-            dumpWrite(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0] + ', ' + (predicate ? 'has' : 'no') + ' predicate clauses');
+        if (!filter ||
+            (filter && ((filter === 'defined-predicate' && predicate)
+                || (filter && filter === 'indexed-predicate' && predicate && predicate.index)
+                || (filter === 'undefined-predicate' && !predicate)))) {
+            dumpWrite(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0] +
+                ', ' + (predicate ?
+                    ('has' + (predicate.index ? ' indexed' : ''))
+                    : 'no') + ' predicate clauses');
         }
     }
+
 }
 
 function dumpPredicate(targetPredicateName, targetArity, mode) {

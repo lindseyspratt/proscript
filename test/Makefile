@@ -9,9 +9,8 @@ NODE_TOOLS=../node_tools
 
 all: node_test
 
-clean: clean_index clean_factorial
+clean: clean_index clean_factorial clean_struct
 		rm -f proscriptls_state.js
-		rm -f proscriptls_test.js
 
 jsc_test:		$(ENGINE) standalone.js proscriptls_state.js
 		$(JSC) $(ENGINE) proscriptls_state.js standalone.js  -e "proscriptls_toplevel($(DEBUG))"
@@ -28,10 +27,11 @@ node_test: $(NODE_TOOLS)/node_toplevel.js proscriptls_state.js
 		node $(NODE_TOOLS)/node_toplevel.js ../test/proscriptls_state.js
 
 dump-state: $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js
-		$(JSC) $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js  -e "dump('defined-predicate')" #Predicate('compile_body_args')"
+		$(JSC) $(ENGINE) proscriptls_state.js $(SRC_ENGINE)/standalone.js  -e "dump('indexed-predicate', 'load')" #Predicate('compile_body_args')"
 
-dump-state-test: proscriptls_state.js
-		$(JSC) $(ENGINE) proscriptls_state.js  -e "dump('defined-predicate')" #Predicate('compile_body_args')"
+ # 'wam_compiler:compile_clause_2'
+dump-state-pred: proscriptls_state.js
+		$(JSC) $(ENGINE) proscriptls_state.js  -e "dumpPredicate('not:explicit_binding', 4, 'load')"
 
 clean_index:
 		rm -f proscriptls_index_state.js;

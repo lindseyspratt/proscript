@@ -666,7 +666,33 @@ function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) 
     load_state();
 
     if(displayLoadInfo) {
-        stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
+        let indexedCount = 0;
+        let fullyIndexedCount = 0;
+        for(let key of Object.keys(predicates)) {
+            let predicate = predicates[key];
+            if(typeof predicate.index !== 'undefined') {
+                indexedCount++;
+
+                let sequenceCount = 0;
+                for(let clauseKey of predicate.clause_keys) {
+                    if(clauseKey !== predicate.index) {
+                        let clause = predicate.clauses[predicate.clause_keys[clauseKey]];
+                        let code = clause.code;
+                        if (code[0] === 30 || code[0] === 254) {
+                            // trust_me or nop2 instruction
+                            // trust_me indicates a sequence of 2 or more clauses,
+                            // nop2 indicates a sequence of one clause.
+                            sequenceCount++;
+                        }
+                    }
+                }
+
+                if(sequenceCount === 1) {
+                    fullyIndexedCount++;
+                }
+            }
+        }
+        stdout("Loaded " + Object.keys(predicates).length + " predicates (" + indexedCount + " indexed, " + fullyIndexedCount + " single sequence)\n");
         stdout("Loaded " + atable.length + " atoms\n");
         stdout("Loaded " + ftable.length + " functors\n");
     }

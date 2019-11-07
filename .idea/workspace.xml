@@ -2,29 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Fixed bugs in indexing. Added hex number format to read.js.&#10;&#10;Fixed emit_code/2 to support extended_address(X) for an value X that must be represented in Javascript as 'X ^ 0x80000000'. This cannot be calculated in ProscriptLS because its effective integer width is less than 32 (28?). Fixed predicate_add_index_clause_to_predicate function to set the predicate.index member (it was mislocated as predicate.clauses[X].index).&#10;Extended expression_to_term function to read/convert hex numbers. Changed it to use ProscriptLS exceptions to report errors.&#10;Fixed not.pl explicit_binding/4 to reference 'bootstrap_js:setof' instead of just 'setof', and similarly for bagog, set_of, and bag_of.&#10;Changed link_1/3 in wam_assemble.pl to use extended_address(Address) instead of directly using 'Address xor 0x80000000'.&#10;Fixed group/5 to use new group1/3 to accumulate groups instead of nested setof/3 predicates. There was a problem with setof's handling of free variables in the list bound to ConstantClauses.&#10;Added two programs in test dir, factorial.pl and struct.pl, to test indexing.&#10;Extended tests.pl with tests for hex integers.">
-      <change afterPath="$PROJECT_DIR$/test/factorial.pl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/proscriptls_factorial_state.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/proscriptls_struct_state.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/struct.pl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/foreign.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/foreign.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/read.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/read.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/not.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/not.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/wam_assemble.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/wam_assemble.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/wam_index_predicates.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/wam_index_predicates.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tools/wam_bootstrap_util.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools/wam_bootstrap_util.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tiles.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tiles.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/dom.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/dom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/dump.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/dump.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/test/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/tests.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/tests.pl" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -41,37 +26,78 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
+        <entry file="file://$PROJECT_DIR$/test/Makefile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" selection-start-line="15" selection-end-line="15" />
+            <state relative-caret-position="525">
+              <caret line="35" column="12" selection-start-line="35" selection-start-column="12" selection-end-line="35" selection-end-column="12" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/node_tools/node_compile.js">
+        <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" column="87" selection-start-line="5" selection-start-column="87" selection-end-line="5" selection-end-column="87" />
+            <state relative-caret-position="513">
+              <caret line="39" column="86" selection-start-line="39" selection-start-column="86" selection-end-line="39" selection-end-column="86" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/examples/test.js">
+        <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="69">
-              <caret line="80" column="24" selection-start-line="80" selection-start-column="24" selection-end-line="80" selection-end-column="24" />
+            <state relative-caret-position="781">
+              <caret line="580" column="34" selection-start-line="580" selection-start-column="34" selection-end-line="580" selection-end-column="34" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/terminal/terminal_test.html">
+        <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="20" selection-start-line="20" selection-end-line="20" />
+            <state relative-caret-position="895">
+              <caret line="697" selection-start-line="694" selection-end-line="697" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/proscriptls_struct_state.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-2263">
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="530">
+              <caret line="405" selection-start-line="392" selection-start-column="1" selection-end-line="405" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/tiles.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="10" column="65" selection-start-line="10" selection-start-column="65" selection-end-line="10" selection-end-column="65" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/dist/proscriptls_engine.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-245">
+              <caret line="14967" column="36" selection-start-line="14967" selection-start-column="36" selection-end-line="14967" selection-end-column="36" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -85,43 +111,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/calculator.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="55" column="4" selection-start-line="55" selection-start-column="4" selection-end-line="55" selection-end-column="4" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/system/wam_index_predicates.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="436">
-              <caret line="349" column="30" selection-start-line="349" selection-start-column="30" selection-end-line="349" selection-end-column="30" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/system/wam_assemble.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="42" column="18" selection-start-line="42" selection-start-column="18" selection-end-line="42" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/system/wam_util.pl">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/library/listut.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
-              <caret line="293" column="30" selection-start-line="293" selection-start-column="30" selection-end-line="293" selection-end-column="30" />
+            <state relative-caret-position="431">
+              <caret line="45" column="81" selection-start-line="45" selection-start-column="81" selection-end-line="45" selection-end-column="81" />
             </state>
           </provider>
         </entry>
@@ -130,7 +124,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>node_goal</find>
       <find>function m</find>
       <find>member</find>
       <find>test2</find>
@@ -160,6 +153,7 @@
       <find>wam1</find>
       <find>factorial</find>
       <find>select</find>
+      <find>proscriptls_test</find>
     </findStrings>
     <replaceStrings>
       <replace>struct</replace>
@@ -183,12 +177,10 @@
         <option value="$PROJECT_DIR$/library/listut2.pl" />
         <option value="$PROJECT_DIR$/node_tools/node_goal_module.js" />
         <option value="$PROJECT_DIR$/test/sccc_test.pl" />
-        <option value="$PROJECT_DIR$/src/engine/dump.js" />
         <option value="$PROJECT_DIR$/library/data_predicates.pl" />
         <option value="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" />
         <option value="$PROJECT_DIR$/src/system/system_util.pl" />
         <option value="$PROJECT_DIR$/test/factorial.pl" />
-        <option value="$PROJECT_DIR$/dist/proscriptls_engine.js" />
         <option value="$PROJECT_DIR$/src/engine/read.js" />
         <option value="$PROJECT_DIR$/src/system/wam_assemble.pl" />
         <option value="$PROJECT_DIR$/src/tools/wam_bootstrap_util.pl" />
@@ -196,7 +188,6 @@
         <option value="$PROJECT_DIR$/examples/Makefile" />
         <option value="$PROJECT_DIR$/test/index_structure.pl" />
         <option value="$PROJECT_DIR$/test/struct.pl" />
-        <option value="$PROJECT_DIR$/test/Makefile" />
         <option value="$PROJECT_DIR$/examples/tiles.pl" />
         <option value="$PROJECT_DIR$/node_tools/node_compile.js" />
         <option value="$PROJECT_DIR$/examples/test.html" />
@@ -204,16 +195,21 @@
         <option value="$PROJECT_DIR$/src/system/not.pl" />
         <option value="$PROJECT_DIR$/src/system/wam_index_predicates.pl" />
         <option value="$PROJECT_DIR$/terminal/terminal_test.html" />
-        <option value="$PROJECT_DIR$/src/engine/dom.js" />
         <option value="$PROJECT_DIR$/src/engine/foreign.js" />
         <option value="$PROJECT_DIR$/examples/calculator.html" />
+        <option value="$PROJECT_DIR$/examples/tiles.html" />
+        <option value="$PROJECT_DIR$/src/engine/dom.js" />
+        <option value="$PROJECT_DIR$/test/Makefile" />
+        <option value="$PROJECT_DIR$/src/engine/dump.js" />
+        <option value="$PROJECT_DIR$/dist/proscriptls_engine.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-2560" />
     <option name="y" value="23" />
-    <option name="width" value="1280" />
-    <option name="height" value="740" />
+    <option name="width" value="2560" />
+    <option name="height" value="1417" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -231,6 +227,11 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="dist" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
               <item name="examples" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -241,7 +242,8 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-              <item name="terminal" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="system" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
@@ -348,19 +350,26 @@
       <option name="project" value="LOCAL" />
       <updated>1573052478594</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Fixed bugs in indexing. Added hex number format to read.js.&#10;&#10;Fixed emit_code/2 to support extended_address(X) for an value X that must be represented in Javascript as 'X ^ 0x80000000'. This cannot be calculated in ProscriptLS because its effective integer width is less than 32 (28?). Fixed predicate_add_index_clause_to_predicate function to set the predicate.index member (it was mislocated as predicate.clauses[X].index).&#10;Extended expression_to_term function to read/convert hex numbers. Changed it to use ProscriptLS exceptions to report errors.&#10;Fixed not.pl explicit_binding/4 to reference 'bootstrap_js:setof' instead of just 'setof', and similarly for bagog, set_of, and bag_of.&#10;Changed link_1/3 in wam_assemble.pl to use extended_address(Address) instead of directly using 'Address xor 0x80000000'.&#10;Fixed group/5 to use new group1/3 to accumulate groups instead of nested setof/3 predicates. There was a problem with setof's handling of free variables in the list bound to ConstantClauses.&#10;Added two programs in test dir, factorial.pl and struct.pl, to test indexing.&#10;Extended tests.pl with tests for hex integers.">
+      <created>1573093640335</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1573093640335</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="45141000" />
+    <option name="totallyTimeSpent" value="54069000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1280" height="740" extended-state="6" />
+    <frame x="-2560" y="23" width="2560" height="1417" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.64935064" visible="true" weight="0.23987292" />
-      <window_info id="Structure" order="1" sideWeight="0.35064936" side_tool="true" visible="true" weight="0.23987292" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65049344" visible="true" weight="0.118944466" />
+      <window_info id="Structure" order="1" sideWeight="0.3495066" side_tool="true" visible="true" weight="0.118944466" />
       <window_info id="Favorites" order="2" sideWeight="0.50062895" side_tool="true" weight="0.118944466" />
-      <window_info anchor="bottom" id="Messages" visible="true" weight="0.16820988" />
+      <window_info anchor="bottom" id="Messages" visible="true" weight="0.08226415" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32981133" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32981133" />
@@ -526,13 +535,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/version.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="5" selection-start-column="5" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/version_date.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -562,13 +564,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/proscriptls_sccc_state.js" />
-    <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="69" column="9" lean-forward="true" selection-start-line="69" selection-start-column="9" selection-end-line="69" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dist/proscriptls_engine_for_node.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
@@ -606,23 +601,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/index_test.pl">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="19" selection-start-line="19" selection-end-line="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dist/proscriptls_engine.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="14938" column="23" selection-start-line="14938" selection-start-column="23" selection-end-line="14938" selection-end-column="23" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/read.js">
       <provider selected="true" editor-type-id="text-editor">
@@ -697,13 +675,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="661">
-          <caret line="790" column="5" selection-start-line="790" selection-start-column="5" selection-end-line="790" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/examples/Makefile">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
@@ -722,13 +693,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="328">
           <caret line="5259" column="20" lean-forward="true" selection-start-line="5259" selection-start-column="20" selection-end-line="5259" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/tiles.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="31" selection-start-line="26" selection-end-line="31" />
         </state>
       </provider>
     </entry>
@@ -753,13 +717,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="71">
-          <caret line="38" column="89" selection-start-line="38" selection-start-column="89" selection-end-line="38" selection-end-column="89" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/system/system_util.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
@@ -769,13 +726,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/system/system.pl">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8075">
-          <caret line="580" column="34" selection-start-line="580" selection-start-column="34" selection-end-line="580" selection-end-column="34" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/system/wam_assemble.pl">
       <provider selected="true" editor-type-id="text-editor">
@@ -838,8 +788,72 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/calculator.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="55" column="4" selection-start-line="55" selection-start-column="4" selection-end-line="55" selection-end-column="4" />
+        <state relative-caret-position="431">
+          <caret line="45" column="81" selection-start-line="45" selection-start-column="81" selection-end-line="45" selection-end-column="81" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/tests.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/tiles.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="65" selection-start-line="10" selection-start-column="65" selection-end-line="10" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="781">
+          <caret line="580" column="34" selection-start-line="580" selection-start-column="34" selection-end-line="580" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/proscriptls_struct_state.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2263">
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="895">
+          <caret line="697" selection-start-line="694" selection-end-line="697" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="35" column="12" selection-start-line="35" selection-start-column="12" selection-end-line="35" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="530">
+          <caret line="405" selection-start-line="392" selection-start-column="1" selection-end-line="405" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="513">
+          <caret line="39" column="86" selection-start-line="39" selection-start-column="86" selection-end-line="39" selection-end-column="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/proscriptls_engine.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-245">
+          <caret line="14967" column="36" selection-start-line="14967" selection-start-column="36" selection-end-line="14967" selection-end-column="36" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

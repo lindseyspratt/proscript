@@ -2,15 +2,105 @@ function dump(filter, mode) {
     if(mode && mode === 'load') {
         load_state();
     }
+
+    let indexedCount = 0;
+    let fullyIndexedCount = 0;
+    let infos = [
+        {ofst: 2, label: 'CA', bit: 1},
+        {ofst: 3, label: 'CI', bit: 2},
+        {ofst: 4, label: 'CF', bit: 4},
+        {ofst: 5, label: 'L', bit: 8},
+        {ofst: 6, label: 'S', bit: 16}
+        ];
+    let counts = {};
+
+    for(let key of Object.keys(predicates)) {
+        let predicate = predicates[key];
+        if(typeof predicate.index !== 'undefined') {
+            indexedCount++;
+
+            let sequenceCount = 0;
+            for(let clauseKey of predicate.clause_keys) {
+                if(clauseKey !== predicate.index) {
+                    let clause = predicate.clauses[predicate.clause_keys[clauseKey]];
+                    let code = clause.code;
+                    if (code[0] === 30 || code[0] === 254) {
+                        // trust_me or nop2 instruction
+                        // trust_me indicates a sequence of 2 or more clauses,
+                        // nop2 indicates a sequence of one clause.
+                        sequenceCount++;
+                    }
+                }
+            }
+
+            if(sequenceCount === 1) {
+                fullyIndexedCount++;
+
+                // inspect switch_on_term instruction.
+                let clause = predicate.clauses[predicate.clause_keys[predicate.index]];
+                let code = clause.code;
+
+             // switch_on_term: [44, V, CA, CI, CF, L, S]
+                {
+                    let codePosition = 2; //first two slots are for nop2 or try_me_else.
+
+                    let V = code[codePosition + 1];
+                    let maskName = '';
+                    let maskBits = 0;
+
+                    for(let info of infos) {
+                        info.value = decode_address(code[codePosition + info.ofst]);
+                        if(info.value !== 'fail') {
+                            maskName += ((maskName !== '') ? '/' : '') + info.label;
+                            maskBits = maskBits | info.bit;
+                        }
+                    }
+                    // let CA = decode_address(code[codePosition + 2]);
+                    // let CI = decode_address(code[codePosition + 3]);
+                    // let CF = decode_address(code[codePosition + 4]);
+                    // let L = decode_address(code[codePosition + 5]);
+                    // let S = decode_address(code[codePosition + 6]);
+
+                    let instruction = 'switch_on_term(' + V + ', ' + info[0].value + ', ' + info[1].value + ', ' + info[2].value + ', ' + info[3].value + ', ' + info[4].value + ')';
+                    let instructionSize = 7;
+
+                    let counter = counts[maskBits].counter;
+                    if(counter) {
+                        counter++;
+                    } else {
+                        counter = 1;
+
+                        counts[maskBits].name = maskName;
+                    }
+
+                    counts[maskBits].counter = counter;
+                    break;
+                }
+
+            }
+        }
+    }
+    dumpWrite("Loaded single sequence types: " + JSON.stringify(counts));
+
+    dumpWrite("Loaded " + Object.keys(predicates).length + " predicates (" + indexedCount + " indexed, " + fullyIndexedCount + " single sequence)\n");
+    dumpWrite("Loaded " + atable.length + " atoms\n");
+    dumpWrite("Loaded " + ftable.length + " functors\n");
+
     for(var ofst = 0;ofst < ftable.length;ofst++) {
         var functionPair = ftable[ofst];
         var predicateName = atable[functionPair[0]];
         let predicate = predicates[ofst];
-        if (!filter || (filter && ((filter === 'defined-predicate' && predicate)
-            || (filter === 'undefined-predicate' && !predicate)))) {
-            dumpWrite(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0] + ', ' + (predicate ? 'has' : 'no') + ' predicate clauses');
+        if (!filter ||
+            (filter && ((filter === 'defined-predicate' && predicate)
+                || (filter && filter === 'indexed-predicate' && predicate && predicate.index)
+                || (filter === 'undefined-predicate' && !predicate)))) {
+            dumpWrite(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0] +
+                ', ' + (predicate ?
+                    ('has' + (predicate.index ? ' indexed' : ''))
+                    : 'no') + ' predicate clauses');
         }
     }
+
 }
 
 function dumpPredicate(targetPredicateName, targetArity, mode) {
