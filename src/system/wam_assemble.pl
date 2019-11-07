@@ -29,8 +29,9 @@ link_1(Label, Address, [address_of(L, N)|References]):-
 link_1(Label, Address, [aux_address_of(L, N)|References]):-
         Label == L, !,
         compile_message(emitting_aux_address_2_of(L, Address, to(N))),
-        A is Address xor 0x80000000,
-        emit_code(N, A),
+        % The extended address is 'Address xor 0x80000000'. This cannot be expressed in ProscriptLS
+        % due to the integer range being less than 32 bits.
+        emit_code(N, extended_address(Address)),
         link_1(Label, Address, References).
 link_1(Label, Address, [_|References]):-
         link_1(Label, Address, References).

@@ -345,11 +345,31 @@ group(ClauseInfos, Type, GroupedConstants, GroupInstructions, GroupTail) :-
      Type = structure
       -> structures(ClauseInfos, ConstantClauses)
     ),
-    (setof(Value-Clauses, setof(Clause, member(Value-Clause, ConstantClauses), Clauses), Groups)
-      -> group_instructions(Groups, GroupedConstants, GroupInstructions, GroupTail)
+    (
+    group1(ConstantClauses, [], Groups),
+    sort(Groups, SortedGroups)
+    %setof(Value-Clauses, setof(Clause, member(Value-Clause, ConstantClauses), Clauses), SortedGroups)
+      -> group_instructions(SortedGroups, GroupedConstants, GroupInstructions, GroupTail)
     ;
      GroupInstructions = GroupTail
     ).
+
+group1([], VG, VG).
+group1([Value-Info|T], VGIn, VGOut) :-
+    group1(Value, Info, VGIn, VGNext),
+    group1(T, VGNext, VGOut).
+
+% group1(Value, Info, ValueGroups, VGTail).
+group1(Value, Info, VGIn, VGOut) :-
+    select(Value-Bucket, VGIn, Value-NewBucket, VGOut)
+      -> sort([Info|Bucket], NewBucket)
+    ;
+    VGOut = [Value-[Info]|VGIn].
+
+% select/4 is from library/listut.pl
+select(X, [X|Tail], Y, [Y|Tail]).
+select(X, [Head|Xlist], Y, [Head|Ylist]) :-
+	select(X, Xlist, Y, Ylist).
 
 constants([], []).
 constants([H|T], [V-H|TC]) :-

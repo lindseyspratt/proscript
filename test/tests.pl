@@ -203,19 +203,18 @@ test(arithmetic_test(3), exception(type_error(evaluable,t/0))):-
 test(arithmetic_test(4), exit):-
         Y is max(2, 7),
         Y == 7 .
-setup_call_catcher_cleanup(true,
-                                   setup_call_catcher_cleanup(true,
-                                                              true,
-                                                              _C1,
-                                                              _Cleanup = ok),
-                                   C2,
-                                   Cleanup2 = ok),
-        !,
-        writeln(C2-Cleanup2).
+
 test(arithmetic_test(5), exit):-
         Y is sin(pi),
         Y < 0.0001,
         Y > -0.0001 .
+
+test(arithmetic_test(6), exit):-
+        X is 0x10,
+        X == 16.
+
+test(arithmetic_test(7), exit):-
+        0x1000000 =:= 16 ^ 6.
 
 test(univ(1), exit):-
         foo(bar) =.. A,

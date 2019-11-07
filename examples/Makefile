@@ -21,7 +21,7 @@ proscriptls_state_demo.js: demo.pl $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_SY
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['$<'], '$@', 'foo'), halt"
 
 dump-state: $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js
-		$(JSC) $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js  -e "dumpPredicate('tiles:setup_hands')"
+		$(JSC) $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js  -e "dumpPredicate('object:$$sys_0', 'load')"
 
 # force proscriptls_init (which runs danglingPredicates()) of state from loadState of proscriptls_state_tiles.js.
 proscriptls_state_tiles.js:  ../dist/proscriptls_engine_for_node.js tiles.pl ../library/data_predicates.pl ../library/object.pl\

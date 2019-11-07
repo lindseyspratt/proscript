@@ -461,7 +461,11 @@ function read_term(stream, term, options)
     
     var varmap = {};
     var singletons = {};
-    var t1 = expression_to_term(expression, varmap, singletons);
+    let readObject = {};
+    if(!expression_to_term(expression, varmap, singletons, readObject)) {
+        return false;
+    }
+    var t1 = readObject.value;
     var keys;
     if (options.variables !== undefined || options.singletons !== undefined)
     {
@@ -730,19 +734,21 @@ function is_punctuation_charAt(object, position) {
     return typeof object.charAt === 'function' && is_punctuation(object.charAt(position));
 }
 
-function expression_to_term(s, varmap, singletons)
+function expression_to_term(s, varmap, singletons, termObject)
 {
+    let newTerm;
+
     if (typeof(s) === "string")
-        return lookup_atom(s);
+        newTerm = lookup_atom(s);
     else if (typeof(s) === "number")
     {
         if (s === ~~s)
         {
-            return (s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+            newTerm = (s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
         }
         else
         {
-            return lookup_float(s);
+            newTerm = lookup_float(s);
         }
     }
     else if (s.variable_name !== undefined)
@@ -766,26 +772,43 @@ function expression_to_term(s, varmap, singletons)
             singletons[s.variable_name] = 1;
         else
             singletons[s.variable_name]++;
-        return result;
+        newTerm = result;
     }
     else if (s.list !== undefined)
     {   
         // Special case for [], as usual, since we do not actually allocate any lists!
         if (s.list.length === 0)
-            return NIL;
+            newTerm = NIL;
+        else {
 
-        var result = alloc_var();
-        var tail = result;
-        var head;
-        for (var i = 0; i < s.list.length; i++)
-        {
-            unify(tail, state.H ^ (TAG_LST << WORD_BITS));
-            head = alloc_var();
-            tail = alloc_var();
-            unify(head, expression_to_term(s.list[i], varmap, singletons));
+            var result = alloc_var();
+            var tail = result;
+            var head;
+            for (var i = 0; i < s.list.length; i++) {
+                unify(tail, state.H ^ (TAG_LST << WORD_BITS));
+                head = alloc_var();
+                tail = alloc_var();
+                let headObject = {};
+                if(!expression_to_term(s.list[i], varmap, singletons, headObject)) {
+                    if(termObject) {
+                        return false;
+                    } else {
+                        abort("Invalid list expression: " + JSON.stringify(s));
+                    }
+                }
+                unify(head, headObject.value);
+            }
+            let tailObject = {};
+            if(!expression_to_term(s.tail, varmap, singletons, tailObject)) {
+                if(termObject) {
+                    return false;
+                } else {
+                    abort("Invalid list expression: " + JSON.stringify(s));
+                }
+            }
+            unify(tail, tailObject.value);
+            newTerm = result;
         }
-        unify(tail, expression_to_term(s.tail, varmap, singletons));
-        return result;
     }
     else if (s.functor !== undefined)
     {
@@ -797,13 +820,34 @@ function expression_to_term(s, varmap, singletons)
             var_args[j] = alloc_var();
         for (var k = 0; k < s.args.length; k++)
         {
-            var z = expression_to_term(s.args[k], varmap, singletons);
+            let argObject = {};
+            if(! expression_to_term(s.args[k], varmap, singletons, argObject)) {
+                if(termObject) {
+                    return false;
+                } else {
+                    abort("Invalid structure expression: " + JSON.stringify(s));
+                }
+            }
+            var z = argObject.value;
             unify(z, var_args[k]);
         }
-        return t;
+        newTerm = t;
     }
-    else
-        abort("Invalid expression: " + JSON.stringify(s));
+    else {
+        if(termObject) {
+            return syntax_error("Invalid expression: " + JSON.stringify(s));
+        } else {
+            abort("Invalid expression: " + JSON.stringify(s));
+        }
+    }
+
+    if(termObject) {
+        termObject.value = newTerm;
+        return true;
+    } else {
+        return newTerm;
+    }
+
 }
 
 function peek_token(s, t)
@@ -930,6 +974,35 @@ function lex(s, t)
                 return true;
             }
         } 
+    }
+    else if (c === '0' && peek_raw_char_with_conversion(s) === 'x')
+    {
+        // hex positive integer
+        // 0x10 === 16
+        let radix = get_raw_char_with_conversion(s);
+        // radix is 'x'.
+
+        token = 0;
+
+        while (true)
+        {
+            c = peek_raw_char_with_conversion(s);
+            let hex;
+            if(c >= '0' && c <= '9') {
+                hex = (get_raw_char_with_conversion(s) - '0');
+            } else if(c >= 'a' && c <= 'f') {
+                hex = (get_raw_char_with_conversion(s) - 'a') + 10;
+            } else if(c >= 'A' && c <= 'F') {
+                hex = (get_raw_char_with_conversion(s) - 'A') + 10;
+            } else if (is_char(c)) {
+                return syntax_error("invalid hex number " + token + ": " + c);
+            } else {
+                t.value = token;
+                return true;
+            }
+
+            token = token * 16 + hex;
+        }
     }
     else if ((c >= '0' && c <= '9') || (c === '-' && peek_raw_char_with_conversion(s) >= '0' && peek_raw_char_with_conversion(s) <= '9'))
     {
@@ -1352,12 +1425,21 @@ function atom_to_term(atom, term, bindings)
         return false;
     expression = expression.value;
     var b = {};
-    var t1 = expression_to_term(expression, b, {});
+    let termObject1 = {};
+    if(!expression_to_term(expression, b, {}, termObject1)) {
+        return false;
+    }
+
+    var t1 = termObject1.value;
     var arglist = [];
     var keys = Object.keys(b);
     for (var i = 0 ; i < keys.length; i++)
         arglist.push({functor:"=", args:[keys[i], {variable_name:keys[i]}]});
-    var t2 = expression_to_term({list:arglist, tail:{list: []}}, b, {});
+    let termObject2 = {};
+    if(!expression_to_term({list:arglist, tail:{list: []}}, b, {}, termObject2)) {
+        return false;
+    }
+    var t2 = termObject2.value;
     debug_msg("Expression: " + expression_to_string({list:arglist, tail:[]}));
     debug_msg("Bindings have been created ( " + VAL(t2) + " ). Reading it back from the heap gives: " + term_to_string(t2));
     return unify(term, t1) && unify(bindings, t2);

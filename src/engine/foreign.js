@@ -616,8 +616,30 @@ function lookup_dynamic_functor(name, arity) {
 
 function emit_code(address, c)
 {
-    // Not checking. Lets assume we know what we are doing!
-    compilation_environment.buffer[VAL(address)] = VAL(c);
+    let value;
+
+    if(TAG(c) === TAG_INT) {
+        value = VAL(c);
+    } else if(TAG(c) === TAG_STR) {
+        // c = extended_address(BaseC)
+        // value = VAL(BaseC) ^ 0x80000000
+        let functor = VAL(memory[VAL(c)]);
+        let functorName = atable[ftable[functor][0]];
+        if(functorName === 'extended_address' &&
+        ftable[functor][1] === 1) {
+            let arg = memory[VAL(c)+1];
+            if(TAG(arg) === TAG_INT) {
+                let argValue = VAL(arg);
+                value = argValue ^ 0x80000000;
+            } else {
+                return type_error('integer', arg);
+            }
+        } else {
+            return type_error('extended_address/1 structure', c);
+        }
+    }
+
+    compilation_environment.buffer[VAL(address)] = value;
     return true;
 }
 
@@ -1710,13 +1732,13 @@ function predicate_add_index_clause_to_predicate(predicateP) {
     predicates[predicate].clauses[predicates[predicate].next_key] =
         {
             code:   compilation_environment.buffer.slice(0),
-            index:  predicates[predicate].next_key,
             key:    predicates[predicate].next_key,
             head:   record_term(indexIndicator),
             body:   record_term(indexIndicator)
         };
 
     predicates[predicate].clause_keys.push(predicates[predicate].next_key);
+    predicates[predicate].index = predicates[predicate].next_key;
     predicates[predicate].next_key++;
 
     return true;
