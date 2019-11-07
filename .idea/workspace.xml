@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Fixed bugs in indexing. Added hex number format to read.js.&#10;&#10;Fixed emit_code/2 to support extended_address(X) for an value X that must be represented in Javascript as 'X ^ 0x80000000'. This cannot be calculated in ProscriptLS because its effective integer width is less than 32 (28?). Fixed predicate_add_index_clause_to_predicate function to set the predicate.index member (it was mislocated as predicate.clauses[X].index).&#10;Extended expression_to_term function to read/convert hex numbers. Changed it to use ProscriptLS exceptions to report errors.&#10;Fixed not.pl explicit_binding/4 to reference 'bootstrap_js:setof' instead of just 'setof', and similarly for bagog, set_of, and bag_of.&#10;Changed link_1/3 in wam_assemble.pl to use extended_address(Address) instead of directly using 'Address xor 0x80000000'.&#10;Fixed group/5 to use new group1/3 to accumulate groups instead of nested setof/3 predicates. There was a problem with setof's handling of free variables in the list bound to ConstantClauses.&#10;Added two programs in test dir, factorial.pl and struct.pl, to test indexing.&#10;Extended tests.pl with tests for hex integers.">
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/tiles.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tiles.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/dom.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/dom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/dump.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/dump.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/test/Makefile" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -34,11 +31,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="513">
-              <caret line="39" column="86" selection-start-line="39" selection-start-column="86" selection-end-line="39" selection-end-column="86" />
+            <state relative-caret-position="733">
+              <caret line="63" column="13" lean-forward="true" selection-start-line="63" selection-start-column="13" selection-end-line="63" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -90,10 +87,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dist/proscriptls_engine.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-245">
+            <state relative-caret-position="-239">
               <caret line="14967" column="36" selection-start-line="14967" selection-start-column="36" selection-end-line="14967" selection-end-column="36" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
@@ -200,8 +197,8 @@
         <option value="$PROJECT_DIR$/examples/tiles.html" />
         <option value="$PROJECT_DIR$/src/engine/dom.js" />
         <option value="$PROJECT_DIR$/test/Makefile" />
-        <option value="$PROJECT_DIR$/src/engine/dump.js" />
         <option value="$PROJECT_DIR$/dist/proscriptls_engine.js" />
+        <option value="$PROJECT_DIR$/src/engine/dump.js" />
       </list>
     </option>
   </component>
@@ -232,23 +229,13 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-              <item name="examples" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
-              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="system" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
-              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="engine" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -357,14 +344,22 @@
       <option name="project" value="LOCAL" />
       <updated>1573093640335</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="&#10;&#10;Changed tiles.html to write load statistics to console.&#10;Extended load statistics in proscriptls_init function to include how many predicates are indexed and of those how many have a single sequence of clauses.&#10;Extended dump function to have new filter for indexed-predicates, to indicate whether a predicate is indexed, to give overall predicate, atom , functor counts, to specify how many predicates are indexed and single-sequenced, and of the single-sequenced indexed clauses to provide counts of types of switch_on_term according to which cases are non-empty (atom, integer, float, list, and structure).&#10;Change dump-state of test/Makefile to only report on indexed predicates.">
+      <created>1573145147120</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1573145147120</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="54069000" />
+    <option name="totallyTimeSpent" value="55477000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-2560" y="23" width="2560" height="1417" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65049344" visible="true" weight="0.118944466" />
       <window_info id="Structure" order="1" sideWeight="0.3495066" side_tool="true" visible="true" weight="0.118944466" />
@@ -449,7 +444,8 @@
     <MESSAGE value="Changed version to 1.4.0" />
     <MESSAGE value="Fixed dump.js to not use environment var." />
     <MESSAGE value="Fixed bugs in indexing. Added hex number format to read.js.&#10;&#10;Fixed emit_code/2 to support extended_address(X) for an value X that must be represented in Javascript as 'X ^ 0x80000000'. This cannot be calculated in ProscriptLS because its effective integer width is less than 32 (28?). Fixed predicate_add_index_clause_to_predicate function to set the predicate.index member (it was mislocated as predicate.clauses[X].index).&#10;Extended expression_to_term function to read/convert hex numbers. Changed it to use ProscriptLS exceptions to report errors.&#10;Fixed not.pl explicit_binding/4 to reference 'bootstrap_js:setof' instead of just 'setof', and similarly for bagog, set_of, and bag_of.&#10;Changed link_1/3 in wam_assemble.pl to use extended_address(Address) instead of directly using 'Address xor 0x80000000'.&#10;Fixed group/5 to use new group1/3 to accumulate groups instead of nested setof/3 predicates. There was a problem with setof's handling of free variables in the list bound to ConstantClauses.&#10;Added two programs in test dir, factorial.pl and struct.pl, to test indexing.&#10;Extended tests.pl with tests for hex integers." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed bugs in indexing. Added hex number format to read.js.&#10;&#10;Fixed emit_code/2 to support extended_address(X) for an value X that must be represented in Javascript as 'X ^ 0x80000000'. This cannot be calculated in ProscriptLS because its effective integer width is less than 32 (28?). Fixed predicate_add_index_clause_to_predicate function to set the predicate.index member (it was mislocated as predicate.clauses[X].index).&#10;Extended expression_to_term function to read/convert hex numbers. Changed it to use ProscriptLS exceptions to report errors.&#10;Fixed not.pl explicit_binding/4 to reference 'bootstrap_js:setof' instead of just 'setof', and similarly for bagog, set_of, and bag_of.&#10;Changed link_1/3 in wam_assemble.pl to use extended_address(Address) instead of directly using 'Address xor 0x80000000'.&#10;Fixed group/5 to use new group1/3 to accumulate groups instead of nested setof/3 predicates. There was a problem with setof's handling of free variables in the list bound to ConstantClauses.&#10;Added two programs in test dir, factorial.pl and struct.pl, to test indexing.&#10;Extended tests.pl with tests for hex integers." />
+    <MESSAGE value="&#10;&#10;Changed tiles.html to write load statistics to console.&#10;Extended load statistics in proscriptls_init function to include how many predicates are indexed and of those how many have a single sequence of clauses.&#10;Extended dump function to have new filter for indexed-predicates, to indicate whether a predicate is indexed, to give overall predicate, atom , functor counts, to specify how many predicates are indexed and single-sequenced, and of the single-sequenced indexed clauses to provide counts of types of switch_on_term according to which cases are non-empty (atom, integer, float, list, and structure).&#10;Change dump-state of test/Makefile to only report on indexed predicates." />
+    <option name="LAST_COMMIT_MESSAGE" value="&#10;&#10;Changed tiles.html to write load statistics to console.&#10;Extended load statistics in proscriptls_init function to include how many predicates are indexed and of those how many have a single sequence of clauses.&#10;Extended dump function to have new filter for indexed-predicates, to indicate whether a predicate is indexed, to give overall predicate, atom , functor counts, to specify how many predicates are indexed and single-sequenced, and of the single-sequenced indexed clauses to provide counts of types of switch_on_term according to which cases are non-empty (atom, integer, float, list, and structure).&#10;Change dump-state of test/Makefile to only report on indexed predicates." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -840,20 +836,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="513">
-          <caret line="39" column="86" selection-start-line="39" selection-start-column="86" selection-end-line="39" selection-end-column="86" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dist/proscriptls_engine.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-245">
+        <state relative-caret-position="-239">
           <caret line="14967" column="36" selection-start-line="14967" selection-start-column="36" selection-end-line="14967" selection-end-column="36" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="733">
+          <caret line="63" column="13" lean-forward="true" selection-start-line="63" selection-start-column="13" selection-end-line="63" selection-end-column="13" />
         </state>
       </provider>
     </entry>

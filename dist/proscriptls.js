@@ -14944,12 +14944,12 @@ function dump(filter, mode) {
 
     let indexedCount = 0;
     let fullyIndexedCount = 0;
-    let switchOnTermArgInfos = [
-        {ofst: 2, label: 'atom', bit: 1},
-        {ofst: 3, label: 'integer', bit: 2},
-        {ofst: 4, label: 'float', bit: 4},
-        {ofst: 5, label: 'list', bit: 8},
-        {ofst: 6, label: 'structure', bit: 16}
+    let infos = [
+        {ofst: 2, label: 'CA', bit: 1},
+        {ofst: 3, label: 'CI', bit: 2},
+        {ofst: 4, label: 'CF', bit: 4},
+        {ofst: 5, label: 'L', bit: 8},
+        {ofst: 6, label: 'S', bit: 16}
         ];
     let counts = {};
 
@@ -14983,11 +14983,11 @@ function dump(filter, mode) {
 
                 let codePosition = 2; //first two slots are for nop2 or try_me_else.
 
-                //let V = code[codePosition + 1];
+                let V = code[codePosition + 1];
                 let maskName = '';
                 let maskBits = 0;
 
-                for (let info of switchOnTermArgInfos) {
+                for (let info of infos) {
                     info.value = decode_address(code[codePosition + info.ofst]);
                     if (info.value !== 'fail') {
                         maskName += ((maskName !== '') ? '/' : '') + info.label;
@@ -14995,36 +14995,26 @@ function dump(filter, mode) {
                     }
                 }
 
-                // let instruction = 'switch_on_term(' + V + ', '
-                //     + switchOnTermArgInfos[0].value + ', '
-                //     + switchOnTermArgInfos[1].value + ', '
-                //     + switchOnTermArgInfos[2].value + ', '
-                //     + switchOnTermArgInfos[3].value + ', '
-                //     + switchOnTermArgInfos[4].value + ')';
-                // let instructionSize = 7;
-
                 if (counts[maskBits]) {
                     counts[maskBits].counter++;
                 } else {
-                    counts[maskBits] = {counter: 1, name: maskName};
+                    counts[maskBits] = {name: maskName, counter: 1};
                 }
             }
         }
     }
 
-    let indexTypes = '';
-
-    let typePad = '        ';
-    for(let countKey of Object.keys(counts)) {
-        let count = counts[countKey];
-        indexTypes += (indexTypes !== '' ? (',\n' + typePad) : '') + count.name + ': ' + count.counter;
-    }
-
-    indexTypes = typePad + indexTypes;
-
     dumpWrite("Loaded " + Object.keys(predicates).length + " predicates");
     dumpWrite("    " + indexedCount + " indexed, " + fullyIndexedCount + " single sequence");
-    dumpWrite("      single sequence types:\n" + indexTypes + "\n");
+
+    let pad = '        ';
+
+    dumpWrite("    single sequence types:");
+    for(let countKey of Object.keys(counts)) {
+        let count = counts[countKey];
+        dumpWrite(pad + count.name + ': ' + count.counter);
+    }
+
     dumpWrite("Loaded " + atable.length + " atoms");
     dumpWrite("Loaded " + ftable.length + " functors");
 

@@ -40,51 +40,44 @@ function dump(filter, mode) {
                 let clause = predicate.clauses[predicate.clause_keys[predicate.index]];
                 let code = clause.code;
 
-             // switch_on_term: [44, V, CA, CI, CF, L, S]
-                {
-                    let codePosition = 2; //first two slots are for nop2 or try_me_else.
+                // switch_on_term: [44, V, CA, CI, CF, L, S]
 
-                    let V = code[codePosition + 1];
-                    let maskName = '';
-                    let maskBits = 0;
+                let codePosition = 2; //first two slots are for nop2 or try_me_else.
 
-                    for(let info of infos) {
-                        info.value = decode_address(code[codePosition + info.ofst]);
-                        if(info.value !== 'fail') {
-                            maskName += ((maskName !== '') ? '/' : '') + info.label;
-                            maskBits = maskBits | info.bit;
-                        }
+                let V = code[codePosition + 1];
+                let maskName = '';
+                let maskBits = 0;
+
+                for (let info of infos) {
+                    info.value = decode_address(code[codePosition + info.ofst]);
+                    if (info.value !== 'fail') {
+                        maskName += ((maskName !== '') ? '/' : '') + info.label;
+                        maskBits = maskBits | info.bit;
                     }
-                    // let CA = decode_address(code[codePosition + 2]);
-                    // let CI = decode_address(code[codePosition + 3]);
-                    // let CF = decode_address(code[codePosition + 4]);
-                    // let L = decode_address(code[codePosition + 5]);
-                    // let S = decode_address(code[codePosition + 6]);
-
-                    let instruction = 'switch_on_term(' + V + ', ' + info[0].value + ', ' + info[1].value + ', ' + info[2].value + ', ' + info[3].value + ', ' + info[4].value + ')';
-                    let instructionSize = 7;
-
-                    let counter = counts[maskBits].counter;
-                    if(counter) {
-                        counter++;
-                    } else {
-                        counter = 1;
-
-                        counts[maskBits].name = maskName;
-                    }
-
-                    counts[maskBits].counter = counter;
-                    break;
                 }
 
+                if (counts[maskBits]) {
+                    counts[maskBits].counter++;
+                } else {
+                    counts[maskBits] = {name: maskName, counter: 1};
+                }
             }
         }
     }
-    dumpWrite("Loaded single sequence types: " + JSON.stringify(counts));
 
-    dumpWrite("Loaded " + Object.keys(predicates).length + " predicates (" + indexedCount + " indexed, " + fullyIndexedCount + " single sequence)\n");
-    dumpWrite("Loaded " + atable.length + " atoms\n");
-    dumpWrite("Loaded " + ftable.length + " functors\n");
+    dumpWrite("Loaded " + Object.keys(predicates).length + " predicates");
+    dumpWrite("    " + indexedCount + " indexed, " + fullyIndexedCount + " single sequence");
+
+    let pad = '        ';
+
+    dumpWrite("    single sequence types:");
+    for(let countKey of Object.keys(counts)) {
+        let count = counts[countKey];
+        dumpWrite(pad + count.name + ': ' + count.counter);
+    }
+
+    dumpWrite("Loaded " + atable.length + " atoms");
+    dumpWrite("Loaded " + ftable.length + " functors");
 
     for(var ofst = 0;ofst < ftable.length;ofst++) {
         var functionPair = ftable[ofst];
