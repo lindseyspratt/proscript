@@ -574,7 +574,7 @@ reset:-
         reserve_predicate('$trace_instruction_set'/1, predicate_trace_instruction_set),
 
         % Testing
-        reserve_predicate(member/2, member),
+        reserve_predicate(member_test/2, predicate_member_test),
 
         % Call cleanup
         reserve_predicate(mark_top_choicepoint/2, mark_top_choicepoint),

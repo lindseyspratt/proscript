@@ -1,4 +1,8 @@
-:- module(system_util, [write_list/2, write_list/3, capitalize/2]).
+:- module(system_util, [member/2, write_list/2, write_list/3, capitalize/2]).
+
+member(X, [X|_]).
+member(X, [_|Tail]) :-
+    member(X, Tail).
 
 write_list(List, Separator) :-
     current_output(Stream),

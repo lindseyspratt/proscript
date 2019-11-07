@@ -611,8 +611,30 @@ function lookup_dynamic_functor(name, arity) {
 
 function emit_code(address, c)
 {
-    // Not checking. Lets assume we know what we are doing!
-    compilation_environment.buffer[VAL(address)] = VAL(c);
+    let value;
+
+    if(TAG(c) === TAG_INT) {
+        value = VAL(c);
+    } else if(TAG(c) === TAG_STR) {
+        // c = extended_address(BaseC)
+        // value = VAL(BaseC) ^ 0x80000000
+        let functor = VAL(memory[VAL(c)]);
+        let functorName = atable[ftable[functor][0]];
+        if(functorName === 'extended_address' &&
+        ftable[functor][1] === 1) {
+            let arg = memory[VAL(c)+1];
+            if(TAG(arg) === TAG_INT) {
+                let argValue = VAL(arg);
+                value = argValue ^ 0x80000000;
+            } else {
+                return type_error('integer', arg);
+            }
+        } else {
+            return type_error('extended_address/1 structure', c);
+        }
+    }
+
+    compilation_environment.buffer[VAL(address)] = value;
     return true;
 }
 
@@ -1705,13 +1727,13 @@ function predicate_add_index_clause_to_predicate(predicateP) {
     predicates[predicate].clauses[predicates[predicate].next_key] =
         {
             code:   compilation_environment.buffer.slice(0),
-            index:  predicates[predicate].next_key,
             key:    predicates[predicate].next_key,
             head:   record_term(indexIndicator),
             body:   record_term(indexIndicator)
         };
 
     predicates[predicate].clause_keys.push(predicates[predicate].next_key);
+    predicates[predicate].index = predicates[predicate].next_key;
     predicates[predicate].next_key++;
 
     return true;
@@ -1922,7 +1944,7 @@ function destroy_choicepoint()
 }
 
 // For testing only! Assumes -,+ mode
-function member(element, list)
+function predicate_member_test(element, list)
 {
     if (state.foreign_retry)
     {
@@ -1939,6 +1961,10 @@ function member(element, list)
         {
             update_choicepoint_data(memory[VAL(list)+1]);
             return true;
+        } else {
+            // undo any bindings created by failed unify(head, element) call.
+            var n = memory[state.B];
+            unwind_trail(memory[state.B + n + CP_TR], state.TR);
         }
         list = memory[VAL(list)+1]
     }
@@ -6695,7 +6721,11 @@ function read_term(stream, term, options)
     
     var varmap = {};
     var singletons = {};
-    var t1 = expression_to_term(expression, varmap, singletons);
+    let readObject = {};
+    if(!expression_to_term(expression, varmap, singletons, readObject)) {
+        return false;
+    }
+    var t1 = readObject.value;
     var keys;
     if (options.variables !== undefined || options.singletons !== undefined)
     {
@@ -6963,19 +6993,21 @@ function is_punctuation_charAt(object, position) {
     return typeof object.charAt === 'function' && is_punctuation(object.charAt(position));
 }
 
-function expression_to_term(s, varmap, singletons)
+function expression_to_term(s, varmap, singletons, termObject)
 {
+    let newTerm;
+
     if (typeof(s) === "string")
-        return lookup_atom(s);
+        newTerm = lookup_atom(s);
     else if (typeof(s) === "number")
     {
         if (s === ~~s)
         {
-            return (s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+            newTerm = (s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
         }
         else
         {
-            return lookup_float(s);
+            newTerm = lookup_float(s);
         }
     }
     else if (s.variable_name !== undefined)
@@ -6999,26 +7031,43 @@ function expression_to_term(s, varmap, singletons)
             singletons[s.variable_name] = 1;
         else
             singletons[s.variable_name]++;
-        return result;
+        newTerm = result;
     }
     else if (s.list !== undefined)
     {   
         // Special case for [], as usual, since we do not actually allocate any lists!
         if (s.list.length === 0)
-            return NIL;
+            newTerm = NIL;
+        else {
 
-        var result = alloc_var();
-        var tail = result;
-        var head;
-        for (var i = 0; i < s.list.length; i++)
-        {
-            unify(tail, state.H ^ (TAG_LST << WORD_BITS));
-            head = alloc_var();
-            tail = alloc_var();
-            unify(head, expression_to_term(s.list[i], varmap, singletons));
+            var result = alloc_var();
+            var tail = result;
+            var head;
+            for (var i = 0; i < s.list.length; i++) {
+                unify(tail, state.H ^ (TAG_LST << WORD_BITS));
+                head = alloc_var();
+                tail = alloc_var();
+                let headObject = {};
+                if(!expression_to_term(s.list[i], varmap, singletons, headObject)) {
+                    if(termObject) {
+                        return false;
+                    } else {
+                        abort("Invalid list expression: " + JSON.stringify(s));
+                    }
+                }
+                unify(head, headObject.value);
+            }
+            let tailObject = {};
+            if(!expression_to_term(s.tail, varmap, singletons, tailObject)) {
+                if(termObject) {
+                    return false;
+                } else {
+                    abort("Invalid list expression: " + JSON.stringify(s));
+                }
+            }
+            unify(tail, tailObject.value);
+            newTerm = result;
         }
-        unify(tail, expression_to_term(s.tail, varmap, singletons));
-        return result;
     }
     else if (s.functor !== undefined)
     {
@@ -7030,13 +7079,34 @@ function expression_to_term(s, varmap, singletons)
             var_args[j] = alloc_var();
         for (var k = 0; k < s.args.length; k++)
         {
-            var z = expression_to_term(s.args[k], varmap, singletons);
+            let argObject = {};
+            if(! expression_to_term(s.args[k], varmap, singletons, argObject)) {
+                if(termObject) {
+                    return false;
+                } else {
+                    abort("Invalid structure expression: " + JSON.stringify(s));
+                }
+            }
+            var z = argObject.value;
             unify(z, var_args[k]);
         }
-        return t;
+        newTerm = t;
     }
-    else
-        abort("Invalid expression: " + JSON.stringify(s));
+    else {
+        if(termObject) {
+            return syntax_error("Invalid expression: " + JSON.stringify(s));
+        } else {
+            abort("Invalid expression: " + JSON.stringify(s));
+        }
+    }
+
+    if(termObject) {
+        termObject.value = newTerm;
+        return true;
+    } else {
+        return newTerm;
+    }
+
 }
 
 function peek_token(s, t)
@@ -7163,6 +7233,35 @@ function lex(s, t)
                 return true;
             }
         } 
+    }
+    else if (c === '0' && peek_raw_char_with_conversion(s) === 'x')
+    {
+        // hex positive integer
+        // 0x10 === 16
+        let radix = get_raw_char_with_conversion(s);
+        // radix is 'x'.
+
+        token = 0;
+
+        while (true)
+        {
+            c = peek_raw_char_with_conversion(s);
+            let hex;
+            if(c >= '0' && c <= '9') {
+                hex = (get_raw_char_with_conversion(s) - '0');
+            } else if(c >= 'a' && c <= 'f') {
+                hex = (get_raw_char_with_conversion(s) - 'a') + 10;
+            } else if(c >= 'A' && c <= 'F') {
+                hex = (get_raw_char_with_conversion(s) - 'A') + 10;
+            } else if (is_char(c)) {
+                return syntax_error("invalid hex number " + token + ": " + c);
+            } else {
+                t.value = token;
+                return true;
+            }
+
+            token = token * 16 + hex;
+        }
     }
     else if ((c >= '0' && c <= '9') || (c === '-' && peek_raw_char_with_conversion(s) >= '0' && peek_raw_char_with_conversion(s) <= '9'))
     {
@@ -7583,12 +7682,21 @@ function atom_to_term(atom, term, bindings)
         return false;
     expression = expression.value;
     var b = {};
-    var t1 = expression_to_term(expression, b, {});
+    let termObject1 = {};
+    if(!expression_to_term(expression, b, {}, termObject1)) {
+        return false;
+    }
+
+    var t1 = termObject1.value;
     var arglist = [];
     var keys = Object.keys(b);
     for (var i = 0 ; i < keys.length; i++)
         arglist.push({functor:"=", args:[keys[i], {variable_name:keys[i]}]});
-    var t2 = expression_to_term({list:arglist, tail:{list: []}}, b, {});
+    let termObject2 = {};
+    if(!expression_to_term({list:arglist, tail:{list: []}}, b, {}, termObject2)) {
+        return false;
+    }
+    var t2 = termObject2.value;
     return unify(term, t1) && unify(bindings, t2);
 }
 
@@ -10249,7 +10357,33 @@ function proscriptls_init(queryJS, debug, displayLoadInfo, displaySucceededMsg) 
     load_state();
 
     if(displayLoadInfo) {
-        stdout("Loaded " + Object.keys(predicates).length + " predicates\n");
+        let indexedCount = 0;
+        let fullyIndexedCount = 0;
+        for(let key of Object.keys(predicates)) {
+            let predicate = predicates[key];
+            if(typeof predicate.index !== 'undefined') {
+                indexedCount++;
+
+                let sequenceCount = 0;
+                for(let clauseKey of predicate.clause_keys) {
+                    if(clauseKey !== predicate.index) {
+                        let clause = predicate.clauses[predicate.clause_keys[clauseKey]];
+                        let code = clause.code;
+                        if (code[0] === 30 || code[0] === 254) {
+                            // trust_me or nop2 instruction
+                            // trust_me indicates a sequence of 2 or more clauses,
+                            // nop2 indicates a sequence of one clause.
+                            sequenceCount++;
+                        }
+                    }
+                }
+
+                if(sequenceCount === 1) {
+                    fullyIndexedCount++;
+                }
+            }
+        }
+        stdout("Loaded " + Object.keys(predicates).length + " predicates (" + indexedCount + " indexed, " + fullyIndexedCount + " single sequence)\n");
         stdout("Loaded " + atable.length + " atoms\n");
         stdout("Loaded " + ftable.length + " functors\n");
     }
@@ -14803,25 +14937,106 @@ function object_method_return() {
     return Reflect.apply(object[object_method], object, method_arguments);
 }
 // File dump.js
-let environment =  'jsc'; // 'browser';
-
-function dump(filter) {
-    if(environment === 'console') {
+function dump(filter, mode) {
+    if(mode && mode === 'load') {
         load_state();
     }
+
+    let indexedCount = 0;
+    let fullyIndexedCount = 0;
+    let infos = [
+        {ofst: 2, label: 'CA', bit: 1},
+        {ofst: 3, label: 'CI', bit: 2},
+        {ofst: 4, label: 'CF', bit: 4},
+        {ofst: 5, label: 'L', bit: 8},
+        {ofst: 6, label: 'S', bit: 16}
+        ];
+    let counts = {};
+
+    for(let key of Object.keys(predicates)) {
+        let predicate = predicates[key];
+        if(typeof predicate.index !== 'undefined') {
+            indexedCount++;
+
+            let sequenceCount = 0;
+            for(let clauseKey of predicate.clause_keys) {
+                if(clauseKey !== predicate.index) {
+                    let clause = predicate.clauses[predicate.clause_keys[clauseKey]];
+                    let code = clause.code;
+                    if (code[0] === 30 || code[0] === 254) {
+                        // trust_me or nop2 instruction
+                        // trust_me indicates a sequence of 2 or more clauses,
+                        // nop2 indicates a sequence of one clause.
+                        sequenceCount++;
+                    }
+                }
+            }
+
+            if(sequenceCount === 1) {
+                fullyIndexedCount++;
+
+                // inspect switch_on_term instruction.
+                let clause = predicate.clauses[predicate.clause_keys[predicate.index]];
+                let code = clause.code;
+
+                // switch_on_term: [44, V, CA, CI, CF, L, S]
+
+                let codePosition = 2; //first two slots are for nop2 or try_me_else.
+
+                let V = code[codePosition + 1];
+                let maskName = '';
+                let maskBits = 0;
+
+                for (let info of infos) {
+                    info.value = decode_address(code[codePosition + info.ofst]);
+                    if (info.value !== 'fail') {
+                        maskName += ((maskName !== '') ? '/' : '') + info.label;
+                        maskBits = maskBits | info.bit;
+                    }
+                }
+
+                if (counts[maskBits]) {
+                    counts[maskBits].counter++;
+                } else {
+                    counts[maskBits] = {name: maskName, counter: 1};
+                }
+            }
+        }
+    }
+
+    dumpWrite("Loaded " + Object.keys(predicates).length + " predicates");
+    dumpWrite("    " + indexedCount + " indexed, " + fullyIndexedCount + " single sequence");
+
+    let pad = '        ';
+
+    dumpWrite("    single sequence types:");
+    for(let countKey of Object.keys(counts)) {
+        let count = counts[countKey];
+        dumpWrite(pad + count.name + ': ' + count.counter);
+    }
+
+    dumpWrite("Loaded " + atable.length + " atoms");
+    dumpWrite("Loaded " + ftable.length + " functors");
+
     for(var ofst = 0;ofst < ftable.length;ofst++) {
         var functionPair = ftable[ofst];
         var predicateName = atable[functionPair[0]];
         let predicate = predicates[ofst];
-        if (!filter || (filter && ((filter === 'defined-predicate' && predicate)
-            || (filter === 'undefined-predicate' && !predicate)))) {
-            dumpWrite(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0] + ', ' + (predicate ? 'has' : 'no') + ' predicate clauses');
+        if (!filter ||
+            (filter && ((filter === 'defined-predicate' && predicate)
+                || (filter && filter === 'indexed-predicate' && predicate && predicate.index)
+                || (filter === 'undefined-predicate' && !predicate)))) {
+            dumpWrite(predicateName + '/' + functionPair[1] + ': ftor=' + ofst + ', atable ofst=' + functionPair[0] +
+                ', ' + (predicate ?
+                    ('has' + (predicate.index ? ' indexed' : ''))
+                    : 'no') + ' predicate clauses');
         }
     }
+
 }
 
-function dumpPredicate(targetPredicateName, targetArity) {
-    if(environment === 'console') {
+function dumpPredicate(targetPredicateName, targetArity, mode) {
+    if(mode && mode === 'load') {
         load_state();
     }
 
@@ -14849,8 +15064,7 @@ function dumpPredicate(targetPredicateName, targetArity) {
 }
 
 function danglingPredicates(mode) {
-    if((!mode && environment === 'console')
-    || (mode && mode === 'load')) {
+    if(mode && mode === 'load') {
         load_state();
     }
 
@@ -14938,8 +15152,7 @@ function danglingPredicates(mode) {
 }
 
 function unusedPredicates(mode) {
-    if((!mode && environment === 'console')
-        || (mode && mode === 'load')) {
+    if(mode && mode === 'load') {
         load_state();
     }
 

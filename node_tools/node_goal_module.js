@@ -58,7 +58,7 @@ function proscriptls_path(input) {
     // find proscriptls/dist/foo given workingdir containing proscriptls segment or not.
     // if workingdir contains proscriptls or proscriptls_sdk*, e.g. '.../proscriptls/...', then combine '.../proscriptls/' and 'foo'
     // if workingdir does not contain proscriptls or proscriptls_sdk* then assume 'foo' is in same dir.
-    let wd = process.cwd();
+    let wd = __dirname; //process.cwd();
 
     let testSegment;
     if (wd.includes('/proscriptls/')) {

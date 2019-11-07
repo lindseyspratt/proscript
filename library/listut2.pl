@@ -1,5 +1,5 @@
-dummy_reference :-
-    dummy_reference,
+listut2_dummy_reference :-
+    listut2_dummy_reference,
     select_list(_, _, _, _).
 
 append_lists([], []).

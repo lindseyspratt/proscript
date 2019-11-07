@@ -1,5 +1,5 @@
-dummy_reference :-
-    dummy_reference,
+dom_dummy_reference :-
+    dom_dummy_reference,
     set_dom_name_path_value(_,_),
     dom_page_offset(_,_,_).
 

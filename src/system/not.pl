@@ -96,12 +96,12 @@ free_variables(N, Term, Bound, OldList, NewList) :-
 %   one or more variables.  In particular \+ is quite common.
 
 explicit_binding(\+ _Goal,	       Bound, fail,	Bound      ) :- !.
-explicit_binding(not(_Goal),	       Bound, fail,	Bound	   ) :- !.
+%explicit_binding(not(_Goal),	       Bound, fail,	Bound	   ) :- !.
 explicit_binding(Var^Goal,	       Bound, Goal,	Bound+Var) :- !.
-explicit_binding(setof(Var,Goal,Set),  Bound, Goal-Set, Bound+Var) :- !.
-explicit_binding(bagof(Var,Goal,Bag),  Bound, Goal-Bag, Bound+Var) :- !.
-explicit_binding(set_of(Var,Goal,Set), Bound, Goal-Set, Bound+Var) :- !.
-explicit_binding(bag_of(Var,Goal,Bag), Bound, Goal-Bag, Bound+Var) :- !.
+explicit_binding('bootstrap_js:setof'(Var,Goal,Set),  Bound, Goal-Set, Bound+Var) :- !.
+explicit_binding('bootstrap_js:bagof'(Var,Goal,Bag),  Bound, Goal-Bag, Bound+Var) :- !.
+explicit_binding('bootstrap_js:set_of'(Var,Goal,Set), Bound, Goal-Set, Bound+Var) :- !.
+explicit_binding('bootstrap_js:bag_of'(Var,Goal,Bag), Bound, Goal-Bag, Bound+Var) :- !.
 
 
 term_is_free_of(Term, Var) :-

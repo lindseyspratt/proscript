@@ -22,7 +22,7 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
 :- module(data_predicates,
     [data_predicates/3, data_predicate_dynamics/1,
     assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2,
-    labelled_values/3]).
+    labelled_values/3, retract_data/2]).
 
 :- meta_predicate((
     data_predicate_dynamics((:)),
@@ -31,7 +31,8 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
     assert_datas((:), ?),
     assert_datas((:)),
     data_predicates(?, (:), ?),
-    labelled_values((:), ?, ?))).
+    labelled_values((:), ?, ?),
+    retract_data((:),?))).
 
 :- dynamic data_predicates/3.
 
@@ -83,7 +84,9 @@ assert_data1(M:ShadowData, ID) :-
        -> assert_shadow_arguments(Args, M:Prefix, Suffixes, ID),
           default_asserted_id(M:Prefix, ID)
     ;
-     throw('tile shadow argument count different from count of shadow argument tile_predicates')
+     length(Suffixes, ArgCount1),
+     length(Args, ArgCount2),
+     throw(shadow_argument_error('Count different from count of shadow argument', M, F, Prefix, ArgCount1, ArgCount2))
     ).
 
 assert_shadow_arguments([], _, [], _).
@@ -162,3 +165,14 @@ data_value(Suffix, M:Prefix, ID, Value) :-
     construct_data_predicate(Prefix, Suffix, Predicate),
     Goal =.. [Predicate, ID, Value],
     call(M:Goal).
+
+retract_data(M:Prefix, ID) :-
+    data_predicates(_, M:Prefix, Suffixes),
+    retract_data(Suffixes, M:Prefix, ID).
+
+retract_data([], _, _).
+retract_data([H|T], M:Prefix, ID) :-
+    construct_data_predicate(Prefix, H, Predicate),
+    Goal =.. [Predicate, ID, _],
+    retractall(M:Goal),
+    retract_data(T, M:Prefix, ID).

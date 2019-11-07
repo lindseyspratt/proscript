@@ -59,8 +59,21 @@ lookup_float(Float, N):-
             assert(fltable(Float, N))
         ).
 
+% ProscriptLS has a smaller integer range
+% than the full 32 bits available in SWI-Prolog
+% and Javascript due to the use of the
+% high-end bits for tags and flags.
+% The 'Value xor 0x80000000' cannot be expressed
+% in ProscriptLS, so 'extended_address(Value)'
+% represents it.
+
 emit_code(N, Code):-
-        assert(ctable(N, Code)).
+        (Code = extended_address(Value)
+          -> RealCode is Value xor 0x80000000
+        ;
+        RealCode = Code
+        ),
+        assert(ctable(N, RealCode)).
 
 compile_buffer_codes(Codes) :-
     setof(N-Code, ctable(N, Code), Codes).
