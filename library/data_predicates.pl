@@ -35,6 +35,8 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
     data_predicates(?, (:), ?),
     labelled_values((:), ?, ?),
     retract_data((:),?),
+    retract_all_data((:)),
+    retract_all_data((:), ?),
     save_data((:),?),
     save_data((:),?,?),
     gather_data1(?,(:),?),
@@ -173,7 +175,34 @@ data_value(Suffix, M:Prefix, ID, Value) :-
     Goal =.. [Predicate, ID, Value],
     call(M:Goal).
 
-retract_data(M:Prefix, ID) :-
+retract_all_data(_M1:M2:Prefix) :-
+    !,
+    retract_all_data(M2:Prefix).
+retract_all_data(DataSpec) :-
+    retract_all_data1(DataSpec).
+
+retract_all_data1(M:Prefix) :-
+    ids_in_use(M:Prefix, SortedIDs),
+    retract_all_data1(SortedIDs, M:Prefix).
+
+retract_all_data(_M1:M2:Prefix, IDs) :-
+    !,
+    retract_all_data(M2:Prefix, IDs).
+retract_all_data(DataSpec, IDs) :-
+    retract_all_data1(IDs, DataSpec).
+
+retract_all_data1([],_).
+retract_all_data1([H|T], M:Prefix) :-
+    retract_data1(M:Prefix, H),
+    retract_all_data1(T, M:Prefix).
+
+retract_data(_M1:M2:Prefix, ID) :-
+    !,
+    retract_data(M2:Prefix, ID).
+retract_data(DataSpec, ID) :-
+    retract_data1(DataSpec, ID).
+
+retract_data1(M:Prefix, ID) :-
     data_predicates(_, M:Prefix, Suffixes),
     retract_data(Suffixes, M:Prefix, ID).
 
@@ -187,7 +216,6 @@ retract_data([H|T], M:Prefix, ID) :-
 % store facts for data matching M:Prefix in the browser's localStorage
 % where the facts are stored as a single string/blob and the
 % localStorage key is a concatenation of Key and M:Prefix.
-
 
 save_data(_M1:M2:Prefix, Target) :-
     !,
