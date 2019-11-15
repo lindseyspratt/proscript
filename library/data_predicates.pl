@@ -22,7 +22,9 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
 :- module(data_predicates,
     [data_predicates/3, data_predicate_dynamics/1,
     assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2,
-    labelled_values/3, retract_data/2]).
+    labelled_values/3, retract_data/2, save_data/2, save_data/3, load_data/2, remove_data/2]).
+
+:- use_module(library(wam_compiler)).
 
 :- meta_predicate((
     data_predicate_dynamics((:)),
@@ -32,7 +34,12 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
     assert_datas((:)),
     data_predicates(?, (:), ?),
     labelled_values((:), ?, ?),
-    retract_data((:),?))).
+    retract_data((:),?),
+    save_data((:),?),
+    save_data((:),?,?),
+    gather_data1(?,(:),?),
+    load_data((:), ?),
+    remove_data((:), ?))).
 
 :- dynamic data_predicates/3.
 
@@ -176,3 +183,115 @@ retract_data([H|T], M:Prefix, ID) :-
     Goal =.. [Predicate, ID, _],
     retractall(M:Goal),
     retract_data(T, M:Prefix, ID).
+
+% store facts for data matching M:Prefix in the browser's localStorage
+% where the facts are stored as a single string/blob and the
+% localStorage key is a concatenation of Key and M:Prefix.
+
+
+save_data(_M1:M2:Prefix, Target) :-
+    !,
+    save_data(M2:Prefix, Target).
+save_data(DataSpec, Target) :-
+    save_data1(DataSpec, Target).
+
+save_data1(M:Prefix, local_storage(Key)) :-
+    ids_in_use(M:Prefix, IDs),
+    save_data1(M:Prefix, IDs, local_storage(Key)).
+
+save_data(_M1:M2:Prefix, IDs, Target) :-
+    !,
+    save_data(M2:Prefix, IDs, Target).
+save_data(DataSpec, IDs, Target) :-
+    save_data1(DataSpec, IDs, Target).
+
+save_data1(M:Prefix, IDs, local_storage(Key)) :-
+    new_memory_file(DataMemFile),
+    open_memory_file(DataMemFile, write, Stream),
+    gather_data(Stream, M:Prefix, IDs),
+    close(Stream),
+    format(atom(K), '~w/~w', [Key, M:Prefix]),
+    copy_memory_file_to_local_storage(DataMemFile, K),
+    free_memory_file(DataMemFile).
+
+gather_data(Stream, M:Prefix, IDs) :-
+    data_predicates(_, M:Prefix, Suffixes),
+    gather_data(Suffixes, Stream, M:Prefix, IDs).
+
+gather_data([], _, _, _).
+gather_data([H|T], Stream, M:Prefix, IDs) :-
+    construct_data_predicate(Prefix, H, Predicate),
+    gather_data1(IDs, M:Predicate, Stream),
+    gather_data(T, Stream, M:Prefix, IDs).
+
+gather_data1([], _Predicate, _Stream).
+gather_data1([H|T], M:Predicate, Stream) :-
+    write(Stream, '\n% '), write(Stream, M:Predicate), write(Stream, '\n\n'),
+    (setof(M:Goal, X^(Goal =.. [Predicate, H, X], call(M:Goal)), Goals)
+      -> write_goals(Goals, Stream)
+    ;
+     true
+    ),
+    gather_data1(T, M:Predicate, Stream).
+
+write_goals([], _Stream).
+write_goals([H|T], Stream) :-
+    write_goal(H, Stream),
+    write_goals(T, Stream).
+
+% writeq/2 is used to ensure that the written
+% goal is readable by the Prolog parser.
+% This does not use write_canonical/2 because
+% that predicate explodes lists (e.g. [a,b] becomes
+% '.'(a,'.'(b,[]))) which could cause the saved
+% goals to require a great deal more storage.
+% Since write_canonical/2 is not used then whatever
+% operator definitions are in place when these goals are
+% written can affect the layout of these goals.
+% Care must be taken that the appropriate operator
+% definitions are in place when loading these goals.
+
+write_goal(H, Stream) :-
+    writeq(Stream, H),
+    write(Stream, '.\n').
+
+load_data(_M1:M2:Prefix, Source) :-
+    !,
+    load_data(M2:Prefix, Source).
+load_data(DataSpec, Source) :-
+    load_data1(DataSpec, Source).
+
+load_data1(M:Prefix, local_storage(Key)) :-
+    format(atom(K), '~w/~w', [Key, M:Prefix]),
+    copy_local_storage_to_memory_file(K, DataMemFile),
+    compile_and_free_memory_file(DataMemFile).
+
+remove_data(_M1:M2:Prefix, Store) :-
+    !,
+    remove_data(M2:Prefix, Store).
+remove_data(DataSpec, Store) :-
+    remove_data1(DataSpec, Store).
+
+remove_data1(M:Prefix, local_storage(Key)) :-
+    format(atom(K), '~w/~w', [Key, M:Prefix]),
+    dom_window(W),
+    dom_object_property(_, W, localStorage, S),
+    dom_object_method(S, removeItem(K)).
+
+ids_in_use(M:Prefix, SortedIDs) :-
+    data_predicates(_, M:Prefix, Suffixes),
+    ids_in_use(Suffixes, M:Prefix, IDs),
+    sort(IDs, SortedIDs). % remove duplicates.
+
+ids_in_use([], _, []).
+ids_in_use([H|T], M:Prefix, IDs) :-
+    construct_data_predicate(Prefix, H, Predicate),
+    (ids_in_use1(M:Predicate, LocalIDs)
+      -> append(LocalIDs, NextIDs, IDs)
+    ;
+     NextIDs = IDs
+    ),
+    ids_in_use(T, M:Prefix, NextIDs).
+
+ids_in_use1(M:Predicate, IDs) :-
+    setof(ID, X^Goal^(Goal =.. [Predicate, ID, X], call(M:Goal)), IDs).

@@ -1,4 +1,4 @@
-:- module(tiles, [select_test/0]).
+:- module(tiles, [select_test/0, save_tiles/0, load_tiles/0]).
 
 :- use_module('../library/object'). % for >>/2.
 :- use_module('../library/data_predicates').
@@ -34,6 +34,16 @@ select_test :-
     initial_hands_expanded(2, Hands),
     setup_hands(Hands, TileIDs),
     draw_all_tiles(TileIDs, Ctx, W, H).
+
+save_tiles :-
+    save_data(game, local_storage(tiles)),
+    save_data(tile, local_storage(tiles)),
+    save_data(legal_position, local_storage(tiles)).
+
+load_tiles :-
+    load_data(game, local_storage(tiles)),
+    load_data(tile, local_storage(tiles)),
+    load_data(legal_position, local_storage(tiles)).
 
 dummy_reference :-
     dummy_reference,

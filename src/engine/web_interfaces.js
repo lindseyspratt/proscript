@@ -477,6 +477,8 @@ var windowMethodSpecs = new Map([
 
 //Window includes GlobalEventHandlers;
 //Window includes WindowEventHandlers;
+//Window includes WindowLocalStorage;
+//Window includes WindowSessionStorage;
 
 webInterfaces.set('window',
     {
@@ -1447,3 +1449,62 @@ webInterfaces.set('navigatorcookies',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorCookies'
         }
     });
+
+var storageInterfaceProperties = new Map( [
+    ['length', SimpleProperty('number', 'length')],
+]);
+
+var storageMethodSpecs = new Map([
+    ['key', {name:'key',arguments:[{type:'number'}],returns:{type:'atom'}}],
+    ['getItem', {name:'getItem',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setItem', {name:'setItem',arguments:[{type:'string'}, {type:'string'}]}],
+    ['removeItem', {name:'removeItem',arguments:[{type:'string'}]}],
+    ['clear', {name:'clear',arguments:[]}]
+]);
+
+webInterfaces.set('storage',
+    {name: 'storage',
+        properties:storageInterfaceProperties,
+        methods:storageMethodSpecs,
+        reference: {name:'Storage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#storage-2',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Storage'
+        }
+    });
+
+var windowLocalStorageInterfaceProperties = new Map( [
+    ['localStorage', SimpleProperty('object', 'localStorage')],
+]);
+
+var windowLocalStorageMethodSpecs = new Map([
+
+]);
+
+webInterfaces.set('windowlocalstorage',
+    {name: 'windowlocalstorage',
+        properties:windowLocalStorageInterfaceProperties,
+        methods:windowLocalStorageMethodSpecs,
+        reference: {name:'WindowLocalStorage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#windowlocalstorage',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Local_storage'
+        }
+    });
+
+var windowSessionStorageInterfaceProperties = new Map( [
+    ['sessionStorage', SimpleProperty('object', 'sessionStorage')],
+]);
+
+var windowSessionStorageMethodSpecs = new Map([
+
+]);
+
+webInterfaces.set('windowsessionstorage',
+    {name: 'windowsessionstorage',
+        properties:windowSessionStorageInterfaceProperties,
+        methods:windowSessionStorageMethodSpecs,
+        reference: {name:'WindowSessionStorage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#windowsessionstorage',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API'
+        }
+    });
+

@@ -103,7 +103,8 @@ function atom_list_to_array(listPL) {
 
 function text_to_memory_file(text) {
     let index = memory_files.length;
-    memory_files[index] = {data:toByteArray(text), ptr:0};
+    let byteArray = toByteArray(text);
+    memory_files[index] = {data:byteArray, ptr:byteArray.length};
     return index;
 }
 
@@ -233,25 +234,31 @@ function tell_memory_file(stream)
 function open_memory_file(memfile, mode, stream)
 {
     var index = streams.length;
-    if (TAG(memfile) === TAG_REF)
-        return instantiation_error(memfile);
-    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
-        return type_error("memory_file", memfile);
-    var memindex = get_arg(memfile, 1);
-    if (TAG(memindex) !== TAG_INT)
-        return type_error("memory_file", memfile);
-    memindex = VAL(memindex);
+    let memfileContainer = {};
+    if(!valid_memfile(memfile, memfileContainer)) {
+        return false;
+    }
+
+    let memindex = memfileContainer.value;
+
     if (TAG(mode) === TAG_REF)
         return instantiation_error(mode);
     else if (TAG(mode) !== TAG_ATM)
         return type_error("atom", mode);
     if (atable[VAL(mode)] === 'read')
     {
+        memory_files[memindex].ptr = 0; // start reading at the beginning of the file.
         streams[index] = new_stream(read_memory_file, null, null, close_memory_file, tell_memory_file, memindex);
 
     }
     else if (atable[VAL(mode)] === 'write')
     {
+        memory_files[memindex].ptr = 0; // start writing at the beginning of the file.
+        streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
+    }
+    else if (atable[VAL(mode)] === 'append')
+    {
+        memory_files[memindex].ptr = memory_files[memindex].data.length; // start writing at the end of the file.
         streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
     }
     else
@@ -263,9 +270,61 @@ function open_memory_file(memfile, mode, stream)
     return unify(stream, ref);
 }
 
+function valid_memfile(memfile, container) {
+    if (TAG(memfile) === TAG_REF)
+        return instantiation_error(memfile);
+    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
+        return type_error("memory_file", memfile);
+    var memindex = get_arg(memfile, 1);
+    if (TAG(memindex) !== TAG_INT)
+        return type_error("memory_file", memfile);
+    container.value = VAL(memindex);
+    return true;
+}
+
 function free_memory_file(memfile)
 {
     var m = memory_files[VAL(get_arg(memfile, 1))];
     memory_files[m] = null;
     return true;
+}
+
+function predicate_copy_memory_file_to_local_storage(memfile, key) {
+    let memfileContainer = {};
+    if(!valid_memfile(memfile, memfileContainer)) {
+        return false;
+    }
+
+    let memindex = memfileContainer.value;
+
+    if (TAG(key) === TAG_REF)
+        return instantiation_error(mode);
+    else if (TAG(key) !== TAG_ATM)
+        return type_error("atom", key);
+
+    window.localStorage.setItem(PL_get_atom_chars(key),fromByteArray(memory_files[memindex].data) );
+    return true;
+}
+
+
+function predicate_copy_local_storage_to_memory_file(key, memfile) {
+    if(TAG(memfile) !== TAG_REF) {
+        return type_error('unbound', memfile);
+    }
+
+    if (TAG(key) === TAG_REF)
+        return instantiation_error(key);
+    else if (TAG(key) !== TAG_ATM)
+        return type_error("atom", key);
+
+    let keyJS = PL_get_atom_chars(key);
+    let item = window.localStorage.getItem(keyJS);
+    if(typeof item === 'undefined' || item === null) {
+        return domain_error('local_storage key', key);
+    }
+
+    let memfileCreated = create_memory_file_structure(item, 'local_storage '+keyJS);
+
+
+    return unify(memfile, memfileCreated);
 }

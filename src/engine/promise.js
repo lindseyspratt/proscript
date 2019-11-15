@@ -1,10 +1,11 @@
 // Promise object in javascript encapsulates asynchronous
 // processing. The functions in this file support the integration
-// of some Promise features with Proscript.
+// of some Promise features with ProscriptLS.
 //
-// The basic integration with Proscript relies on foreign predicates
+// The basic integration with ProscriptLS relies on foreign predicates
 // that create Promise objects, Prolog terms of the form
-// '$promise'(N) to map to these Javascript Promise objects,
+// '$obj'(N) (with object N registered as type 'promise')
+// to map to these Javascript Promise objects,
 // and two foreign predicates to request results from a
 // Promise object and to handle the event (callback) when
 // the requested results are made available to the Javascript
@@ -46,19 +47,22 @@ function get_promise_object(term, ref) {
         return false;
     }
 
-    return(ref.type === 'promise');
+    if(ref.type !== 'promise'){
+        return representation_error('promise', term);
+    }
+    return true;
 }
 
 function predicate_request_result(promise) {
     let promiseObject = {};
     if (!get_promise_object(promise, promiseObject)) {
-        return representation_error('promise', promise);
+        return false;
     }
+
     let promiseJS = promiseObject.value;
 
-    promise_requests.set(promise, '');
-    // ignore promiseResultJS?
     let promiseResultJS = request_result(promise, promiseJS);
+    promise_requests.set(promise, promiseResultJS);
     return true;
 }
 

@@ -3623,11 +3623,12 @@ function engine_error(message) {
 // File promise.js
 // Promise object in javascript encapsulates asynchronous
 // processing. The functions in this file support the integration
-// of some Promise features with Proscript.
+// of some Promise features with ProscriptLS.
 //
-// The basic integration with Proscript relies on foreign predicates
+// The basic integration with ProscriptLS relies on foreign predicates
 // that create Promise objects, Prolog terms of the form
-// '$promise'(N) to map to these Javascript Promise objects,
+// '$obj'(N) (with object N registered as type 'promise')
+// to map to these Javascript Promise objects,
 // and two foreign predicates to request results from a
 // Promise object and to handle the event (callback) when
 // the requested results are made available to the Javascript
@@ -3669,19 +3670,22 @@ function get_promise_object(term, ref) {
         return false;
     }
 
-    return(ref.type === 'promise');
+    if(ref.type !== 'promise'){
+        return representation_error('promise', term);
+    }
+    return true;
 }
 
 function predicate_request_result(promise) {
     let promiseObject = {};
     if (!get_promise_object(promise, promiseObject)) {
-        return representation_error('promise', promise);
+        return false;
     }
+
     let promiseJS = promiseObject.value;
 
-    promise_requests.set(promise, '');
-    // ignore promiseResultJS?
     let promiseResultJS = request_result(promise, promiseJS);
+    promise_requests.set(promise, promiseResultJS);
     return true;
 }
 
@@ -3961,7 +3965,8 @@ function atom_list_to_array(listPL) {
 
 function text_to_memory_file(text) {
     let index = memory_files.length;
-    memory_files[index] = {data:toByteArray(text), ptr:0};
+    let byteArray = toByteArray(text);
+    memory_files[index] = {data:byteArray, ptr:byteArray.length};
     return index;
 }
 
@@ -4090,25 +4095,31 @@ function tell_memory_file(stream)
 function open_memory_file(memfile, mode, stream)
 {
     var index = streams.length;
-    if (TAG(memfile) === TAG_REF)
-        return instantiation_error(memfile);
-    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
-        return type_error("memory_file", memfile);
-    var memindex = get_arg(memfile, 1);
-    if (TAG(memindex) !== TAG_INT)
-        return type_error("memory_file", memfile);
-    memindex = VAL(memindex);
+    let memfileContainer = {};
+    if(!valid_memfile(memfile, memfileContainer)) {
+        return false;
+    }
+
+    let memindex = memfileContainer.value;
+
     if (TAG(mode) === TAG_REF)
         return instantiation_error(mode);
     else if (TAG(mode) !== TAG_ATM)
         return type_error("atom", mode);
     if (atable[VAL(mode)] === 'read')
     {
+        memory_files[memindex].ptr = 0; // start reading at the beginning of the file.
         streams[index] = new_stream(read_memory_file, null, null, close_memory_file, tell_memory_file, memindex);
 
     }
     else if (atable[VAL(mode)] === 'write')
     {
+        memory_files[memindex].ptr = 0; // start writing at the beginning of the file.
+        streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
+    }
+    else if (atable[VAL(mode)] === 'append')
+    {
+        memory_files[memindex].ptr = memory_files[memindex].data.length; // start writing at the end of the file.
         streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
     }
     else
@@ -4119,11 +4130,63 @@ function open_memory_file(memfile, mode, stream)
     return unify(stream, ref);
 }
 
+function valid_memfile(memfile, container) {
+    if (TAG(memfile) === TAG_REF)
+        return instantiation_error(memfile);
+    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
+        return type_error("memory_file", memfile);
+    var memindex = get_arg(memfile, 1);
+    if (TAG(memindex) !== TAG_INT)
+        return type_error("memory_file", memfile);
+    container.value = VAL(memindex);
+    return true;
+}
+
 function free_memory_file(memfile)
 {
     var m = memory_files[VAL(get_arg(memfile, 1))];
     memory_files[m] = null;
     return true;
+}
+
+function predicate_copy_memory_file_to_local_storage(memfile, key) {
+    let memfileContainer = {};
+    if(!valid_memfile(memfile, memfileContainer)) {
+        return false;
+    }
+
+    let memindex = memfileContainer.value;
+
+    if (TAG(key) === TAG_REF)
+        return instantiation_error(mode);
+    else if (TAG(key) !== TAG_ATM)
+        return type_error("atom", key);
+
+    window.localStorage.setItem(PL_get_atom_chars(key),fromByteArray(memory_files[memindex].data) );
+    return true;
+}
+
+
+function predicate_copy_local_storage_to_memory_file(key, memfile) {
+    if(TAG(memfile) !== TAG_REF) {
+        return type_error('unbound', memfile);
+    }
+
+    if (TAG(key) === TAG_REF)
+        return instantiation_error(key);
+    else if (TAG(key) !== TAG_ATM)
+        return type_error("atom", key);
+
+    let keyJS = PL_get_atom_chars(key);
+    let item = window.localStorage.getItem(keyJS);
+    if(typeof item === 'undefined' || item === null) {
+        return domain_error('local_storage key', key);
+    }
+
+    let memfileCreated = create_memory_file_structure(item, 'local_storage '+keyJS);
+
+
+    return unify(memfile, memfileCreated);
 }
 // File wam.js
 /* For general documentation, see wam_compiler.pl
@@ -6830,6 +6893,10 @@ function quote_atom(a)
 {
     if (! a.charAt) {
         return a;
+    }
+
+    if (a.charAt(0) >= "0" && a.charAt(0) <= "9") {
+        return "'" + escape_atom(a) + "'";
     }
 
     if (a.charAt(0) >= "A" && a.charAt(0) <= "Z")
@@ -11414,7 +11481,7 @@ function get_object_id_container(term, idContainer) {
 
 var parentMap = new Map([
     ['eventtarget', []],
-    ['window', ['eventtarget']],
+    ['window', ['eventtarget', 'windowlocalstorage', 'windowsessionstorage']],
     ['node', ['eventtarget']],
     ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
     ['document', ['node', 'parentnode']],
@@ -11450,11 +11517,15 @@ var parentMap = new Map([
     ['customelementregistrgy',[]],
     ['barprop', []],
     ['navigator', ['navigatorid','navigatorlanguage', 'navigatoronline', 'navigatorcontentutils', 'navigatorcookies']],
-    ['navigatorid', []],
-    ['navigatorlanguage', []],
-    ['navigatoronline', []],
-    ['navigatorcontentutils', []],
-    ['navigatorcookies', []]
+    ['navigatorid', []], // mixin
+    ['navigatorlanguage', []], // mixin
+    ['navigatoronline', []], // mixin
+    ['navigatorcontentutils', []], // mixin
+    ['navigatorcookies', []], // mixin
+    ['blob', []],
+    ['storage', []],
+    ['windowlocalstorage',[]], // mixin
+    ['windowsessionstorage',[]] // mixin
 ]);
 
 var childMap = new Map();
@@ -11478,6 +11549,7 @@ function calculate_inheritance_children() {
 calculate_inheritance_children();
 
 // constructorMap[obj.constructor] is object type.
+// This map does not include mixin Web API Interfaces.
 
 var constructorMap = {
     "ImageData" : "imagedata",
@@ -11502,7 +11574,9 @@ var constructorMap = {
     "History" : 'history',
     "CustomElementRegistry" : 'customelementregistrgy',
     "BarProp" : 'barprop',
-    "Navigator" : 'navigator'
+    "Navigator" : 'navigator',
+    "Blob" : 'blob',
+    "Storage" : 'storage'
 };
 
 var distinctivePropertyMap = {
@@ -11518,8 +11592,7 @@ var distinctiveMethodMap = {
     document: 'getElementById',
     cssstyledeclaration:'getPropertyPriority',
     htmlcanvaselement:'getContext',
-    canvasrenderingcontext2d: 'getImageData',
-    blob: 'slice'
+    canvasrenderingcontext2d: 'getImageData'
 };
 
 // [createImageData, [number, number], object]
@@ -11608,19 +11681,19 @@ function convert_type_term(typePL, container) {
     } else if(TAG(typePL) === TAG_STR) {
         let functorPL = ftable[VAL(memory[VAL(typePL)])][0];
         let functor = atable[functorPL];
-        if(functor !== 'array') {
-            return domain_error('type array', functorPL);
+        if(functor !== 'array_type') {
+            return domain_error('type array_type', functorPL);
         }
         let arity = ftable[VAL(memory[VAL(typePL)])][1];
         if(arity !== 1) {
-            return representation_error('type array arity 1', typePL);
+            return representation_error('type array_type arity 1', typePL);
         }
         let subContainer = {};
         if(! convert_type_term(deref(memory[VAL(typePL) + 1]), subContainer, true)) {
             return false;
         }
         let extendedType = {};
-        extendedType.array = subContainer.value;
+        extendedType.arrayType = subContainer.value.type;
         result.type = extendedType;
     } else {
         return type_error('atom or structure', typePL);
@@ -12951,6 +13024,8 @@ var windowMethodSpecs = new Map([
 
 //Window includes GlobalEventHandlers;
 //Window includes WindowEventHandlers;
+//Window includes WindowLocalStorage;
+//Window includes WindowSessionStorage;
 
 webInterfaces.set('window',
     {
@@ -13921,6 +13996,65 @@ webInterfaces.set('navigatorcookies',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorCookies'
         }
     });
+
+var storageInterfaceProperties = new Map( [
+    ['length', SimpleProperty('number', 'length')],
+]);
+
+var storageMethodSpecs = new Map([
+    ['key', {name:'key',arguments:[{type:'number'}],returns:{type:'atom'}}],
+    ['getItem', {name:'getItem',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setItem', {name:'setItem',arguments:[{type:'string'}, {type:'string'}]}],
+    ['removeItem', {name:'removeItem',arguments:[{type:'string'}]}],
+    ['clear', {name:'clear',arguments:[]}]
+]);
+
+webInterfaces.set('storage',
+    {name: 'storage',
+        properties:storageInterfaceProperties,
+        methods:storageMethodSpecs,
+        reference: {name:'Storage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#storage-2',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Storage'
+        }
+    });
+
+var windowLocalStorageInterfaceProperties = new Map( [
+    ['localStorage', SimpleProperty('object', 'localStorage')],
+]);
+
+var windowLocalStorageMethodSpecs = new Map([
+
+]);
+
+webInterfaces.set('windowlocalstorage',
+    {name: 'windowlocalstorage',
+        properties:windowLocalStorageInterfaceProperties,
+        methods:windowLocalStorageMethodSpecs,
+        reference: {name:'WindowLocalStorage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#windowlocalstorage',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Local_storage'
+        }
+    });
+
+var windowSessionStorageInterfaceProperties = new Map( [
+    ['sessionStorage', SimpleProperty('object', 'sessionStorage')],
+]);
+
+var windowSessionStorageMethodSpecs = new Map([
+
+]);
+
+webInterfaces.set('windowsessionstorage',
+    {name: 'windowsessionstorage',
+        properties:windowSessionStorageInterfaceProperties,
+        methods:windowSessionStorageMethodSpecs,
+        reference: {name:'WindowSessionStorage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#windowsessionstorage',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API'
+        }
+    });
+
 // File object_property.js
 
 var dopCursors = new Map();
@@ -14560,20 +14694,21 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
 
         if (spec.returns) {
             let resultJS = object_method_return(objectJS, spec.name, applyArguments);
-            if(spec.returns.multiple) {
+            if(typeof resultJS === 'undefined' || resultJS === null) {
+                return false;
+            } else  if(spec.returns.multiple) {
                 let values = [];
-                if(typeof resultJS !== 'undefined' && resultJS !== null) {
-                    if(typeof resultJS === 'object' && resultJS.constructor.name === 'NodeList') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'FileList') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLOptionsCollection') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLCollection') {
-                        values = Array.from(resultJS);
-                    } else {
-                        values.push(resultJS);
-                    }
+
+                if (typeof resultJS === 'object' && resultJS.constructor.name === 'NodeList') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'FileList') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLOptionsCollection') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLCollection') {
+                    values = Array.from(resultJS);
+                } else {
+                    values.push(resultJS);
                 }
 
                 cursor = {values: values, spec: spec, module: moduleName, methodAddress: methodAddress, arity: arity};
@@ -14582,7 +14717,6 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
                 cursorIDPL = lookup_atom(cursorIDJS);
 
                 create_choicepoint();
-
             } else {
                 let resultContainer = {};
                 if (convert_result(resultJS, spec.returns, moduleName, resultContainer)) {

@@ -70,11 +70,14 @@
 <li><a  class="index" id="api_node_index" href="#api_node"> Node </a></li>
 <li><a  class="index" id="api_parentnode_index" href="#api_parentnode"> ParentNode </a></li>
 <li><a  class="index" id="api_path2d_index" href="#api_path2d"> Path2D </a></li>
+<li><a  class="index" id="api_storage_index" href="#api_storage"> Storage </a></li>
 <li><a  class="index" id="api_textmetrics_index" href="#api_textmetrics"> TextMetrics </a></li>
 <li><a  class="index" id="api_uievent_index" href="#api_uievent"> UIEvent </a></li>
 <li><a  class="index" id="api_uint8clampedarray_index" href="#api_uint8clampedarray"> Uint8ClampedArray </a></li>
 <li><a  class="index" id="api_validitystate_index" href="#api_validitystate"> ValidityState </a></li>
 <li><a  class="index" id="api_window_index" href="#api_window"> Window </a></li>
+<li><a  class="index" id="api_windowlocalstorage_index" href="#api_windowlocalstorage"> WindowLocalStorage </a></li>
+<li><a  class="index" id="api_windowsessionstorage_index" href="#api_windowsessionstorage"> WindowSessionStorage </a></li>
 
                                 </ul>
                             </li>
@@ -986,6 +989,20 @@ to simplify working with objects.
 		<li><b>ellipse</b>(<i>number</i>, <i>number</i>, <i>number</i>, <i>number</i>, <i>number</i>, <i>number</i>, <i>number</i>, <i>boolean</i>)</li>
 	</ul>
 </li>
+<li class="indexed" id="api_storage"><h5>Storage (<a href="https://html.spec.whatwg.org/multipage/webstorage.html#storage-2">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Storage'>MDN</a>): storage</h5>
+<h6>Properties</h6>
+	<ul>
+		<li><b>length</b>: <i>number</i></li>
+	</ul>
+<h6>Methods</h6>
+	<ul>
+		<li><b>clear</b></li>
+		<li><b>getItem</b>(<i>string</i>, <i>atom</i>) [last arg is result]</li>
+		<li><b>key</b>(<i>number</i>, <i>atom</i>) [last arg is result]</li>
+		<li><b>removeItem</b>(<i>string</i>)</li>
+		<li><b>setItem</b>(<i>string</i>, <i>string</i>)</li>
+	</ul>
+</li>
 <li class="indexed" id="api_textmetrics"><h5>TextMetrics (<a href="https://www.w3.org/TR/2dcontext/#textmetrics">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics'>MDN</a>): textmetrics</h5>
 <h6>Properties</h6>
 	<ul>
@@ -1029,7 +1046,7 @@ to simplify working with objects.
 	(no methods)
 </li>
 <li class="indexed" id="api_window"><h5>Window (<a href="https://html.spec.whatwg.org/multipage/window-object.html">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window'>MDN</a>): window</h5>
-<h6>Parents</h6><ul><li><a href='#api_eventtarget'>eventtarget</a></li></ul>
+<h6>Parents</h6><ul><li><a href='#api_eventtarget'>eventtarget</a></li><li><a href='#api_windowlocalstorage'>windowlocalstorage</a></li><li><a href='#api_windowsessionstorage'>windowsessionstorage</a></li></ul>
 <h6>Properties</h6>
 	<ul>
 		<li><b>applicationCache</b>: <i>object</i></li>
@@ -1064,6 +1081,22 @@ to simplify working with objects.
 		<li><b>prompt</b>(<i>string</i>, <i>string</i>) [last arg is result]</li>
 		<li><b>stop</b></li>
 	</ul>
+</li>
+<li class="indexed" id="api_windowlocalstorage"><h5>WindowLocalStorage (<a href="https://html.spec.whatwg.org/multipage/webstorage.html#windowlocalstorage">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Local_storage'>MDN</a>): windowlocalstorage</h5>
+<h6>Children</h6><ul><li><a href='#api_window'>window</a></li></ul>
+<h6>Properties</h6>
+	<ul>
+		<li><b>localStorage</b>: <i>object</i></li>
+	</ul>
+	(no methods)
+</li>
+<li class="indexed" id="api_windowsessionstorage"><h5>WindowSessionStorage (<a href="https://html.spec.whatwg.org/multipage/webstorage.html#windowsessionstorage">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API'>MDN</a>): windowsessionstorage</h5>
+<h6>Children</h6><ul><li><a href='#api_window'>window</a></li></ul>
+<h6>Properties</h6>
+	<ul>
+		<li><b>sessionStorage</b>: <i>object</i></li>
+	</ul>
+	(no methods)
 </li>
 
     </ul>
@@ -1664,8 +1697,8 @@ The unique predicates include several predicates for working with HTML documents
     An argument may be a goal_function type, in which case the ModuleName (inferred or explicit)
     is needed to determine what module holds the predicate(s) of the goal_functor.
     Argument types include: object, string, string_codes, integer, number, boolean, position, goal_function,
-    event, and options. Also a type may specify a list or array of items of the same type as 'array(Type)', e.g.
-    'array(integer)' for an array/list of integers.
+    event, and options. Also a type may specify a list or array of items of the same type as 'array_type(Type)', e.g.
+    'array_type(integer)' for an array/list of integers.
 <br>
 <br><b>arg</b>: <i>Type</i>. an atom or structure that specifies the kind of object to create.
 <br><b>arg</b>: <i>Object</i>. an object ID structure for a Web API (or other Javascript) object.

@@ -65,7 +65,9 @@ Some gotchas:
 
 */
 
-:-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/1, save_compiled_state/2, bootstrap_toplevel/1, consult_atom/1, repl/1, call_atom/2]).
+:-module(wam_compiler,
+        [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, compile_and_free_memory_file/1,
+         save_compiled_state/1, save_compiled_state/2, bootstrap_toplevel/1, consult_atom/1, repl/1, call_atom/2]).
 
 :- meta_predicate((compile_clause_system_directive(0),bootstrap_toplevel(0))).
 

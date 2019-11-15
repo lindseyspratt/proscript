@@ -573,6 +573,10 @@ function quote_atom(a)
         return a;
     }
 
+    if (a.charAt(0) >= "0" && a.charAt(0) <= "9") {
+        return "'" + escape_atom(a) + "'";
+    }
+
     if (a.charAt(0) >= "A" && a.charAt(0) <= "Z")
         return "'" + escape_atom(a) + "'";
     var chars = a.split('');

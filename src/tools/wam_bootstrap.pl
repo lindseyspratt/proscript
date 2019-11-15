@@ -516,6 +516,8 @@ reset:-
         reserve_predicate(format/3, predicate_format),
         reserve_predicate(flag/3, predicate_flag),
         reserve_predicate(memory_file_description/2, predicate_memory_file_description),
+        reserve_predicate(copy_memory_file_to_local_storage/2, predicate_copy_memory_file_to_local_storage),
+        reserve_predicate(copy_local_storage_to_memory_file/2, predicate_copy_local_storage_to_memory_file),
         reserve_predicate(absolute_file_name/3, predicate_absolute_file_name),
         reserve_predicate(numbervars/3, predicate_numbervars),
 

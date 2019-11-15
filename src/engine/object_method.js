@@ -118,20 +118,21 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
 
         if (spec.returns) {
             let resultJS = object_method_return(objectJS, spec.name, applyArguments);
-            if(spec.returns.multiple) {
+            if(typeof resultJS === 'undefined' || resultJS === null) {
+                return false;
+            } else  if(spec.returns.multiple) {
                 let values = [];
-                if(typeof resultJS !== 'undefined' && resultJS !== null) {
-                    if(typeof resultJS === 'object' && resultJS.constructor.name === 'NodeList') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'FileList') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLOptionsCollection') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLCollection') {
-                        values = Array.from(resultJS);
-                    } else {
-                        values.push(resultJS);
-                    }
+
+                if (typeof resultJS === 'object' && resultJS.constructor.name === 'NodeList') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'FileList') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLOptionsCollection') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLCollection') {
+                    values = Array.from(resultJS);
+                } else {
+                    values.push(resultJS);
                 }
 
                 cursor = {values: values, spec: spec, module: moduleName, methodAddress: methodAddress, arity: arity};
@@ -141,7 +142,6 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
 
                 debug_msg("Not a retry");
                 create_choicepoint();
-
             } else {
                 let resultContainer = {};
                 if (convert_result(resultJS, spec.returns, moduleName, resultContainer)) {

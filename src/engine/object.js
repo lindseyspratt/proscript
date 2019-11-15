@@ -103,7 +103,7 @@ function get_object_id_container(term, idContainer) {
 
 var parentMap = new Map([
     ['eventtarget', []],
-    ['window', ['eventtarget']],
+    ['window', ['eventtarget', 'windowlocalstorage', 'windowsessionstorage']],
     ['node', ['eventtarget']],
     ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
     ['document', ['node', 'parentnode']],
@@ -139,11 +139,15 @@ var parentMap = new Map([
     ['customelementregistrgy',[]],
     ['barprop', []],
     ['navigator', ['navigatorid','navigatorlanguage', 'navigatoronline', 'navigatorcontentutils', 'navigatorcookies']],
-    ['navigatorid', []],
-    ['navigatorlanguage', []],
-    ['navigatoronline', []],
-    ['navigatorcontentutils', []],
-    ['navigatorcookies', []]
+    ['navigatorid', []], // mixin
+    ['navigatorlanguage', []], // mixin
+    ['navigatoronline', []], // mixin
+    ['navigatorcontentutils', []], // mixin
+    ['navigatorcookies', []], // mixin
+    ['blob', []],
+    ['storage', []],
+    ['windowlocalstorage',[]], // mixin
+    ['windowsessionstorage',[]] // mixin
 ]);
 
 var childMap = new Map();
@@ -167,6 +171,7 @@ function calculate_inheritance_children() {
 calculate_inheritance_children();
 
 // constructorMap[obj.constructor] is object type.
+// This map does not include mixin Web API Interfaces.
 
 var constructorMap = {
     "ImageData" : "imagedata",
@@ -191,7 +196,9 @@ var constructorMap = {
     "History" : 'history',
     "CustomElementRegistry" : 'customelementregistrgy',
     "BarProp" : 'barprop',
-    "Navigator" : 'navigator'
+    "Navigator" : 'navigator',
+    "Blob" : 'blob',
+    "Storage" : 'storage'
 };
 
 var distinctivePropertyMap = {
@@ -207,8 +214,7 @@ var distinctiveMethodMap = {
     document: 'getElementById',
     cssstyledeclaration:'getPropertyPriority',
     htmlcanvaselement:'getContext',
-    canvasrenderingcontext2d: 'getImageData',
-    blob: 'slice'
+    canvasrenderingcontext2d: 'getImageData'
 };
 
 // [createImageData, [number, number], object]
@@ -297,19 +303,19 @@ function convert_type_term(typePL, container) {
     } else if(TAG(typePL) === TAG_STR) {
         let functorPL = ftable[VAL(memory[VAL(typePL)])][0];
         let functor = atable[functorPL];
-        if(functor !== 'array') {
-            return domain_error('type array', functorPL);
+        if(functor !== 'array_type') {
+            return domain_error('type array_type', functorPL);
         }
         let arity = ftable[VAL(memory[VAL(typePL)])][1];
         if(arity !== 1) {
-            return representation_error('type array arity 1', typePL);
+            return representation_error('type array_type arity 1', typePL);
         }
         let subContainer = {};
         if(! convert_type_term(deref(memory[VAL(typePL) + 1]), subContainer, true)) {
             return false;
         }
         let extendedType = {};
-        extendedType.array = subContainer.value;
+        extendedType.arrayType = subContainer.value.type;
         result.type = extendedType;
     } else {
         return type_error('atom or structure', typePL);
