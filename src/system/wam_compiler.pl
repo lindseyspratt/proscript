@@ -1544,7 +1544,8 @@ compile_memory_file(MemoryFile) :-
 %write('Start compile '), write(MemoryFile), write(': WAM duration = '), writeln(D1),
         open_memory_file(MemoryFile, read, Stream),
         compile_stream(Stream),
-        close(Stream).
+        close(Stream),
+        !.
 %        wam_duration(D2),
 %write('Finish compile '), write(MemoryFile), write(': WAM duration = '), writeln(D2).
 

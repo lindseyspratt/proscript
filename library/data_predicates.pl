@@ -117,6 +117,24 @@ default_asserted_id(M:Prefix, ID) :-
     retractall(M:GoalR),
     assertz(M:Goal).
 
+retract_default_id(M:Prefix) :-
+    atom_concat(Prefix, '_default_id', Predicate),
+    GoalR =.. [Predicate, _],
+    retractall(M:GoalR).
+
+retract_default_id(M:Prefix, ID) :-
+    atom_concat(Prefix, '_default_id', Predicate),
+    Goal =.. [Predicate, ID],
+    retract(M:Goal).
+
+write_default_id(M:Prefix, Stream) :-
+    atom_concat(Prefix, '_default_id', Predicate),
+    Goal =.. [Predicate, _],
+    call(M:Goal)
+      -> write_goal(M:Goal, Stream)
+    ;
+    true.
+
 data_predicate_dynamics(M : DPs) :-
     assert_dps(M : DPs),
     findall(Prefix-Suffixes, data_predicates(_, M:Prefix, Suffixes), All),
@@ -182,6 +200,7 @@ retract_all_data(DataSpec) :-
     retract_all_data1(DataSpec).
 
 retract_all_data1(M:Prefix) :-
+    retract_default_id(M:Prefix),
     ids_in_use(M:Prefix, SortedIDs),
     retract_all_data1(SortedIDs, M:Prefix).
 
@@ -203,6 +222,11 @@ retract_data(DataSpec, ID) :-
     retract_data1(DataSpec, ID).
 
 retract_data1(M:Prefix, ID) :-
+    (retract_default_id(M:Prefix, ID) % retract foo_default_id if set to ID, otherwise leave it.
+      -> true
+    ;
+     true
+    ),
     data_predicates(_, M:Prefix, Suffixes),
     retract_data(Suffixes, M:Prefix, ID).
 
@@ -236,6 +260,8 @@ save_data(DataSpec, IDs, Target) :-
 save_data1(M:Prefix, IDs, local_storage(Key)) :-
     new_memory_file(DataMemFile),
     open_memory_file(DataMemFile, write, Stream),
+    % write foo_default_id(ID) ...
+    write_default_id(M:Prefix, Stream),
     gather_data(Stream, M:Prefix, IDs),
     close(Stream),
     format(atom(K), '~w/~w', [Key, M:Prefix]),
@@ -290,9 +316,15 @@ load_data(DataSpec, Source) :-
     load_data1(DataSpec, Source).
 
 load_data1(M:Prefix, local_storage(Key)) :-
+    writeln(load_data1(M:Prefix, local_storage(Key))),
+    writeln(load_data1(retractall)),
+    retract_all_data1(M:Prefix),
     format(atom(K), '~w/~w', [Key, M:Prefix]),
+    writeln(load_data1(copy)),
     copy_local_storage_to_memory_file(K, DataMemFile),
-    compile_and_free_memory_file(DataMemFile).
+    writeln(load_data1(compile)),
+    compile_and_free_memory_file(DataMemFile),
+    writeln(load_data1(completed)).
 
 remove_data(_M1:M2:Prefix, Store) :-
     !,

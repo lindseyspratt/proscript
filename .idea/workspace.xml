@@ -1,45 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Updated version to 1.4.1.">
-      <change afterPath="$PROJECT_DIR$/test/web_test_blob.pl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/web_test_window.pl" afterDir="false" />
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/calculator_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/calculator_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/console_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/consult_console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/consult_console_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_about.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_about.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_doc.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_download.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_download.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/likes_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/likes_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/simple_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/simple_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/tiles_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tiles_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/tiles.pl" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tiles.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/library/data_predicates.pl" beforeDir="false" afterPath="$PROJECT_DIR$/library/data_predicates.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/api.sidenav.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/api.sidenav.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/items.predicates.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/items.predicates.doc.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/predicate_doc.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/predicate_doc.pl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/type_references.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/type_references.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/memory_files.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/memory_files.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/object.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/object.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/object_method.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/object_method.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/promise.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/promise.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/read.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/read.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/web_interfaces.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/web_interfaces.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/system/wam_compiler.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/wam_compiler.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/web_tests.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/web_tests.pl" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -67,8 +38,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="156">
-              <caret line="68" column="105" selection-start-line="68" selection-start-column="77" selection-end-line="68" selection-end-column="105" />
+            <state relative-caret-position="169">
+              <caret line="1472" column="48" selection-start-line="1472" selection-start-column="48" selection-end-line="1472" selection-end-column="48" />
             </state>
           </provider>
         </entry>
@@ -94,11 +65,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="960">
-              <caret line="252" selection-start-line="252" selection-end-line="252" />
+            <state relative-caret-position="-601">
+              <caret line="202" column="33" selection-start-line="202" selection-start-column="33" selection-end-line="202" selection-end-column="33" />
             </state>
           </provider>
         </entry>
@@ -115,11 +86,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/tiles.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="31" column="7" lean-forward="true" selection-start-line="31" selection-start-column="7" selection-end-line="31" selection-end-column="7" />
+            <state relative-caret-position="495">
+              <caret line="33" selection-start-line="33" selection-end-line="33" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/library/listut.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="262">
+              <caret line="155" column="28" selection-start-line="155" selection-start-column="28" selection-end-line="155" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -142,25 +122,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/promise.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1490">
-              <caret line="194" column="28" selection-start-line="194" selection-start-column="15" selection-end-line="194" selection-end-column="28" />
-              <folding>
-                <element signature="n#!!doc" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>eval_jav</find>
-      <find>height</find>
-      <find>repl</find>
       <find>:- if</find>
       <find>blob</find>
       <find>dom_create_object</find>
@@ -188,6 +153,9 @@
       <find>use_module(l</find>
       <find>memory</find>
       <find>write_term</find>
+      <find>retry_fo</find>
+      <find>foo</find>
+      <find>compile_and_free_memory_file</find>
     </findStrings>
     <replaceStrings>
       <replace>Session</replace>
@@ -223,19 +191,19 @@
         <option value="$PROJECT_DIR$/src/engine/promise.js" />
         <option value="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" />
         <option value="$PROJECT_DIR$/src/engine/memory_files.js" />
-        <option value="$PROJECT_DIR$/src/system/wam_compiler.pl" />
         <option value="$PROJECT_DIR$/examples/tiles.pl" />
         <option value="$PROJECT_DIR$/src/engine/read.js" />
-        <option value="$PROJECT_DIR$/library/data_predicates.pl" />
         <option value="$PROJECT_DIR$/examples/tiles.html" />
+        <option value="$PROJECT_DIR$/library/listut.pl" />
+        <option value="$PROJECT_DIR$/src/system/wam_compiler.pl" />
+        <option value="$PROJECT_DIR$/library/data_predicates.pl" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-5568" />
-    <option name="y" value="-846" />
-    <option name="width" value="2560" />
-    <option name="height" value="1417" />
+    <option name="y" value="23" />
+    <option name="width" value="1280" />
+    <option name="height" value="739" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -252,7 +220,12 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-              <item name="examples" type="462c0819:PsiDirectoryNode" />
+              <item name="library" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -305,7 +278,7 @@
       <workItem from="1572617235327" duration="728000" />
       <workItem from="1573149691720" duration="6944000" />
       <workItem from="1573421596692" duration="598000" />
-      <workItem from="1573438365843" duration="27766000" />
+      <workItem from="1573438365843" duration="34620000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -349,21 +322,35 @@
       <option name="project" value="LOCAL" />
       <updated>1573152593235</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Added localStorage and memoryFile coordination.&#10;&#10;Added save_tiles/0 and load_tiles/0 to tiles.pl.&#10;Added save_data/2, save_data/3, load_data/2, and remove_data/2 to data_predicates.pl. Data is saved to localStorage on the Window Web API object using a key constructed from a specified label plus the data predicate module and prefix. The data is saved as a Prolog-compilable collection of facts for each suffix of the specified prefix. Saving the data writes these facts to a memory file, then copies the memory file to the local storage. Loading the data reads the contents of local storage at a given key to a memory file, then compiles the contents of that memory file.&#10;memory_files.js: Fixed text_to_memory_file function to set the 'ptr' to the length of the byteArray (same as if the text had been written to the memory file); fixed open_memory_file to set 'ptr' to 0 on read and write modes and data.length on append mode (added 'append' mode); refactored to create valie_memfile; and added predicate_copy_memory_file_to_local_storage and predicate_copy_local_storage_to_memory_file functions.&#10;object.js: added storage, windowlocalstorage, and windowsessionstorage API interfaces; and fixed convert_type_term handling of arrayType - expects 'array_type' instead of 'array'.&#10;object_method.js: fixed predicate_dom_object_method to properly fail when multiple-return method result is 'null'.&#10;promise.js: refactored get_promise_object; changed promise_requests map to hold the promiseResultJS.&#10;Fixed quote_atom in read.js to quote atoms that start with a digit (0 to 9).&#10;web_interfaces.js: Added Storage, WindowLocalStorage, and WindowSessionStorage Web API interfaces.&#10;Added export of compile_and_free_memory_file/1 to wam_compiler.pl.&#10;Added builtin definitions for copy_memory_file_to_local_storage/2 and copy_local_storage_to_memory_file/2 to wam_bootstrap.pl.&#10;Added web_test_blob and web_test_window to web_tests.pl.">
+      <created>1573834256282</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1573834256282</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Added retract_all_data/1 and retract_all_data/2 to data_predicates.pl.&#10;&#10;Fixed retract_data/2 to process nested modules.&#10;Added performance cuts to nth0/3, nth0/4, nth1/3, and nth1/4.">
+      <created>1573839206878</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1573839206878</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="36077000" />
+    <option name="totallyTimeSpent" value="42931000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-5568" y="-846" width="2560" height="1417" extended-state="6" />
+    <frame x="0" y="23" width="1280" height="739" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6651543" visible="true" weight="0.118944466" />
-      <window_info id="Structure" order="1" sideWeight="0.33484572" side_tool="true" visible="true" weight="0.118944466" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.6635338" visible="true" weight="0.23987292" />
+      <window_info id="Structure" order="1" sideWeight="0.33646616" side_tool="true" visible="true" weight="0.23987292" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" visible="true" weight="0.16830188" />
+      <window_info active="true" anchor="bottom" id="Find" order="1" visible="true" weight="0.17774343" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -407,7 +394,9 @@
     <MESSAGE value="Update workspace.xml." />
     <MESSAGE value="Merge branch 'retract_data'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="Updated version to 1.4.1." />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated version to 1.4.1." />
+    <MESSAGE value="Added localStorage and memoryFile coordination.&#10;&#10;Added save_tiles/0 and load_tiles/0 to tiles.pl.&#10;Added save_data/2, save_data/3, load_data/2, and remove_data/2 to data_predicates.pl. Data is saved to localStorage on the Window Web API object using a key constructed from a specified label plus the data predicate module and prefix. The data is saved as a Prolog-compilable collection of facts for each suffix of the specified prefix. Saving the data writes these facts to a memory file, then copies the memory file to the local storage. Loading the data reads the contents of local storage at a given key to a memory file, then compiles the contents of that memory file.&#10;memory_files.js: Fixed text_to_memory_file function to set the 'ptr' to the length of the byteArray (same as if the text had been written to the memory file); fixed open_memory_file to set 'ptr' to 0 on read and write modes and data.length on append mode (added 'append' mode); refactored to create valie_memfile; and added predicate_copy_memory_file_to_local_storage and predicate_copy_local_storage_to_memory_file functions.&#10;object.js: added storage, windowlocalstorage, and windowsessionstorage API interfaces; and fixed convert_type_term handling of arrayType - expects 'array_type' instead of 'array'.&#10;object_method.js: fixed predicate_dom_object_method to properly fail when multiple-return method result is 'null'.&#10;promise.js: refactored get_promise_object; changed promise_requests map to hold the promiseResultJS.&#10;Fixed quote_atom in read.js to quote atoms that start with a digit (0 to 9).&#10;web_interfaces.js: Added Storage, WindowLocalStorage, and WindowSessionStorage Web API interfaces.&#10;Added export of compile_and_free_memory_file/1 to wam_compiler.pl.&#10;Added builtin definitions for copy_memory_file_to_local_storage/2 and copy_local_storage_to_memory_file/2 to wam_bootstrap.pl.&#10;Added web_test_blob and web_test_window to web_tests.pl." />
+    <MESSAGE value="Added retract_all_data/1 and retract_all_data/2 to data_predicates.pl.&#10;&#10;Fixed retract_data/2 to process nested modules.&#10;Added performance cuts to nth0/3, nth0/4, nth1/3, and nth1/4." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added retract_all_data/1 and retract_all_data/2 to data_predicates.pl.&#10;&#10;Fixed retract_data/2 to process nested modules.&#10;Added performance cuts to nth0/3, nth0/4, nth1/3, and nth1/4." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/test/Makefile">
@@ -625,13 +614,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="156">
-          <caret line="68" column="105" selection-start-line="68" selection-start-column="77" selection-end-line="68" selection-end-column="105" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -659,17 +641,31 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
+    <entry file="file://$PROJECT_DIR$/examples/tiles.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="960">
-          <caret line="252" selection-start-line="252" selection-end-line="252" />
+        <state relative-caret-position="495">
+          <caret line="33" selection-start-line="33" selection-end-line="33" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/examples/tiles.html">
+    <entry file="file://$PROJECT_DIR$/library/listut.pl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="31" column="7" lean-forward="true" selection-start-line="31" selection-start-column="7" selection-end-line="31" selection-end-column="7" />
+        <state relative-caret-position="262">
+          <caret line="155" column="28" selection-start-line="155" selection-start-column="28" selection-end-line="155" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="169">
+          <caret line="1472" column="48" selection-start-line="1472" selection-start-column="48" selection-end-line="1472" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-601">
+          <caret line="202" column="33" selection-start-line="202" selection-start-column="33" selection-end-line="202" selection-end-column="33" />
         </state>
       </provider>
     </entry>

@@ -206,7 +206,7 @@
     <div id="tiles_pl" >
         <h2 id='tiles_pl_header'>tiles.pl</h2>
         <code class='content'>
-        <span style='color:red'>:-</span>&nbsp;module(tiles,&nbsp;[select_test/0]).<br>
+        <span style='color:red'>:-</span>&nbsp;module(tiles,&nbsp;[select_test/0,&nbsp;save_tiles/0,&nbsp;load_tiles/0]).<br>
 <br>
 <span style='color:red'>:-</span>&nbsp;use_module('../library/object').&nbsp;<span style='color:green'>%&nbsp;for&nbsp;>>/2.</span><br>
 <span style='color:red'>:-</span>&nbsp;use_module('../library/data_predicates').<br>
@@ -242,6 +242,16 @@ select_test&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;initial_hands_expanded(2,&nbsp;<i>Hands</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;setup_hands(<i>Hands</i>,&nbsp;<i>TileIDs</i>),<br>
 &nbsp;&nbsp;&nbsp;&nbsp;draw_all_tiles(<i>TileIDs</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>W</i>,&nbsp;<i>H</i>).<br>
+<br>
+save_tiles&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;save_data(game,&nbsp;local_storage(tiles)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;save_data(tile,&nbsp;local_storage(tiles)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;save_data(legal_position,&nbsp;local_storage(tiles)).<br>
+<br>
+load_tiles&nbsp;<span style='color:red'>:-</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;load_data(game,&nbsp;local_storage(tiles)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;load_data(tile,&nbsp;local_storage(tiles)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;load_data(legal_position,&nbsp;local_storage(tiles)).<br>
 <br>
 dummy_reference&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;dummy_reference,<br>
