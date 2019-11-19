@@ -236,6 +236,27 @@ test(univ(5), exit):-
         [a, b, c] =.. A,
         A == ['.', a, [b,c]].
 
+test(univ(6), exit) :-
+        A =.. [foo],
+        A = foo.
+
+test(univ(7), exit) :-
+        foo =.. [foo].
+
+test(univ(8), exit) :-
+        1 =.. [1].
+
+test(univ(9), exit) :-
+        0.3 =.. [0.3].
+
+test(univ(10), exit) :-
+        A =.. [1],
+        A = 1.
+
+test(univ(11), exit) :-
+        A =.. [0.3],
+        A = 0.3.
+
 deterministic_goal.
 nondeterministic_goal.
 nondeterministic_goal.

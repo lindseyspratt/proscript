@@ -111,16 +111,19 @@ function dumpPredicate(targetPredicateName, targetArity, mode) {
                 dumpWrite('Clause ' + clauseKey);
                 dumpWrite(' ');
                 let clause = predicates[ofst].clauses[clauseKey];
-                code = clause.code;
-                let position = 0;
-                while(position < code.length) {
-                    let decoded = decode_instruction({key:ofst},position);
-                    dumpWrite(decoded.string);
-                    position += decoded.size;
-                }
+                dumpCode(ofst, clause.code);
             }
             return;
         }
+    }
+}
+
+function dumpCode(ftableOfst, code) {
+    let position = 0;
+    while(position < code.length) {
+        let decoded = decode_instruction_general(ftableOfst, position, code);
+        dumpWrite(decoded.string);
+        position += decoded.size;
     }
 }
 

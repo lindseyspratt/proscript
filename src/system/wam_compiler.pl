@@ -575,7 +575,13 @@ next_free_variable([_|S], A):- next_free_variable(S, A).
 commit_to_cut(no_cut):- !.
 commit_to_cut(has_cut(_)).
 
+% first_goal_arity/2 may be called with pre- or post-transformed goals.
+% In the case of post-transformed goals the arity is of the arg to goal/1: e.g. goal(foo(1,2)) has an arity of 2, not 1.
+% The auxiliary definition goals include a mix of transformed goals, e.g. goal(foo(1,2)), and special goals,
+% e.g. get_top_choicepoint(N, B), aux_head(...), and !(...).
+
 first_goal_arity((A,_), N):- !, first_goal_arity(A, N).
+first_goal_arity(goal(A), N):- !, functor(A, _, N).
 first_goal_arity(A, N):- functor(A, _, N).
 
 %transform_body(Body, Position, NewBody, ExtraClauses, Tail, CutVariable):-

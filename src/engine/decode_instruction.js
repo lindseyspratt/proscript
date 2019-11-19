@@ -1,6 +1,151 @@
 
 function decode_instruction(predicateID, codePosition) {
-    let predicate = (predicateID == null) ? ("no predicate") : (atable[ftable[parseInt(predicateID.key)][0]] + "/" + ftable[parseInt(predicateID.key)][1]);
+    return decode_instruction_general(predicateID, codePosition, code);
+}
+
+// Binds 4th parameter to structure of the form: instruction(String, Op, OpName, Size, GoalPredicate),
+// GoalPredicate = goal_predicate(Functor, Arity, PredicateID, Type)
+// Base on info found at codePosition'th element of codeP list (0 based).
+// The instruction String incorporates the predicateNameP as part of its label.
+// The String is a list of character codes, e.g. "foo: bar" (using Prolog shorthand notation for string).
+
+function predicate_decode_instruction(predicateNameP, codeP, codePositionP, instructionP) {
+    let predicateNameJS;
+    if(TAG(predicateNameP) === TAG_REF) {
+        return instantiation_error(predicateNameP);
+    } else if(TAG(predicateNameP) === TAG_ATM) {
+        predicateNameJS = PL_get_atom_chars(predicateNameP);
+    } else if(TAG(predicateNameP) === TAG_INT) {
+        predicateNameJS = PL_get_integer(predicateNameP);
+    } else {
+        return type_error('predicate ID or name', predicateNameP);
+    }
+
+    if(TAG(codeP) === TAG_REF) {
+        return instantiation_error(codeP);
+    } else if(TAG(codeP) !== TAG_LST) {
+        return type_error('list', codeP);
+    }
+
+    if(TAG(codePositionP) === TAG_REF) {
+        return instantiation_error(codePositionP);
+    } else if(TAG(codePositionP) !== TAG_INT) {
+        return type_error('integer', codePositionP);
+    }
+
+    if(TAG(instructionP) !== TAG_REF && TAG(instructionP) !== TAG_STR) {
+        return type_error('variable or instruction/5 structure', instructionP);
+    }
+
+    let codePositionJS = PL_get_integer(codePositionP);
+    let codeJS = integer_list_to_term_array(codeP);
+    let instruction = decode_instruction_general(predicateNameJS, codePositionJS, codeJS);
+    let internalInstructionP = make_instruction_structure(instruction);
+    return unify(instructionP, internalInstructionP);
+}
+
+// instruction = {string: instString, op: op, opName:opName, size:instructionSize, goalPredicate:goalPredicate};
+// goalPredicate = {functor: functor, arity: arity, predicate: i, type: 'call'};
+function make_instruction_structure(instruction) {
+    let goalPredicate = instruction.goalPredicate;
+
+    let goalPredicateP;
+    if(typeof goalPredicate === 'string') {
+        goalPredicateP = PL_put_atom_chars(goalPredicate);
+    } else {
+        let ftorGP = lookup_functor('goal_predicate', 4);
+        goalPredicateP = alloc_structure(ftorGP);
+        memory[state.H++] = PL_put_atom_chars(goalPredicate.functor);
+        memory[state.H++] = PL_put_integer(goalPredicate.arity);
+        memory[state.H++] = PL_put_integer(goalPredicate.predicate);
+        memory[state.H++] = PL_put_atom_chars(goalPredicate.type);
+    }
+
+    let instructionStringP = string_to_codes(instruction.string);
+
+    let ftor = lookup_functor('instruction', 5);
+    let instructionP = alloc_structure(ftor);
+    memory[state.H++] = instructionStringP;
+    memory[state.H++] = PL_put_integer(instruction.op);
+    memory[state.H++] = PL_put_atom_chars(instruction.opName);
+    memory[state.H++] = PL_put_integer(instruction.size);
+    memory[state.H++] = goalPredicateP;
+
+    return instructionP;
+}
+
+function initOpNames() {
+    let opNames = [];
+    opNames[0] = 'zero';
+    opNames[1] = 'allocate';
+    opNames[2] = 'deallocate';
+    opNames[3] = 'call';
+    opNames[4] = 'execute';
+    opNames[5] = 'proceed';
+    opNames[6] = 'put_variable'; // variable to Y and X registers.
+    opNames[60] = 'put_variable'; // Y register variable only
+    opNames[7] = 'put_variable'; // variable to X and X registers.
+    opNames[8] = 'put_value';
+    opNames[9] = 'put_unsafe_value';
+    opNames[10] = 'put_constant';
+    opNames[11] = 'put_nil';
+    opNames[12] = 'put_structure';
+    opNames[13] = 'put_list';
+    opNames[14] = 'put_integer';
+    opNames[51] = 'put_float';
+    opNames[15] = 'get_variable';
+    opNames[16] = 'get_value';
+    opNames[17] = 'get_constant';
+    opNames[18] = 'get_nil';
+    opNames[19] = 'get_structure';
+    opNames[20] = 'get_list';
+    opNames[21] = 'get_integer';
+    opNames[50] = 'get_float';
+    opNames[22] = 'unify_void';
+    opNames[23] = 'unify_variable';
+    opNames[24] = 'unify_value';
+    opNames[25] = 'unify_local_value';
+    opNames[26] = 'unify_constant';
+    opNames[27] = 'unify_integer';
+    opNames[52] = 'unify_float';
+    opNames[28] = 'try_me_else';
+    opNames[29] = 'retry_me_else';
+    opNames[30] = 'trust_me';
+    opNames[31] = 'neck_cut';
+    opNames[32] = 'cut';
+    opNames[33] = 'get_level';
+    opNames[40] = 'call_aux';
+    opNames[41] = 'execute_aux';
+    opNames[42] = 'retry_foreign';
+    opNames[43] = 'get_choicepoint';
+    opNames[44] = 'switch_on_term';
+    opNames[45] = 'switch_on_constant';
+    opNames[46] = 'switch_on_structure';
+    opNames[71] = 'try';
+    opNames[72] = 'retry';
+    opNames[73] = 'trust';
+    opNames[74] = 'goto_clause';
+    opNames[254] = 'nop2';
+
+    return opNames;
+}
+
+let opNames = initOpNames();
+
+function decode_instruction_general(predicateID, codePosition, code) {
+    let predicateName; // = (predicateID == null) ? ("no predicate") : (atable[ftable[parseInt(predicateID.key)][0]] + "/" + ftable[parseInt(predicateID.key)][1]);
+    if(typeof predicateID === 'undefined' || predicateID == null) {
+        predicateName = 'no predicate';
+    } else if(predicateID.key) {
+        predicateName = atable[ftable[parseInt(predicateID.key)][0]] + "/" + ftable[parseInt(predicateID.key)][1]
+    } else if(typeof predicateID === 'number') {
+        predicateName = atable[ftable[predicateID][0]] + "/" + ftable[predicateID][1]
+    } else if(typeof predicateID === 'string') {
+        predicateName = predicateID;
+    } else {
+        predicateName = JSON.stringify(predicateID);
+    }
+
     let op = code[codePosition];
     let instruction = '';
     let instructionSize = -1;
@@ -9,11 +154,11 @@ function decode_instruction(predicateID, codePosition) {
     switch(op) {
         // Control instructions 1-5
         case 1: // allocate
-            instruction = 'allocate';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
         case 2: // deallocate
-            instruction = 'deallocate';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
         case 3: // call: [3, I, N]
@@ -27,7 +172,7 @@ function decode_instruction(predicateID, codePosition) {
             let functor = atable[nameID];
             let arity = ftable[i][1];
 
-            instruction = 'call(' + functor + '/' + arity + ',' + N + ')';
+            instruction = opNames[op] + '(' + functor + '/' + arity + ',' + N + ')';
             instructionSize = 3;
             goalPredicate = {functor: functor, arity: arity, predicate: i, type: 'call'};
             break;
@@ -42,13 +187,13 @@ function decode_instruction(predicateID, codePosition) {
             let functor = atable[nameID];
             let arity = ftable[i][1];
 
-            instruction = 'execute(' + functor + '/' + arity + ')';
+            instruction = opNames[op] + '(' + functor + '/' + arity + ')';
             instructionSize = 2;
             goalPredicate = {functor: functor, arity: arity, predicate: i, type: 'execute'};
             break;
         }
         case 5: // proceed
-            instruction = 'proceed';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
 
@@ -57,14 +202,14 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
-            instruction = 'put_variable(y(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(y(' + N + '), x(' + I + '))';
             instructionSize = 3;
            break;
         }
         case 60: // put_variable: [60, N]
         {
             let N = code[codePosition + 1];
-            instruction = 'put_variable(y(' + N + '))';
+            instruction = opNames[op] + '(y(' + N + '))';
             instructionSize = 2;
             break;
         }
@@ -72,7 +217,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
-            instruction = 'put_variable(x(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(x(' + N + '), x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -84,7 +229,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'put_variable(' + V  + '(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(' + V  + '(' + N + '), x(' + I + '))';
             instructionSize = 4;
             break;
         }
@@ -92,7 +237,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
-            instruction = 'put_unsafe_value(y(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(y(' + N + '), x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -102,14 +247,14 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             let C = atable[VAL(K)];
-            instruction = 'put_constant(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
         case 11: // put_nil: [I]
         {
             let I = code[codePosition + 1];
-            instruction = 'put_nil(x(' + I + '))';
+            instruction = opNames[op] + '(x(' + I + '))';
             instructionSize = 1;
             break;
         }
@@ -122,7 +267,7 @@ function decode_instruction(predicateID, codePosition) {
             let nameID = ftable[f][0];
             let functor = atable[nameID];
             let arity = ftable[f][1];
-            instruction = 'put_structure('  + functor + '/' + arity +  ', x(' + I + '))';
+            instruction = opNames[op] + '('  + functor + '/' + arity +  ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -130,7 +275,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let I = code[codePosition + 1];
 
-            instruction = 'put_list(x(' + I + '))';
+            instruction = opNames[op] + '(x(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -139,7 +284,7 @@ function decode_instruction(predicateID, codePosition) {
             let C = code[codePosition + 1];
             let I = code[codePosition + 2];
 
-            instruction = 'put_integer(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -149,7 +294,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             let C = floats[VAL(N)];
-            instruction = 'put_float(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -163,7 +308,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'get_variable(' + V  + '(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(' + V  + '(' + N + '), x(' + I + '))';
             instructionSize = 4;
             break;
         }
@@ -175,7 +320,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'get_value(' + V  + '(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(' + V  + '(' + N + '), x(' + I + '))';
             instructionSize = 4;
             break;
         }
@@ -185,14 +330,14 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             let C = atable[VAL(K)];
-            instruction = 'get_constant(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
         case 18: // get_nil: [18, I]
         {
             let I = code[codePosition + 1];
-            instruction = 'get_nil(x(' + I + '))';
+            instruction = opNames[op] + '(x(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -205,7 +350,7 @@ function decode_instruction(predicateID, codePosition) {
             let nameID = ftable[f][0];
             let functor = atable[nameID];
             let arity = ftable[f][1];
-            instruction = 'get_structure('  + functor + '/' + arity +  ', x(' + I + '))';
+            instruction = opNames[op] + '('  + functor + '/' + arity +  ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -213,7 +358,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let I = code[codePosition + 1];
 
-            instruction = 'get_list(x(' + I + '))';
+            instruction = opNames[op] + '(x(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -222,7 +367,7 @@ function decode_instruction(predicateID, codePosition) {
             let C = code[codePosition + 1];
             let I = code[codePosition + 2];
 
-            instruction = 'get_integer(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -232,7 +377,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             let C = floats[VAL(N)];
-            instruction = 'get_float(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -242,7 +387,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
 
-            instruction = 'unify_void(' + N + ')';
+            instruction = opNames[op] + '(' + N + ')';
             instructionSize = 2;
             break;
         }
@@ -253,7 +398,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'unify_variable(' + V  + '(' + N + ')';
+            instruction = opNames[op] + '(' + V  + '(' + N + ')';
             instructionSize = 3;
             break;
         }
@@ -264,7 +409,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'unify_value(' + V  + '(' + N + ')';
+            instruction = opNames[op] + '(' + V  + '(' + N + ')';
             instructionSize = 3;
             break;
         }
@@ -275,7 +420,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'unify_local_value(' + V  + '(' + N + ')';
+            instruction = opNames[op] + '(' + V  + '(' + N + ')';
             instructionSize = 3;
             break;
         }
@@ -284,7 +429,7 @@ function decode_instruction(predicateID, codePosition) {
             let K = code[codePosition + 1];
 
             let C = atable[VAL(K)];
-            instruction = 'unify_constant(' + C + ')';
+            instruction = opNames[op] + '(' + C + ')';
             instructionSize = 2;
             break;
         }
@@ -292,7 +437,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let C = code[codePosition + 1];
 
-            instruction = 'unify_integer(' + C + ')';
+            instruction = opNames[op] + '(' + C + ')';
             instructionSize = 2;
             break;
         }
@@ -301,7 +446,7 @@ function decode_instruction(predicateID, codePosition) {
             let N = code[codePosition + 1];
 
             let C = floats[VAL(N)];
-            instruction = 'unify_float(' + C + ')';
+            instruction = opNames[op] + '(' + C + ')';
             instructionSize = 2;
             break;
         }
@@ -310,7 +455,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let L = code[codePosition + 1];
 
-            instruction = 'try_me_else(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
@@ -318,13 +463,13 @@ function decode_instruction(predicateID, codePosition) {
         {
             let L = code[codePosition + 1];
 
-            instruction = 'retry_me_else(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 30: // trust_me: [30, 0]
         {
-            instruction = 'trust_me(0)';
+            instruction = opNames[op] + '(0)';
             instructionSize = 2;
             break;
         }
@@ -332,7 +477,7 @@ function decode_instruction(predicateID, codePosition) {
         // Cut instructions
         case 31: // neck_cut: [31]
         {
-            instruction = 'neck_cut';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
         }
@@ -340,7 +485,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let I = code[codePosition + 1];
 
-            instruction = 'cut(y(' + I + '))';
+            instruction = opNames[op] + '(y(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -348,7 +493,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let I = code[codePosition + 1];
 
-            instruction = 'get_level(y(' + I + '))';
+            instruction = opNames[op] + '(y(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -360,7 +505,7 @@ function decode_instruction(predicateID, codePosition) {
             let A = code[codePosition + 2];
             let N = code[codePosition + 3];
 
-            instruction = 'call_aux(' + P + ',' + A + ',' + N +'))';
+            instruction = opNames[op] + '(' + P + ',' + A + ',' + N +'))';
             instructionSize = 4;
             break;
         }
@@ -369,14 +514,14 @@ function decode_instruction(predicateID, codePosition) {
             let P = code[codePosition + 1];
             let A = code[codePosition + 2];
 
-            instruction = 'execute_aux(' + P + ',' + A +'))';
+            instruction = opNames[op] + '(' + P + ',' + A +'))';
             instructionSize = 3;
             break;
         }
         // retry_foreign is for foreign predicates with non-deterministic behaviour
         case 42: // retry_foreign: [42]
         {
-            instruction = 'retry_foreign';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
         }
@@ -386,7 +531,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
-            instruction = 'get_choicepoint(' + N + ', y(' + I + '))';
+            instruction = opNames[op] + '(' + N + ', y(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -399,7 +544,7 @@ function decode_instruction(predicateID, codePosition) {
             let L = decode_address(code[codePosition + 5]);
             let S = decode_address(code[codePosition + 6]);
 
-            instruction = 'switch_on_term(' + V + ', ' + CA + ', ' + CI + ', ' + CF + ', ' + L + ', ' + S + ')';
+            instruction = opNames[op] + '(' + V + ', ' + CA + ', ' + CI + ', ' + CF + ', ' + L + ', ' + S + ')';
             instructionSize = 7;
             break;
         }
@@ -417,7 +562,7 @@ function decode_instruction(predicateID, codePosition) {
                 size = decoding.size;
                 table = 'hash(' + decoding.string + ')';
             }
-            instruction = 'switch_on_constant(' + table + ')';
+            instruction = opNames[op] + '(' + table + ')';
             instructionSize = 2 + size;
             break;
         }
@@ -435,41 +580,41 @@ function decode_instruction(predicateID, codePosition) {
                 size = decoding.size;
                 table = 'hash(' + decoding.string + ')';
             }
-            instruction = 'switch_on_structure(' + T + ', ' + table + ')';
+            instruction = opNames[op] + '(' + T + ', ' + table + ')';
             instructionSize = 2 + size;
             break;
         }
         case 71: // try: [71, L]
         {
             let L = code[codePosition + 1];
-            instruction = 'try(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 72: // retry: [72, L]
         {
             let L = code[codePosition + 1];
-            instruction = 'retry(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 73: // trust: [73, L]
         {
             let L = code[codePosition + 1];
-            instruction = 'trust(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 74: // goto_clause: [74, L]
         {
             let L = code[codePosition + 1];
-            instruction = 'goto_clause(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 254: // nop2: [254, 0]
         {
-            instruction = 'nop2(0)';
+            instruction = opNames[op] + '(0)';
             instructionSize = 2;
             break;
         }
@@ -480,7 +625,7 @@ function decode_instruction(predicateID, codePosition) {
             break;
     }
 
-    return {string: (predicate + ':' + '(' + instruction + ',' + codePosition + ')'), size:instructionSize, goalPredicate:goalPredicate};
+    return {string: (predicateName + ':' + '(' + instruction + ',' + codePosition + ')'), op: op, opName: opNames[op], size:instructionSize, goalPredicate:goalPredicate};
 
 }
 

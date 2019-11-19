@@ -555,6 +555,7 @@ reset:-
         reserve_predicate(compiled_clauses/2, predicate_compiled_clauses),
         reserve_predicate(add_index_clause_to_predicate/1, predicate_add_index_clause_to_predicate),
         reserve_predicate(edit_clauses_for_index_sequences/2, predicate_edit_clauses_for_index_sequences),
+        reserve_predicate(decode_instruction/4, predicate_decode_instruction),
 
         % Promises
         reserve_predicate(request_result/1, predicate_request_result),

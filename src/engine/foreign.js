@@ -354,27 +354,39 @@ function predicate_univ(term, list_term)
             var arity = 0;
             if (TAG(list_term) !== TAG_LST)
                 return type_error("list", list_term);
-            if (TAG(deref(memory[VAL(list_term)])) !== TAG_ATM)
-                return type_error("atom", deref(memory[VAL(list_term)]));
-            var ftor_name = atable[VAL(deref(memory[VAL(list_term)]))];
-            list_term = memory[VAL(list_term) + 1];
-            // Now write the args
-            while (TAG(list_term) === TAG_LST) {
-                // Write head
-                memory[state.H++] = memory[VAL(list_term)];
-                // Update tail
+
+            let ftor_name_id = deref(memory[VAL(list_term)]);
+
+            if(TAG(ftor_name_id)===TAG_ATM) {
+                var ftor_name = atable[VAL(ftor_name_id)];
                 list_term = memory[VAL(list_term) + 1];
-                arity++;
+                // Now write the args
+                while (TAG(list_term) === TAG_LST) {
+                    // Write head
+                    memory[state.H++] = memory[VAL(list_term)];
+                    // Update tail
+                    list_term = memory[VAL(list_term) + 1];
+                    arity++;
+                }
+                // Check tail
+                if (list_term !== NIL) {
+                    if (TAG(list_term) === TAG_REF)
+                        return instantiation_error(list_term);
+                    else
+                        return type_error("list", list_term);
+                }
+
+                if (arity === 0) {
+                    state.H--; // undo the setup for allocating a structure on the heap.
+                    return unify(term, ftor_name_id);
+                }
+                memory[tmp] = lookup_functor(ftor_name, arity);
+                return unify(term, tmp ^ (TAG_STR << WORD_BITS));
+            } else if(TAG(ftor_name_id)===TAG_INT || TAG(ftor_name_id)===TAG_FLT) {
+                return unify(term, ftor_name_id);
+            } else {
+                return type_error('atomic first item in univ list', ftor_name_id);
             }
-            // Check tail
-            if (list_term !== NIL) {
-                if (TAG(list_term) === TAG_REF)
-                    return instantiation_error(list_term);
-                else
-                    return type_error("list", list_term);
-            }
-            memory[tmp] = lookup_functor(ftor_name, arity);
-            return unify(term, tmp ^ (TAG_STR << WORD_BITS));
         case TAG_STR:
             var ftor = VAL(memory[VAL(term)]);
             if (ftable[ftor] === undefined)
@@ -1743,6 +1755,25 @@ function predicate_add_index_clause_to_predicate(predicateP) {
 
     return true;
 }
+
+// predicate_edit_clauses_for_index_sequences modifies sequences of clauses
+// to use try_me_else, retry_me_else, trust_me, and nop2 appropriately for
+// supporting indexing using switch_on_term instruction.
+// The sequencesP parameter is a Prolog list of lists of integers: these
+// integers specify clauseKey indices (0-based) such that an integer K
+// identifies a clause as:
+//      let clause = predicates.clauses[predicates.clauseKeys[K]];
+// The code for clause K has its first instruction modified appropriately
+// for a control instruction according to the position of clause K in its
+// containing sequence:
+//  if the sequence only has one clause (K), then the control instruction is 'nop2';
+//  if K is the first clause in its sequence then its control instruction is
+//      'try_me_else(N)' where N is the clauseKey index of the next clause in
+//      the sequence, which is alwasy (K+1);
+//  if K is neither the first nor the last clause in its sequence then its control
+//      instruction is retry_me_else(N), where N=K+1 as before; finally,
+//  if K is the last clause in its sequence (of more than one clause) then
+//      its control instruction is trust_me.
 
 function predicate_edit_clauses_for_index_sequences(sequencesP, predicateP) {
     let sequences = integer_list_list_to_term_array(sequencesP);

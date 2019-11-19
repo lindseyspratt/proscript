@@ -11,7 +11,8 @@
          halt/0,
          callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
          call_with_module/2,
-         call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8
+         call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8,
+         decode_instructions/2
          ]).
 
 :- use_module(not).
@@ -596,3 +597,16 @@ call_extension_with_module(_, M : A, ExtensionArgs):-
 call_extension_with_module(M, A, ExtensionArgs):-
         add_args(A, ExtensionArgs, AA),
         call_with_module(M, AA).
+
+decode_instructions(PredicateName, Codes) :-
+    length(Codes, Length),
+    decode_instructions(PredicateName, Codes, 0, Length).
+
+decode_instructions(_PredicateName, _Codes, BeyondEnd, BeyondEnd) :- !.
+decode_instructions(PredicateName, Codes, Current, BeyondEnd) :-
+    Current < BeyondEnd, % sanity check
+    decode_instruction(PredicateName, Codes, Current, instruction(StringCodes, Op, OpName, Size, GoalPredicate)),
+    atom_codes(Atom, StringCodes),
+    writeln(inst(Atom, Op, OpName, Size, GoalPredicate)),
+    Next is Current + Size,
+    decode_instructions(PredicateName, Codes, Next, BeyondEnd).
