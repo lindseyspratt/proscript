@@ -1457,9 +1457,13 @@ push_current_compilation_stream(Stream) :-
   ),
   asserta('$current_compilation_stream'([Stream|Streams])).
 
+% Since there can only be one $$current_compilation_stream/1 fact,
+% use a ! to tell the compiler that it doesn't need a choicepoint here.
+
 pop_current_compilation_stream(Stream) :-
   retract('$current_compilation_stream'([Stream|Streams])),
-  asserta('$current_compilation_stream'(Streams)).
+  asserta('$current_compilation_stream'(Streams)),
+  !.
 
 compile_stream(Stream) :-
         push_current_compilation_stream(Stream),
