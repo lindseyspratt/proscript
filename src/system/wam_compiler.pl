@@ -344,7 +344,8 @@ push_current_compilation_module(Name, Stream) :-
 
 pop_current_compilation_module(Name, Stream) :-
   retract('$current_compilation_module'([Name-Stream|Names])),
-  asserta('$current_compilation_module'(Names)).
+  asserta('$current_compilation_module'(Names)),
+  !.
 
 define_use_module(Spec) :-
         setup_use_module(Spec, ImportName),
