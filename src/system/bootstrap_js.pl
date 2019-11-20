@@ -117,7 +117,7 @@ call_with_module(Module, Goal) :-
          wam_compiler:compile_clause_2(query(Vars):-Goal),
         !,
         '$jmp'(Vars),
-         wam_compiler:pop_current_compilation_module(Module, call)
+        wam_compiler:pop_current_compilation_module(Module, call)
         ).
 
 
