@@ -356,4 +356,14 @@ test(escapes, exit) :-
 test(member, !) :-
         member(a-_Y, [p-1, a-3]).
 
+test(leftassoc, exit) :-
+        current_op(_, yfx, +), % verify that + is left associative.
+        !,
+        X = (a + b + c),
+        (_ + c) = X.
 
+test(rightassoc, exit) :-
+        current_op(_, xfy, ;), % verify that ; is right associative.
+        !,
+        X = (a ; b ; c),
+        (a ; _) = X.

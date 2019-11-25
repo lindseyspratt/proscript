@@ -244,14 +244,22 @@ select_test&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;draw_all_tiles(<i>TileIDs</i>,&nbsp;<i>Ctx</i>,&nbsp;<i>W</i>,&nbsp;<i>H</i>).<br>
 <br>
 save_tiles&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;save_data(game,&nbsp;local_storage(tiles)),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;save_data(tile,&nbsp;local_storage(tiles)),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;save_data(legal_position,&nbsp;local_storage(tiles)).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_memory_file(<i>DataMemFile</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;open_memory_file(<i>DataMemFile</i>,&nbsp;write,&nbsp;<i>Stream</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;save_data_stream(game,&nbsp;<i>Stream</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;save_data_stream(tile,&nbsp;<i>Stream</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;save_data_stream(legal_position,&nbsp;<i>Stream</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;close(<i>Stream</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;copy_memory_file_to_local_storage(<i>DataMemFile</i>,&nbsp;save_tiles),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;free_memory_file(<i>DataMemFile</i>).<br>
 <br>
 load_tiles&nbsp;<span style='color:red'>:-</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;load_data(game,&nbsp;local_storage(tiles)),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;load_data(tile,&nbsp;local_storage(tiles)),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;load_data(legal_position,&nbsp;local_storage(tiles)).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;retract_all_data(game),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;retract_all_data(tile),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;retract_all_data(legal_position),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;copy_local_storage_to_memory_file(save_tiles,&nbsp;<i>DataMemFile</i>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wam_compiler:compile_and_free_memory_file(<i>DataMemFile</i>).<br>
+<br>
 <br>
 dummy_reference&nbsp;<span style='color:red'>:-</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;dummy_reference,<br>

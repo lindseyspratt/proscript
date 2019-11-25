@@ -88,8 +88,6 @@ Some gotchas:
 :-dynamic(bootstrap/0).
 :-dynamic(delayed_initialization/1).
 :-dynamic('$loaded'/1).
-:-dynamic('$current_compilation_module'/1).
-:-dynamic('$current_compilation_stream'/1).
 
 /*
 Dynamic and multifile predicate, normally not defined.
@@ -330,22 +328,24 @@ current_compilation_module(Name) :-
         current_compilation_module(Name, _).
 
 current_compilation_module(Name, Stream) :-
-        '$current_compilation_module'([Name-Stream|_]),
-        !.
+    recorded(wam_compiler_compilation_modules, [Name-Stream|_], _),
+    !.
 current_compilation_module(user, none).
 
 push_current_compilation_module(Name, Stream) :-
-  (retract('$current_compilation_module'(Names))
-    -> true
-   ;
-   Names = []
-  ),
-  asserta('$current_compilation_module'([Name-Stream|Names])).
+    (recorded(wam_compiler_compilation_modules, Items, Ref)
+       -> erase(Ref)
+     ;
+     Items = []
+    ),
+    recorda(wam_compiler_compilation_modules, [Name-Stream|Items], _),
+    !.
 
 pop_current_compilation_module(Name, Stream) :-
-  retract('$current_compilation_module'([Name-Stream|Names])),
-  asserta('$current_compilation_module'(Names)),
-  !.
+    recorded(wam_compiler_compilation_modules, [Name-Stream|Names], Ref),
+    erase(Ref),
+    recorda(wam_compiler_compilation_modules, Names, _),
+    !.
 
 define_use_module(Spec) :-
         setup_use_module(Spec, ImportName),
@@ -1448,22 +1448,21 @@ compile_file(Source):-
   assertz('$loaded'(CanonicalSource)).
 
 current_compilation_stream(Stream) :-
-        '$current_compilation_stream'([Stream|_]).
+    recorded(wam_compiler_compilation_stream, [Stream|_], _).
 
 push_current_compilation_stream(Stream) :-
-  (retract('$current_compilation_stream'(Streams))
-    -> true
-   ;
-   Streams = []
-  ),
-  asserta('$current_compilation_stream'([Stream|Streams])).
-
-% Since there can only be one $$current_compilation_stream/1 fact,
-% use a ! to tell the compiler that it doesn't need a choicepoint here.
+    (recorded(wam_compiler_compilation_stream, Streams, Ref)
+       -> erase(Ref)
+    ;
+    Streams = []
+    ),
+    recorda(wam_compiler_compilation_stream, [Stream|Streams], _),
+    !.
 
 pop_current_compilation_stream(Stream) :-
-  retract('$current_compilation_stream'([Stream|Streams])),
-  asserta('$current_compilation_stream'(Streams)),
+  recorded(wam_compiler_compilation_stream, [Stream|Streams], Ref),
+  erase(Ref),
+  recorda(wam_compiler_compilation_stream, Streams, _),
   !.
 
 compile_stream(Stream) :-

@@ -12,7 +12,7 @@
          callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
          call_with_module/2,
          call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8,
-         decode_instructions/2
+         decode_instructions/2, yield/0
          ]).
 
 :- use_module(not).
@@ -115,9 +115,10 @@ call_with_module(Module, Goal) :-
         ;
          wam_compiler:push_current_compilation_module(Module, call),
          wam_compiler:compile_clause_2(query(Vars):-Goal),
-        !,
-        '$jmp'(Vars),
-        wam_compiler:pop_current_compilation_module(Module, call)
+         wam_compiler:pop_current_compilation_module(_, _),
+         !,
+         '$jmp'(Vars),
+         true
         ).
 
 
@@ -610,3 +611,23 @@ decode_instructions(PredicateName, Codes, Current, BeyondEnd) :-
     writeln(inst(Atom, Op, OpName, Size, GoalPredicate)),
     Next is Current + Size,
     decode_instructions(PredicateName, Codes, Next, BeyondEnd).
+
+% yield/0 yields the single Javascript thread from the control of the WAM to
+% any Javascript events that are queued waiting to evaluate then resumes execution
+% of the WAM. Common events are page rendering actions such as drawing to a canvas
+% or writing to an HTMLElement (e.g. the ProscriptLS Interpreter may have output
+% waiting to be displayed).
+%
+% yield/0 sets up a delayed promise_backtrack() callback then halts the WAM.
+% After halting the WAM (but leaving all of its global data intact) Javascript control
+% eventually returns to the top level allowing events to be raised and handled.
+% Finally the delayed promise_backtrack() callback is encountered and evaluated.
+% this backtracks the WAM global state so that the second yield/0 clause is active
+% then calls the WAM. On entry to the WAM the second yield/0 clause is evaluated and
+% succeeds and the evaluation of the program that called yield/0 continues.
+
+yield :-
+    eval_javascript('setTimeout(() => {promise_backtrack();}, 0)'),
+    halt.
+yield :-
+    true.

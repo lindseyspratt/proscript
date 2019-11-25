@@ -95,10 +95,10 @@ function promise_backtrack() {
     if(typeof try_backtrack === 'undefined' || !try_backtrack) {
         if (backtrack()) {
             if (!wam()) {
-                throw 'promise_callback failed: callback ' + promise + ' result ' + result;
+                throw 'promise_callback failed';
             }
         } else {
-            throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
+            throw 'promise_callback backtrack failed';
         }
     } else {
         // stdout('running promise_backtrack\n');

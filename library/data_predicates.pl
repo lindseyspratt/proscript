@@ -22,7 +22,9 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
 :- module(data_predicates,
     [data_predicates/3, data_predicate_dynamics/1,
     assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2,
-    labelled_values/3, retract_data/2, save_data/2, save_data/3, load_data/2, remove_data/2]).
+    labelled_values/3, retract_all_data/1, retract_data/2,
+    save_data_stream/2, save_data_stream/3,
+    save_data/2, save_data/3, load_data/2, remove_data/2]).
 
 :- use_module(library(wam_compiler)).
 
@@ -39,6 +41,8 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
     retract_all_data((:), ?),
     save_data((:),?),
     save_data((:),?,?),
+    save_data_stream((:),?),
+    save_data_stream((:),?,?),
     gather_data1(?,(:),?),
     load_data((:), ?),
     remove_data((:), ?))).
@@ -268,6 +272,27 @@ save_data1(M:Prefix, IDs, local_storage(Key)) :-
     copy_memory_file_to_local_storage(DataMemFile, K),
     free_memory_file(DataMemFile).
 
+save_data_stream(_M1:M2:Prefix, Stream) :-
+    !,
+    save_data_stream(M2:Prefix, Stream).
+save_data_stream(DataSpec, Stream) :-
+    save_data_stream1(DataSpec, Stream).
+
+save_data_stream(_M1:M2:Prefix, IDs, Stream) :-
+    !,
+    save_data_stream(M2:Prefix, IDs, Stream).
+save_data_stream(DataSpec, IDs, Stream) :-
+    save_data_stream1(DataSpec, IDs, Stream).
+
+save_data_stream1(M:Prefix, Stream) :-
+    ids_in_use(M:Prefix, IDs),
+    save_data_stream1(M:Prefix, IDs, Stream).
+
+save_data_stream1(M:Prefix, IDs, Stream) :-
+    % write foo_default_id(ID) ...
+    write_default_id(M:Prefix, Stream),
+    gather_data(Stream, M:Prefix, IDs).
+
 gather_data(Stream, M:Prefix, IDs) :-
     data_predicates(_, M:Prefix, Suffixes),
     gather_data(Suffixes, Stream, M:Prefix, IDs).
@@ -275,12 +300,12 @@ gather_data(Stream, M:Prefix, IDs) :-
 gather_data([], _, _, _).
 gather_data([H|T], Stream, M:Prefix, IDs) :-
     construct_data_predicate(Prefix, H, Predicate),
+    write(Stream, '\n% '), write(Stream, M:Predicate), write(Stream, '\n\n'),
     gather_data1(IDs, M:Predicate, Stream),
     gather_data(T, Stream, M:Prefix, IDs).
 
 gather_data1([], _Predicate, _Stream).
 gather_data1([H|T], M:Predicate, Stream) :-
-    write(Stream, '\n% '), write(Stream, M:Predicate), write(Stream, '\n\n'),
     (setof(M:Goal, X^(Goal =.. [Predicate, H, X], call(M:Goal)), Goals)
       -> write_goals(Goals, Stream)
     ;

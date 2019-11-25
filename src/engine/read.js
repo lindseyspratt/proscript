@@ -265,6 +265,7 @@ function read_expression(s, precedence, isarg, islist, expression)
             unread_token(s, "-");
             infix_operator = "-";
         }
+
         if (infix_operator === '(')
         {
             // We are reading a term. Keep reading expressions: After each one we should
@@ -348,9 +349,9 @@ function read_expression(s, precedence, isarg, islist, expression)
                 if (lhs === false)
                     return false;
             }
-            else if (op.fixity === "yfx" && precedence >= op.precedence)
+            else if (op.fixity === "yfx" && precedence > op.precedence)
             {
-                lhs = parse_infix(s, lhs, op.precedence);
+                lhs = parse_infix(s, lhs, op.precedence-0.5);
                 if (lhs === false)
                     return false;
             }

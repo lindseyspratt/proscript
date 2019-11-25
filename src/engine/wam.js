@@ -1979,6 +1979,9 @@ function hex(number)
     {
     	number = 0xFFFFFFFF + number + 1;
     }
+    if (typeof number !== 'number') {
+        return "NaN";
+    }
     // noinspection JSCheckFunctionSignatures
     return "0x" + number.toString(16).toUpperCase();
 }

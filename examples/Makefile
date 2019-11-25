@@ -24,7 +24,8 @@ dump-state: $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js
 		$(JSC) $(ENGINE) proscriptls_state_tiles.js ../test/standalone.js  -e "dumpPredicate('object:$$sys_0', 'load')"
 
 # force proscriptls_init (which runs danglingPredicates()) of state from loadState of proscriptls_state_tiles.js.
-proscriptls_state_tiles.js:  ../dist/proscriptls_engine_for_node.js tiles.pl ../library/data_predicates.pl ../library/object.pl\
+proscriptls_state_tiles.js:  ../dist/proscriptls_engine_for_node.js ../dist/proscriptls_state.js\
+				tiles.pl ../library/data_predicates.pl ../library/object.pl\
 				$(NODE_TOOLS)/node_compile.js $(NODE_TOOLS)/node_goal.js
 		node $(NODE_TOOLS)/node_compile.js `pwd`/tiles.pl `pwd`/proscriptls_state_tiles.js
 		node $(NODE_TOOLS)/node_goal.js `pwd`/proscriptls_state_tiles.js true

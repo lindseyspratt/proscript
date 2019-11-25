@@ -36,14 +36,22 @@ select_test :-
     draw_all_tiles(TileIDs, Ctx, W, H).
 
 save_tiles :-
-    save_data(game, local_storage(tiles)),
-    save_data(tile, local_storage(tiles)),
-    save_data(legal_position, local_storage(tiles)).
+    new_memory_file(DataMemFile),
+    open_memory_file(DataMemFile, write, Stream),
+    save_data_stream(game, Stream),
+    save_data_stream(tile, Stream),
+    save_data_stream(legal_position, Stream),
+    close(Stream),
+    copy_memory_file_to_local_storage(DataMemFile, save_tiles),
+    free_memory_file(DataMemFile).
 
 load_tiles :-
-    load_data(game, local_storage(tiles)),
-    load_data(tile, local_storage(tiles)),
-    load_data(legal_position, local_storage(tiles)).
+    retract_all_data(game),
+    retract_all_data(tile),
+    retract_all_data(legal_position),
+    copy_local_storage_to_memory_file(save_tiles, DataMemFile),
+    wam_compiler:compile_and_free_memory_file(DataMemFile).
+
 
 dummy_reference :-
     dummy_reference,

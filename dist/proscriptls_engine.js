@@ -3749,10 +3749,10 @@ function promise_backtrack() {
     if(typeof try_backtrack === 'undefined' || !try_backtrack) {
         if (backtrack()) {
             if (!wam()) {
-                throw 'promise_callback failed: callback ' + promise + ' result ' + result;
+                throw 'promise_callback failed';
             }
         } else {
-            throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
+            throw 'promise_callback backtrack failed';
         }
     } else {
         // stdout('running promise_backtrack\n');
@@ -6086,6 +6086,9 @@ function hex(number)
     {
     	number = 0xFFFFFFFF + number + 1;
     }
+    if (typeof number !== 'number') {
+        return "NaN";
+    }
     // noinspection JSCheckFunctionSignatures
     return "0x" + number.toString(16).toUpperCase();
 }
@@ -6620,6 +6623,7 @@ function read_expression(s, precedence, isarg, islist, expression)
             unread_token(s, "-");
             infix_operator = "-";
         }
+
         if (infix_operator === '(')
         {
             // We are reading a term. Keep reading expressions: After each one we should
@@ -6703,9 +6707,9 @@ function read_expression(s, precedence, isarg, islist, expression)
                 if (lhs === false)
                     return false;
             }
-            else if (op.fixity === "yfx" && precedence >= op.precedence)
+            else if (op.fixity === "yfx" && precedence > op.precedence)
             {
-                lhs = parse_infix(s, lhs, op.precedence);
+                lhs = parse_infix(s, lhs, op.precedence-0.5);
                 if (lhs === false)
                     return false;
             }
@@ -7915,6 +7919,9 @@ function recorded(key, term, ref)
     let data = d.data;
     // We need the first actual key. This may not be [0] if something has been erased
     var index = d.keys[0];
+    if(typeof index === 'undefined' || typeof data[index] === 'undefined') {
+        return false;
+    }
     // noinspection UnnecessaryLocalVariableJS
     var result = unify(recall_term(data[index].value, {}), term) && unify(data[index].ref ^ (TAG_INT << WORD_BITS), ref);
     return result;
