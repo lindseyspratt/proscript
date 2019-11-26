@@ -163,7 +163,8 @@ function evaluate_expression(expression, evaluated)
             memory[state.H++] = arity ^ (TAG_INT << WORD_BITS);
             return type_error("evaluable", indicator)
         }
-        return true;            
+
+        return true;
     }
     else if (TAG(expression) === TAG_ATM)
     {
@@ -2830,13 +2831,14 @@ function flag_bounded(set, value)
 function flag_max_integer(set, value)
 {
     if (set) return permission_error("prolog_flag");
-    return unify(value, (268435455) ^ (TAG_INT<<WORD_BITS));
+    return unify(value, ((2**(WORD_BITS-1)-1) & ((1 << WORD_BITS)-1)) ^ (TAG_INT<<WORD_BITS));
 }
 
 function flag_min_integer(set, value)
 {
     if (set) return permission_error("prolog_flag");
-    return unify(value, (536870911) ^ (TAG_INT<<WORD_BITS));
+    let newTerm = ((-1*(2**(WORD_BITS-1))) & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+    return unify(value, newTerm);
 }
 
 function flag_integer_rounding_function(set, value)
@@ -2968,11 +2970,10 @@ function predicate_current_prolog_flag(key, value)
     else if (TAG(key) === TAG_ATM)
     {
         let keyname = atable[VAL(key)];
-        let index = 0;
         for (let i = 0; i < prolog_flags.length; i++)
         {
-            if (prolog_flags[index].name === keyname)
-                return prolog_flags[index].fn(false, value);
+            if (prolog_flags[i].name === keyname)
+                return prolog_flags[i].fn(false, value);
         }
         return false;
     }

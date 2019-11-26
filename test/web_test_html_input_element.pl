@@ -143,7 +143,7 @@ test('HTMLInputElement', 'value of input ', succeeded) :-
 
 test('HTMLInputElement', 'valueAsNumber of input ', succeeded) :-
     dom_element_attribute_value(E, id, input_text),
-    dom_object_property(_, E, valueAsNumber, X).
+    dom_object_property(_, E, valueAsNumber, _X).
 
 test('HTMLInputElement', 'width of input ', succeeded) :-
     dom_element_attribute_value(E, id, input_image),

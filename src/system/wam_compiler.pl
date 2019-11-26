@@ -1508,6 +1508,12 @@ compile_stream_term(_, end_of_file, Mode):-
         ).
 
 compile_stream_term(Stream, Term, ModeIn):-
+        (current_prolog_flag(debug, on)
+         -> writeln(compile_stream_term(Term)),
+            yield
+        ;
+         true
+        ),
         compile_clause(Term, ModeIn, ModeNext),
         !,
         compile_stream(Stream, ModeNext).

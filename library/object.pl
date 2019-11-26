@@ -226,8 +226,13 @@ goal_application(Obj, Goal) :-
     call(Goal, Obj).
 
 object_expression(M:Expression, Object) :-
+    atom(M),
+    !,
     bottom_right(Expression, Object),
     evaluate_expression(M:Expression).
+object_expression(Expression, Object) :-
+    bottom_right(Expression, Object),
+    evaluate_expression(user:Expression).
 
 % Expression is a tree of binary and unary nodes.
 % the 'result' of evaluating Expression is the last

@@ -367,3 +367,8 @@ test(rightassoc, exit) :-
         !,
         X = (a ; b ; c),
         (a ; _) = X.
+
+test(flag, exit) :-
+        current_prolog_flag(min_integer, Mn),
+        current_prolog_flag(max_integer, Mx),
+        Mn < Mx.
