@@ -1,3 +1,5 @@
+"use strict";
+
 /* Term reading */
 // See http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
 // Parsers return either:

@@ -1,3 +1,5 @@
+"use strict";
+
 // from https://stackoverflow.com/a/26354478/302650
 
 var http = require('http');

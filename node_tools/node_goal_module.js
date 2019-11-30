@@ -1,3 +1,5 @@
+"use strict";
+
 function node_goal(state, query) {
     let fs = require('fs');
     let path = require('path');

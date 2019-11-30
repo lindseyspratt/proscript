@@ -1,3 +1,4 @@
+"use strict";
 
 /* Memory files */
 var memory_files = [];

@@ -1,3 +1,5 @@
+"use strict";
+
 let gc_environment = 'browser'; // 'console'
 
 function predicate_gc()

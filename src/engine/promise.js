@@ -1,3 +1,5 @@
+"use strict";
+
 // Promise object in javascript encapsulates asynchronous
 // processing. The functions in this file support the integration
 // of some Promise features with ProscriptLS.

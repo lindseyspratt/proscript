@@ -1,3 +1,5 @@
+"use strict";
+
 let compilation_environment = {
     buffer: [],
     indexing_mode: 'basic'

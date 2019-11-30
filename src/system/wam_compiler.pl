@@ -1524,7 +1524,8 @@ save_compiled_state(SavedStateFile) :-
 
 save_compiled_state(BootCode, SavedStateFile) :-
         open(SavedStateFile, write, S1),
-        format(S1, '/* This file generated automatically. It defines the ProscriptLS system that is evaluated by the runtime engine. */', []),
+        format(S1, '/* This file generated automatically. It defines the ProscriptLS system that is evaluated by the runtime engine. */~n', []),
+        format(S1, '"use strict";~n', []),
         format(S1, 'function load_state() {~n', []),
         format(S1, 'bootstrap_code = ~w;~n', [BootCode]),
         format(S1, 'retry_foreign_offset = 7;~n', []),

@@ -1,3 +1,5 @@
+"use strict";
+
 /* Need to implement recorda/3, recorded/3 and erase/1 */
 var database_ptr = 0;
 var database_references = {};

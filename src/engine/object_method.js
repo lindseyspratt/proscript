@@ -1,3 +1,5 @@
+"use strict";
+
 /*
 The general approach to providing access to Javascript objects
 through Prolog predicates is described in object_property.js.

@@ -1,3 +1,5 @@
+"use strict";
+
 var input_buffer = [];
 
 function predicate_get_terminal_char(c) {

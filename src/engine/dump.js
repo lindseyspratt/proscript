@@ -1,3 +1,5 @@
+"use strict";
+
 function dump(filter, mode) {
     if(mode && mode === 'load') {
         load_state();

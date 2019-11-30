@@ -1,3 +1,5 @@
+"use strict";
+
 /*
 W3C Web API specifies 'APIs', 'webInterfaces', and 'mixins'.
 (It also uses the term 'object type' to refer to

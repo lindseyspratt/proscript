@@ -1,3 +1,4 @@
+"use strict";
 //load_state();
 //call_directives();
 //initialize();

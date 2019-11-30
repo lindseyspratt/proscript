@@ -1,3 +1,5 @@
+"use strict";
+
 /* For general documentation, see wam_compiler.pl
 
 Some helpful diagrams:

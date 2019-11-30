@@ -1,3 +1,4 @@
+"use strict";
 
 function decode_instruction(predicateID, codePosition) {
     return decode_instruction_general(predicateID, codePosition, code);

@@ -1,3 +1,4 @@
+"use strict";
 
 var dopCursors = new Map();
 var dopCursorCounter = 0;

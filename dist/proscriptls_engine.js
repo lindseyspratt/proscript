@@ -1,5 +1,7 @@
 /* This file generated automatically. It defines the runtime engine for ProscriptLS.*/
 // File foreign.js
+"use strict";
+
 let compilation_environment = {
     buffer: [],
     indexing_mode: 'basic'
@@ -3653,6 +3655,8 @@ function engine_error(message) {
 
 }
 // File promise.js
+"use strict";
+
 // Promise object in javascript encapsulates asynchronous
 // processing. The functions in this file support the integration
 // of some Promise features with ProscriptLS.
@@ -3892,6 +3896,7 @@ async function node_fetch(urlJS) {
 //     }
 // }
 // File memory_files.js
+"use strict";
 
 /* Memory files */
 var memory_files = [];
@@ -4221,6 +4226,8 @@ function predicate_copy_local_storage_to_memory_file(key, memfile) {
     return unify(memfile, memfileCreated);
 }
 // File wam.js
+"use strict";
+
 /* For general documentation, see wam_compiler.pl
 
 Some helpful diagrams:
@@ -6357,6 +6364,8 @@ function strings_to_atom_list(strings) {
 }
 
 // File read.js
+"use strict";
+
 /* Term reading */
 // See http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
 // Parsers return either:
@@ -7822,6 +7831,8 @@ function read_atom(stream, size, count, buffer)
 }
 
 // File record.js
+"use strict";
+
 /* Need to implement recorda/3, recorded/3 and erase/1 */
 var database_ptr = 0;
 var database_references = {};
@@ -8051,6 +8062,8 @@ function recall_term(e, varmap)
     }
 }
 // File fli.js
+"use strict";
+
 /* Not implemented:
    All the nondet foreign stuff. That is supported, but not using the SWI-Prolog interface
    Strings
@@ -8464,6 +8477,8 @@ function PL_call_predicate(module, debug, predicate, args)
     return result;
 }
 // File stream.js
+"use strict";
+
 var current_input = null;
 var current_output = 0;
 // FIXME: Ignores size and count!
@@ -9088,6 +9103,8 @@ function toUTF8Array(str) {
     return utf8;
 }
 // File gc.js
+"use strict";
+
 let gc_environment = 'browser'; // 'console'
 
 function predicate_gc()
@@ -10732,6 +10749,8 @@ function debug(msg) {
     }
 }
 // File debugger.js
+"use strict";
+
 var input_buffer = [];
 
 function predicate_get_terminal_char(c) {
@@ -10773,6 +10792,7 @@ function predicate_trace_set_prompt(value) {
     return true;
 }
 // File decode_instruction.js
+"use strict";
 
 function decode_instruction(predicateID, codePosition) {
     return decode_instruction_general(predicateID, codePosition, code);
@@ -12729,6 +12749,8 @@ function setupCursorForMethodNames(methods, methodName, cursor) {
     return true;
 }
 // File web_interfaces.js
+"use strict";
+
 /*
 W3C Web API specifies 'APIs', 'webInterfaces', and 'mixins'.
 (It also uses the term 'object type' to refer to
@@ -14240,6 +14262,7 @@ webInterfaces.set('windowsessionstorage',
     });
 
 // File object_property.js
+"use strict";
 
 var dopCursors = new Map();
 var dopCursorCounter = 0;
@@ -14759,6 +14782,8 @@ function predicate_set_dom_object_property(object, property, value, specTerm) {
     return true;
 }
 // File object_method.js
+"use strict";
+
 /*
 The general approach to providing access to Javascript objects
 through Prolog predicates is described in object_property.js.
@@ -15255,6 +15280,8 @@ function object_method_return() {
     return Reflect.apply(object[object_method], object, method_arguments);
 }
 // File dump.js
+"use strict";
+
 function dump(filter, mode) {
     if(mode && mode === 'load') {
         load_state();
