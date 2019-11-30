@@ -5,7 +5,7 @@ copy local storage to new memory_file and compile.
 test facts: local_storage_test:test(1,1)...lstest:test(N, N).
 */
 
-:- module(test_local_storage, [test/0, test/1]).
+:- module(test_local_storage, [test/0, test/2]).
 
 :- use_module(library(wam_compiler)).
 
@@ -20,8 +20,8 @@ test :-
 
 test(K, N) :-
     asserta(display_spans_mode(all)),
-    dom_window(W),
-    dom_object_property(_, W, localStorage, S),
+    %dom_window(W),
+    %dom_object_property(_, W, localStorage, S),
     %forall(retract(local_storage_key(test_local_storage, OldKey)), dom_object_method(S, removeItem(OldKey))),
     retractall(data(_,_)),
     save_to_local_storage(K, N, test_local_storage),
