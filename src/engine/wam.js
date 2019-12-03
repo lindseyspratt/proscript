@@ -672,6 +672,13 @@ function wam1()
     {
         debug_msg("---");        
         debug_msg("P=" + (((state.current_predicate == null)?("no predicate"):(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1])) + "@" + state.P + ": " + code[state.P]) + ", H=" + state.H + ", B=" + state.B + ", B0=" + state.B0 + ", E=" + state.E);
+
+        // The conditional "prolog_flag_values.wam_log !== 'none'" avoids the call to log() in the common case.
+        // This makes a noticeable difference in performance.
+
+        if(prolog_flag_values.wam_log !== 'none')
+            log(prolog_flag_values.wam_log, decode_instruction(state.current_predicate, state.P).string);
+
         if(state.trace_call === 'trace' && state.trace_instruction &&
             (state.trace_instruction === 'trace' || state.trace_instruction === 'step')) {
             let instruction = decode_instruction(state.current_predicate, state.P);
@@ -2253,3 +2260,16 @@ function strings_to_atom_list(strings) {
     return tmp;
 }
 
+function log(target, msg) {
+    if(target !== 'none') {
+        if (target === 'console') {
+            dumpWrite(msg);
+        } else if (target === 'local_storage') {
+            logToLocalStorage(msg);
+        } else if (target === 'local_storage_ring') {
+            log_ring(msg);
+        } else {
+            throw 'invalid log target: ' + target;
+        }
+    }
+}

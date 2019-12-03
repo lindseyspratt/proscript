@@ -1816,9 +1816,21 @@ function add_clause_to_predicate(predicateP, head, body)
     //     console.log(JSON.stringify(record_term(head)) + " : " + JSON.stringify(record_term(body)));
     // }
 
+
     var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
     if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))
     {
+        let headString = term_to_string(head);
+        // if(prolog_flag_values.wam_log === 'none' && headString.includes('location_modelx')) {
+        //     prolog_flag_values.wam_log = 'local_storage_ring';
+        // } else if(prolog_flag_values.wam_log !== 'none' && ! headString.includes('location_modelx')) {
+        //     log(prolog_flag_values.wam_log, 'ending log at ' + headString);
+        //     prolog_flag_values.wam_log = 'none';
+        // }
+        //
+        // if(prolog_flag_values.wam_log !== 'none') {
+        //     log(prolog_flag_values.wam_log, 'start ' + headString);
+        // }
         // Easy case. New or empty predicate. Add it to the table then set up the <NOP,0> header
         compilation_environment.buffer[0] = 254;
         compilation_environment.buffer[1] = 0;
@@ -1833,6 +1845,11 @@ function add_clause_to_predicate(predicateP, head, body)
                                  clause_keys: [0],
                                  is_public: is_public,
                                  next_key: 1};
+
+        // if(prolog_flag_values.wam_log !== 'none') {
+        //     log(prolog_flag_values.wam_log, '...completed ' + headString);
+        // }
+
     }
     else
     {
@@ -2795,12 +2812,16 @@ var prolog_flags = [{name:"bounded", fn:flag_bounded},
                     {name:"max_arity", fn:flag_max_arity},
                     {name:"unknown", fn:flag_unknown},
                     {name:"double_quotes", fn:flag_double_quotes},
-                    {name:"dialect", fn:flag_dialect}];
+                    {name:"dialect", fn:flag_dialect},
+                    {name:"wam_log", fn:flag_wam_log},
+                    {name:"wam_log_size", fn:flag_wam_log_size}];
 
 var prolog_flag_values = {char_conversion: false,
                           debug: false,
                           unknown: "error",
-                          double_quotes: "codes"};
+                          double_quotes: "codes",
+                          wam_log: "none",
+                          wam_log_size: 50};
 
 function flag_bounded(set, value)
 {
@@ -2905,6 +2926,41 @@ function flag_dialect(set, value)
     return unify(value, lookup_atom("proscriptls"));
 }
 
+function flag_wam_log(set, value) {
+    if (set)
+    {
+        if (TAG(value) === TAG_ATM && atable[VAL(value)] === "console")
+            prolog_flag_values.wam_log = "console";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "local_storage")
+            prolog_flag_values.wam_log = "local_storage";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "local_storage_ring")
+            prolog_flag_values.wam_log = "local_storage_ring";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "none")
+            prolog_flag_values.wam_log = "none";
+        else
+        {
+            return type_error("wam_log_value", value);
+        }
+        return true;
+    }
+    return unify(value, lookup_atom(prolog_flag_values.wam_log));
+}
+
+function flag_wam_log_size(set, value)
+{
+    if (set) {
+        if (TAG(value) === TAG_REF) {
+            return instantiation_error(value);
+        } else if (TAG(value) === TAG_INT) {
+            prolog_flag_values.wam_log_size = VAL(value);
+            return true;
+        } else {
+            return type_error('integer', value);
+        }
+    }
+
+    return unify(value, PL_put_integer(prolog_flag_values.wam_log_size));
+}
 
 function predicate_set_prolog_flag(key, value)
 {
@@ -4881,6 +4937,10 @@ function wam1()
     state.running = true;
     while (state.running)
     {
+
+        if(prolog_flag_values.wam_log !== 'none') 
+            log(prolog_flag_values.wam_log, decode_instruction(state.current_predicate, state.P).string);
+
         if(state.trace_call === 'trace' && state.trace_instruction &&
             (state.trace_instruction === 'trace' || state.trace_instruction === 'step')) {
             let instruction = decode_instruction(state.current_predicate, state.P);
@@ -6363,6 +6423,19 @@ function strings_to_atom_list(strings) {
     return tmp;
 }
 
+function log(target, msg) {
+    if(target !== 'none') {
+        if (target === 'console') {
+            dumpWrite(msg);
+        } else if (target === 'local_storage') {
+            logToLocalStorage(msg);
+        } else if (target === 'local_storage_ring') {
+            log_ring(msg);
+        } else {
+            throw 'invalid log target: ' + target;
+        }
+    }
+}
 // File read.js
 "use strict";
 
@@ -10746,6 +10819,74 @@ function proscriptls_apply(goalArguments, module, goal) {
 function debug(msg) {
     if(debugging) {
         alert(msg);
+    }
+}
+
+let logKey = 'proscriptls_log';
+
+function logToLocalStorage(msg) {
+    let log = window.localStorage.getItem(logKey);
+    if(log) {
+        log += msg + '\n';
+    } else {
+        log = msg + '\n';
+    }
+    window.localStorage.setItem(logKey, log);
+}
+
+function predicate_clear_local_storage_log() {
+    window.localStorage.removeItem(logKey);
+
+    current = -1;
+    let ringCurrentKey = logKey + ':current';
+    window.localStorage.setItem(ringCurrentKey, '' + current);
+
+    let ofst = 0;
+    while(true) {
+        let ringKey = logKey + ':' + ofst++;
+        if(typeof window.localStorage.getItem(ringKey) === 'undefined' ||
+            window.localStorage.getItem(ringKey) === null) {
+            break;
+        } else {
+             window.localStorage.removeItem(ringKey);
+        }
+    }
+
+    return true;
+}
+
+let current = -1;
+
+function log_ring(msg) {
+    current = (current+1) % prolog_flag_values.wam_log_size;
+    let ringKey = logKey + ':' + current;
+    let ringCurrentKey = logKey + ':current';
+    window.localStorage.setItem(ringKey, msg);
+    window.localStorage.setItem(ringCurrentKey, '' + current);
+}
+
+function dumpWriteLogRing() {
+    let ringCurrentKey = logKey + ':current';
+    let currentLogString = window.localStorage.getItem(ringCurrentKey);
+    let currentLog = Number.parseInt(currentLogString);
+    // find log ring size for the currently recorded log entries.
+    // This might be different than the current global value for log_ring_size.
+    let ofst = 0;
+    while(true) {
+        let ringKey = logKey + ':' + ofst++;
+        if(typeof window.localStorage.getItem(ringKey) === 'undefined' ||
+            window.localStorage.getItem(ringKey) === null) {
+            break;
+        }
+    }
+
+    let ringSize = ofst-1;
+    let unadjustedLimit = currentLog + ringSize;
+    for(let unadjustedOfst = currentLog;unadjustedOfst < unadjustedLimit;unadjustedOfst++) {
+        let adjustedOfst = unadjustedOfst % ringSize;
+        let ringKey = logKey + ':' + adjustedOfst;
+        let msg = window.localStorage.getItem(ringKey);
+        dumpWrite(msg);
     }
 }
 // File debugger.js

@@ -575,6 +575,7 @@ reset:-
         reserve_predicate('$get_backtrack_frame'/1, predicate_get_backtrack_frame),
         reserve_predicate('$set_backtrack_frame'/1, predicate_set_backtrack_frame),
         reserve_predicate('$trace_instruction_set'/1, predicate_trace_instruction_set),
+        reserve_predicate(clear_local_storage_log/0, predicate_clear_local_storage_log),
 
         % Testing
         reserve_predicate(member_test/2, predicate_member_test),

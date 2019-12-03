@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/test/game_data_x.pl" afterDir="false" />
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Added log function for debugging.&#10;&#10;The log function can write to console.log(), print(), or localStorage. The localStorage logging can be to a single key ('proscriptls_log'), or to a ring of entries (default size is 50), 'proscriptls_log:0' to 'proscriptls_log:49', current position stored in localStorage with key 'proscripls_log:current'. The ring can be dumped in the browser dev window using dumpWriteLogRing().&#10;Added wam_log and wam_log_size to prolog flags in foreign.js.&#10;Added call to log using prolog_flag_values.wam_log of decode_instruction() for current instruction.&#10;Added clear_local_storage_log/0 to clear both 'proscriptls_log' key item and ring items in localStorage.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/wam_compiler.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/wam_compiler.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/game_data.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/game_data.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/dom.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/dom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/foreign.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/foreign.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/wam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -28,46 +30,19 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
+        <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="305">
-              <caret line="311" column="24" selection-start-line="311" selection-start-column="24" selection-end-line="311" selection-end-column="24" />
+            <state relative-caret-position="183">
+              <caret line="1835" column="39" selection-start-line="1835" selection-start-column="39" selection-end-line="1835" selection-end-column="39" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
+        <entry file="file://$PROJECT_DIR$/src/engine/record.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2242">
-              <caret line="303" selection-start-line="303" selection-end-line="303" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/node_tools/node_toplevel.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" selection-start-line="2" selection-end-line="2" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/node_tools/simple_server.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" selection-start-line="2" selection-end-line="2" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="23" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
+            <state relative-caret-position="-93">
+              <caret line="156" column="9" selection-start-line="156" selection-start-column="9" selection-end-line="156" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -75,8 +50,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="197">
-              <caret line="45" column="1" selection-start-line="45" selection-start-column="1" selection-end-line="45" selection-end-column="1" />
+            <state relative-caret-position="188">
+              <caret line="19" column="33" selection-start-line="19" selection-start-column="26" selection-end-line="19" selection-end-column="40" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/engine/fli.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="165">
+              <caret line="258" column="9" selection-start-line="258" selection-start-column="9" selection-end-line="258" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -85,34 +69,52 @@
         <entry file="file://$PROJECT_DIR$/test/game_data.pl">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="119">
-              <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+              <caret line="8" selection-start-line="8" selection-end-line="8" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/game_data_x.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6061">
+            <state relative-caret-position="489">
               <caret line="509" column="4" selection-start-line="509" selection-start-column="4" selection-end-line="509" selection-end-column="4" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/web_interfaces.js">
+        <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="178">
-              <caret line="357" column="11" selection-start-line="357" selection-start-column="6" selection-end-line="357" selection-end-column="11" />
+            <state relative-caret-position="317">
+              <caret line="326" column="9" selection-start-line="326" selection-start-column="9" selection-end-line="326" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="70">
+              <caret line="675" column="66" selection-start-line="675" selection-start-column="66" selection-end-line="675" selection-end-column="66" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/examples/test.js">
+        <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1079">
-              <caret line="1" column="4" selection-start-line="1" selection-start-column="4" selection-end-line="1" selection-end-column="4" />
+            <state relative-caret-position="272">
+              <caret line="980" column="25" selection-start-line="980" selection-start-column="9" selection-end-line="980" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="347">
+              <caret line="578" selection-start-line="578" selection-end-line="578" />
             </state>
           </provider>
         </entry>
@@ -121,8 +123,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>(\d+)\t(\d\.\d+)\t(\d*,?\d+)\t(\d+.\d+)\t(\d.\d+)\t(\d*,?\d+)\t(\d+.\d+)</find>
-      <find>(\d+)\t(\d\.\d+)\t(\d*),?(\d+)\t(\d+.\d+)\t(\d.\d+)\t(\d*),?(\d+)\t(\d+.\d+)</find>
       <find>toString</find>
       <find>&gt;-&gt;(</find>
       <find>&gt;+&gt;(</find>
@@ -151,6 +151,8 @@
       <find>query</find>
       <find>:</find>
       <find>x:-</find>
+      <find>ringSize</find>
+      <find>hex</find>
     </findStrings>
     <replaceStrings>
       <replace>Session</replace>
@@ -185,13 +187,11 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/docs/items.predicates.doc.template" />
         <option value="$PROJECT_DIR$/test/web_test_blob.pl" />
         <option value="$PROJECT_DIR$/test/web_test_window.pl" />
         <option value="$PROJECT_DIR$/test/web_tests.pl" />
         <option value="$PROJECT_DIR$/src/engine/object.js" />
         <option value="$PROJECT_DIR$/library/listut.pl" />
-        <option value="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" />
         <option value="$PROJECT_DIR$/Makefile" />
         <option value="$PROJECT_DIR$/examples/Makefile" />
         <option value="$PROJECT_DIR$/src/system/bootstrap_js.pl" />
@@ -208,12 +208,10 @@
         <option value="$PROJECT_DIR$/test/web_test_html_input_element.pl" />
         <option value="$PROJECT_DIR$/test/web_test_html_select_element.pl" />
         <option value="$PROJECT_DIR$/test/test_local_storage.pl" />
-        <option value="$PROJECT_DIR$/src/engine/wam.js" />
         <option value="$PROJECT_DIR$/src/engine/debugger.js" />
         <option value="$PROJECT_DIR$/src/engine/decode_instruction.js" />
         <option value="$PROJECT_DIR$/src/engine/dump.js" />
         <option value="$PROJECT_DIR$/src/engine/fli.js" />
-        <option value="$PROJECT_DIR$/src/engine/foreign.js" />
         <option value="$PROJECT_DIR$/src/engine/gc.js" />
         <option value="$PROJECT_DIR$/src/engine/memory_files.js" />
         <option value="$PROJECT_DIR$/src/engine/object_method.js" />
@@ -236,6 +234,10 @@
         <option value="$PROJECT_DIR$/src/system/wam_compiler.pl" />
         <option value="$PROJECT_DIR$/test/game_data.pl" />
         <option value="$PROJECT_DIR$/test/game_data_x.pl" />
+        <option value="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" />
+        <option value="$PROJECT_DIR$/src/engine/dom.js" />
+        <option value="$PROJECT_DIR$/src/engine/foreign.js" />
+        <option value="$PROJECT_DIR$/src/engine/wam.js" />
       </list>
     </option>
   </component>
@@ -273,7 +275,7 @@
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="system" type="462c0819:PsiDirectoryNode" />
+              <item name="tools" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
@@ -342,7 +344,7 @@
       <workItem from="1573149691720" duration="6944000" />
       <workItem from="1573421596692" duration="598000" />
       <workItem from="1573438365843" duration="70447000" />
-      <workItem from="1574362050120" duration="62041000" />
+      <workItem from="1574362050120" duration="71825000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -456,23 +458,31 @@
       <option name="project" value="LOCAL" />
       <updated>1575135545342</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Extended dynamic directive to allow explicit module and lists.&#10;&#10;Added game_data_x.pl.&#10;Removed unused x_history and h_ptr global vars from proscript_interpreter_terminal.js.">
+      <created>1575385573530</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1575385573531</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="146300000" />
+    <option name="totallyTimeSpent" value="156084000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1280" height="740" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.6625222" visible="true" weight="0.20413026" />
-      <window_info id="Structure" order="1" sideWeight="0.3374778" side_tool="true" visible="true" weight="0.20413026" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.66206896" visible="true" weight="0.20413026" />
+      <window_info id="Structure" order="1" sideWeight="0.33793104" side_tool="true" visible="true" weight="0.20413026" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info active="true" anchor="bottom" id="Messages" visible="true" weight="0.3287037" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.1558642" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.13117284" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.13117284" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -540,20 +550,22 @@
     <MESSAGE value="Fixed object.pl modules in &gt;+&gt;/2 and &gt;-&gt;/2. Fixed current_prolog_flag.&#10;&#10;Adjusted values for flag_min_integer and flag_max_integer.&#10;Added debug output for each clause to compile_stream_term/3 controlled by current_prolog_flag debug = on. The output is followed by a yield/0 call to allow the debug text to be written immediately.&#10;Added flag unit test.&#10;Fixed web_test*.pl to remove singleton variables. Fixed 'class of test1 finds 1 classes [foo, bar]' to use setof/3 instead of findall/3." />
     <MESSAGE value="Fixed test_local_storage.pl export. Added test/game_data.pl." />
     <MESSAGE value="Added use-strict." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added use-strict." />
+    <MESSAGE value="Extended dynamic directive to allow explicit module and lists.&#10;&#10;Added game_data_x.pl.&#10;Removed unused x_history and h_ptr global vars from proscript_interpreter_terminal.js." />
+    <MESSAGE value="Added log function for debugging.&#10;&#10;The log function can write to console.log(), print(), or localStorage. The localStorage logging can be to a single key ('proscriptls_log'), or to a ring of entries (default size is 50), 'proscriptls_log:0' to 'proscriptls_log:49', current position stored in localStorage with key 'proscripls_log:current'. The ring can be dumped in the browser dev window using dumpWriteLogRing().&#10;Added wam_log and wam_log_size to prolog flags in foreign.js.&#10;Added call to log using prolog_flag_values.wam_log of decode_instruction() for current instruction.&#10;Added clear_local_storage_log/0 to clear both 'proscriptls_log' key item and ring items in localStorage." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added log function for debugging.&#10;&#10;The log function can write to console.log(), print(), or localStorage. The localStorage logging can be to a single key ('proscriptls_log'), or to a ring of entries (default size is 50), 'proscriptls_log:0' to 'proscriptls_log:49', current position stored in localStorage with key 'proscripls_log:current'. The ring can be dumped in the browser dev window using dumpWriteLogRing().&#10;Added wam_log and wam_log_size to prolog flags in foreign.js.&#10;Added call to log using prolog_flag_values.wam_log of decode_instruction() for current instruction.&#10;Added clear_local_storage_log/0 to clear both 'proscriptls_log' key item and ring items in localStorage." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/dist/proscriptls_engine_for_node.js</url>
-          <line>6174</line>
+          <line>6221</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/dist/proscriptls_engine.js</url>
-          <line>6174</line>
+          <line>6221</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="2" />
         </line-breakpoint>
@@ -575,13 +587,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/examples/tiles.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" column="42" selection-start-line="12" selection-start-column="42" selection-end-line="12" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="335">
@@ -687,23 +692,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/fli.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/gc.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
@@ -765,13 +753,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="232">
-          <caret line="1462" column="9" selection-start-line="1462" selection-start-column="9" selection-end-line="1462" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dist/proscriptls_engine.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="92505">
@@ -799,13 +780,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/record.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/standalone.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
@@ -817,13 +791,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
           <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" selection-end-line="1" />
         </state>
       </provider>
     </entry>
@@ -890,13 +857,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="197">
-          <caret line="45" column="1" selection-start-line="45" selection-start-column="1" selection-end-line="45" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2242">
@@ -921,14 +881,70 @@
     <entry file="file://$PROJECT_DIR$/test/game_data.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
-          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="347">
+          <caret line="578" selection-start-line="578" selection-end-line="578" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="188">
+          <caret line="19" column="33" selection-start-line="19" selection-start-column="26" selection-end-line="19" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/fli.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="258" column="9" selection-start-line="258" selection-start-column="9" selection-end-line="258" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/record.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-93">
+          <caret line="156" column="9" selection-start-line="156" selection-start-column="9" selection-end-line="156" selection-end-column="9" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/game_data_x.pl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6061">
+        <state relative-caret-position="489">
           <caret line="509" column="4" selection-start-line="509" selection-start-column="4" selection-end-line="509" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="317">
+          <caret line="326" column="9" selection-start-line="326" selection-start-column="9" selection-end-line="326" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="980" column="25" selection-start-line="980" selection-start-column="9" selection-end-line="980" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="183">
+          <caret line="1835" column="39" selection-start-line="1835" selection-start-column="39" selection-end-line="1835" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="70">
+          <caret line="675" column="66" selection-start-line="675" selection-start-column="66" selection-end-line="675" selection-end-column="66" />
         </state>
       </provider>
     </entry>
