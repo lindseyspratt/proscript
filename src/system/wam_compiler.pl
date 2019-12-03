@@ -292,10 +292,18 @@ macro_endif(ModeIn, ModeOut) :-
           -> throw('endif unknown action')
         ).
 
+define_dynamic_predicates(Module:Name/Arity) :-
+        !,
+        define_dynamic_predicate1(Module:Name/Arity).
 define_dynamic_predicates(Name/Arity) :-
         !,
         define_dynamic_predicate1(Name/Arity).
-define_dynamic_predicates([]).
+define_dynamic_predicates(_:[]) :- !.
+define_dynamic_predicates(Module:[H|T]) :-
+        !,
+        define_dynamic_predicates(Module:H),
+        define_dynamic_predicates(Module:T).
+define_dynamic_predicates([]) :- !.
 define_dynamic_predicates([H|T]) :-
         !,
         define_dynamic_predicates(H),
@@ -304,6 +312,9 @@ define_dynamic_predicates((A,B)) :-
         define_dynamic_predicates(A),
         define_dynamic_predicates(B).
 
+define_dynamic_predicate1(Module:Functor/Arity) :-
+        !,
+        define_dynamic_predicate(Module : (Functor/Arity)).
 define_dynamic_predicate1(Functor/Arity) :-
         current_compilation_module(Module),
         define_dynamic_predicate(Module : (Functor/Arity)).

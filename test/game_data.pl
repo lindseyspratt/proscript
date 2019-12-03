@@ -1,3 +1,94 @@
+:- dynamic(model_basics:
+    [
+    data_default_id/1,
+    data_numberOfPlayers/2,
+    data_trianglesPerTile/2,
+    data_abstractColors/2,
+    data_handColorIDSequences/2
+    ]).
+
+:- dynamic(view_basics:
+    [
+    data_default_id/1,
+    data_canvasWidth/2,
+    data_canvasHeight/2,
+    data_canvasOffsetTop/2,
+    data_canvasOffsetLeft/2,
+    data_context/2,
+    data_colors/2,
+    data_highlightColors/2,
+    data_handTileSize/2,
+    data_handPadding/2,
+    data_handMargin/2,
+    data_boardTileSize/2,
+    data_boardLeft/2,
+    data_boardTop/2,
+    data_boardWidth/2,
+    data_boardHeight/2
+    ]).
+
+:- dynamic(tile_model:
+    [
+    tile_model_default_id/1,
+    tile_model_gridX/2,
+    tile_model_gridY/2,
+    tile_model_colors/2,
+    tile_model_container/2,
+    tile_model_replacements/2,
+    tile_model_minimumMismatch/2
+    ]).
+
+:- dynamic(tile_view:
+    [data_displayX/2,
+     data_displayY/2,
+     data_size/2
+    ]).
+
+:- dynamic(game_model_tiles:
+    [data_default_id/1,
+     data_tile_counter/2,
+     data_tiles/2,
+     data_hands/2,
+     data_board/2,
+     data_tilesPlaced/2,
+     data_boardHash/2,
+     data_lastPlacedTile1/2,
+     data_lastPlacedTile2/2,
+     data_lastBuildPhaseTilePlacedID/2,
+     data_turn/2,
+     data_selectedTileID/2,
+     data_replacements/2,
+     data_gamePhase/2
+     ]).
+
+:- dynamic(game_view_tiles:
+    [data_default_id/1,
+     data_translateX/2,
+     data_translateY/2,
+     data_targetTranslateX/2,
+     data_targetTranslateY/2
+    ]).
+
+:- dynamic(location_model:
+    [data_gridX/2,
+     data_gridY/2,
+     data_neighbors/2,
+     data_orthogonalNeighbors/2,
+     data_byLastTilePlaced/2,
+     data_constraints/2,
+     data_forcedColors/2,
+     data_replacements/2,
+     data_minimumMismatch/2
+    ]).
+
+:- dynamic(locations:
+    [data_default_id/1,
+     data_locationCounter/2,
+     data_shapedPositions/2,
+     data_legalPositions/2,
+     data_legalPositionsWithRotation/2,
+     data_irreplaceables/2
+    ]).
 
 model_basics:data_default_id(1).
 %success
@@ -394,7 +485,7 @@ location_model:data_minimumMismatch(3,[]).
 location_model:data_minimumMismatch(5,[]).
 location_model:data_minimumMismatch(6,[]).
 location_model:data_minimumMismatch(8,[]).
-/*
+
 locations:data_default_id(1).
 
 % locations:data_locationCounter
@@ -417,4 +508,3 @@ locations:data_legalPositionsWithRotation(1,[]).
 
 locations:data_irreplaceables(1,[]).
 %:- endif.
-*/

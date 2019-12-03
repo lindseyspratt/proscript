@@ -3,7 +3,6 @@
 //call_directives();
 //initialize();
 var can_backtrack = false;
-var x_history = [];
 
 jQuery(function ($, undefined) {
     $('#proscriptinterpreter').terminal(function (command, term) {
@@ -209,8 +208,6 @@ function solve_query(query, term) {
     state.current_predicate = pred;
     code = pred.clauses[pi].code;
     register[0] = lookup_atom(query);
-    x_history.unshift(query);
-    h_ptr = -1;
     try_running();
 }
 
