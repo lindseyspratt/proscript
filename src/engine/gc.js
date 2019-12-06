@@ -1,101 +1,95 @@
 "use strict";
 
 let gc_environment = 'browser'; // 'console'
+let display_gc = false;
+let display_minor_gc = false;
 
 function predicate_gc()
 {
     let msgIn = "Before GC, heap is " + state.H;
     //stdout("===" + msgIn + "\n" + '\n');
-    debug(msgIn);
+    gc_main_debug(msgIn);
     // WARNING: This assumes ONLY predicate_gc will mark things!
     total_marked = 0;
 
-    // debugging only
-/*
-    var before = [];
-    var e = state.E;
-    var envsize = state.CP.code[state.CP.offset - 1];
-    while (e != HEAP_SIZE)
-    {
-        for (var i = 0; i < envsize; i++)
-        {
-            debug_msg("Y"+ i + " = " + term_to_string(memory[e+2 + i]) + " (" + hex(memory[e+2+i]) + ") @ " + (e+2+i));
-            before.push(record_term(memory[e+2 + i]));
-        }
-        var envcp = memory[e+1];
-        envsize = envcp.code[envcp.offset-1];
-        e = memory[e];
-    }
+    let before;
+    let after;
 
-    gc_debug('===check stacks before mark');
-    check_stacks(false);
- */
+    if(display_gc) {
+        // debugging only
+
+        before = [];
+        let e = state.E;
+        let envsize = state.CP.code[state.CP.offset - 1];
+        while (e !== HEAP_SIZE) {
+            for (let i = 0; i < envsize; i++) {
+                before.push(record_term(memory[e + 2 + i]));
+            }
+            let envcp = memory[e + 1];
+            envsize = envcp.code[envcp.offset - 1];
+            e = memory[e];
+        }
+
+//        gc_debug('===check stacks before mark');
+        check_stacks(false);
+    }
     mark();
-    /*
-    gc_debug('===check stacks after mark');
-    check_stacks(true);
-     */
-    debug_msg("\n\nMarked " + total_marked + " cells. Starting sweep");
+
+//    gc_debug('===check stacks after mark');
+//    check_stacks(true);
+
     push_registers();
+    //   gc_debug('after push_registers, before sweep_trail');
     sweep_trail();
-    debug_msg("Trail swept: " + total_marked);
-    sweep_stack(); 
+//    gc_debug('after sweep_trail, before sweep_stack');
+    sweep_stack();
 
-    debug_msg("\n\nMarked " + total_marked + " cells");
-    debug_msg("Stack swept");
-    debug_msg("Compacting heap");
 
+//    gc_debug('after sweep_stack, before compact');
     compact();
+//    gc_debug('after compact, before pop_registers');
     pop_registers();
+//    gc_debug('after pop_registers');
     state.H = total_marked;
-/*
-    gc_debug('===check stacks after compact/pop_registers');
-    check_stacks(false);
+    if(display_gc) {
+//    gc_debug('===check stacks after compact/pop_registers');
+//    check_stacks(false);
 
-    var after = [];
-    var e = state.E;
-    var envsize = state.CP.code[state.CP.offset - 1];
-    while (e != HEAP_SIZE)
-    {
-        for (var i = 0; i < envsize; i++)
-        {
-            debug_msg("Y"+ i + " = " + term_to_string(memory[e+2 + i]) + " (" + hex(memory[e+2+i]) + ") @ " + (e+2+i));
-            after.push(record_term(memory[e+2 + i]));
+        after = [];
+        let e = state.E;
+        let envsize = state.CP.code[state.CP.offset - 1];
+        while (e !== HEAP_SIZE) {
+            for (let i = 0; i < envsize; i++) {
+                after.push(record_term(memory[e + 2 + i]));
+            }
+            let envcp = memory[e + 1];
+            envsize = envcp.code[envcp.offset - 1];
+            e = memory[e];
         }
-        var envcp = memory[e+1];
-        envsize = envcp.code[envcp.offset-1];
-        e = memory[e];
     }
-*/
     if (total_marked !== 0)
     {
-        debug_msg("Warning: Some objects were not unmarked: " + total_marked);
     }
-/*
-    debug_msg("Comparing environments");
-    while (before.length != 0)
-    {
-        var a = before.pop();
-        var b = after.pop();
-        at = recall_term(a, {});
-        bt = recall_term(b, {});
-        if (!predicate_unify(at, bt))
-        {
-            debug("Error: Terms in environment changed during GC!");
-            debug("at = " + term_to_string(at));
-            debug("bt = " + term_to_string(bt));
-            abort("false");
+    if(display_gc) {
+        while (before.length !== 0) {
+            let a = before.pop();
+            let b = after.pop();
+            let at = recall_term(a, {});
+            let bt = recall_term(b, {});
+            if (!predicate_unify(at, bt)) {
+                gc_main_debug("Error: Terms in environment changed during GC!");
+                gc_main_debug("at = " + term_to_string(at));
+                gc_main_debug("bt = " + term_to_string(bt));
+                abort("false");
+            }
         }
-        debug_msg("Match: " + term_to_string(at) + " and " + term_to_string(bt));
+
+
+        // display_gc_log();
     }
-    debug_msg("All values accounted for");
-
-
-    display_gc_log();
- */
     let msgOut = "After GC, heap is " + state.H;
     //stdout( msgOut + '\n');
-    debug(msgOut);
+    gc_main_debug(msgOut);
 
     return true;
 }
@@ -217,33 +211,32 @@ function compact()
 {
     var dest;
     var current;
-    dest = total_marked - 1; 
-    debug_msg("Upward phase");
+    dest = total_marked - 1;
+    gc_debug('before compact upward');
     // Upward
     for (current = state.H-1; current >= 0; current--)
     {
         if ((memory[current] & M_BIT) === M_BIT)
         {
+            //gc_debug('compact - before update_relocation_chain('+current+', '+dest+')')
             update_relocation_chain(current, dest);
             if (IS_HEAP_PTR(memory[current]))
             {
-                debug_msg("current->value ( " + hex(memory[current]) + ") is a pointer to heap address " + VAL(memory[current]));
                 if (VAL(memory[current]) < current)
                 {
-                    debug_msg("Adding to relocation chain: " + VAL(memory[current]) + ", " + current);
+                    //gc_debug('compact - after update_relocation_chain, before into_relocation_chain('+VAL(memory[current])+', '+current+')')
                     into_relocation_chain(VAL(memory[current]), current);
                 }
                 else if (VAL(memory[current]) === current)
                 {
-                    debug_msg("A cell pointing to itself. Must set the value to dest: " + dest);
                     memory[current] = (memory[current] & NV_MASK) ^ dest;
                 }
             }
             dest--;
         }
     }
-    debug_msg("Downward phase");
 
+    gc_debug('after compact upward, before downward');
     // Downward
     dest = 0;
     for (current = 0; current < state.H; current++)
@@ -254,7 +247,7 @@ function compact()
             if (IS_HEAP_PTR(memory[current]) && VAL(memory[current]) > current)
             {
                 into_relocation_chain(VAL(memory[current]), dest);
-                
+
                 memory[dest] = VAL(memory[dest]) ^ (TAG(memory[current]) << WORD_BITS);
             }
             else
@@ -262,28 +255,46 @@ function compact()
                 memory[dest] = memory[current];
                 // clear the GC flags
                 memory[dest] &= ~F_BIT;
-            }            
+            }
             memory[dest] &= ~M_BIT;
-            debug_msg("set memory[" + dest + "] to " + hex(memory[dest]));
             dest++;
         }
     }
-    debug_msg("Complete. Total marked: " + total_marked);
+    gc_debug('after compact downward');
 }
 
 function update_relocation_chain(current, dest)
 {
-    var j;    
+    let localDebug = false; //(dest === 20);
+
+    if(localDebug) {
+        gc_debug('start update_relocation_chain(' + current + ', ' + dest + ')');
+    }
+
+    var j;
     while ((memory[current] & F_BIT) === F_BIT)
     {
-        debug_msg("Current: " + current + " has F bit set");
         j = VAL(memory[current]);
-        debug_msg("J is " + j + " which has value " + hex(memory[j]));
-        memory[current] = VAL(memory[j]) ^ (memory[current] & (NV_MASK ^ F_BIT)) | (memory[j] & F_BIT);
+        if(localDebug) {
+            gc_debug('update_relocation_chain - memory[current]=' + memory[current] + ', j=' + j);
+            gc_debug('memory[j]=' + memory[j] + ', VAL(memory[j])=' + VAL(memory[j]));
+            gc_debug('(memory[current] & (NV_MASK ^ F_BIT))=' + (memory[current] & (NV_MASK ^ F_BIT))
+                + ', (VAL(memory[j]) ^ (memory[current] & (NV_MASK ^ F_BIT)))=' + (VAL(memory[j]) ^ (memory[current] & (NV_MASK ^ F_BIT)))
+                + ', (memory[j] & F_BIT)=' + (memory[j] & F_BIT));
+        }
+        memory[current] = (VAL(memory[j]) ^ (memory[current] & (NV_MASK ^ F_BIT))) | (memory[j] & F_BIT);
+        if(localDebug) {
+            gc_debug('new memory[current]=' + memory[current]);
+            gc_debug('dest ^ (memory[j] & NV_MASK)='+(dest ^ (memory[j] & NV_MASK)));
+        }
         memory[j] = dest ^ (memory[j] & NV_MASK);
-        memory[j] &= ~F_BIT;                
-        debug_msg("memory[" + j + "] <- " + hex(memory[j]));
-        debug_msg("memory[" + current + "] <- " + hex(memory[current]));
+        if(localDebug) {
+            gc_debug('new memory[j]=' + memory[j]);
+        }
+        memory[j] &= ~F_BIT;
+        if(localDebug) {
+            gc_debug('new new memory[j]= (new memory[j] &= ~F_BIT)' + memory[j]);
+        }
     }
 }
 
@@ -699,7 +710,19 @@ function add_to_gc_log(msg) {
     gc_log.push(msg);
 }
 
+function gc_main_debug(msg) {
+    if(display_gc) {
+        alert('gc: ' + msg);
+//        display_backtrack = true;
+    }
+//    add_to_gc_log(msg);
+}
+
 function gc_debug(msg) {
+    if(display_minor_gc) {
+        alert('gc: ' + msg);
+//        display_backtrack = true;
+    }
 //    add_to_gc_log(msg);
 }
 
