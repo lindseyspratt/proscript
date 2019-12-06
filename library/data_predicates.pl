@@ -365,6 +365,7 @@ remove_data1(M:Prefix, local_storage(Key)) :-
 
 ids_in_use(M:Prefix, SortedIDs) :-
     data_predicates(_, M:Prefix, Suffixes),
+    !,
     ids_in_use(Suffixes, M:Prefix, IDs),
     sort(IDs, SortedIDs). % remove duplicates.
 

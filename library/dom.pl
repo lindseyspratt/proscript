@@ -36,6 +36,7 @@ dom_page_offset(Top, Left, HTMLElement) :-
 dom_page_offset(TopIN, LeftIN, Top, Left, HTMLElement) :-
     dom_object_property(_, HTMLElement, offsetTop, LTop),
     dom_object_property(_, HTMLElement, offsetLeft, LLeft),
+    !,
     TopNEXT is TopIN + LTop,
     LeftNEXT is LeftIN + LLeft,
     (dom_object_property(_, HTMLElement, offsetParent, Parent)

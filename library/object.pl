@@ -119,6 +119,7 @@ general_application(Obj,  M : [H|T]) :-
     general_application(Obj,  M : H),
     general_application(Obj,  M : T).
 general_application(_Obj,  M : {G}) :-
+    !,
     call(M : G).
 general_application(Obj, M : (* Method)) :-
     !, % method invocation
@@ -163,6 +164,7 @@ attribute_application(_Obj, {G}) :-
     !,
     call(G).
 attribute_application(Obj, :>(Attribute, V)) :-
+    !,
     dom_element_attribute_value(Obj, Attribute, V).
 attribute_application(Obj, <:(Attribute, V)) :-
     set_dom_element_attribute_value(Obj, Attribute, V).
@@ -183,6 +185,7 @@ property_application(Type-Obj, :>(Property, V)) :-
     !,
     dom_object_property(Type, Obj, Property, V).
 property_application(Obj, :>(Property, V)) :-
+    !,
     dom_object_property(_, Obj, Property, V).
 property_application(Obj, <:(Property, V)) :-
     set_dom_object_property(Obj, Property, V).
