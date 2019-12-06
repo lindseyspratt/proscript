@@ -66,6 +66,8 @@ let indexed_predicates = [];
 let exception = null;
 let itable = [];
 let stable = [];
+let maxStackSize = 0;
+let maxHeapSize = 0;
 
 /* Constants. Should be auto-generated */
 const HEAP_SIZE = 1410700;
@@ -425,6 +427,9 @@ function alloc_structure(ftor)
 {
     let tmp = state.H;
     memory[state.H++] = ftor;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return tmp ^ (TAG_STR << WORD_BITS);
 }
 
@@ -433,6 +438,9 @@ function alloc_var()
     let result = state.H ^ (TAG_REF << WORD_BITS);
     memory[state.H] = result;    
     state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return result;
 }
 
@@ -441,6 +449,9 @@ function alloc_list()
     let result = (state.H+1) ^ (TAG_LST << WORD_BITS);
     memory[state.H] = result;    
     state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return result;
 }
 
@@ -458,6 +469,9 @@ function wam_setup_trace_call(target_ftor_ofst) {
         let argOfst = 0;
         for (; argOfst < traceArgArity; argOfst++) {
             memory[state.H++] = register[argOfst];
+        }
+        if(state.H > maxHeapSize) {
+            maxHeapSize = state.H;
         }
 
         // Make the traceArgStructure the first argument.
@@ -581,6 +595,12 @@ function wam_create_choicepoint(nextCP, prefix) {
     memory[newB + n + CP_TI] = state.trace_info;
     state.B = newB;
     state.HB = state.H;
+
+    let stackTop = newB + n + CP_SIZE - 1;
+
+    if(maxStackSize < stackTop) {
+        maxStackSize = stackTop;
+    }
 }
 
 function wam_trace_call_or_execute(functor) {
@@ -776,6 +796,11 @@ function wam1()
                 memory[tmpE + 1] = state.CP;
                 state.E = tmpE;
                 state.P += 1;
+
+                if(maxStackSize < tmpE+1) {
+                    maxStackSize = tmpE+1;
+                }
+
             }
                 continue;
 
@@ -953,6 +978,9 @@ function wam1()
                 register[code[state.P + 1]] = freshvar;
                 register[code[state.P + 2]] = freshvar;
                 state.H++;
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 debug_msg("After put_variable, state.H is now " + state.H);
                 state.P += 3;
             }
@@ -1206,6 +1234,10 @@ function wam1()
                 } else {
                     memory[state.H++] = register[code[state.P + 2]];
                 }
+
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
             }
             state.P += 3;
             if (did_fail)
@@ -1250,6 +1282,10 @@ function wam1()
                     if (code[state.P + 1] === 1)
                         register[code[state.P + 2]] = fresh; // also set X(i) if X-register
                 }
+
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
             }
             state.P += 3;
             if (did_fail)
@@ -1277,6 +1313,9 @@ function wam1()
             else
             {
                 memory[state.H++] = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -1298,6 +1337,9 @@ function wam1()
             else
             {
                 memory[state.H++] = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -1779,6 +1821,9 @@ function wam1()
             else
             {
                 memory[state.H++] = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -2140,6 +2185,9 @@ function undefined_predicate(ftor)
         memory[state.H++] = lookup_functor("/", 2);
         memory[state.H++] = ftable[ftor][0] ^ (TAG_ATM << WORD_BITS);
         memory[state.H++] = ftable_arity(ftor) ^ (TAG_INT << WORD_BITS);
+        if(state.H > maxHeapSize) {
+            maxHeapSize = state.H;
+        }
         existence_error("procedure", indicator);
     }
     else if (prolog_flag_values.unknown === "warning")

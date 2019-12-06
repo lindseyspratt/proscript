@@ -372,3 +372,15 @@ test(flag, exit) :-
         current_prolog_flag(min_integer, Mn),
         current_prolog_flag(max_integer, Mx),
         Mn < Mx.
+
+test(stat_max_heap, exit) :-
+        statistics_max_heap(M),
+        M > 0.
+
+test(stat_max_stack, exit) :-
+        statistics_max_stack(M),
+        M > 0.
+
+test(stat_wam_duration, exit) :-
+        wam_duration(M),
+        M > 0.

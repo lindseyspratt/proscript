@@ -568,22 +568,23 @@ function dump_registers()
 
 function predicate_statistics()
 {
-    var aggregateDuration = statistics_wam_duration();
-    var heapSize = statistics_heap_size();
+    let aggregateDuration = statistics_wam_duration();
+    let heapSize = statistics_heap_size();
+    let maxHeap = statistics_max_heap();
+    let maxStack = statistics_max_stack();
+    let stackPortion = maxStack - HEAP_SIZE;
 
     stdout("WAM duration: " + aggregateDuration + "\n");
-    stdout("Heap size: " + heapSize + "\n");
+    stdout("Current heap: " + heapSize + "\n");
+    stdout("Max heap: " + maxHeap + " (words of " + HEAP_SIZE + " limit)\n");
+    stdout("Max stack: " + stackPortion + " (words of " + STACK_SIZE + " limit, " + maxStack + " absolute)\n");
     return true;
 }
 
 function predicate_wam_duration(duration) {
     var aggregateDuration = statistics_wam_duration();
 
-    if(Number.isSafeInteger(aggregateDuration)) {
-        return PL_unify_integer(duration, aggregateDuration);
-    } else {
-        return PL_unify_float(duration, aggregateDuration);
-    }
+    return unify_number(aggregateDuration, duration);
 }
 
 function statistics_wam_duration() {
@@ -600,15 +601,39 @@ function statistics_wam_duration() {
 function predicate_statistics_heap_size(size) {
     var heapSize = statistics_heap_size();
 
-    if(Number.isSafeInteger(heapSize)) {
-        return PL_unify_integer(size, heapSize);
-    } else {
-        return PL_unify_float(size, heapSize);
-    }
+    return unify_number(heapSize, size);
 }
 
 function statistics_heap_size() {
     return state.H;
+}
+
+function predicate_statistics_max_stack(maxStackPL) {
+    var maxStackJS = statistics_max_stack();
+
+    return unify_number(maxStackJS, maxStackPL);
+}
+
+function statistics_max_stack() {
+    return maxStackSize;
+}
+
+function predicate_statistics_max_heap(maxHeapPL) {
+    var maxHeapJS = statistics_max_heap();
+
+    return unify_number(maxHeapJS, maxHeapPL);
+}
+
+function statistics_max_heap() {
+    return maxHeapSize;
+}
+
+function unify_number(numberJS, numberPL) {
+    if(Number.isInteger(numberJS) && numberJS <= (2**(WORD_BITS-1)-1) && numberJS >= -1*(2**(WORD_BITS-1)-1)) {
+        return PL_unify_integer(numberPL, numberJS);
+    } else {
+        return PL_unify_float(numberPL, numberJS);
+    }
 }
 
 function gc_check(t)

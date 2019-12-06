@@ -4350,6 +4350,8 @@ let indexed_predicates = [];
 let exception = null;
 let itable = [];
 let stable = [];
+let maxStackSize = 0;
+let maxHeapSize = 0;
 
 /* Constants. Should be auto-generated */
 const HEAP_SIZE = 1410700;
@@ -4700,6 +4702,9 @@ function alloc_structure(ftor)
 {
     let tmp = state.H;
     memory[state.H++] = ftor;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return tmp ^ (TAG_STR << WORD_BITS);
 }
 
@@ -4708,6 +4713,9 @@ function alloc_var()
     let result = state.H ^ (TAG_REF << WORD_BITS);
     memory[state.H] = result;    
     state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return result;
 }
 
@@ -4716,6 +4724,9 @@ function alloc_list()
     let result = (state.H+1) ^ (TAG_LST << WORD_BITS);
     memory[state.H] = result;    
     state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return result;
 }
 
@@ -4733,6 +4744,9 @@ function wam_setup_trace_call(target_ftor_ofst) {
         let argOfst = 0;
         for (; argOfst < traceArgArity; argOfst++) {
             memory[state.H++] = register[argOfst];
+        }
+        if(state.H > maxHeapSize) {
+            maxHeapSize = state.H;
         }
 
         // Make the traceArgStructure the first argument.
@@ -4850,6 +4864,12 @@ function wam_create_choicepoint(nextCP, prefix) {
     memory[newB + n + CP_TI] = state.trace_info;
     state.B = newB;
     state.HB = state.H;
+
+    let stackTop = newB + n + CP_SIZE - 1;
+
+    if(maxStackSize < stackTop) {
+        maxStackSize = stackTop;
+    }
 }
 
 function wam_trace_call_or_execute(functor) {
@@ -5037,6 +5057,11 @@ function wam1()
                 memory[tmpE + 1] = state.CP;
                 state.E = tmpE;
                 state.P += 1;
+
+                if(maxStackSize < tmpE+1) {
+                    maxStackSize = tmpE+1;
+                }
+
             }
                 continue;
 
@@ -5200,6 +5225,9 @@ function wam1()
                 register[code[state.P + 1]] = freshvar;
                 register[code[state.P + 2]] = freshvar;
                 state.H++;
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 3;
             }
             continue;
@@ -5429,6 +5457,10 @@ function wam1()
                 } else {
                     memory[state.H++] = register[code[state.P + 2]];
                 }
+
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
             }
             state.P += 3;
             if (did_fail)
@@ -5469,6 +5501,10 @@ function wam1()
                     if (code[state.P + 1] === 1)
                         register[code[state.P + 2]] = fresh; // also set X(i) if X-register
                 }
+
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
             }
             state.P += 3;
             if (did_fail)
@@ -5494,6 +5530,9 @@ function wam1()
             else
             {
                 memory[state.H++] = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -5514,6 +5553,9 @@ function wam1()
             else
             {
                 memory[state.H++] = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -5953,6 +5995,9 @@ function wam1()
             else
             {
                 memory[state.H++] = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -6306,6 +6351,9 @@ function undefined_predicate(ftor)
         memory[state.H++] = lookup_functor("/", 2);
         memory[state.H++] = ftable[ftor][0] ^ (TAG_ATM << WORD_BITS);
         memory[state.H++] = ftable_arity(ftor) ^ (TAG_INT << WORD_BITS);
+        if(state.H > maxHeapSize) {
+            maxHeapSize = state.H;
+        }
         existence_error("procedure", indicator);
     }
     else if (prolog_flag_values.unknown === "warning")
@@ -9704,22 +9752,23 @@ function dump_registers()
 
 function predicate_statistics()
 {
-    var aggregateDuration = statistics_wam_duration();
-    var heapSize = statistics_heap_size();
+    let aggregateDuration = statistics_wam_duration();
+    let heapSize = statistics_heap_size();
+    let maxHeap = statistics_max_heap();
+    let maxStack = statistics_max_stack();
+    let stackPortion = maxStack - HEAP_SIZE;
 
     stdout("WAM duration: " + aggregateDuration + "\n");
-    stdout("Heap size: " + heapSize + "\n");
+    stdout("Current heap: " + heapSize + "\n");
+    stdout("Max heap: " + maxHeap + " ( memory words of " + HEAP_SIZE + " limit)\n");
+    stdout("Max stack: " + stackPortion + " (stack memory words of " + STACK_SIZE + " limit, " + maxStack + " absolute)\n");
     return true;
 }
 
 function predicate_wam_duration(duration) {
     var aggregateDuration = statistics_wam_duration();
 
-    if(Number.isSafeInteger(aggregateDuration)) {
-        return PL_unify_integer(duration, aggregateDuration);
-    } else {
-        return PL_unify_float(duration, aggregateDuration);
-    }
+    return unify_number(aggregateDuration, duration);
 }
 
 function statistics_wam_duration() {
@@ -9736,15 +9785,39 @@ function statistics_wam_duration() {
 function predicate_statistics_heap_size(size) {
     var heapSize = statistics_heap_size();
 
-    if(Number.isSafeInteger(heapSize)) {
-        return PL_unify_integer(size, heapSize);
-    } else {
-        return PL_unify_float(size, heapSize);
-    }
+    return unify_number(heapSize, size);
 }
 
 function statistics_heap_size() {
     return state.H;
+}
+
+function predicate_statistics_max_stack(maxStackPL) {
+    var maxStackJS = statistics_max_stack();
+
+    return unify_number(maxStackJS, maxStackPL);
+}
+
+function statistics_max_stack() {
+    return maxStackSize;
+}
+
+function predicate_statistics_max_heap(maxHeapPL) {
+    var maxHeapJS = statistics_max_heap();
+
+    return unify_number(maxHeapJS, maxHeapPL);
+}
+
+function statistics_max_heap() {
+    return maxHeapSize;
+}
+
+function unify_number(numberJS, numberPL) {
+    if(Number.isInteger(numberJS) && numberJS <= (2**(WORD_BITS-1)-1) && numberJS >= -1*(2**(WORD_BITS-1)-1)) {
+        return PL_unify_integer(numberPL, numberJS);
+    } else {
+        return PL_unify_float(numberPL, numberJS);
+    }
 }
 
 function gc_check(t)

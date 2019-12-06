@@ -606,6 +606,9 @@ reset:-
         reserve_predicate(gc/0, predicate_gc),
         reserve_predicate(statistics/0, predicate_statistics),
         reserve_predicate(wam_duration/1, predicate_wam_duration),
+        reserve_predicate(statistics_heap_size/1, predicate_statistics_heap_size),
+        reserve_predicate(statistics_max_stack/1, predicate_statistics_max_stack),
+        reserve_predicate(statistics_max_heap/1, predicate_statistics_max_heap),
 
         % Javascript
         reserve_predicate(eval_javascript/1, predicate_eval_javascript),
