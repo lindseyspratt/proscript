@@ -1,5 +1,7 @@
 /* This file generated automatically. It defines the runtime engine for ProscriptLS.*/
 // File foreign.js
+"use strict";
+
 let compilation_environment = {
     buffer: [],
     indexing_mode: 'basic'
@@ -165,7 +167,8 @@ function evaluate_expression(expression, evaluated)
             memory[state.H++] = arity ^ (TAG_INT << WORD_BITS);
             return type_error("evaluable", indicator)
         }
-        return true;            
+
+        return true;
     }
     else if (TAG(expression) === TAG_ATM)
     {
@@ -350,27 +353,39 @@ function predicate_univ(term, list_term)
             var arity = 0;
             if (TAG(list_term) !== TAG_LST)
                 return type_error("list", list_term);
-            if (TAG(deref(memory[VAL(list_term)])) !== TAG_ATM)
-                return type_error("atom", deref(memory[VAL(list_term)]));
-            var ftor_name = atable[VAL(deref(memory[VAL(list_term)]))];
-            list_term = memory[VAL(list_term) + 1];
-            // Now write the args
-            while (TAG(list_term) === TAG_LST) {
-                // Write head
-                memory[state.H++] = memory[VAL(list_term)];
-                // Update tail
+
+            let ftor_name_id = deref(memory[VAL(list_term)]);
+
+            if(TAG(ftor_name_id)===TAG_ATM) {
+                var ftor_name = atable[VAL(ftor_name_id)];
                 list_term = memory[VAL(list_term) + 1];
-                arity++;
+                // Now write the args
+                while (TAG(list_term) === TAG_LST) {
+                    // Write head
+                    memory[state.H++] = memory[VAL(list_term)];
+                    // Update tail
+                    list_term = memory[VAL(list_term) + 1];
+                    arity++;
+                }
+                // Check tail
+                if (list_term !== NIL) {
+                    if (TAG(list_term) === TAG_REF)
+                        return instantiation_error(list_term);
+                    else
+                        return type_error("list", list_term);
+                }
+
+                if (arity === 0) {
+                    state.H--; // undo the setup for allocating a structure on the heap.
+                    return unify(term, ftor_name_id);
+                }
+                memory[tmp] = lookup_functor(ftor_name, arity);
+                return unify(term, tmp ^ (TAG_STR << WORD_BITS));
+            } else if(TAG(ftor_name_id)===TAG_INT || TAG(ftor_name_id)===TAG_FLT) {
+                return unify(term, ftor_name_id);
+            } else {
+                return type_error('atomic first item in univ list', ftor_name_id);
             }
-            // Check tail
-            if (list_term !== NIL) {
-                if (TAG(list_term) === TAG_REF)
-                    return instantiation_error(list_term);
-                else
-                    return type_error("list", list_term);
-            }
-            memory[tmp] = lookup_functor(ftor_name, arity);
-            return unify(term, tmp ^ (TAG_STR << WORD_BITS));
         case TAG_STR:
             var ftor = VAL(memory[VAL(term)]);
             if (ftable[ftor] === undefined)
@@ -1739,6 +1754,25 @@ function predicate_add_index_clause_to_predicate(predicateP) {
     return true;
 }
 
+// predicate_edit_clauses_for_index_sequences modifies sequences of clauses
+// to use try_me_else, retry_me_else, trust_me, and nop2 appropriately for
+// supporting indexing using switch_on_term instruction.
+// The sequencesP parameter is a Prolog list of lists of integers: these
+// integers specify clauseKey indices (0-based) such that an integer K
+// identifies a clause as:
+//      let clause = predicates.clauses[predicates.clauseKeys[K]];
+// The code for clause K has its first instruction modified appropriately
+// for a control instruction according to the position of clause K in its
+// containing sequence:
+//  if the sequence only has one clause (K), then the control instruction is 'nop2';
+//  if K is the first clause in its sequence then its control instruction is
+//      'try_me_else(N)' where N is the clauseKey index of the next clause in
+//      the sequence, which is alwasy (K+1);
+//  if K is neither the first nor the last clause in its sequence then its control
+//      instruction is retry_me_else(N), where N=K+1 as before; finally,
+//  if K is the last clause in its sequence (of more than one clause) then
+//      its control instruction is trust_me.
+
 function predicate_edit_clauses_for_index_sequences(sequencesP, predicateP) {
     let sequences = integer_list_list_to_term_array(sequencesP);
     for(let ofst = 0;ofst < sequences.length; ofst++) {
@@ -1782,9 +1816,21 @@ function add_clause_to_predicate(predicateP, head, body)
     //     console.log(JSON.stringify(record_term(head)) + " : " + JSON.stringify(record_term(body)));
     // }
 
+
     var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
     if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))
     {
+        // let headString = term_to_string(head);
+        // if(prolog_flag_values.wam_log === 'none' && headString.includes('location_modelx')) {
+        //     prolog_flag_values.wam_log = 'local_storage_ring';
+        // } else if(prolog_flag_values.wam_log !== 'none' && ! headString.includes('location_modelx')) {
+        //     log(prolog_flag_values.wam_log, 'ending log at ' + headString);
+        //     prolog_flag_values.wam_log = 'none';
+        // }
+        //
+        // if(prolog_flag_values.wam_log !== 'none') {
+        //     log(prolog_flag_values.wam_log, 'start ' + headString);
+        // }
         // Easy case. New or empty predicate. Add it to the table then set up the <NOP,0> header
         compilation_environment.buffer[0] = 254;
         compilation_environment.buffer[1] = 0;
@@ -1799,6 +1845,11 @@ function add_clause_to_predicate(predicateP, head, body)
                                  clause_keys: [0],
                                  is_public: is_public,
                                  next_key: 1};
+
+        // if(prolog_flag_values.wam_log !== 'none') {
+        //     log(prolog_flag_values.wam_log, '...completed ' + headString);
+        // }
+
     }
     else
     {
@@ -2761,12 +2812,16 @@ var prolog_flags = [{name:"bounded", fn:flag_bounded},
                     {name:"max_arity", fn:flag_max_arity},
                     {name:"unknown", fn:flag_unknown},
                     {name:"double_quotes", fn:flag_double_quotes},
-                    {name:"dialect", fn:flag_dialect}];
+                    {name:"dialect", fn:flag_dialect},
+                    {name:"wam_log", fn:flag_wam_log},
+                    {name:"wam_log_size", fn:flag_wam_log_size}];
 
 var prolog_flag_values = {char_conversion: false,
                           debug: false,
                           unknown: "error",
-                          double_quotes: "codes"};
+                          double_quotes: "codes",
+                          wam_log: "none",
+                          wam_log_size: 50};
 
 function flag_bounded(set, value)
 {
@@ -2777,13 +2832,14 @@ function flag_bounded(set, value)
 function flag_max_integer(set, value)
 {
     if (set) return permission_error("prolog_flag");
-    return unify(value, (268435455) ^ (TAG_INT<<WORD_BITS));
+    return unify(value, ((2**(WORD_BITS-1)-1) & ((1 << WORD_BITS)-1)) ^ (TAG_INT<<WORD_BITS));
 }
 
 function flag_min_integer(set, value)
 {
     if (set) return permission_error("prolog_flag");
-    return unify(value, (536870911) ^ (TAG_INT<<WORD_BITS));
+    let newTerm = ((-1*(2**(WORD_BITS-1))) & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+    return unify(value, newTerm);
 }
 
 function flag_integer_rounding_function(set, value)
@@ -2870,6 +2926,41 @@ function flag_dialect(set, value)
     return unify(value, lookup_atom("proscriptls"));
 }
 
+function flag_wam_log(set, value) {
+    if (set)
+    {
+        if (TAG(value) === TAG_ATM && atable[VAL(value)] === "console")
+            prolog_flag_values.wam_log = "console";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "local_storage")
+            prolog_flag_values.wam_log = "local_storage";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "local_storage_ring")
+            prolog_flag_values.wam_log = "local_storage_ring";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "none")
+            prolog_flag_values.wam_log = "none";
+        else
+        {
+            return type_error("wam_log_value", value);
+        }
+        return true;
+    }
+    return unify(value, lookup_atom(prolog_flag_values.wam_log));
+}
+
+function flag_wam_log_size(set, value)
+{
+    if (set) {
+        if (TAG(value) === TAG_REF) {
+            return instantiation_error(value);
+        } else if (TAG(value) === TAG_INT) {
+            prolog_flag_values.wam_log_size = VAL(value);
+            return true;
+        } else {
+            return type_error('integer', value);
+        }
+    }
+
+    return unify(value, PL_put_integer(prolog_flag_values.wam_log_size));
+}
 
 function predicate_set_prolog_flag(key, value)
 {
@@ -2915,11 +3006,10 @@ function predicate_current_prolog_flag(key, value)
     else if (TAG(key) === TAG_ATM)
     {
         let keyname = atable[VAL(key)];
-        let index = 0;
         for (let i = 0; i < prolog_flags.length; i++)
         {
-            if (prolog_flags[index].name === keyname)
-                return prolog_flags[index].fn(false, value);
+            if (prolog_flags[i].name === keyname)
+                return prolog_flags[i].fn(false, value);
         }
         return false;
     }
@@ -3621,13 +3711,16 @@ function engine_error(message) {
 
 }
 // File promise.js
+"use strict";
+
 // Promise object in javascript encapsulates asynchronous
 // processing. The functions in this file support the integration
-// of some Promise features with Proscript.
+// of some Promise features with ProscriptLS.
 //
-// The basic integration with Proscript relies on foreign predicates
+// The basic integration with ProscriptLS relies on foreign predicates
 // that create Promise objects, Prolog terms of the form
-// '$promise'(N) to map to these Javascript Promise objects,
+// '$obj'(N) (with object N registered as type 'promise')
+// to map to these Javascript Promise objects,
 // and two foreign predicates to request results from a
 // Promise object and to handle the event (callback) when
 // the requested results are made available to the Javascript
@@ -3669,19 +3762,22 @@ function get_promise_object(term, ref) {
         return false;
     }
 
-    return(ref.type === 'promise');
+    if(ref.type !== 'promise'){
+        return representation_error('promise', term);
+    }
+    return true;
 }
 
 function predicate_request_result(promise) {
     let promiseObject = {};
     if (!get_promise_object(promise, promiseObject)) {
-        return representation_error('promise', promise);
+        return false;
     }
+
     let promiseJS = promiseObject.value;
 
-    promise_requests.set(promise, '');
-    // ignore promiseResultJS?
     let promiseResultJS = request_result(promise, promiseJS);
+    promise_requests.set(promise, promiseResultJS);
     return true;
 }
 
@@ -3714,10 +3810,10 @@ function promise_backtrack() {
     if(typeof try_backtrack === 'undefined' || !try_backtrack) {
         if (backtrack()) {
             if (!wam()) {
-                throw 'promise_callback failed: callback ' + promise + ' result ' + result;
+                throw 'promise_callback failed';
             }
         } else {
-            throw 'promise_callback backtrack failed: promise ' + promise + ' result ' + result;
+            throw 'promise_callback backtrack failed';
         }
     } else {
         // stdout('running promise_backtrack\n');
@@ -3856,6 +3952,7 @@ async function node_fetch(urlJS) {
 //     }
 // }
 // File memory_files.js
+"use strict";
 
 /* Memory files */
 var memory_files = [];
@@ -3961,7 +4058,8 @@ function atom_list_to_array(listPL) {
 
 function text_to_memory_file(text) {
     let index = memory_files.length;
-    memory_files[index] = {data:toByteArray(text), ptr:0};
+    let byteArray = toByteArray(text);
+    memory_files[index] = {data:byteArray, ptr:byteArray.length};
     return index;
 }
 
@@ -4090,25 +4188,31 @@ function tell_memory_file(stream)
 function open_memory_file(memfile, mode, stream)
 {
     var index = streams.length;
-    if (TAG(memfile) === TAG_REF)
-        return instantiation_error(memfile);
-    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
-        return type_error("memory_file", memfile);
-    var memindex = get_arg(memfile, 1);
-    if (TAG(memindex) !== TAG_INT)
-        return type_error("memory_file", memfile);
-    memindex = VAL(memindex);
+    let memfileContainer = {};
+    if(!valid_memfile(memfile, memfileContainer)) {
+        return false;
+    }
+
+    let memindex = memfileContainer.value;
+
     if (TAG(mode) === TAG_REF)
         return instantiation_error(mode);
     else if (TAG(mode) !== TAG_ATM)
         return type_error("atom", mode);
     if (atable[VAL(mode)] === 'read')
     {
+        memory_files[memindex].ptr = 0; // start reading at the beginning of the file.
         streams[index] = new_stream(read_memory_file, null, null, close_memory_file, tell_memory_file, memindex);
 
     }
     else if (atable[VAL(mode)] === 'write')
     {
+        memory_files[memindex].ptr = 0; // start writing at the beginning of the file.
+        streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
+    }
+    else if (atable[VAL(mode)] === 'append')
+    {
+        memory_files[memindex].ptr = memory_files[memindex].data.length; // start writing at the end of the file.
         streams[index] = new_stream(null, write_memory_file, null, close_memory_file, tell_memory_file, memindex);
     }
     else
@@ -4119,13 +4223,67 @@ function open_memory_file(memfile, mode, stream)
     return unify(stream, ref);
 }
 
+function valid_memfile(memfile, container) {
+    if (TAG(memfile) === TAG_REF)
+        return instantiation_error(memfile);
+    if (TAG(memfile) !== TAG_STR || memory[VAL(memfile)] !== lookup_functor("$memory_file", 1))
+        return type_error("memory_file", memfile);
+    var memindex = get_arg(memfile, 1);
+    if (TAG(memindex) !== TAG_INT)
+        return type_error("memory_file", memfile);
+    container.value = VAL(memindex);
+    return true;
+}
+
 function free_memory_file(memfile)
 {
     var m = memory_files[VAL(get_arg(memfile, 1))];
     memory_files[m] = null;
     return true;
 }
+
+function predicate_copy_memory_file_to_local_storage(memfile, key) {
+    let memfileContainer = {};
+    if(!valid_memfile(memfile, memfileContainer)) {
+        return false;
+    }
+
+    let memindex = memfileContainer.value;
+
+    if (TAG(key) === TAG_REF)
+        return instantiation_error(mode);
+    else if (TAG(key) !== TAG_ATM)
+        return type_error("atom", key);
+
+    window.localStorage.setItem(PL_get_atom_chars(key),fromByteArray(memory_files[memindex].data) );
+    return true;
+}
+
+
+function predicate_copy_local_storage_to_memory_file(key, memfile) {
+    if(TAG(memfile) !== TAG_REF) {
+        return type_error('unbound', memfile);
+    }
+
+    if (TAG(key) === TAG_REF)
+        return instantiation_error(key);
+    else if (TAG(key) !== TAG_ATM)
+        return type_error("atom", key);
+
+    let keyJS = PL_get_atom_chars(key);
+    let item = window.localStorage.getItem(keyJS);
+    if(typeof item === 'undefined' || item === null) {
+        return domain_error('local_storage key', key);
+    }
+
+    let memfileCreated = create_memory_file_structure(item, 'local_storage '+keyJS);
+
+
+    return unify(memfile, memfileCreated);
+}
 // File wam.js
+"use strict";
+
 /* For general documentation, see wam_compiler.pl
 
 Some helpful diagrams:
@@ -4192,6 +4350,8 @@ let indexed_predicates = [];
 let exception = null;
 let itable = [];
 let stable = [];
+let maxStackSize = 0;
+let maxHeapSize = 0;
 
 /* Constants. Should be auto-generated */
 const HEAP_SIZE = 1410700;
@@ -4542,6 +4702,9 @@ function alloc_structure(ftor)
 {
     let tmp = state.H;
     memory[state.H++] = ftor;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return tmp ^ (TAG_STR << WORD_BITS);
 }
 
@@ -4550,6 +4713,9 @@ function alloc_var()
     let result = state.H ^ (TAG_REF << WORD_BITS);
     memory[state.H] = result;    
     state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return result;
 }
 
@@ -4558,6 +4724,9 @@ function alloc_list()
     let result = (state.H+1) ^ (TAG_LST << WORD_BITS);
     memory[state.H] = result;    
     state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return result;
 }
 
@@ -4575,6 +4744,9 @@ function wam_setup_trace_call(target_ftor_ofst) {
         let argOfst = 0;
         for (; argOfst < traceArgArity; argOfst++) {
             memory[state.H++] = register[argOfst];
+        }
+        if(state.H > maxHeapSize) {
+            maxHeapSize = state.H;
         }
 
         // Make the traceArgStructure the first argument.
@@ -4692,6 +4864,12 @@ function wam_create_choicepoint(nextCP, prefix) {
     memory[newB + n + CP_TI] = state.trace_info;
     state.B = newB;
     state.HB = state.H;
+
+    let stackTop = newB + n + CP_SIZE - 1;
+
+    if(maxStackSize < stackTop) {
+        maxStackSize = stackTop;
+    }
 }
 
 function wam_trace_call_or_execute(functor) {
@@ -4779,6 +4957,13 @@ function wam1()
     state.running = true;
     while (state.running)
     {
+
+        // The conditional "prolog_flag_values.wam_log !== 'none'" avoids the call to log() in the common case.
+        // This makes a noticeable difference in performance.
+
+        if(prolog_flag_values.wam_log !== 'none')
+            log(prolog_flag_values.wam_log, decode_instruction(state.current_predicate, state.P).string);
+
         if(state.trace_call === 'trace' && state.trace_instruction &&
             (state.trace_instruction === 'trace' || state.trace_instruction === 'step')) {
             let instruction = decode_instruction(state.current_predicate, state.P);
@@ -4872,6 +5057,11 @@ function wam1()
                 memory[tmpE + 1] = state.CP;
                 state.E = tmpE;
                 state.P += 1;
+
+                if(maxStackSize < tmpE+1) {
+                    maxStackSize = tmpE+1;
+                }
+
             }
                 continue;
 
@@ -5035,6 +5225,9 @@ function wam1()
                 register[code[state.P + 1]] = freshvar;
                 register[code[state.P + 2]] = freshvar;
                 state.H++;
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 3;
             }
             continue;
@@ -5264,6 +5457,10 @@ function wam1()
                 } else {
                     memory[state.H++] = register[code[state.P + 2]];
                 }
+
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
             }
             state.P += 3;
             if (did_fail)
@@ -5304,6 +5501,10 @@ function wam1()
                     if (code[state.P + 1] === 1)
                         register[code[state.P + 2]] = fresh; // also set X(i) if X-register
                 }
+
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
             }
             state.P += 3;
             if (did_fail)
@@ -5329,6 +5530,9 @@ function wam1()
             else
             {
                 memory[state.H++] = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -5349,6 +5553,9 @@ function wam1()
             else
             {
                 memory[state.H++] = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -5788,6 +5995,9 @@ function wam1()
             else
             {
                 memory[state.H++] = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -5992,6 +6202,9 @@ function hex(number)
     {
     	number = 0xFFFFFFFF + number + 1;
     }
+    if (typeof number !== 'number') {
+        return "NaN";
+    }
     // noinspection JSCheckFunctionSignatures
     return "0x" + number.toString(16).toUpperCase();
 }
@@ -6138,6 +6351,9 @@ function undefined_predicate(ftor)
         memory[state.H++] = lookup_functor("/", 2);
         memory[state.H++] = ftable[ftor][0] ^ (TAG_ATM << WORD_BITS);
         memory[state.H++] = ftable_arity(ftor) ^ (TAG_INT << WORD_BITS);
+        if(state.H > maxHeapSize) {
+            maxHeapSize = state.H;
+        }
         existence_error("procedure", indicator);
     }
     else if (prolog_flag_values.unknown === "warning")
@@ -6258,7 +6474,22 @@ function strings_to_atom_list(strings) {
     return tmp;
 }
 
+function log(target, msg) {
+    if(target !== 'none') {
+        if (target === 'console') {
+            dumpWrite(msg);
+        } else if (target === 'local_storage') {
+            logToLocalStorage(msg);
+        } else if (target === 'local_storage_ring') {
+            log_ring(msg);
+        } else {
+            throw 'invalid log target: ' + target;
+        }
+    }
+}
 // File read.js
+"use strict";
+
 /* Term reading */
 // See http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
 // Parsers return either:
@@ -6526,6 +6757,7 @@ function read_expression(s, precedence, isarg, islist, expression)
             unread_token(s, "-");
             infix_operator = "-";
         }
+
         if (infix_operator === '(')
         {
             // We are reading a term. Keep reading expressions: After each one we should
@@ -6609,9 +6841,9 @@ function read_expression(s, precedence, isarg, islist, expression)
                 if (lhs === false)
                     return false;
             }
-            else if (op.fixity === "yfx" && precedence >= op.precedence)
+            else if (op.fixity === "yfx" && precedence > op.precedence)
             {
-                lhs = parse_infix(s, lhs, op.precedence);
+                lhs = parse_infix(s, lhs, op.precedence-0.5);
                 if (lhs === false)
                     return false;
             }
@@ -6830,6 +7062,10 @@ function quote_atom(a)
 {
     if (! a.charAt) {
         return a;
+    }
+
+    if (a.charAt(0) >= "0" && a.charAt(0) <= "9") {
+        return "'" + escape_atom(a) + "'";
     }
 
     if (a.charAt(0) >= "A" && a.charAt(0) <= "Z")
@@ -7719,6 +7955,8 @@ function read_atom(stream, size, count, buffer)
 }
 
 // File record.js
+"use strict";
+
 /* Need to implement recorda/3, recorded/3 and erase/1 */
 var database_ptr = 0;
 var database_references = {};
@@ -7817,6 +8055,9 @@ function recorded(key, term, ref)
     let data = d.data;
     // We need the first actual key. This may not be [0] if something has been erased
     var index = d.keys[0];
+    if(typeof index === 'undefined' || typeof data[index] === 'undefined') {
+        return false;
+    }
     // noinspection UnnecessaryLocalVariableJS
     var result = unify(recall_term(data[index].value, {}), term) && unify(data[index].ref ^ (TAG_INT << WORD_BITS), ref);
     return result;
@@ -7945,6 +8186,8 @@ function recall_term(e, varmap)
     }
 }
 // File fli.js
+"use strict";
+
 /* Not implemented:
    All the nondet foreign stuff. That is supported, but not using the SWI-Prolog interface
    Strings
@@ -8358,6 +8601,8 @@ function PL_call_predicate(module, debug, predicate, args)
     return result;
 }
 // File stream.js
+"use strict";
+
 var current_input = null;
 var current_output = 0;
 // FIXME: Ignores size and count!
@@ -8982,91 +9227,98 @@ function toUTF8Array(str) {
     return utf8;
 }
 // File gc.js
+"use strict";
+
 let gc_environment = 'browser'; // 'console'
+let display_gc = false;
+let display_minor_gc = false;
 
 function predicate_gc()
 {
     let msgIn = "Before GC, heap is " + state.H;
     //stdout("===" + msgIn + "\n" + '\n');
-    debug(msgIn);
+    gc_main_debug(msgIn);
     // WARNING: This assumes ONLY predicate_gc will mark things!
     total_marked = 0;
 
-    // debugging only
-/*
-    var before = [];
-    var e = state.E;
-    var envsize = state.CP.code[state.CP.offset - 1];
-    while (e != HEAP_SIZE)
-    {
-        for (var i = 0; i < envsize; i++)
-        {
-            before.push(record_term(memory[e+2 + i]));
-        }
-        var envcp = memory[e+1];
-        envsize = envcp.code[envcp.offset-1];
-        e = memory[e];
-    }
+    let before;
+    let after;
 
-    gc_debug('===check stacks before mark');
-    check_stacks(false);
- */
+    if(display_gc) {
+        // debugging only
+
+        before = [];
+        let e = state.E;
+        let envsize = state.CP.code[state.CP.offset - 1];
+        while (e !== HEAP_SIZE) {
+            for (let i = 0; i < envsize; i++) {
+                before.push(record_term(memory[e + 2 + i]));
+            }
+            let envcp = memory[e + 1];
+            envsize = envcp.code[envcp.offset - 1];
+            e = memory[e];
+        }
+
+//        gc_debug('===check stacks before mark');
+        check_stacks(false);
+    }
     mark();
-    /*
-    gc_debug('===check stacks after mark');
-    check_stacks(true);
-     */
+
+//    gc_debug('===check stacks after mark');
+//    check_stacks(true);
+
     push_registers();
+    //   gc_debug('after push_registers, before sweep_trail');
     sweep_trail();
-    sweep_stack(); 
+//    gc_debug('after sweep_trail, before sweep_stack');
+    sweep_stack();
 
 
+//    gc_debug('after sweep_stack, before compact');
     compact();
+//    gc_debug('after compact, before pop_registers');
     pop_registers();
+//    gc_debug('after pop_registers');
     state.H = total_marked;
-/*
-    gc_debug('===check stacks after compact/pop_registers');
-    check_stacks(false);
+    if(display_gc) {
+//    gc_debug('===check stacks after compact/pop_registers');
+//    check_stacks(false);
 
-    var after = [];
-    var e = state.E;
-    var envsize = state.CP.code[state.CP.offset - 1];
-    while (e != HEAP_SIZE)
-    {
-        for (var i = 0; i < envsize; i++)
-        {
-            after.push(record_term(memory[e+2 + i]));
+        after = [];
+        let e = state.E;
+        let envsize = state.CP.code[state.CP.offset - 1];
+        while (e !== HEAP_SIZE) {
+            for (let i = 0; i < envsize; i++) {
+                after.push(record_term(memory[e + 2 + i]));
+            }
+            let envcp = memory[e + 1];
+            envsize = envcp.code[envcp.offset - 1];
+            e = memory[e];
         }
-        var envcp = memory[e+1];
-        envsize = envcp.code[envcp.offset-1];
-        e = memory[e];
     }
-*/
     if (total_marked !== 0)
     {
     }
-/*
-    while (before.length != 0)
-    {
-        var a = before.pop();
-        var b = after.pop();
-        at = recall_term(a, {});
-        bt = recall_term(b, {});
-        if (!predicate_unify(at, bt))
-        {
-            debug("Error: Terms in environment changed during GC!");
-            debug("at = " + term_to_string(at));
-            debug("bt = " + term_to_string(bt));
-            abort("false");
+    if(display_gc) {
+        while (before.length !== 0) {
+            let a = before.pop();
+            let b = after.pop();
+            let at = recall_term(a, {});
+            let bt = recall_term(b, {});
+            if (!predicate_unify(at, bt)) {
+                gc_main_debug("Error: Terms in environment changed during GC!");
+                gc_main_debug("at = " + term_to_string(at));
+                gc_main_debug("bt = " + term_to_string(bt));
+                abort("false");
+            }
         }
+
+
+        // display_gc_log();
     }
-
-
-    display_gc_log();
- */
     let msgOut = "After GC, heap is " + state.H;
     //stdout( msgOut + '\n');
-    debug(msgOut);
+    gc_main_debug(msgOut);
 
     return true;
 }
@@ -9175,17 +9427,20 @@ function compact()
 {
     var dest;
     var current;
-    dest = total_marked - 1; 
+    dest = total_marked - 1;
+    gc_debug('before compact upward');
     // Upward
     for (current = state.H-1; current >= 0; current--)
     {
         if ((memory[current] & M_BIT) === M_BIT)
         {
+            //gc_debug('compact - before update_relocation_chain('+current+', '+dest+')')
             update_relocation_chain(current, dest);
             if (IS_HEAP_PTR(memory[current]))
             {
                 if (VAL(memory[current]) < current)
                 {
+                    //gc_debug('compact - after update_relocation_chain, before into_relocation_chain('+VAL(memory[current])+', '+current+')')
                     into_relocation_chain(VAL(memory[current]), current);
                 }
                 else if (VAL(memory[current]) === current)
@@ -9197,6 +9452,7 @@ function compact()
         }
     }
 
+    gc_debug('after compact upward, before downward');
     // Downward
     dest = 0;
     for (current = 0; current < state.H; current++)
@@ -9207,7 +9463,7 @@ function compact()
             if (IS_HEAP_PTR(memory[current]) && VAL(memory[current]) > current)
             {
                 into_relocation_chain(VAL(memory[current]), dest);
-                
+
                 memory[dest] = VAL(memory[dest]) ^ (TAG(memory[current]) << WORD_BITS);
             }
             else
@@ -9215,22 +9471,46 @@ function compact()
                 memory[dest] = memory[current];
                 // clear the GC flags
                 memory[dest] &= ~F_BIT;
-            }            
+            }
             memory[dest] &= ~M_BIT;
             dest++;
         }
     }
+    gc_debug('after compact downward');
 }
 
 function update_relocation_chain(current, dest)
 {
-    var j;    
+    let localDebug = false; //(dest === 20);
+
+    if(localDebug) {
+        gc_debug('start update_relocation_chain(' + current + ', ' + dest + ')');
+    }
+
+    var j;
     while ((memory[current] & F_BIT) === F_BIT)
     {
         j = VAL(memory[current]);
-        memory[current] = VAL(memory[j]) ^ (memory[current] & (NV_MASK ^ F_BIT)) | (memory[j] & F_BIT);
+        if(localDebug) {
+            gc_debug('update_relocation_chain - memory[current]=' + memory[current] + ', j=' + j);
+            gc_debug('memory[j]=' + memory[j] + ', VAL(memory[j])=' + VAL(memory[j]));
+            gc_debug('(memory[current] & (NV_MASK ^ F_BIT))=' + (memory[current] & (NV_MASK ^ F_BIT))
+                + ', (VAL(memory[j]) ^ (memory[current] & (NV_MASK ^ F_BIT)))=' + (VAL(memory[j]) ^ (memory[current] & (NV_MASK ^ F_BIT)))
+                + ', (memory[j] & F_BIT)=' + (memory[j] & F_BIT));
+        }
+        memory[current] = (VAL(memory[j]) ^ (memory[current] & (NV_MASK ^ F_BIT))) | (memory[j] & F_BIT);
+        if(localDebug) {
+            gc_debug('new memory[current]=' + memory[current]);
+            gc_debug('dest ^ (memory[j] & NV_MASK)='+(dest ^ (memory[j] & NV_MASK)));
+        }
         memory[j] = dest ^ (memory[j] & NV_MASK);
-        memory[j] &= ~F_BIT;                
+        if(localDebug) {
+            gc_debug('new memory[j]=' + memory[j]);
+        }
+        memory[j] &= ~F_BIT;
+        if(localDebug) {
+            gc_debug('new new memory[j]= (new memory[j] &= ~F_BIT)' + memory[j]);
+        }
     }
 }
 
@@ -9472,22 +9752,23 @@ function dump_registers()
 
 function predicate_statistics()
 {
-    var aggregateDuration = statistics_wam_duration();
-    var heapSize = statistics_heap_size();
+    let aggregateDuration = statistics_wam_duration();
+    let heapSize = statistics_heap_size();
+    let maxHeap = statistics_max_heap();
+    let maxStack = statistics_max_stack();
+    let stackPortion = maxStack - HEAP_SIZE;
 
     stdout("WAM duration: " + aggregateDuration + "\n");
-    stdout("Heap size: " + heapSize + "\n");
+    stdout("Current heap: " + heapSize + "\n");
+    stdout("Max heap: " + maxHeap + " (words of " + HEAP_SIZE + " limit)\n");
+    stdout("Max stack: " + stackPortion + " (words of " + STACK_SIZE + " limit, " + maxStack + " absolute)\n");
     return true;
 }
 
 function predicate_wam_duration(duration) {
     var aggregateDuration = statistics_wam_duration();
 
-    if(Number.isSafeInteger(aggregateDuration)) {
-        return PL_unify_integer(duration, aggregateDuration);
-    } else {
-        return PL_unify_float(duration, aggregateDuration);
-    }
+    return unify_number(aggregateDuration, duration);
 }
 
 function statistics_wam_duration() {
@@ -9504,15 +9785,39 @@ function statistics_wam_duration() {
 function predicate_statistics_heap_size(size) {
     var heapSize = statistics_heap_size();
 
-    if(Number.isSafeInteger(heapSize)) {
-        return PL_unify_integer(size, heapSize);
-    } else {
-        return PL_unify_float(size, heapSize);
-    }
+    return unify_number(heapSize, size);
 }
 
 function statistics_heap_size() {
     return state.H;
+}
+
+function predicate_statistics_max_stack(maxStackPL) {
+    var maxStackJS = statistics_max_stack();
+
+    return unify_number(maxStackJS, maxStackPL);
+}
+
+function statistics_max_stack() {
+    return maxStackSize;
+}
+
+function predicate_statistics_max_heap(maxHeapPL) {
+    var maxHeapJS = statistics_max_heap();
+
+    return unify_number(maxHeapJS, maxHeapPL);
+}
+
+function statistics_max_heap() {
+    return maxHeapSize;
+}
+
+function unify_number(numberJS, numberPL) {
+    if(Number.isInteger(numberJS) && numberJS <= (2**(WORD_BITS-1)-1) && numberJS >= -1*(2**(WORD_BITS-1)-1)) {
+        return PL_unify_integer(numberPL, numberJS);
+    } else {
+        return PL_unify_float(numberPL, numberJS);
+    }
 }
 
 function gc_check(t)
@@ -9614,7 +9919,19 @@ function add_to_gc_log(msg) {
     gc_log.push(msg);
 }
 
+function gc_main_debug(msg) {
+    if(display_gc) {
+        alert('gc: ' + msg);
+//        display_backtrack = true;
+    }
+//    add_to_gc_log(msg);
+}
+
 function gc_debug(msg) {
+    if(display_minor_gc) {
+        alert('gc: ' + msg);
+//        display_backtrack = true;
+    }
 //    add_to_gc_log(msg);
 }
 
@@ -10625,7 +10942,77 @@ function debug(msg) {
         alert(msg);
     }
 }
+
+let logKey = 'proscriptls_log';
+
+function logToLocalStorage(msg) {
+    let log = window.localStorage.getItem(logKey);
+    if(log) {
+        log += msg + '\n';
+    } else {
+        log = msg + '\n';
+    }
+    window.localStorage.setItem(logKey, log);
+}
+
+function predicate_clear_local_storage_log() {
+    window.localStorage.removeItem(logKey);
+
+    current = -1;
+    let ringCurrentKey = logKey + ':current';
+    window.localStorage.setItem(ringCurrentKey, '' + current);
+
+    let ofst = 0;
+    while(true) {
+        let ringKey = logKey + ':' + ofst++;
+        if(typeof window.localStorage.getItem(ringKey) === 'undefined' ||
+            window.localStorage.getItem(ringKey) === null) {
+            break;
+        } else {
+             window.localStorage.removeItem(ringKey);
+        }
+    }
+
+    return true;
+}
+
+let current = -1;
+
+function log_ring(msg) {
+    current = (current+1) % prolog_flag_values.wam_log_size;
+    let ringKey = logKey + ':' + current;
+    let ringCurrentKey = logKey + ':current';
+    window.localStorage.setItem(ringKey, msg);
+    window.localStorage.setItem(ringCurrentKey, '' + current);
+}
+
+function dumpWriteLogRing() {
+    let ringCurrentKey = logKey + ':current';
+    let currentLogString = window.localStorage.getItem(ringCurrentKey);
+    let currentLog = Number.parseInt(currentLogString);
+    // find log ring size for the currently recorded log entries.
+    // This might be different than the current global value for log_ring_size.
+    let ofst = 0;
+    while(true) {
+        let ringKey = logKey + ':' + ofst++;
+        if(typeof window.localStorage.getItem(ringKey) === 'undefined' ||
+            window.localStorage.getItem(ringKey) === null) {
+            break;
+        }
+    }
+
+    let ringSize = ofst-1;
+    let unadjustedLimit = currentLog + ringSize;
+    for(let unadjustedOfst = currentLog;unadjustedOfst < unadjustedLimit;unadjustedOfst++) {
+        let adjustedOfst = unadjustedOfst % ringSize;
+        let ringKey = logKey + ':' + adjustedOfst;
+        let msg = window.localStorage.getItem(ringKey);
+        dumpWrite(msg);
+    }
+}
 // File debugger.js
+"use strict";
+
 var input_buffer = [];
 
 function predicate_get_terminal_char(c) {
@@ -10667,9 +11054,155 @@ function predicate_trace_set_prompt(value) {
     return true;
 }
 // File decode_instruction.js
+"use strict";
 
 function decode_instruction(predicateID, codePosition) {
-    let predicate = (predicateID == null) ? ("no predicate") : (atable[ftable[parseInt(predicateID.key)][0]] + "/" + ftable[parseInt(predicateID.key)][1]);
+    return decode_instruction_general(predicateID, codePosition, code);
+}
+
+// Binds 4th parameter to structure of the form: instruction(String, Op, OpName, Size, GoalPredicate),
+// GoalPredicate = goal_predicate(Functor, Arity, PredicateID, Type)
+// Base on info found at codePosition'th element of codeP list (0 based).
+// The instruction String incorporates the predicateNameP as part of its label.
+// The String is a list of character codes, e.g. "foo: bar" (using Prolog shorthand notation for string).
+
+function predicate_decode_instruction(predicateNameP, codeP, codePositionP, instructionP) {
+    let predicateNameJS;
+    if(TAG(predicateNameP) === TAG_REF) {
+        return instantiation_error(predicateNameP);
+    } else if(TAG(predicateNameP) === TAG_ATM) {
+        predicateNameJS = PL_get_atom_chars(predicateNameP);
+    } else if(TAG(predicateNameP) === TAG_INT) {
+        predicateNameJS = PL_get_integer(predicateNameP);
+    } else {
+        return type_error('predicate ID or name', predicateNameP);
+    }
+
+    if(TAG(codeP) === TAG_REF) {
+        return instantiation_error(codeP);
+    } else if(TAG(codeP) !== TAG_LST) {
+        return type_error('list', codeP);
+    }
+
+    if(TAG(codePositionP) === TAG_REF) {
+        return instantiation_error(codePositionP);
+    } else if(TAG(codePositionP) !== TAG_INT) {
+        return type_error('integer', codePositionP);
+    }
+
+    if(TAG(instructionP) !== TAG_REF && TAG(instructionP) !== TAG_STR) {
+        return type_error('variable or instruction/5 structure', instructionP);
+    }
+
+    let codePositionJS = PL_get_integer(codePositionP);
+    let codeJS = integer_list_to_term_array(codeP);
+    let instruction = decode_instruction_general(predicateNameJS, codePositionJS, codeJS);
+    let internalInstructionP = make_instruction_structure(instruction);
+    return unify(instructionP, internalInstructionP);
+}
+
+// instruction = {string: instString, op: op, opName:opName, size:instructionSize, goalPredicate:goalPredicate};
+// goalPredicate = {functor: functor, arity: arity, predicate: i, type: 'call'};
+function make_instruction_structure(instruction) {
+    let goalPredicate = instruction.goalPredicate;
+
+    let goalPredicateP;
+    if(typeof goalPredicate === 'string') {
+        goalPredicateP = PL_put_atom_chars(goalPredicate);
+    } else {
+        let ftorGP = lookup_functor('goal_predicate', 4);
+        goalPredicateP = alloc_structure(ftorGP);
+        memory[state.H++] = PL_put_atom_chars(goalPredicate.functor);
+        memory[state.H++] = PL_put_integer(goalPredicate.arity);
+        memory[state.H++] = PL_put_integer(goalPredicate.predicate);
+        memory[state.H++] = PL_put_atom_chars(goalPredicate.type);
+    }
+
+    let instructionStringP = string_to_codes(instruction.string);
+
+    let ftor = lookup_functor('instruction', 5);
+    let instructionP = alloc_structure(ftor);
+    memory[state.H++] = instructionStringP;
+    memory[state.H++] = PL_put_integer(instruction.op);
+    memory[state.H++] = PL_put_atom_chars(instruction.opName);
+    memory[state.H++] = PL_put_integer(instruction.size);
+    memory[state.H++] = goalPredicateP;
+
+    return instructionP;
+}
+
+function initOpNames() {
+    let opNames = [];
+    opNames[0] = 'zero';
+    opNames[1] = 'allocate';
+    opNames[2] = 'deallocate';
+    opNames[3] = 'call';
+    opNames[4] = 'execute';
+    opNames[5] = 'proceed';
+    opNames[6] = 'put_variable'; // variable to Y and X registers.
+    opNames[60] = 'put_variable'; // Y register variable only
+    opNames[7] = 'put_variable'; // variable to X and X registers.
+    opNames[8] = 'put_value';
+    opNames[9] = 'put_unsafe_value';
+    opNames[10] = 'put_constant';
+    opNames[11] = 'put_nil';
+    opNames[12] = 'put_structure';
+    opNames[13] = 'put_list';
+    opNames[14] = 'put_integer';
+    opNames[51] = 'put_float';
+    opNames[15] = 'get_variable';
+    opNames[16] = 'get_value';
+    opNames[17] = 'get_constant';
+    opNames[18] = 'get_nil';
+    opNames[19] = 'get_structure';
+    opNames[20] = 'get_list';
+    opNames[21] = 'get_integer';
+    opNames[50] = 'get_float';
+    opNames[22] = 'unify_void';
+    opNames[23] = 'unify_variable';
+    opNames[24] = 'unify_value';
+    opNames[25] = 'unify_local_value';
+    opNames[26] = 'unify_constant';
+    opNames[27] = 'unify_integer';
+    opNames[52] = 'unify_float';
+    opNames[28] = 'try_me_else';
+    opNames[29] = 'retry_me_else';
+    opNames[30] = 'trust_me';
+    opNames[31] = 'neck_cut';
+    opNames[32] = 'cut';
+    opNames[33] = 'get_level';
+    opNames[40] = 'call_aux';
+    opNames[41] = 'execute_aux';
+    opNames[42] = 'retry_foreign';
+    opNames[43] = 'get_choicepoint';
+    opNames[44] = 'switch_on_term';
+    opNames[45] = 'switch_on_constant';
+    opNames[46] = 'switch_on_structure';
+    opNames[71] = 'try';
+    opNames[72] = 'retry';
+    opNames[73] = 'trust';
+    opNames[74] = 'goto_clause';
+    opNames[254] = 'nop2';
+
+    return opNames;
+}
+
+let opNames = initOpNames();
+
+function decode_instruction_general(predicateID, codePosition, code) {
+    let predicateName; // = (predicateID == null) ? ("no predicate") : (atable[ftable[parseInt(predicateID.key)][0]] + "/" + ftable[parseInt(predicateID.key)][1]);
+    if(typeof predicateID === 'undefined' || predicateID == null) {
+        predicateName = 'no predicate';
+    } else if(predicateID.key) {
+        predicateName = atable[ftable[parseInt(predicateID.key)][0]] + "/" + ftable[parseInt(predicateID.key)][1]
+    } else if(typeof predicateID === 'number') {
+        predicateName = atable[ftable[predicateID][0]] + "/" + ftable[predicateID][1]
+    } else if(typeof predicateID === 'string') {
+        predicateName = predicateID;
+    } else {
+        predicateName = JSON.stringify(predicateID);
+    }
+
     let op = code[codePosition];
     let instruction = '';
     let instructionSize = -1;
@@ -10678,11 +11211,11 @@ function decode_instruction(predicateID, codePosition) {
     switch(op) {
         // Control instructions 1-5
         case 1: // allocate
-            instruction = 'allocate';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
         case 2: // deallocate
-            instruction = 'deallocate';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
         case 3: // call: [3, I, N]
@@ -10696,7 +11229,7 @@ function decode_instruction(predicateID, codePosition) {
             let functor = atable[nameID];
             let arity = ftable[i][1];
 
-            instruction = 'call(' + functor + '/' + arity + ',' + N + ')';
+            instruction = opNames[op] + '(' + functor + '/' + arity + ',' + N + ')';
             instructionSize = 3;
             goalPredicate = {functor: functor, arity: arity, predicate: i, type: 'call'};
             break;
@@ -10711,13 +11244,13 @@ function decode_instruction(predicateID, codePosition) {
             let functor = atable[nameID];
             let arity = ftable[i][1];
 
-            instruction = 'execute(' + functor + '/' + arity + ')';
+            instruction = opNames[op] + '(' + functor + '/' + arity + ')';
             instructionSize = 2;
             goalPredicate = {functor: functor, arity: arity, predicate: i, type: 'execute'};
             break;
         }
         case 5: // proceed
-            instruction = 'proceed';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
 
@@ -10726,14 +11259,14 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
-            instruction = 'put_variable(y(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(y(' + N + '), x(' + I + '))';
             instructionSize = 3;
            break;
         }
         case 60: // put_variable: [60, N]
         {
             let N = code[codePosition + 1];
-            instruction = 'put_variable(y(' + N + '))';
+            instruction = opNames[op] + '(y(' + N + '))';
             instructionSize = 2;
             break;
         }
@@ -10741,7 +11274,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
-            instruction = 'put_variable(x(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(x(' + N + '), x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -10753,7 +11286,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'put_variable(' + V  + '(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(' + V  + '(' + N + '), x(' + I + '))';
             instructionSize = 4;
             break;
         }
@@ -10761,7 +11294,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
-            instruction = 'put_unsafe_value(y(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(y(' + N + '), x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -10771,14 +11304,14 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             let C = atable[VAL(K)];
-            instruction = 'put_constant(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
         case 11: // put_nil: [I]
         {
             let I = code[codePosition + 1];
-            instruction = 'put_nil(x(' + I + '))';
+            instruction = opNames[op] + '(x(' + I + '))';
             instructionSize = 1;
             break;
         }
@@ -10791,7 +11324,7 @@ function decode_instruction(predicateID, codePosition) {
             let nameID = ftable[f][0];
             let functor = atable[nameID];
             let arity = ftable[f][1];
-            instruction = 'put_structure('  + functor + '/' + arity +  ', x(' + I + '))';
+            instruction = opNames[op] + '('  + functor + '/' + arity +  ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -10799,7 +11332,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let I = code[codePosition + 1];
 
-            instruction = 'put_list(x(' + I + '))';
+            instruction = opNames[op] + '(x(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -10808,7 +11341,7 @@ function decode_instruction(predicateID, codePosition) {
             let C = code[codePosition + 1];
             let I = code[codePosition + 2];
 
-            instruction = 'put_integer(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -10818,7 +11351,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             let C = floats[VAL(N)];
-            instruction = 'put_float(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -10832,7 +11365,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'get_variable(' + V  + '(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(' + V  + '(' + N + '), x(' + I + '))';
             instructionSize = 4;
             break;
         }
@@ -10844,7 +11377,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'get_value(' + V  + '(' + N + '), x(' + I + '))';
+            instruction = opNames[op] + '(' + V  + '(' + N + '), x(' + I + '))';
             instructionSize = 4;
             break;
         }
@@ -10854,14 +11387,14 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             let C = atable[VAL(K)];
-            instruction = 'get_constant(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
         case 18: // get_nil: [18, I]
         {
             let I = code[codePosition + 1];
-            instruction = 'get_nil(x(' + I + '))';
+            instruction = opNames[op] + '(x(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -10874,7 +11407,7 @@ function decode_instruction(predicateID, codePosition) {
             let nameID = ftable[f][0];
             let functor = atable[nameID];
             let arity = ftable[f][1];
-            instruction = 'get_structure('  + functor + '/' + arity +  ', x(' + I + '))';
+            instruction = opNames[op] + '('  + functor + '/' + arity +  ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -10882,7 +11415,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let I = code[codePosition + 1];
 
-            instruction = 'get_list(x(' + I + '))';
+            instruction = opNames[op] + '(x(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -10891,7 +11424,7 @@ function decode_instruction(predicateID, codePosition) {
             let C = code[codePosition + 1];
             let I = code[codePosition + 2];
 
-            instruction = 'get_integer(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -10901,7 +11434,7 @@ function decode_instruction(predicateID, codePosition) {
             let I = code[codePosition + 2];
 
             let C = floats[VAL(N)];
-            instruction = 'get_float(' + C + ', x(' + I + '))';
+            instruction = opNames[op] + '(' + C + ', x(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -10911,7 +11444,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
 
-            instruction = 'unify_void(' + N + ')';
+            instruction = opNames[op] + '(' + N + ')';
             instructionSize = 2;
             break;
         }
@@ -10922,7 +11455,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'unify_variable(' + V  + '(' + N + ')';
+            instruction = opNames[op] + '(' + V  + '(' + N + ')';
             instructionSize = 3;
             break;
         }
@@ -10933,7 +11466,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'unify_value(' + V  + '(' + N + ')';
+            instruction = opNames[op] + '(' + V  + '(' + N + ')';
             instructionSize = 3;
             break;
         }
@@ -10944,7 +11477,7 @@ function decode_instruction(predicateID, codePosition) {
 
             let V = (A === 0) ? 'y' : 'x';
 
-            instruction = 'unify_local_value(' + V  + '(' + N + ')';
+            instruction = opNames[op] + '(' + V  + '(' + N + ')';
             instructionSize = 3;
             break;
         }
@@ -10953,7 +11486,7 @@ function decode_instruction(predicateID, codePosition) {
             let K = code[codePosition + 1];
 
             let C = atable[VAL(K)];
-            instruction = 'unify_constant(' + C + ')';
+            instruction = opNames[op] + '(' + C + ')';
             instructionSize = 2;
             break;
         }
@@ -10961,7 +11494,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let C = code[codePosition + 1];
 
-            instruction = 'unify_integer(' + C + ')';
+            instruction = opNames[op] + '(' + C + ')';
             instructionSize = 2;
             break;
         }
@@ -10970,7 +11503,7 @@ function decode_instruction(predicateID, codePosition) {
             let N = code[codePosition + 1];
 
             let C = floats[VAL(N)];
-            instruction = 'unify_float(' + C + ')';
+            instruction = opNames[op] + '(' + C + ')';
             instructionSize = 2;
             break;
         }
@@ -10979,7 +11512,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let L = code[codePosition + 1];
 
-            instruction = 'try_me_else(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
@@ -10987,13 +11520,13 @@ function decode_instruction(predicateID, codePosition) {
         {
             let L = code[codePosition + 1];
 
-            instruction = 'retry_me_else(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 30: // trust_me: [30, 0]
         {
-            instruction = 'trust_me(0)';
+            instruction = opNames[op] + '(0)';
             instructionSize = 2;
             break;
         }
@@ -11001,7 +11534,7 @@ function decode_instruction(predicateID, codePosition) {
         // Cut instructions
         case 31: // neck_cut: [31]
         {
-            instruction = 'neck_cut';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
         }
@@ -11009,7 +11542,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let I = code[codePosition + 1];
 
-            instruction = 'cut(y(' + I + '))';
+            instruction = opNames[op] + '(y(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -11017,7 +11550,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let I = code[codePosition + 1];
 
-            instruction = 'get_level(y(' + I + '))';
+            instruction = opNames[op] + '(y(' + I + '))';
             instructionSize = 2;
             break;
         }
@@ -11029,7 +11562,7 @@ function decode_instruction(predicateID, codePosition) {
             let A = code[codePosition + 2];
             let N = code[codePosition + 3];
 
-            instruction = 'call_aux(' + P + ',' + A + ',' + N +'))';
+            instruction = opNames[op] + '(' + P + ',' + A + ',' + N +'))';
             instructionSize = 4;
             break;
         }
@@ -11038,14 +11571,14 @@ function decode_instruction(predicateID, codePosition) {
             let P = code[codePosition + 1];
             let A = code[codePosition + 2];
 
-            instruction = 'execute_aux(' + P + ',' + A +'))';
+            instruction = opNames[op] + '(' + P + ',' + A +'))';
             instructionSize = 3;
             break;
         }
         // retry_foreign is for foreign predicates with non-deterministic behaviour
         case 42: // retry_foreign: [42]
         {
-            instruction = 'retry_foreign';
+            instruction = opNames[op];
             instructionSize = 1;
             break;
         }
@@ -11055,7 +11588,7 @@ function decode_instruction(predicateID, codePosition) {
         {
             let N = code[codePosition + 1];
             let I = code[codePosition + 2];
-            instruction = 'get_choicepoint(' + N + ', y(' + I + '))';
+            instruction = opNames[op] + '(' + N + ', y(' + I + '))';
             instructionSize = 3;
             break;
         }
@@ -11068,7 +11601,7 @@ function decode_instruction(predicateID, codePosition) {
             let L = decode_address(code[codePosition + 5]);
             let S = decode_address(code[codePosition + 6]);
 
-            instruction = 'switch_on_term(' + V + ', ' + CA + ', ' + CI + ', ' + CF + ', ' + L + ', ' + S + ')';
+            instruction = opNames[op] + '(' + V + ', ' + CA + ', ' + CI + ', ' + CF + ', ' + L + ', ' + S + ')';
             instructionSize = 7;
             break;
         }
@@ -11086,7 +11619,7 @@ function decode_instruction(predicateID, codePosition) {
                 size = decoding.size;
                 table = 'hash(' + decoding.string + ')';
             }
-            instruction = 'switch_on_constant(' + table + ')';
+            instruction = opNames[op] + '(' + table + ')';
             instructionSize = 2 + size;
             break;
         }
@@ -11104,41 +11637,41 @@ function decode_instruction(predicateID, codePosition) {
                 size = decoding.size;
                 table = 'hash(' + decoding.string + ')';
             }
-            instruction = 'switch_on_structure(' + T + ', ' + table + ')';
+            instruction = opNames[op] + '(' + T + ', ' + table + ')';
             instructionSize = 2 + size;
             break;
         }
         case 71: // try: [71, L]
         {
             let L = code[codePosition + 1];
-            instruction = 'try(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 72: // retry: [72, L]
         {
             let L = code[codePosition + 1];
-            instruction = 'retry(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 73: // trust: [73, L]
         {
             let L = code[codePosition + 1];
-            instruction = 'trust(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 74: // goto_clause: [74, L]
         {
             let L = code[codePosition + 1];
-            instruction = 'goto_clause(' + L + ')';
+            instruction = opNames[op] + '(' + L + ')';
             instructionSize = 2;
             break;
         }
         case 254: // nop2: [254, 0]
         {
-            instruction = 'nop2(0)';
+            instruction = opNames[op] + '(0)';
             instructionSize = 2;
             break;
         }
@@ -11149,7 +11682,7 @@ function decode_instruction(predicateID, codePosition) {
             break;
     }
 
-    return {string: (predicate + ':' + '(' + instruction + ',' + codePosition + ')'), size:instructionSize, goalPredicate:goalPredicate};
+    return {string: (predicateName + ':' + '(' + instruction + ',' + codePosition + ')'), op: op, opName: opNames[op], size:instructionSize, goalPredicate:goalPredicate};
 
 }
 
@@ -11414,7 +11947,7 @@ function get_object_id_container(term, idContainer) {
 
 var parentMap = new Map([
     ['eventtarget', []],
-    ['window', ['eventtarget']],
+    ['window', ['eventtarget', 'windowlocalstorage', 'windowsessionstorage']],
     ['node', ['eventtarget']],
     ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
     ['document', ['node', 'parentnode']],
@@ -11450,11 +11983,15 @@ var parentMap = new Map([
     ['customelementregistrgy',[]],
     ['barprop', []],
     ['navigator', ['navigatorid','navigatorlanguage', 'navigatoronline', 'navigatorcontentutils', 'navigatorcookies']],
-    ['navigatorid', []],
-    ['navigatorlanguage', []],
-    ['navigatoronline', []],
-    ['navigatorcontentutils', []],
-    ['navigatorcookies', []]
+    ['navigatorid', []], // mixin
+    ['navigatorlanguage', []], // mixin
+    ['navigatoronline', []], // mixin
+    ['navigatorcontentutils', []], // mixin
+    ['navigatorcookies', []], // mixin
+    ['blob', []],
+    ['storage', []],
+    ['windowlocalstorage',[]], // mixin
+    ['windowsessionstorage',[]] // mixin
 ]);
 
 var childMap = new Map();
@@ -11478,6 +12015,7 @@ function calculate_inheritance_children() {
 calculate_inheritance_children();
 
 // constructorMap[obj.constructor] is object type.
+// This map does not include mixin Web API Interfaces.
 
 var constructorMap = {
     "ImageData" : "imagedata",
@@ -11502,7 +12040,9 @@ var constructorMap = {
     "History" : 'history',
     "CustomElementRegistry" : 'customelementregistrgy',
     "BarProp" : 'barprop',
-    "Navigator" : 'navigator'
+    "Navigator" : 'navigator',
+    "Blob" : 'blob',
+    "Storage" : 'storage'
 };
 
 var distinctivePropertyMap = {
@@ -11518,8 +12058,7 @@ var distinctiveMethodMap = {
     document: 'getElementById',
     cssstyledeclaration:'getPropertyPriority',
     htmlcanvaselement:'getContext',
-    canvasrenderingcontext2d: 'getImageData',
-    blob: 'slice'
+    canvasrenderingcontext2d: 'getImageData'
 };
 
 // [createImageData, [number, number], object]
@@ -11608,19 +12147,19 @@ function convert_type_term(typePL, container) {
     } else if(TAG(typePL) === TAG_STR) {
         let functorPL = ftable[VAL(memory[VAL(typePL)])][0];
         let functor = atable[functorPL];
-        if(functor !== 'array') {
-            return domain_error('type array', functorPL);
+        if(functor !== 'array_type') {
+            return domain_error('type array_type', functorPL);
         }
         let arity = ftable[VAL(memory[VAL(typePL)])][1];
         if(arity !== 1) {
-            return representation_error('type array arity 1', typePL);
+            return representation_error('type array_type arity 1', typePL);
         }
         let subContainer = {};
         if(! convert_type_term(deref(memory[VAL(typePL) + 1]), subContainer, true)) {
             return false;
         }
         let extendedType = {};
-        extendedType.array = subContainer.value;
+        extendedType.arrayType = subContainer.value.type;
         result.type = extendedType;
     } else {
         return type_error('atom or structure', typePL);
@@ -12472,6 +13011,8 @@ function setupCursorForMethodNames(methods, methodName, cursor) {
     return true;
 }
 // File web_interfaces.js
+"use strict";
+
 /*
 W3C Web API specifies 'APIs', 'webInterfaces', and 'mixins'.
 (It also uses the term 'object type' to refer to
@@ -12951,6 +13492,8 @@ var windowMethodSpecs = new Map([
 
 //Window includes GlobalEventHandlers;
 //Window includes WindowEventHandlers;
+//Window includes WindowLocalStorage;
+//Window includes WindowSessionStorage;
 
 webInterfaces.set('window',
     {
@@ -13921,7 +14464,67 @@ webInterfaces.set('navigatorcookies',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/NavigatorCookies'
         }
     });
+
+var storageInterfaceProperties = new Map( [
+    ['length', SimpleProperty('number', 'length')],
+]);
+
+var storageMethodSpecs = new Map([
+    ['key', {name:'key',arguments:[{type:'number'}],returns:{type:'atom'}}],
+    ['getItem', {name:'getItem',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['setItem', {name:'setItem',arguments:[{type:'string'}, {type:'string'}]}],
+    ['removeItem', {name:'removeItem',arguments:[{type:'string'}]}],
+    ['clear', {name:'clear',arguments:[]}]
+]);
+
+webInterfaces.set('storage',
+    {name: 'storage',
+        properties:storageInterfaceProperties,
+        methods:storageMethodSpecs,
+        reference: {name:'Storage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#storage-2',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Storage'
+        }
+    });
+
+var windowLocalStorageInterfaceProperties = new Map( [
+    ['localStorage', SimpleProperty('object', 'localStorage')],
+]);
+
+var windowLocalStorageMethodSpecs = new Map([
+
+]);
+
+webInterfaces.set('windowlocalstorage',
+    {name: 'windowlocalstorage',
+        properties:windowLocalStorageInterfaceProperties,
+        methods:windowLocalStorageMethodSpecs,
+        reference: {name:'WindowLocalStorage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#windowlocalstorage',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Local_storage'
+        }
+    });
+
+var windowSessionStorageInterfaceProperties = new Map( [
+    ['sessionStorage', SimpleProperty('object', 'sessionStorage')],
+]);
+
+var windowSessionStorageMethodSpecs = new Map([
+
+]);
+
+webInterfaces.set('windowsessionstorage',
+    {name: 'windowsessionstorage',
+        properties:windowSessionStorageInterfaceProperties,
+        methods:windowSessionStorageMethodSpecs,
+        reference: {name:'WindowSessionStorage',
+            standard:'https://html.spec.whatwg.org/multipage/webstorage.html#windowsessionstorage',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API'
+        }
+    });
+
 // File object_property.js
+"use strict";
 
 var dopCursors = new Map();
 var dopCursorCounter = 0;
@@ -14441,6 +15044,8 @@ function predicate_set_dom_object_property(object, property, value, specTerm) {
     return true;
 }
 // File object_method.js
+"use strict";
+
 /*
 The general approach to providing access to Javascript objects
 through Prolog predicates is described in object_property.js.
@@ -14560,20 +15165,21 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
 
         if (spec.returns) {
             let resultJS = object_method_return(objectJS, spec.name, applyArguments);
-            if(spec.returns.multiple) {
+            if(typeof resultJS === 'undefined' || resultJS === null) {
+                return false;
+            } else  if(spec.returns.multiple) {
                 let values = [];
-                if(typeof resultJS !== 'undefined' && resultJS !== null) {
-                    if(typeof resultJS === 'object' && resultJS.constructor.name === 'NodeList') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'FileList') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLOptionsCollection') {
-                        values = Array.from(resultJS);
-                    } else if(typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLCollection') {
-                        values = Array.from(resultJS);
-                    } else {
-                        values.push(resultJS);
-                    }
+
+                if (typeof resultJS === 'object' && resultJS.constructor.name === 'NodeList') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'FileList') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLOptionsCollection') {
+                    values = Array.from(resultJS);
+                } else if (typeof resultJS === 'object' && resultJS.constructor.name === 'HTMLCollection') {
+                    values = Array.from(resultJS);
+                } else {
+                    values.push(resultJS);
                 }
 
                 cursor = {values: values, spec: spec, module: moduleName, methodAddress: methodAddress, arity: arity};
@@ -14582,7 +15188,6 @@ function predicate_dom_object_method(object, methodStructure, specTerm) {
                 cursorIDPL = lookup_atom(cursorIDJS);
 
                 create_choicepoint();
-
             } else {
                 let resultContainer = {};
                 if (convert_result(resultJS, spec.returns, moduleName, resultContainer)) {
@@ -14937,6 +15542,8 @@ function object_method_return() {
     return Reflect.apply(object[object_method], object, method_arguments);
 }
 // File dump.js
+"use strict";
+
 function dump(filter, mode) {
     if(mode && mode === 'load') {
         load_state();
@@ -15050,16 +15657,19 @@ function dumpPredicate(targetPredicateName, targetArity, mode) {
                 dumpWrite('Clause ' + clauseKey);
                 dumpWrite(' ');
                 let clause = predicates[ofst].clauses[clauseKey];
-                code = clause.code;
-                let position = 0;
-                while(position < code.length) {
-                    let decoded = decode_instruction({key:ofst},position);
-                    dumpWrite(decoded.string);
-                    position += decoded.size;
-                }
+                dumpCode(ofst, clause.code);
             }
             return;
         }
+    }
+}
+
+function dumpCode(ftableOfst, code) {
+    let position = 0;
+    while(position < code.length) {
+        let decoded = decode_instruction_general(ftableOfst, position, code);
+        dumpWrite(decoded.string);
+        position += decoded.size;
     }
 }
 
@@ -15265,6 +15875,8 @@ function dumpWrite(msg) {
         print(msg);
     }
 }
+"use strict";
+
 var stdout_buffer = "";
 
 stdout = function (msg)
@@ -15291,4 +15903,6 @@ predicate_flush_stdout = function ()
 function alert(msg) {
     console.log('alert:' + msg);
 }
+"use strict";
+
 module.exports = {proscriptls_init: proscriptls_init, proscriptls_toplevel: proscriptls_toplevel, danglingPredicates: danglingPredicates};

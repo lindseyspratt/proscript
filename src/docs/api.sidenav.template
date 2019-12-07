@@ -34,8 +34,11 @@
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_node, 'index_doc.html', 'Node']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_parentnode, 'index_doc.html', 'ParentNode']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_path2d, 'index_doc.html', 'Path2D']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_storage, 'index_doc.html', 'Storage']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_textmetrics, 'index_doc.html', 'TextMetrics']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_uievent, 'index_doc.html', 'UIEvent']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_uint8clampedarray, 'index_doc.html', 'Uint8ClampedArray']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_validitystate, 'index_doc.html', 'ValidityState']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_window, 'index_doc.html', 'Window']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_windowlocalstorage, 'index_doc.html', 'WindowLocalStorage']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_windowsessionstorage, 'index_doc.html', 'WindowSessionStorage']}}</li>

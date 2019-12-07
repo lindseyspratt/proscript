@@ -22,7 +22,11 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
 :- module(data_predicates,
     [data_predicates/3, data_predicate_dynamics/1,
     assert_datas/1, assert_datas/2, assert_id_datas/1, assert_data/2,
-    labelled_values/3, retract_data/2]).
+    labelled_values/3, retract_all_data/1, retract_data/2,
+    save_data_stream/2, save_data_stream/3,
+    save_data/2, save_data/3, load_data/2, remove_data/2]).
+
+:- use_module(library(wam_compiler)).
 
 :- meta_predicate((
     data_predicate_dynamics((:)),
@@ -32,7 +36,16 @@ The default_asserted_id(Type, ID) is updated to the last data asserted which is 
     assert_datas((:)),
     data_predicates(?, (:), ?),
     labelled_values((:), ?, ?),
-    retract_data((:),?))).
+    retract_data((:),?),
+    retract_all_data((:)),
+    retract_all_data((:), ?),
+    save_data((:),?),
+    save_data((:),?,?),
+    save_data_stream((:),?),
+    save_data_stream((:),?,?),
+    gather_data1(?,(:),?),
+    load_data((:), ?),
+    remove_data((:), ?))).
 
 :- dynamic data_predicates/3.
 
@@ -108,6 +121,24 @@ default_asserted_id(M:Prefix, ID) :-
     retractall(M:GoalR),
     assertz(M:Goal).
 
+retract_default_id(M:Prefix) :-
+    atom_concat(Prefix, '_default_id', Predicate),
+    GoalR =.. [Predicate, _],
+    retractall(M:GoalR).
+
+retract_default_id(M:Prefix, ID) :-
+    atom_concat(Prefix, '_default_id', Predicate),
+    Goal =.. [Predicate, ID],
+    retract(M:Goal).
+
+write_default_id(M:Prefix, Stream) :-
+    atom_concat(Prefix, '_default_id', Predicate),
+    Goal =.. [Predicate, _],
+    call(M:Goal)
+      -> write_goal(M:Goal, Stream)
+    ;
+    true.
+
 data_predicate_dynamics(M : DPs) :-
     assert_dps(M : DPs),
     findall(Prefix-Suffixes, data_predicates(_, M:Prefix, Suffixes), All),
@@ -166,7 +197,40 @@ data_value(Suffix, M:Prefix, ID, Value) :-
     Goal =.. [Predicate, ID, Value],
     call(M:Goal).
 
-retract_data(M:Prefix, ID) :-
+retract_all_data(_M1:M2:Prefix) :-
+    !,
+    retract_all_data(M2:Prefix).
+retract_all_data(DataSpec) :-
+    retract_all_data1(DataSpec).
+
+retract_all_data1(M:Prefix) :-
+    retract_default_id(M:Prefix),
+    ids_in_use(M:Prefix, SortedIDs),
+    retract_all_data1(SortedIDs, M:Prefix).
+
+retract_all_data(_M1:M2:Prefix, IDs) :-
+    !,
+    retract_all_data(M2:Prefix, IDs).
+retract_all_data(DataSpec, IDs) :-
+    retract_all_data1(IDs, DataSpec).
+
+retract_all_data1([],_).
+retract_all_data1([H|T], M:Prefix) :-
+    retract_data1(M:Prefix, H),
+    retract_all_data1(T, M:Prefix).
+
+retract_data(_M1:M2:Prefix, ID) :-
+    !,
+    retract_data(M2:Prefix, ID).
+retract_data(DataSpec, ID) :-
+    retract_data1(DataSpec, ID).
+
+retract_data1(M:Prefix, ID) :-
+    (retract_default_id(M:Prefix, ID) % retract foo_default_id if set to ID, otherwise leave it.
+      -> true
+    ;
+     true
+    ),
     data_predicates(_, M:Prefix, Suffixes),
     retract_data(Suffixes, M:Prefix, ID).
 
@@ -176,3 +240,144 @@ retract_data([H|T], M:Prefix, ID) :-
     Goal =.. [Predicate, ID, _],
     retractall(M:Goal),
     retract_data(T, M:Prefix, ID).
+
+% store facts for data matching M:Prefix in the browser's localStorage
+% where the facts are stored as a single string/blob and the
+% localStorage key is a concatenation of Key and M:Prefix.
+
+save_data(_M1:M2:Prefix, Target) :-
+    !,
+    save_data(M2:Prefix, Target).
+save_data(DataSpec, Target) :-
+    save_data1(DataSpec, Target).
+
+save_data1(M:Prefix, local_storage(Key)) :-
+    ids_in_use(M:Prefix, IDs),
+    save_data1(M:Prefix, IDs, local_storage(Key)).
+
+save_data(_M1:M2:Prefix, IDs, Target) :-
+    !,
+    save_data(M2:Prefix, IDs, Target).
+save_data(DataSpec, IDs, Target) :-
+    save_data1(DataSpec, IDs, Target).
+
+save_data1(M:Prefix, IDs, local_storage(Key)) :-
+    new_memory_file(DataMemFile),
+    open_memory_file(DataMemFile, write, Stream),
+    % write foo_default_id(ID) ...
+    write_default_id(M:Prefix, Stream),
+    gather_data(Stream, M:Prefix, IDs),
+    close(Stream),
+    format(atom(K), '~w/~w', [Key, M:Prefix]),
+    copy_memory_file_to_local_storage(DataMemFile, K),
+    free_memory_file(DataMemFile).
+
+save_data_stream(_M1:M2:Prefix, Stream) :-
+    !,
+    save_data_stream(M2:Prefix, Stream).
+save_data_stream(DataSpec, Stream) :-
+    save_data_stream1(DataSpec, Stream).
+
+save_data_stream(_M1:M2:Prefix, IDs, Stream) :-
+    !,
+    save_data_stream(M2:Prefix, IDs, Stream).
+save_data_stream(DataSpec, IDs, Stream) :-
+    save_data_stream1(DataSpec, IDs, Stream).
+
+save_data_stream1(M:Prefix, Stream) :-
+    ids_in_use(M:Prefix, IDs),
+    save_data_stream1(M:Prefix, IDs, Stream).
+
+save_data_stream1(M:Prefix, IDs, Stream) :-
+    % write foo_default_id(ID) ...
+    write_default_id(M:Prefix, Stream),
+    gather_data(Stream, M:Prefix, IDs).
+
+gather_data(Stream, M:Prefix, IDs) :-
+    data_predicates(_, M:Prefix, Suffixes),
+    gather_data(Suffixes, Stream, M:Prefix, IDs).
+
+gather_data([], _, _, _).
+gather_data([H|T], Stream, M:Prefix, IDs) :-
+    construct_data_predicate(Prefix, H, Predicate),
+    write(Stream, '\n% '), write(Stream, M:Predicate), write(Stream, '\n\n'),
+    gather_data1(IDs, M:Predicate, Stream),
+    gather_data(T, Stream, M:Prefix, IDs).
+
+gather_data1([], _Predicate, _Stream).
+gather_data1([H|T], M:Predicate, Stream) :-
+    (setof(M:Goal, X^(Goal =.. [Predicate, H, X], call(M:Goal)), Goals)
+      -> write_goals(Goals, Stream)
+    ;
+     true
+    ),
+    gather_data1(T, M:Predicate, Stream).
+
+write_goals([], _Stream).
+write_goals([H|T], Stream) :-
+    write_goal(H, Stream),
+    write_goals(T, Stream).
+
+% writeq/2 is used to ensure that the written
+% goal is readable by the Prolog parser.
+% This does not use write_canonical/2 because
+% that predicate explodes lists (e.g. [a,b] becomes
+% '.'(a,'.'(b,[]))) which could cause the saved
+% goals to require a great deal more storage.
+% Since write_canonical/2 is not used then whatever
+% operator definitions are in place when these goals are
+% written can affect the layout of these goals.
+% Care must be taken that the appropriate operator
+% definitions are in place when loading these goals.
+
+write_goal(H, Stream) :-
+    writeq(Stream, H),
+    write(Stream, '.\n').
+
+load_data(_M1:M2:Prefix, Source) :-
+    !,
+    load_data(M2:Prefix, Source).
+load_data(DataSpec, Source) :-
+    load_data1(DataSpec, Source).
+
+load_data1(M:Prefix, local_storage(Key)) :-
+    writeln(load_data1(M:Prefix, local_storage(Key))),
+    writeln(load_data1(retractall)),
+    retract_all_data1(M:Prefix),
+    format(atom(K), '~w/~w', [Key, M:Prefix]),
+    writeln(load_data1(copy)),
+    copy_local_storage_to_memory_file(K, DataMemFile),
+    writeln(load_data1(compile)),
+    compile_and_free_memory_file(DataMemFile),
+    writeln(load_data1(completed)).
+
+remove_data(_M1:M2:Prefix, Store) :-
+    !,
+    remove_data(M2:Prefix, Store).
+remove_data(DataSpec, Store) :-
+    remove_data1(DataSpec, Store).
+
+remove_data1(M:Prefix, local_storage(Key)) :-
+    format(atom(K), '~w/~w', [Key, M:Prefix]),
+    dom_window(W),
+    dom_object_property(_, W, localStorage, S),
+    dom_object_method(S, removeItem(K)).
+
+ids_in_use(M:Prefix, SortedIDs) :-
+    data_predicates(_, M:Prefix, Suffixes),
+    !,
+    ids_in_use(Suffixes, M:Prefix, IDs),
+    sort(IDs, SortedIDs). % remove duplicates.
+
+ids_in_use([], _, []).
+ids_in_use([H|T], M:Prefix, IDs) :-
+    construct_data_predicate(Prefix, H, Predicate),
+    (ids_in_use1(M:Predicate, LocalIDs)
+      -> append(LocalIDs, NextIDs, IDs)
+    ;
+     NextIDs = IDs
+    ),
+    ids_in_use(T, M:Prefix, NextIDs).
+
+ids_in_use1(M:Predicate, IDs) :-
+    setof(ID, X^Goal^(Goal =.. [Predicate, ID, X], call(M:Goal)), IDs).

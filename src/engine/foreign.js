@@ -1,3 +1,5 @@
+"use strict";
+
 let compilation_environment = {
     buffer: [],
     indexing_mode: 'basic'
@@ -163,7 +165,8 @@ function evaluate_expression(expression, evaluated)
             memory[state.H++] = arity ^ (TAG_INT << WORD_BITS);
             return type_error("evaluable", indicator)
         }
-        return true;            
+
+        return true;
     }
     else if (TAG(expression) === TAG_ATM)
     {
@@ -354,27 +357,39 @@ function predicate_univ(term, list_term)
             var arity = 0;
             if (TAG(list_term) !== TAG_LST)
                 return type_error("list", list_term);
-            if (TAG(deref(memory[VAL(list_term)])) !== TAG_ATM)
-                return type_error("atom", deref(memory[VAL(list_term)]));
-            var ftor_name = atable[VAL(deref(memory[VAL(list_term)]))];
-            list_term = memory[VAL(list_term) + 1];
-            // Now write the args
-            while (TAG(list_term) === TAG_LST) {
-                // Write head
-                memory[state.H++] = memory[VAL(list_term)];
-                // Update tail
+
+            let ftor_name_id = deref(memory[VAL(list_term)]);
+
+            if(TAG(ftor_name_id)===TAG_ATM) {
+                var ftor_name = atable[VAL(ftor_name_id)];
                 list_term = memory[VAL(list_term) + 1];
-                arity++;
+                // Now write the args
+                while (TAG(list_term) === TAG_LST) {
+                    // Write head
+                    memory[state.H++] = memory[VAL(list_term)];
+                    // Update tail
+                    list_term = memory[VAL(list_term) + 1];
+                    arity++;
+                }
+                // Check tail
+                if (list_term !== NIL) {
+                    if (TAG(list_term) === TAG_REF)
+                        return instantiation_error(list_term);
+                    else
+                        return type_error("list", list_term);
+                }
+
+                if (arity === 0) {
+                    state.H--; // undo the setup for allocating a structure on the heap.
+                    return unify(term, ftor_name_id);
+                }
+                memory[tmp] = lookup_functor(ftor_name, arity);
+                return unify(term, tmp ^ (TAG_STR << WORD_BITS));
+            } else if(TAG(ftor_name_id)===TAG_INT || TAG(ftor_name_id)===TAG_FLT) {
+                return unify(term, ftor_name_id);
+            } else {
+                return type_error('atomic first item in univ list', ftor_name_id);
             }
-            // Check tail
-            if (list_term !== NIL) {
-                if (TAG(list_term) === TAG_REF)
-                    return instantiation_error(list_term);
-                else
-                    return type_error("list", list_term);
-            }
-            memory[tmp] = lookup_functor(ftor_name, arity);
-            return unify(term, tmp ^ (TAG_STR << WORD_BITS));
         case TAG_STR:
             var ftor = VAL(memory[VAL(term)]);
             if (ftable[ftor] === undefined)
@@ -1744,6 +1759,25 @@ function predicate_add_index_clause_to_predicate(predicateP) {
     return true;
 }
 
+// predicate_edit_clauses_for_index_sequences modifies sequences of clauses
+// to use try_me_else, retry_me_else, trust_me, and nop2 appropriately for
+// supporting indexing using switch_on_term instruction.
+// The sequencesP parameter is a Prolog list of lists of integers: these
+// integers specify clauseKey indices (0-based) such that an integer K
+// identifies a clause as:
+//      let clause = predicates.clauses[predicates.clauseKeys[K]];
+// The code for clause K has its first instruction modified appropriately
+// for a control instruction according to the position of clause K in its
+// containing sequence:
+//  if the sequence only has one clause (K), then the control instruction is 'nop2';
+//  if K is the first clause in its sequence then its control instruction is
+//      'try_me_else(N)' where N is the clauseKey index of the next clause in
+//      the sequence, which is alwasy (K+1);
+//  if K is neither the first nor the last clause in its sequence then its control
+//      instruction is retry_me_else(N), where N=K+1 as before; finally,
+//  if K is the last clause in its sequence (of more than one clause) then
+//      its control instruction is trust_me.
+
 function predicate_edit_clauses_for_index_sequences(sequencesP, predicateP) {
     let sequences = integer_list_list_to_term_array(sequencesP);
     for(let ofst = 0;ofst < sequences.length; ofst++) {
@@ -1787,9 +1821,21 @@ function add_clause_to_predicate(predicateP, head, body)
     //     console.log(JSON.stringify(record_term(head)) + " : " + JSON.stringify(record_term(body)));
     // }
 
+
     var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
     if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))
     {
+        // let headString = term_to_string(head);
+        // if(prolog_flag_values.wam_log === 'none' && headString.includes('location_modelx')) {
+        //     prolog_flag_values.wam_log = 'local_storage_ring';
+        // } else if(prolog_flag_values.wam_log !== 'none' && ! headString.includes('location_modelx')) {
+        //     log(prolog_flag_values.wam_log, 'ending log at ' + headString);
+        //     prolog_flag_values.wam_log = 'none';
+        // }
+        //
+        // if(prolog_flag_values.wam_log !== 'none') {
+        //     log(prolog_flag_values.wam_log, 'start ' + headString);
+        // }
         // Easy case. New or empty predicate. Add it to the table then set up the <NOP,0> header
         compilation_environment.buffer[0] = 254;
         compilation_environment.buffer[1] = 0;
@@ -1804,6 +1850,11 @@ function add_clause_to_predicate(predicateP, head, body)
                                  clause_keys: [0],
                                  is_public: is_public,
                                  next_key: 1};
+
+        // if(prolog_flag_values.wam_log !== 'none') {
+        //     log(prolog_flag_values.wam_log, '...completed ' + headString);
+        // }
+
     }
     else
     {
@@ -2783,12 +2834,16 @@ var prolog_flags = [{name:"bounded", fn:flag_bounded},
                     {name:"max_arity", fn:flag_max_arity},
                     {name:"unknown", fn:flag_unknown},
                     {name:"double_quotes", fn:flag_double_quotes},
-                    {name:"dialect", fn:flag_dialect}];
+                    {name:"dialect", fn:flag_dialect},
+                    {name:"wam_log", fn:flag_wam_log},
+                    {name:"wam_log_size", fn:flag_wam_log_size}];
 
 var prolog_flag_values = {char_conversion: false,
                           debug: false,
                           unknown: "error",
-                          double_quotes: "codes"};
+                          double_quotes: "codes",
+                          wam_log: "none",
+                          wam_log_size: 50};
 
 function flag_bounded(set, value)
 {
@@ -2799,13 +2854,14 @@ function flag_bounded(set, value)
 function flag_max_integer(set, value)
 {
     if (set) return permission_error("prolog_flag");
-    return unify(value, (268435455) ^ (TAG_INT<<WORD_BITS));
+    return unify(value, ((2**(WORD_BITS-1)-1) & ((1 << WORD_BITS)-1)) ^ (TAG_INT<<WORD_BITS));
 }
 
 function flag_min_integer(set, value)
 {
     if (set) return permission_error("prolog_flag");
-    return unify(value, (536870911) ^ (TAG_INT<<WORD_BITS));
+    let newTerm = ((-1*(2**(WORD_BITS-1))) & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+    return unify(value, newTerm);
 }
 
 function flag_integer_rounding_function(set, value)
@@ -2892,6 +2948,41 @@ function flag_dialect(set, value)
     return unify(value, lookup_atom("proscriptls"));
 }
 
+function flag_wam_log(set, value) {
+    if (set)
+    {
+        if (TAG(value) === TAG_ATM && atable[VAL(value)] === "console")
+            prolog_flag_values.wam_log = "console";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "local_storage")
+            prolog_flag_values.wam_log = "local_storage";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "local_storage_ring")
+            prolog_flag_values.wam_log = "local_storage_ring";
+        else if (TAG(value) === TAG_ATM && atable[VAL(value)] === "none")
+            prolog_flag_values.wam_log = "none";
+        else
+        {
+            return type_error("wam_log_value", value);
+        }
+        return true;
+    }
+    return unify(value, lookup_atom(prolog_flag_values.wam_log));
+}
+
+function flag_wam_log_size(set, value)
+{
+    if (set) {
+        if (TAG(value) === TAG_REF) {
+            return instantiation_error(value);
+        } else if (TAG(value) === TAG_INT) {
+            prolog_flag_values.wam_log_size = VAL(value);
+            return true;
+        } else {
+            return type_error('integer', value);
+        }
+    }
+
+    return unify(value, PL_put_integer(prolog_flag_values.wam_log_size));
+}
 
 function predicate_set_prolog_flag(key, value)
 {
@@ -2937,11 +3028,10 @@ function predicate_current_prolog_flag(key, value)
     else if (TAG(key) === TAG_ATM)
     {
         let keyname = atable[VAL(key)];
-        let index = 0;
         for (let i = 0; i < prolog_flags.length; i++)
         {
-            if (prolog_flags[index].name === keyname)
-                return prolog_flags[index].fn(false, value);
+            if (prolog_flags[i].name === keyname)
+                return prolog_flags[i].fn(false, value);
         }
         return false;
     }

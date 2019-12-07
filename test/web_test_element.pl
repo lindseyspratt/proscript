@@ -19,9 +19,9 @@ test('Element', 'childElementCount of test1 finds value 1', succeeded) :-
 
 test('Element', 'class of test1 finds 1 classes [foo, bar]', succeeded) :-
     dom_element_attribute_value(E, id, test1),
-    findall(T,
-                dom_object_property(_, E, class,C),
-                [foo, bar]).
+    setof(C,
+                A^dom_object_property(A, E, class,C),
+                [bar, foo]).
 
 test('Element', 'clientHeight of test1 finds value 19', succeeded) :-
     dom_element_attribute_value(E, id, test1),
@@ -112,7 +112,7 @@ test('Element', 'tag of test1 is DIV', succeeded) :-
 test('Element', 'getBoundingClientRect of test1 is particular rectangle', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_method(E, getBoundingClientRect(X)),
-    X=dom_rect(8, A, B1, B2, 8, A, C1, C2),
+    X=dom_rect(8, A, B1, _B2, 8, A, C1, _C2),
     B1 is C1 + 8.
     % X=dom_rect(8,-177,1336,-156,8,-177,1328,21). % Safari
     % X=dom_rect(8,-167,1432,-145,8,-167,1424,21). % Firefox, Mac
@@ -120,7 +120,7 @@ test('Element', 'getBoundingClientRect of test1 is particular rectangle', succee
 test('Element', 'generic getBoundingClientRect of test1 is particular rectangle', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_method(E, getBoundingClientRect(X), [getBoundingClientRect, [], dom_rect]),
-    X=dom_rect(8, A, B1, B2, 8, A, C1, C2),
+    X=dom_rect(8, A, B1, _B2, 8, A, C1, _C2),
     B1 is C1 + 8.
 
 test('Element', 'insertAdjacentElement of new div afterEnd of test1', succeeded) :-

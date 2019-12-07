@@ -161,6 +161,7 @@ nth0(0, [Head|_], Head) :- !.
 
 nth0(N, [_|Tail], Elem) :-
 	nonvar(N),
+	!,
 	M is N-1,
 	nth0(M, Tail, Elem).
 
@@ -174,6 +175,7 @@ nth1(1, [Head|_], Head) :- !.
 
 nth1(N, [_|Tail], Elem) :-
 	nonvar(N),
+	!,
 	M is N-1,			% should be succ(M, N)
 	nth1(M, Tail, Elem).
 
@@ -184,7 +186,7 @@ nth1(N,[_|T],Item) :-		% Clause added KJ 4-5-87 to allow mode
 
 %   nth0(+N, ?List, ?Elem, ?Rest) unifies Elem with the Nth element of List,
 %   counting from 0, and Rest with the other elements.  It can be used
-%   to select the Nth element of List (yielding Elem and Rest), or to 
+%   to select the Nth element of List (yielding Elem and Rest), or to
 %   insert Elem before the Nth (counting from 1) element of Rest, when
 %   it yields List, e.g. nth0(2, List, c, [a,b,d,e]) unifies List with
 %   [a,b,c,d,e].  nth1 is the same except that it counts from 1.  nth1
@@ -194,6 +196,7 @@ nth0(0, [Head|Tail], Head, Tail) :- !.
 
 nth0(N, [Head|Tail], Elem, [Head|Rest]) :-
 	nonvar(N),
+	!,
 	M is N-1,
 	nth0(M, Tail, Elem, Rest).
 
@@ -207,6 +210,7 @@ nth1(1, [Head|Tail], Head, Tail) :- !.
 
 nth1(N, [Head|Tail], Elem, [Head|Rest]) :-
 	nonvar(N),
+	!,
 	M is N-1,
 	nth1(M, Tail, Elem, Rest).
 

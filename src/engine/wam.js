@@ -1,3 +1,5 @@
+"use strict";
+
 /* For general documentation, see wam_compiler.pl
 
 Some helpful diagrams:
@@ -64,6 +66,8 @@ let indexed_predicates = [];
 let exception = null;
 let itable = [];
 let stable = [];
+let maxStackSize = 0;
+let maxHeapSize = 0;
 
 /* Constants. Should be auto-generated */
 const HEAP_SIZE = 1410700;
@@ -423,6 +427,9 @@ function alloc_structure(ftor)
 {
     let tmp = state.H;
     memory[state.H++] = ftor;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return tmp ^ (TAG_STR << WORD_BITS);
 }
 
@@ -431,6 +438,9 @@ function alloc_var()
     let result = state.H ^ (TAG_REF << WORD_BITS);
     memory[state.H] = result;    
     state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return result;
 }
 
@@ -439,6 +449,9 @@ function alloc_list()
     let result = (state.H+1) ^ (TAG_LST << WORD_BITS);
     memory[state.H] = result;    
     state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
     return result;
 }
 
@@ -456,6 +469,9 @@ function wam_setup_trace_call(target_ftor_ofst) {
         let argOfst = 0;
         for (; argOfst < traceArgArity; argOfst++) {
             memory[state.H++] = register[argOfst];
+        }
+        if(state.H > maxHeapSize) {
+            maxHeapSize = state.H;
         }
 
         // Make the traceArgStructure the first argument.
@@ -579,6 +595,12 @@ function wam_create_choicepoint(nextCP, prefix) {
     memory[newB + n + CP_TI] = state.trace_info;
     state.B = newB;
     state.HB = state.H;
+
+    let stackTop = newB + n + CP_SIZE - 1;
+
+    if(maxStackSize < stackTop) {
+        maxStackSize = stackTop;
+    }
 }
 
 function wam_trace_call_or_execute(functor) {
@@ -670,6 +692,13 @@ function wam1()
     {
         debug_msg("---");        
         debug_msg("P=" + (((state.current_predicate == null)?("no predicate"):(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1])) + "@" + state.P + ": " + code[state.P]) + ", H=" + state.H + ", B=" + state.B + ", B0=" + state.B0 + ", E=" + state.E);
+
+        // The conditional "prolog_flag_values.wam_log !== 'none'" avoids the call to log() in the common case.
+        // This makes a noticeable difference in performance.
+
+        if(prolog_flag_values.wam_log !== 'none')
+            log(prolog_flag_values.wam_log, decode_instruction(state.current_predicate, state.P).string);
+
         if(state.trace_call === 'trace' && state.trace_instruction &&
             (state.trace_instruction === 'trace' || state.trace_instruction === 'step')) {
             let instruction = decode_instruction(state.current_predicate, state.P);
@@ -767,6 +796,11 @@ function wam1()
                 memory[tmpE + 1] = state.CP;
                 state.E = tmpE;
                 state.P += 1;
+
+                if(maxStackSize < tmpE+1) {
+                    maxStackSize = tmpE+1;
+                }
+
             }
                 continue;
 
@@ -944,6 +978,9 @@ function wam1()
                 register[code[state.P + 1]] = freshvar;
                 register[code[state.P + 2]] = freshvar;
                 state.H++;
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 debug_msg("After put_variable, state.H is now " + state.H);
                 state.P += 3;
             }
@@ -1197,6 +1234,10 @@ function wam1()
                 } else {
                     memory[state.H++] = register[code[state.P + 2]];
                 }
+
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
             }
             state.P += 3;
             if (did_fail)
@@ -1241,6 +1282,10 @@ function wam1()
                     if (code[state.P + 1] === 1)
                         register[code[state.P + 2]] = fresh; // also set X(i) if X-register
                 }
+
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
             }
             state.P += 3;
             if (did_fail)
@@ -1268,6 +1313,9 @@ function wam1()
             else
             {
                 memory[state.H++] = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -1289,6 +1337,9 @@ function wam1()
             else
             {
                 memory[state.H++] = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -1770,6 +1821,9 @@ function wam1()
             else
             {
                 memory[state.H++] = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
+                if(state.H > maxHeapSize) {
+                    maxHeapSize = state.H;
+                }
                 state.P += 2;
             }
             continue;
@@ -1979,6 +2033,9 @@ function hex(number)
     {
     	number = 0xFFFFFFFF + number + 1;
     }
+    if (typeof number !== 'number') {
+        return "NaN";
+    }
     // noinspection JSCheckFunctionSignatures
     return "0x" + number.toString(16).toUpperCase();
 }
@@ -2128,6 +2185,9 @@ function undefined_predicate(ftor)
         memory[state.H++] = lookup_functor("/", 2);
         memory[state.H++] = ftable[ftor][0] ^ (TAG_ATM << WORD_BITS);
         memory[state.H++] = ftable_arity(ftor) ^ (TAG_INT << WORD_BITS);
+        if(state.H > maxHeapSize) {
+            maxHeapSize = state.H;
+        }
         existence_error("procedure", indicator);
     }
     else if (prolog_flag_values.unknown === "warning")
@@ -2248,3 +2308,16 @@ function strings_to_atom_list(strings) {
     return tmp;
 }
 
+function log(target, msg) {
+    if(target !== 'none') {
+        if (target === 'console') {
+            dumpWrite(msg);
+        } else if (target === 'local_storage') {
+            logToLocalStorage(msg);
+        } else if (target === 'local_storage_ring') {
+            log_ring(msg);
+        } else {
+            throw 'invalid log target: ' + target;
+        }
+    }
+}

@@ -1,3 +1,5 @@
+"use strict";
+
 var stdout_buffer = "";
 
 stdout = function (msg)

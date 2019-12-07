@@ -236,6 +236,27 @@ test(univ(5), exit):-
         [a, b, c] =.. A,
         A == ['.', a, [b,c]].
 
+test(univ(6), exit) :-
+        A =.. [foo],
+        A = foo.
+
+test(univ(7), exit) :-
+        foo =.. [foo].
+
+test(univ(8), exit) :-
+        1 =.. [1].
+
+test(univ(9), exit) :-
+        0.3 =.. [0.3].
+
+test(univ(10), exit) :-
+        A =.. [1],
+        A = 1.
+
+test(univ(11), exit) :-
+        A =.. [0.3],
+        A = 0.3.
+
 deterministic_goal.
 nondeterministic_goal.
 nondeterministic_goal.
@@ -335,4 +356,31 @@ test(escapes, exit) :-
 test(member, !) :-
         member(a-_Y, [p-1, a-3]).
 
+test(leftassoc, exit) :-
+        current_op(_, yfx, +), % verify that + is left associative.
+        !,
+        X = (a + b + c),
+        (_ + c) = X.
 
+test(rightassoc, exit) :-
+        current_op(_, xfy, ;), % verify that ; is right associative.
+        !,
+        X = (a ; b ; c),
+        (a ; _) = X.
+
+test(flag, exit) :-
+        current_prolog_flag(min_integer, Mn),
+        current_prolog_flag(max_integer, Mx),
+        Mn < Mx.
+
+test(stat_max_heap, exit) :-
+        statistics_max_heap(M),
+        M > 0.
+
+test(stat_max_stack, exit) :-
+        statistics_max_stack(M),
+        M > 0.
+
+test(stat_wam_duration, exit) :-
+        wam_duration(M),
+        M > 0.

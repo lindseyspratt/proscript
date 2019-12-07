@@ -613,6 +613,20 @@
 		<li><b>ellipse</b>(<i>number</i>, <i>number</i>, <i>number</i>, <i>number</i>, <i>number</i>, <i>number</i>, <i>number</i>, <i>boolean</i>)</li>
 	</ul>
 </li>
+<li class="indexed" id="api_storage"><h5>Storage (<a href="https://html.spec.whatwg.org/multipage/webstorage.html#storage-2">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Storage'>MDN</a>): storage</h5>
+<h6>Properties</h6>
+	<ul>
+		<li><b>length</b>: <i>number</i></li>
+	</ul>
+<h6>Methods</h6>
+	<ul>
+		<li><b>clear</b></li>
+		<li><b>getItem</b>(<i>string</i>, <i>atom</i>) [last arg is result]</li>
+		<li><b>key</b>(<i>number</i>, <i>atom</i>) [last arg is result]</li>
+		<li><b>removeItem</b>(<i>string</i>)</li>
+		<li><b>setItem</b>(<i>string</i>, <i>string</i>)</li>
+	</ul>
+</li>
 <li class="indexed" id="api_textmetrics"><h5>TextMetrics (<a href="https://www.w3.org/TR/2dcontext/#textmetrics">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics'>MDN</a>): textmetrics</h5>
 <h6>Properties</h6>
 	<ul>
@@ -656,7 +670,7 @@
 	(no methods)
 </li>
 <li class="indexed" id="api_window"><h5>Window (<a href="https://html.spec.whatwg.org/multipage/window-object.html">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window'>MDN</a>): window</h5>
-<h6>Parents</h6><ul><li><a href='#api_eventtarget'>eventtarget</a></li></ul>
+<h6>Parents</h6><ul><li><a href='#api_eventtarget'>eventtarget</a></li><li><a href='#api_windowlocalstorage'>windowlocalstorage</a></li><li><a href='#api_windowsessionstorage'>windowsessionstorage</a></li></ul>
 <h6>Properties</h6>
 	<ul>
 		<li><b>applicationCache</b>: <i>object</i></li>
@@ -691,4 +705,20 @@
 		<li><b>prompt</b>(<i>string</i>, <i>string</i>) [last arg is result]</li>
 		<li><b>stop</b></li>
 	</ul>
+</li>
+<li class="indexed" id="api_windowlocalstorage"><h5>WindowLocalStorage (<a href="https://html.spec.whatwg.org/multipage/webstorage.html#windowlocalstorage">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Local_storage'>MDN</a>): windowlocalstorage</h5>
+<h6>Children</h6><ul><li><a href='#api_window'>window</a></li></ul>
+<h6>Properties</h6>
+	<ul>
+		<li><b>localStorage</b>: <i>object</i></li>
+	</ul>
+	(no methods)
+</li>
+<li class="indexed" id="api_windowsessionstorage"><h5>WindowSessionStorage (<a href="https://html.spec.whatwg.org/multipage/webstorage.html#windowsessionstorage">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API'>MDN</a>): windowsessionstorage</h5>
+<h6>Children</h6><ul><li><a href='#api_window'>window</a></li></ul>
+<h6>Properties</h6>
+	<ul>
+		<li><b>sessionStorage</b>: <i>object</i></li>
+	</ul>
+	(no methods)
 </li>

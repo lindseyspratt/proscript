@@ -218,8 +218,8 @@ doc(dom_create_object/3, dom_create_object(+ < type * atom, - < object * object_
     An argument may be a goal_function type, in which case the ModuleName (inferred or explicit)
     is needed to determine what module holds the predicate(s) of the goal_functor.
     Argument types include: object, string, string_codes, integer, number, boolean, position, goal_function,
-    event, and options. Also a type may specify a list or array of items of the same type as 'array(Type)', e.g.
-    'array(integer)' for an array/list of integers.",
+    event, and options. Also a type may specify a list or array of items of the same type as 'array_type(Type)', e.g.
+    'array_type(integer)' for an array/list of integers.",
     [arg(type, "an atom or structure that specifies the kind of object to create"),
      arg(object, "an object ID structure for a Web API (or other Javascript) object"),
      arg(spec, "a list specifying the types of the arguments of the Type structure (if any)."),

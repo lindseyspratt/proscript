@@ -1,3 +1,5 @@
+"use strict";
+
 var current_input = null;
 var current_output = 0;
 // FIXME: Ignores size and count!

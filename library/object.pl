@@ -1,36 +1,36 @@
 :- module(object, [
     op(200, fx, *),
     op(200, fx, @),
-    op(500, xfy, :>),
+    op(500, xfx, :>),
     op(500, xfx, <:),
-    op(500, xfy, -:>),
+    op(500, xfx, -:>),
     op(500, xfx, <:-),
-    op(500, xfy, +:>),
+    op(500, xfx, +:>),
     op(500, xfx, <:+),
-    op(500, xfy, *:>),
-    op(700, xfy, >->),
-    op(700, xfy, >+>),
-    op(700, xfy, >*>),
-    op(700, xfy, >@>),
+    op(500, xfx, *:>),
+    op(700, yfx, >->),
+    op(700, yfx, >+>),
+    op(700, yfx, >*>),
+    op(700, yfx, >@>),
     (>>)/2, (>->)/2, (>+>)/2, (>*>)/2, (>@>)/2]).
 
-:- meta_predicate(('>>'(?, (:)), '>*>'(?, (:) ), '>@>'(?, (:) ))).
+:- meta_predicate(('>>'((:), (:)), '>*>'((:), (:) ), '>@>'((:), (:) ))).
 
 :- op(200, fx, *).
 :- op(200, fx, @).
-:- op(500, xfy, :>).
+:- op(500, xfx, :>).
 :- op(500, xfx, <:).
-:- op(500, xfy, -:>).
+:- op(500, xfx, -:>).
 :- op(500, xfx, <:-).
-:- op(500, xfy, +:>).
+:- op(500, xfx, +:>).
 :- op(500, xfx, <:+).
-:- op(500, xfy, *:>).
-:- op(700, xfy, >->).
-:- op(700, xfy, >+>).
-:- op(700, xfy, >*>).
-:- op(700, xfy, >@>).
+:- op(500, xfx, *:>).
+:- op(700, yfx, >->).
+:- op(700, yfx, >+>).
+:- op(700, yfx, >*>).
+:- op(700, yfx, >@>).
 
-% The Proscript object language provides a concise way
+% The ProscriptLS object language provides a concise way
 % to access object properties, methods and Element
 % object attributes.
 % There are operators for accessing these things individually
@@ -108,100 +108,168 @@
 %       The Xi may be any of the above forms: * M, - AV, + PV, @ G, A -:> V, A <:- V,
 %       P +:> V, P <:+ V, and M *:> V. Xi may also be a list.
 
->>(_, _M : []) :-
+>>(ObjectExpression, Application) :-
+    object_expression(ObjectExpression, Object),
+    general_application(Object, Application).
+
+general_application(_, _M : []) :-
     !.
->>(Obj,  M : [H|T]) :-
+general_application(Obj,  M : [H|T]) :-
     !,
-    >>(Obj,  M : H),
-    >>(Obj,  M : T).
->>(_Obj,  M : {G}) :-
+    general_application(Obj,  M : H),
+    general_application(Obj,  M : T).
+general_application(_Obj,  M : {G}) :-
+    !,
     call(M : G).
->>(Obj, M : (* Method)) :-
+general_application(Obj, M : (* Method)) :-
     !, % method invocation
-    >*>(Obj, M : Method).
->>(Obj, _M : (+ PV)) :-
+    method_application(Obj, M : Method).
+general_application(Obj, _M : (+ PV)) :-
     !, % property/value invocation
-    >+>(Obj, PV).
->>(Obj, _M : (- AV)) :-
+    property_application(Obj, PV).
+general_application(Obj, _M : (- AV)) :-
     !, % attribute/value invocation
-    >->(Obj, AV).
->>(Obj, M : (@ G)) :-
+    attribute_application(Obj, AV).
+general_application(Obj, M : (@ G)) :-
     !, % goal invocation
-    >@>(Obj, M : G).
->>(Obj, _M : (A -:> V)) :-
+    goal_application(Obj, M : G).
+general_application(Obj, _M : (A -:> V)) :-
     !,
-    >->(Obj, A :> V).
->>(Obj, _M : (P +:> V)) :-
+    attribute_application(Obj, A :> V).
+general_application(Obj, _M : (P +:> V)) :-
     !,
-    >+>(Obj, P :> V).
->>(Obj, _M : (Method *:> V)) :-
+    property_application(Obj, P :> V).
+general_application(Obj, M : (Method *:> V)) :-
     !,
-    >*>(Obj, Method :> V).
->>(Obj, _M : (A <:- V)) :-
+    method_application(Obj, M : Method :> V).
+general_application(Obj, _M : (A <:- V)) :-
     !,
-    >->(Obj, A <: V).
->>(Obj, _M : (P <:+ V)) :-
+    attribute_application(Obj, A <: V).
+general_application(Obj, _M : (P <:+ V)) :-
     !,
-    >+>(Obj, P <: V).
->>(Obj, M : Method) :-
-    >*>(Obj, M : Method).
+    property_application(Obj, P <: V).
+general_application(Obj, M : Method) :-
+    method_application(Obj, M : Method).
 
+>->(ObjectExpression, Application) :-
+    object_expression(ObjectExpression, Object),
+    attribute_application(Object, Application).
 
->->(_, []).
->->(Obj, [H|T]) :-
+attribute_application(_, []).
+attribute_application(Obj, [H|T]) :-
     !,
-    >->(Obj, H),
-    >->(Obj, T).
->->(_Obj, {G}) :-
+    attribute_application(Obj, H),
+    attribute_application(Obj, T).
+attribute_application(_Obj, {G}) :-
     !,
     call(G).
->->(Obj, :>(Attribute, V)) :-
+attribute_application(Obj, :>(Attribute, V)) :-
+    !,
     dom_element_attribute_value(Obj, Attribute, V).
->->(Obj, <:(Attribute, V)) :-
+attribute_application(Obj, <:(Attribute, V)) :-
     set_dom_element_attribute_value(Obj, Attribute, V).
 
->+>(_, []).
->+>(Obj, [H|T]) :-
+>+>(ObjectExpression, Application) :-
+    object_expression(ObjectExpression, Object),
+    property_application(Object, Application).
+
+property_application(_, []).
+property_application(Obj, [H|T]) :-
     !,
-    >+>(Obj, H),
-    >+>(Obj, T).
->+>(_Obj, {G}) :-
+    property_application(Obj, H),
+    property_application(Obj, T).
+property_application(_Obj, {G}) :-
     !,
     call(G).
->+>(Type-Obj, :>(Property, V)) :-
+property_application(Type-Obj, :>(Property, V)) :-
     !,
     dom_object_property(Type, Obj, Property, V).
->+>(Obj, :>(Property, V)) :-
+property_application(Obj, :>(Property, V)) :-
+    !,
     dom_object_property(_, Obj, Property, V).
->+>(Obj, <:(Property, V)) :-
+property_application(Obj, <:(Property, V)) :-
     set_dom_object_property(Obj, Property, V).
 
->*>(_, _Module : []) :-
+>*>(ObjectExpression, Application) :-
+    object_expression(ObjectExpression, Object),
+    method_application(Object, Application).
+
+method_application(_, _Module : []) :-
     !.
->*>(Obj, Module : [H|T]) :-
+method_application(Obj, Module : [H|T]) :-
     !,
-    >*>(Obj, Module : H),
-    >*>(Obj, Module : T).
->*>(_Obj, Module : {G}) :-
+    method_application(Obj, Module : H),
+    method_application(Obj, Module : T).
+method_application(_Obj, Module : {G}) :-
     !,
     call(Module : G).
->*>(Obj, Module : :>(Method, V)) :-
+method_application(Obj, Module : :>(Method, V)) :-
     !,
     Method =.. [F|As],
     append(As, [V], AV),
     MethodX =.. [F|AV],
     dom_object_method(Obj, Module : MethodX).
->*>(Obj, Module : Method) :-
+method_application(Obj, Module : Method) :-
     dom_object_method(Obj, Module : Method).
 
->@>(_, _ : []) :-
+>@>(ObjectExpression, Application) :-
+    object_expression(ObjectExpression, Object),
+    goal_application(Object, Application).
+
+goal_application(_, _ : []) :-
     !.
->@>(Obj, M : [H|T]) :-
+goal_application(Obj, M : [H|T]) :-
     !,
-    >@>(Obj, M : H),
-    >@>(Obj, M : T).
->@>(_Obj, M : {G}) :-
+    goal_application(Obj, M : H),
+    goal_application(Obj, M : T).
+goal_application(_Obj, M : {G}) :-
     !,
     call(M : G).
->@>(Obj, Goal) :-
+goal_application(Obj, Goal) :-
     call(Goal, Obj).
+
+object_expression(M:Expression, Object) :-
+    atom(M),
+    !,
+    bottom_right(Expression, Object),
+    evaluate_expression(M:Expression).
+object_expression(Expression, Object) :-
+    bottom_right(Expression, Object),
+    evaluate_expression(user:Expression).
+
+% Expression is a tree of binary and unary nodes.
+% the 'result' of evaluating Expression is the last
+% term (generally a variable).
+
+bottom_right(Expression, Expression) :-
+    var(Expression),
+    !.
+bottom_right(Expression, Expression) :-
+    atomic(Expression),
+    !.
+bottom_right([_H1, H2|T], Expression) :-
+    !,
+    bottom_right([H2|T], Expression).
+bottom_right([BR], BR) :-
+    !.
+bottom_right('$obj'(X), '$obj'(X)) :-
+    !.
+bottom_right(Expression, BR) :-
+    Expression =.. [_|As],
+    append(_, [X], As),
+    bottom_right(X, BR).
+
+evaluate_expression(_:Expression) :-
+    var(Expression),
+    !.
+evaluate_expression(_:Expression) :-
+    atomic(Expression),
+    !.
+evaluate_expression(_:[_|_]) :-
+    !.
+evaluate_expression(_:[_]) :-
+    !.
+evaluate_expression(_:'$obj'(_)) :-
+    !.
+evaluate_expression(Expression) :-
+    call(Expression).

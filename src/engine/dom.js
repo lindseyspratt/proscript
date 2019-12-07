@@ -934,3 +934,71 @@ function debug(msg) {
         alert(msg);
     }
 }
+
+let logKey = 'proscriptls_log';
+
+function logToLocalStorage(msg) {
+    let log = window.localStorage.getItem(logKey);
+    if(log) {
+        log += msg + '\n';
+    } else {
+        log = msg + '\n';
+    }
+    window.localStorage.setItem(logKey, log);
+}
+
+function predicate_clear_local_storage_log() {
+    window.localStorage.removeItem(logKey);
+
+    current = -1;
+    let ringCurrentKey = logKey + ':current';
+    window.localStorage.setItem(ringCurrentKey, '' + current);
+
+    let ofst = 0;
+    while(true) {
+        let ringKey = logKey + ':' + ofst++;
+        if(typeof window.localStorage.getItem(ringKey) === 'undefined' ||
+            window.localStorage.getItem(ringKey) === null) {
+            break;
+        } else {
+             window.localStorage.removeItem(ringKey);
+        }
+    }
+
+    return true;
+}
+
+let current = -1;
+
+function log_ring(msg) {
+    current = (current+1) % prolog_flag_values.wam_log_size;
+    let ringKey = logKey + ':' + current;
+    let ringCurrentKey = logKey + ':current';
+    window.localStorage.setItem(ringKey, msg);
+    window.localStorage.setItem(ringCurrentKey, '' + current);
+}
+
+function dumpWriteLogRing() {
+    let ringCurrentKey = logKey + ':current';
+    let currentLogString = window.localStorage.getItem(ringCurrentKey);
+    let currentLog = Number.parseInt(currentLogString);
+    // find log ring size for the currently recorded log entries.
+    // This might be different than the current global value for log_ring_size.
+    let ofst = 0;
+    while(true) {
+        let ringKey = logKey + ':' + ofst++;
+        if(typeof window.localStorage.getItem(ringKey) === 'undefined' ||
+            window.localStorage.getItem(ringKey) === null) {
+            break;
+        }
+    }
+
+    let ringSize = ofst-1;
+    let unadjustedLimit = currentLog + ringSize;
+    for(let unadjustedOfst = currentLog;unadjustedOfst < unadjustedLimit;unadjustedOfst++) {
+        let adjustedOfst = unadjustedOfst % ringSize;
+        let ringKey = logKey + ':' + adjustedOfst;
+        let msg = window.localStorage.getItem(ringKey);
+        dumpWrite(msg);
+    }
+}

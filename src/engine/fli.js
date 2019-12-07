@@ -1,3 +1,5 @@
+"use strict";
+
 /* Not implemented:
    All the nondet foreign stuff. That is supported, but not using the SWI-Prolog interface
    Strings

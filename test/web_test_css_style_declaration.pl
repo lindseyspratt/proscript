@@ -36,7 +36,7 @@ test('CSSStyleDeclaration', 'getPropertyValue(color) of style of test1 finds blu
 test('CSSStyleDeclaration', 'item(0) of style of test1 finds color', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_property(_, E, style, S),
-    dom_object_method(S, item(0, X)).
+    dom_object_method(S, item(0, _X)).
 
 test('CSSStyleDeclaration', 'removeProperty(color) of style of test1 finds blue', succeeded) :-
     dom_element_attribute_value(E, id, test1),

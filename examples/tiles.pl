@@ -1,4 +1,4 @@
-:- module(tiles, [select_test/0]).
+:- module(tiles, [select_test/0, save_tiles/0, load_tiles/0]).
 
 :- use_module('../library/object'). % for >>/2.
 :- use_module('../library/data_predicates').
@@ -34,6 +34,24 @@ select_test :-
     initial_hands_expanded(2, Hands),
     setup_hands(Hands, TileIDs),
     draw_all_tiles(TileIDs, Ctx, W, H).
+
+save_tiles :-
+    new_memory_file(DataMemFile),
+    open_memory_file(DataMemFile, write, Stream),
+    save_data_stream(game, Stream),
+    save_data_stream(tile, Stream),
+    save_data_stream(legal_position, Stream),
+    close(Stream),
+    copy_memory_file_to_local_storage(DataMemFile, save_tiles),
+    free_memory_file(DataMemFile).
+
+load_tiles :-
+    retract_all_data(game),
+    retract_all_data(tile),
+    retract_all_data(legal_position),
+    copy_local_storage_to_memory_file(save_tiles, DataMemFile),
+    wam_compiler:compile_and_free_memory_file(DataMemFile).
+
 
 dummy_reference :-
     dummy_reference,

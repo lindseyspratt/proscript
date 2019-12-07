@@ -39,7 +39,7 @@ test('HTMLSelectElement', 'name of select', succeeded) :-
 
 test('HTMLSelectElement', 'options of select', succeeded) :-
     dom_element_attribute_value(E, id, select),
-    dom_object_property(_, E, options,X).
+    %dom_object_property(_, E, options,X).
     setof(OptionValue, X^Y^T^(dom_object_property(T, E, options, X), dom_object_property(Y, X, value, OptionValue)), [a,b]).
 
 test('HTMLSelectElement', 'required of select', succeeded) :-
@@ -55,8 +55,8 @@ test('HTMLSelectElement', 'selectedIndex of select', succeeded) :-
 test('HTMLSelectElement', 'selectedOptions of select', succeeded) :-
     dom_element_attribute_value(E, id, select),
     set_dom_object_property(E, selectedIndex,1),
-    dom_object_property(T, E, selectedOptions, X),
-    dom_object_property(Y, X, value, b),
+    dom_object_property(_T, E, selectedOptions, X),
+    dom_object_property(_Y, X, value, b),
     set_dom_object_property(E, selectedIndex,0).
 
     % test using following goal fails when run as part of run_tests. Maybe setof has a problem with multiple uses in the same run of the wam?
@@ -104,7 +104,7 @@ test('HTMLSelectElement', 'checkValidity of select', succeeded) :-
 test('HTMLSelectElement', 'namedItem of select', succeeded) :-
     dom_element_attribute_value(E, id, select),
     dom_object_method(E, namedItem('a-item', X)),
-    dom_element_attribute_value(X, name, Y).
+    dom_element_attribute_value(X, name, _Y).
 
 % remove - tested elsewhere
 

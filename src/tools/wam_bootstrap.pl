@@ -516,6 +516,8 @@ reset:-
         reserve_predicate(format/3, predicate_format),
         reserve_predicate(flag/3, predicate_flag),
         reserve_predicate(memory_file_description/2, predicate_memory_file_description),
+        reserve_predicate(copy_memory_file_to_local_storage/2, predicate_copy_memory_file_to_local_storage),
+        reserve_predicate(copy_local_storage_to_memory_file/2, predicate_copy_local_storage_to_memory_file),
         reserve_predicate(absolute_file_name/3, predicate_absolute_file_name),
         reserve_predicate(numbervars/3, predicate_numbervars),
 
@@ -553,6 +555,7 @@ reset:-
         reserve_predicate(compiled_clauses/2, predicate_compiled_clauses),
         reserve_predicate(add_index_clause_to_predicate/1, predicate_add_index_clause_to_predicate),
         reserve_predicate(edit_clauses_for_index_sequences/2, predicate_edit_clauses_for_index_sequences),
+        reserve_predicate(decode_instruction/4, predicate_decode_instruction),
 
         % Promises
         reserve_predicate(request_result/1, predicate_request_result),
@@ -572,6 +575,7 @@ reset:-
         reserve_predicate('$get_backtrack_frame'/1, predicate_get_backtrack_frame),
         reserve_predicate('$set_backtrack_frame'/1, predicate_set_backtrack_frame),
         reserve_predicate('$trace_instruction_set'/1, predicate_trace_instruction_set),
+        reserve_predicate(clear_local_storage_log/0, predicate_clear_local_storage_log),
 
         % Testing
         reserve_predicate(member_test/2, predicate_member_test),
@@ -602,6 +606,9 @@ reset:-
         reserve_predicate(gc/0, predicate_gc),
         reserve_predicate(statistics/0, predicate_statistics),
         reserve_predicate(wam_duration/1, predicate_wam_duration),
+        reserve_predicate(statistics_heap_size/1, predicate_statistics_heap_size),
+        reserve_predicate(statistics_max_stack/1, predicate_statistics_max_stack),
+        reserve_predicate(statistics_max_heap/1, predicate_statistics_max_heap),
 
         % Javascript
         reserve_predicate(eval_javascript/1, predicate_eval_javascript),

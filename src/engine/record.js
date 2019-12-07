@@ -1,3 +1,5 @@
+"use strict";
+
 /* Need to implement recorda/3, recorded/3 and erase/1 */
 var database_ptr = 0;
 var database_references = {};
@@ -110,6 +112,9 @@ function recorded(key, term, ref)
     // We need the first actual key. This may not be [0] if something has been erased
     debug_msg("Keys: " + JSON.stringify(Object.keys(data)));
     var index = d.keys[0];
+    if(typeof index === 'undefined' || typeof data[index] === 'undefined') {
+        return false;
+    }
     debug_msg("Returning reference " + d.data[index].ref);
     // noinspection UnnecessaryLocalVariableJS
     var result = unify(recall_term(data[index].value, {}), term) && unify(data[index].ref ^ (TAG_INT << WORD_BITS), ref);

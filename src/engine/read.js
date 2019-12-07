@@ -1,3 +1,5 @@
+"use strict";
+
 /* Term reading */
 // See http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
 // Parsers return either:
@@ -265,6 +267,7 @@ function read_expression(s, precedence, isarg, islist, expression)
             unread_token(s, "-");
             infix_operator = "-";
         }
+
         if (infix_operator === '(')
         {
             // We are reading a term. Keep reading expressions: After each one we should
@@ -348,9 +351,9 @@ function read_expression(s, precedence, isarg, islist, expression)
                 if (lhs === false)
                     return false;
             }
-            else if (op.fixity === "yfx" && precedence >= op.precedence)
+            else if (op.fixity === "yfx" && precedence > op.precedence)
             {
-                lhs = parse_infix(s, lhs, op.precedence);
+                lhs = parse_infix(s, lhs, op.precedence-0.5);
                 if (lhs === false)
                     return false;
             }
@@ -571,6 +574,10 @@ function quote_atom(a)
 {
     if (! a.charAt) {
         return a;
+    }
+
+    if (a.charAt(0) >= "0" && a.charAt(0) <= "9") {
+        return "'" + escape_atom(a) + "'";
     }
 
     if (a.charAt(0) >= "A" && a.charAt(0) <= "Z")

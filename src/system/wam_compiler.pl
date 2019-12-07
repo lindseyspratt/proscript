@@ -65,7 +65,9 @@ Some gotchas:
 
 */
 
-:-module(wam_compiler, [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, save_compiled_state/1, save_compiled_state/2, bootstrap_toplevel/1, consult_atom/1, repl/1, call_atom/2]).
+:-module(wam_compiler,
+        [op(920, fy, ?), op(920, fy, ??), compile_clause/1, compile_files/1, compile_and_free_memory_file/1,
+         save_compiled_state/1, save_compiled_state/2, bootstrap_toplevel/1, consult_atom/1, repl/1, call_atom/2]).
 
 :- meta_predicate((compile_clause_system_directive(0),bootstrap_toplevel(0))).
 
@@ -86,8 +88,6 @@ Some gotchas:
 :-dynamic(bootstrap/0).
 :-dynamic(delayed_initialization/1).
 :-dynamic('$loaded'/1).
-:-dynamic('$current_compilation_module'/1).
-:-dynamic('$current_compilation_stream'/1).
 
 /*
 Dynamic and multifile predicate, normally not defined.
@@ -292,10 +292,18 @@ macro_endif(ModeIn, ModeOut) :-
           -> throw('endif unknown action')
         ).
 
+define_dynamic_predicates(Module:Name/Arity) :-
+        !,
+        define_dynamic_predicate1(Module:Name/Arity).
 define_dynamic_predicates(Name/Arity) :-
         !,
         define_dynamic_predicate1(Name/Arity).
-define_dynamic_predicates([]).
+define_dynamic_predicates(_:[]) :- !.
+define_dynamic_predicates(Module:[H|T]) :-
+        !,
+        define_dynamic_predicates(Module:H),
+        define_dynamic_predicates(Module:T).
+define_dynamic_predicates([]) :- !.
 define_dynamic_predicates([H|T]) :-
         !,
         define_dynamic_predicates(H),
@@ -304,6 +312,9 @@ define_dynamic_predicates((A,B)) :-
         define_dynamic_predicates(A),
         define_dynamic_predicates(B).
 
+define_dynamic_predicate1(Module:Functor/Arity) :-
+        !,
+        define_dynamic_predicate(Module : (Functor/Arity)).
 define_dynamic_predicate1(Functor/Arity) :-
         current_compilation_module(Module),
         define_dynamic_predicate(Module : (Functor/Arity)).
@@ -328,21 +339,24 @@ current_compilation_module(Name) :-
         current_compilation_module(Name, _).
 
 current_compilation_module(Name, Stream) :-
-        '$current_compilation_module'([Name-Stream|_]),
-        !.
+    recorded(wam_compiler_compilation_modules, [Name-Stream|_], _),
+    !.
 current_compilation_module(user, none).
 
 push_current_compilation_module(Name, Stream) :-
-  (retract('$current_compilation_module'(Names))
-    -> true
-   ;
-   Names = []
-  ),
-  asserta('$current_compilation_module'([Name-Stream|Names])).
+    (recorded(wam_compiler_compilation_modules, Items, Ref)
+       -> erase(Ref)
+     ;
+     Items = []
+    ),
+    recorda(wam_compiler_compilation_modules, [Name-Stream|Items], _),
+    !.
 
 pop_current_compilation_module(Name, Stream) :-
-  retract('$current_compilation_module'([Name-Stream|Names])),
-  asserta('$current_compilation_module'(Names)).
+    recorded(wam_compiler_compilation_modules, [Name-Stream|Names], Ref),
+    erase(Ref),
+    recorda(wam_compiler_compilation_modules, Names, _),
+    !.
 
 define_use_module(Spec) :-
         setup_use_module(Spec, ImportName),
@@ -573,7 +587,13 @@ next_free_variable([_|S], A):- next_free_variable(S, A).
 commit_to_cut(no_cut):- !.
 commit_to_cut(has_cut(_)).
 
+% first_goal_arity/2 may be called with pre- or post-transformed goals.
+% In the case of post-transformed goals the arity is of the arg to goal/1: e.g. goal(foo(1,2)) has an arity of 2, not 1.
+% The auxiliary definition goals include a mix of transformed goals, e.g. goal(foo(1,2)), and special goals,
+% e.g. get_top_choicepoint(N, B), aux_head(...), and !(...).
+
 first_goal_arity((A,_), N):- !, first_goal_arity(A, N).
+first_goal_arity(goal(A), N):- !, functor(A, _, N).
 first_goal_arity(A, N):- functor(A, _, N).
 
 %transform_body(Body, Position, NewBody, ExtraClauses, Tail, CutVariable):-
@@ -1439,19 +1459,22 @@ compile_file(Source):-
   assertz('$loaded'(CanonicalSource)).
 
 current_compilation_stream(Stream) :-
-        '$current_compilation_stream'([Stream|_]).
+    recorded(wam_compiler_compilation_stream, [Stream|_], _).
 
 push_current_compilation_stream(Stream) :-
-  (retract('$current_compilation_stream'(Streams))
-    -> true
-   ;
-   Streams = []
-  ),
-  asserta('$current_compilation_stream'([Stream|Streams])).
+    (recorded(wam_compiler_compilation_stream, Streams, Ref)
+       -> erase(Ref)
+    ;
+    Streams = []
+    ),
+    recorda(wam_compiler_compilation_stream, [Stream|Streams], _),
+    !.
 
 pop_current_compilation_stream(Stream) :-
-  retract('$current_compilation_stream'([Stream|Streams])),
-  asserta('$current_compilation_stream'(Streams)).
+  recorded(wam_compiler_compilation_stream, [Stream|Streams], Ref),
+  erase(Ref),
+  recorda(wam_compiler_compilation_stream, Streams, _),
+  !.
 
 compile_stream(Stream) :-
         push_current_compilation_stream(Stream),
@@ -1496,6 +1519,12 @@ compile_stream_term(_, end_of_file, Mode):-
         ).
 
 compile_stream_term(Stream, Term, ModeIn):-
+        (current_prolog_flag(debug, on)
+         -> writeln(compile_stream_term(Term)),
+            yield
+        ;
+         true
+        ),
         compile_clause(Term, ModeIn, ModeNext),
         !,
         compile_stream(Stream, ModeNext).
@@ -1506,7 +1535,8 @@ save_compiled_state(SavedStateFile) :-
 
 save_compiled_state(BootCode, SavedStateFile) :-
         open(SavedStateFile, write, S1),
-        format(S1, '/* This file generated automatically. It defines the ProscriptLS system that is evaluated by the runtime engine. */', []),
+        format(S1, '/* This file generated automatically. It defines the ProscriptLS system that is evaluated by the runtime engine. */~n', []),
+        format(S1, '"use strict";~n', []),
         format(S1, 'function load_state() {~n', []),
         format(S1, 'bootstrap_code = ~w;~n', [BootCode]),
         format(S1, 'retry_foreign_offset = 7;~n', []),
@@ -1542,7 +1572,8 @@ compile_memory_file(MemoryFile) :-
 %write('Start compile '), write(MemoryFile), write(': WAM duration = '), writeln(D1),
         open_memory_file(MemoryFile, read, Stream),
         compile_stream(Stream),
-        close(Stream).
+        close(Stream),
+        !.
 %        wam_duration(D2),
 %write('Finish compile '), write(MemoryFile), write(': WAM duration = '), writeln(D2).
 
