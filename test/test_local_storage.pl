@@ -20,15 +20,19 @@ test :-
 
 test(K, N) :-
     asserta(display_spans_mode(all)),
-    %dom_window(W),
-    %dom_object_property(_, W, localStorage, S),
-    %forall(retract(local_storage_key(test_local_storage, OldKey)), dom_object_method(S, removeItem(OldKey))),
+    %clear_local_storage,
     retractall(data(_,_)),
     save_to_local_storage(K, N, test_local_storage),
     load_from_local_storage(test_local_storage),
     findall(X-ID, data(X,ID), IDs),
     length(IDs, L),
     writeln(test(K, N,L)).
+
+clear_local_storage :-
+    dom_window(W),
+    dom_object_property(_, W, localStorage, S),
+    !,
+    forall(retract(local_storage_key(test_local_storage, OldKey)), dom_object_method(S, removeItem(OldKey))).
 
 save_to_local_storage(0, _NumberOfFacts, _KeyPrefix) :- !.
 save_to_local_storage(NumberOfKeys, NumberOfFacts, KeyPrefix) :-

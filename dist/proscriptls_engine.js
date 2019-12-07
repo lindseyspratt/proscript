@@ -9760,8 +9760,8 @@ function predicate_statistics()
 
     stdout("WAM duration: " + aggregateDuration + "\n");
     stdout("Current heap: " + heapSize + "\n");
-    stdout("Max heap: " + maxHeap + " ( memory words of " + HEAP_SIZE + " limit)\n");
-    stdout("Max stack: " + stackPortion + " (stack memory words of " + STACK_SIZE + " limit, " + maxStack + " absolute)\n");
+    stdout("Max heap: " + maxHeap + " (words of " + HEAP_SIZE + " limit)\n");
+    stdout("Max stack: " + stackPortion + " (words of " + STACK_SIZE + " limit, " + maxStack + " absolute)\n");
     return true;
 }
 
