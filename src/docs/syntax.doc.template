@@ -167,12 +167,32 @@ Example: <code>:- op(200, fx, *).</code>
 <br>
 The dynamic/1 directive identifies PredicateIndicator predicate as dynamic: it can be the subject of assert and retract goals.
 The PredicateIndicator is of the form 'Name/Arity'.
-A dynamic predicate can be defined in a specific module different than the source file module using the ':' operator:
+<br>
 <code>:- dynamic(Module : (PredicateIndicator)).</code>
+<br>
+This form defines PredicateIndicator in a specific module different than the source file module using the ':' operator:
+<br>
+<code>:- dynamic((PI1, PI2, ...)).</code>
+<br>
+This form defines a sequence of predicate indicators, PI1, PI2, etc., in the current module.
+Because dynamic is defined as a prefix operator this can also be written:
+<code>:- dynamic (PI1, PI2, ...).</code>
+(Notice the space between 'dynamic' and '('.)
+<br>
+<code>:- dynamic([PI1, PI2, ...]).</code>
+<br>
+This form defines a list of predicate indicators, PI1, PI2, etc., in the current module.
+<br>
+<code>:- dynamic(Module: [PI1, PI2, ...]).</code>
+<br>
+This form defines a list of predicate indicators, PI1, PI2, etc., in Module.
 <br>
 Example: <code>:- dynamic(special_things/3).</code>
 <br>
 This defines a dynamic 'special_things' predicate with three arguments.
+This can also be written as
+<br>
+<code>:- dynamic special_things/3.</code>
 </li>
 <li>
 <code>:- initialization(Goal).</code>

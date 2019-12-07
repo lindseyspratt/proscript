@@ -26,12 +26,25 @@
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_dom_object_property_3, 'index_doc.html', 'set_dom_object_property/3']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_toggle_dom_element_class_3, 'index_doc.html', 'toggle_dom_element_class/3']}}</li>
 </ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_memory_file, 'index_doc.html', 'memory_file']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_copy_local_storage_to_memory_file_2, 'index_doc.html', 'copy_local_storage_to_memory_file/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_copy_memory_file_to_local_storage_2, 'index_doc.html', 'copy_memory_file_to_local_storage/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_free_memory_file_1, 'index_doc.html', 'free_memory_file/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_new_memory_file_1, 'index_doc.html', 'new_memory_file/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_open_memory_file_3, 'index_doc.html', 'open_memory_file/3']}}</li>
+</ul></li>
 <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_runtime, 'index_doc.html', 'runtime']}}
 <ul class='nested'>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_prolog_flag_2, 'index_doc.html', 'current_prolog_flag/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_halt_0, 'index_doc.html', 'halt/0']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_repeat_0, 'index_doc.html', 'repeat/0']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_prolog_flag_2, 'index_doc.html', 'set_prolog_flag/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_statistics_0, 'index_doc.html', 'statistics/0']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_statistics_max_heap_1, 'index_doc.html', 'statistics_max_heap/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_statistics_max_stack_1, 'index_doc.html', 'statistics_max_stack/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_wam_duration_1, 'index_doc.html', 'wam_duration/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_yield_0, 'index_doc.html', 'yield/0']}}</li>
 </ul></li>
 <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_terms, 'index_doc.html', 'terms']}}
 <ul class='nested'>

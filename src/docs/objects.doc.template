@@ -115,6 +115,10 @@ to simplify working with objects.
     object attributes.
     There are operators for accessing these things individually
     and for accessing sequences of these things.
+    Some attributes, properties, and methods return an object value. Object expressions may be put together in a sequence
+    where an object expression result is the object to which the expression to its right is applied:
+    Example: <code>dom_window(W), W >+> localStorage :> S >*> getItem(foo) :> Item.</code>
+    In this example the localStorage object is unified with 'S' and getItem(foo) is evaluated against 'S' and the 'foo' item is unified with 'Item'.
     <ul>
         <li>
             <code class="prolog inline">>->/2</code> applies an <span style="font-style: italic">attribute</span> operation to

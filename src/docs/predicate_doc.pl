@@ -69,7 +69,8 @@ doc(arg/3, arg(+ < position * integer, + < term * term, ? < arg * term) is det,
 doc(=.. /2, =..(? < term * term, ? < list * list) is det,
     "Term univ List. List is a list [Functor|Args] where functor(Term, Functor, Arity)
      and Args are the arguments of Term (if any):
-     forall(between(1, Arity, N), (arg(N, Term, Arg), nth1(N, Args, Arg))).",
+     forall(between(1, Arity, N), (arg(N, Term, Arg), nth1(N, Args, Arg))).
+     If Args is null then Term is atomic (either an atom or a number) and is equal to Functor.",
     [arg(term, "any Prolog term"), arg(list, "a list"), compat(iso), cat(terms)]).
 doc(copy_term/2, copy_term(? < term1 * term, ? < term2 * term) is det,
     "Term2 is the same as Term1 but with distinct variables such that Term1 and Term2 subsume each other and the
@@ -79,6 +80,12 @@ doc(copy_term/2, copy_term(? < term1 * term, ? < term2 * term) is det,
 % Runtime
 doc(halt/0, halt is det, "Halt the WAM engine. The engine may be restarted - typically after evaluating the backtrack Javascript function.",
     [compat(iso), cat(runtime)]).
+doc(yield/0, yield is det,
+    "Yield (suspend) the WAM engine to allow any waiting HTML events to be processed.
+     The yield/0 predicate completes after these waiting events have been handled.
+     This can be used to make changes to the current web page and have them rendered
+     immediately instead of when the current top level query completes.",
+    [compat(proscriptls), cat(runtime)]).
 doc(current_prolog_flag/2,
     [current_prolog_flag(+ < flag * term, ? < value * term) is det,
      current_prolog_flag(- < flag * term, ? < value * term) is nondet],
@@ -87,10 +94,43 @@ doc(current_prolog_flag/2,
     char_conversion, debug, max_arity, unknown, double_quotes, and dialect.",
     [arg(flag, "a defined flag atom"), arg(value, "a Prolog term"), compat(iso), cat(runtime)]).
 doc(set_prolog_flag/2, set_prolog_flag(+ < flag * term, ? < value * term) is det,
-    "Set Prolog Flag to Value. Only certain flags are settable: char_conversion, debug, unknown, and double_quotes.",
+    "Set Prolog Flag to Value. Only certain flags are settable: char_conversion, debug, unknown, double_quotes, wam_log, and wam_log_size.",
     [arg(flag, "a defined flag atom"), arg(value, "a Prolog term"), compat(iso), cat(runtime)]).
 doc(repeat/0, repeat is nondet, "Always succeeds on initial call and on all redo calls (it backtracks without bound).",
     [compat(iso), cat(runtime)]).
+doc(statistics/0, statistics is det,
+    "Display runtime statistics. These include WAM duration, current heap size in words,
+    maximum heap size encountered, and maximum stack size encountered.",
+    [compat(iso), cat(runtime)]).
+doc(wam_duration/1, wam_duration is det,
+    "Milliseconds spent in the WAM since start of the WAM",
+    [compat(proscriptls), cat(runtime)]).
+doc(statistics_max_heap/1, statistics_max_heap(? < value * integer) is det,
+    "Size in words of the maximum storage allocated in the WAM heap since the WAM was initialized",
+    [compat(proscriptls), cat(runtime)]).
+doc(statistics_max_stack/1, statistics_max_stack(? < value * integer) is det,
+    "Size in words of the maximum storage allocated in the WAM stack since the WAM was initialized",
+    [compat(proscriptls), cat(runtime)]).
+
+% Memory file
+doc(new_memory_file/1, new_memory_file(- < memoryFile * memory_file_specifier) is det,
+    "Create a memory file. This allocates internal storage that should be freed using free_memory_file/1.",
+    [compat(proscriptls), cat(memory_file)]).
+doc(open_memory_file/3,
+    open_memory_file(+ < memoryFile * memory_file_specifier, + < mode * stream_mode_atom, - < stream * stream_specifier) is det,
+    "Open a stream to read from , write into, or append to the given memory file.",
+    [compat(proscriptls), cat(memory_file)]).
+doc(free_memory_file/1, free_memory_file(+ < memoryFile * memory_file_specifier) is det,
+    "Free the internal storage for the memory file.",
+    [compat(proscriptls), cat(memory_file)]).
+doc(copy_memory_file_to_local_storage/2,
+    copy_memory_file_to_local_storage(+ < memoryFile * memory_file_specifier, + < key * atom) is det,
+    "Copy from a memory file to Window.localStorage using the specified key.",
+    [compat(proscriptls), cat(memory_file)]).
+doc(copy_local_storage_to_memory_file/2,
+    copy_local_storage_to_memory_file(+ < key * atom, + < memoryFile * memory_file_specifier) is det,
+    "Copy from Window.localStorage at the specified key to the memory_file.",
+    [compat(proscriptls), cat(memory_file)]).
 
 % DOM
 doc(remove_dom_element_class/2,

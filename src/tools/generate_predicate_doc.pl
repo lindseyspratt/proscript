@@ -79,7 +79,11 @@ sig_args(Sig is Determinism, Stream) :-
     !,
     sig_args(Sig, Functor, Args),
     list_to_sequence_atom(Args, ArgsCore),
-    format(Stream, '<br><b>~w</b>(~w) is ~w~n', [Functor,ArgsCore,Determinism]).
+    (ArgsCore = ''
+     -> format(Stream, '<br><b>~w</b> is ~w~n', [Functor,Determinism])
+    ;
+     format(Stream, '<br><b>~w</b>(~w) is ~w~n', [Functor,ArgsCore,Determinism])
+    ).
 sig_args(Sig, Stream) :-
     sig_args(Sig, Functor, Args),
     list_to_sequence_atom(Args, ArgsCore),

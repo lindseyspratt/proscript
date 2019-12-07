@@ -117,12 +117,25 @@
 <li><a  class="index" id="pred_set_dom_object_property_3_index" href="#pred_set_dom_object_property_3"> set_dom_object_property/3 </a></li>
 <li><a  class="index" id="pred_toggle_dom_element_class_3_index" href="#pred_toggle_dom_element_class_3"> toggle_dom_element_class/3 </a></li>
 </ul></li>
+<li><span class="caret"></span><a  class="index" id="pred_cat_memory_file_index" href="#pred_cat_memory_file"> memory_file </a>
+<ul class='nested'>
+<li><a  class="index" id="pred_copy_local_storage_to_memory_file_2_index" href="#pred_copy_local_storage_to_memory_file_2"> copy_local_storage_to_memory_file/2 </a></li>
+<li><a  class="index" id="pred_copy_memory_file_to_local_storage_2_index" href="#pred_copy_memory_file_to_local_storage_2"> copy_memory_file_to_local_storage/2 </a></li>
+<li><a  class="index" id="pred_free_memory_file_1_index" href="#pred_free_memory_file_1"> free_memory_file/1 </a></li>
+<li><a  class="index" id="pred_new_memory_file_1_index" href="#pred_new_memory_file_1"> new_memory_file/1 </a></li>
+<li><a  class="index" id="pred_open_memory_file_3_index" href="#pred_open_memory_file_3"> open_memory_file/3 </a></li>
+</ul></li>
 <li><span class="caret"></span><a  class="index" id="pred_cat_runtime_index" href="#pred_cat_runtime"> runtime </a>
 <ul class='nested'>
 <li><a  class="index" id="pred_current_prolog_flag_2_index" href="#pred_current_prolog_flag_2"> current_prolog_flag/2 </a></li>
 <li><a  class="index" id="pred_halt_0_index" href="#pred_halt_0"> halt/0 </a></li>
 <li><a  class="index" id="pred_repeat_0_index" href="#pred_repeat_0"> repeat/0 </a></li>
 <li><a  class="index" id="pred_set_prolog_flag_2_index" href="#pred_set_prolog_flag_2"> set_prolog_flag/2 </a></li>
+<li><a  class="index" id="pred_statistics_0_index" href="#pred_statistics_0"> statistics/0 </a></li>
+<li><a  class="index" id="pred_statistics_max_heap_1_index" href="#pred_statistics_max_heap_1"> statistics_max_heap/1 </a></li>
+<li><a  class="index" id="pred_statistics_max_stack_1_index" href="#pred_statistics_max_stack_1"> statistics_max_stack/1 </a></li>
+<li><a  class="index" id="pred_wam_duration_1_index" href="#pred_wam_duration_1"> wam_duration/1 </a></li>
+<li><a  class="index" id="pred_yield_0_index" href="#pred_yield_0"> yield/0 </a></li>
 </ul></li>
 <li><span class="caret"></span><a  class="index" id="pred_cat_terms_index" href="#pred_cat_terms"> terms </a>
 <ul class='nested'>
@@ -1108,6 +1121,10 @@ to simplify working with objects.
     object attributes.
     There are operators for accessing these things individually
     and for accessing sequences of these things.
+    Some attributes, properties, and methods return an object value. Object expressions may be put together in a sequence
+    where an object expression result is the object to which the expression to its right is applied:
+    Example: <code>dom_window(W), W >+> localStorage :> S >*> getItem(foo) :> Item.</code>
+    In this example the localStorage object is unified with 'S' and getItem(foo) is evaluated against 'S' and the 'foo' item is unified with 'Item'.
     <ul>
         <li>
             <code class="prolog inline">>->/2</code> applies an <span style="font-style: italic">attribute</span> operation to
@@ -1585,12 +1602,32 @@ Example: <code>:- op(200, fx, *).</code>
 <br>
 The dynamic/1 directive identifies PredicateIndicator predicate as dynamic: it can be the subject of assert and retract goals.
 The PredicateIndicator is of the form 'Name/Arity'.
-A dynamic predicate can be defined in a specific module different than the source file module using the ':' operator:
+<br>
 <code>:- dynamic(Module : (PredicateIndicator)).</code>
+<br>
+This form defines PredicateIndicator in a specific module different than the source file module using the ':' operator:
+<br>
+<code>:- dynamic((PI1, PI2, ...)).</code>
+<br>
+This form defines a sequence of predicate indicators, PI1, PI2, etc., in the current module.
+Because dynamic is defined as a prefix operator this can also be written:
+<code>:- dynamic (PI1, PI2, ...).</code>
+(Notice the space between 'dynamic' and '('.)
+<br>
+<code>:- dynamic([PI1, PI2, ...]).</code>
+<br>
+This form defines a list of predicate indicators, PI1, PI2, etc., in the current module.
+<br>
+<code>:- dynamic(Module: [PI1, PI2, ...]).</code>
+<br>
+This form defines a list of predicate indicators, PI1, PI2, etc., in Module.
 <br>
 Example: <code>:- dynamic(special_things/3).</code>
 <br>
 This defines a dynamic 'special_things' predicate with three arguments.
+This can also be written as
+<br>
+<code>:- dynamic special_things/3.</code>
 </li>
 <li>
 <code>:- initialization(Goal).</code>
@@ -1946,6 +1983,56 @@ The unique predicates include several predicates for working with HTML documents
 
 </ul>
 </div>
+<div class="indexed" id="pred_cat_memory_file">
+<h4>memory_file</h4>
+<ul>
+<li class="indexed" id="pred_copy_local_storage_to_memory_file_2">
+<h5>copy_local_storage_to_memory_file/2</h5>
+<br><b>copy_local_storage_to_memory_file</b>(+<i>Key</i>:atom,+<i>MemoryFile</i>:memory_file_specifier) is det
+<br><br>Copy from Window.localStorage at the specified key to the memory_file.
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: memory_file.
+</li>
+
+<li class="indexed" id="pred_copy_memory_file_to_local_storage_2">
+<h5>copy_memory_file_to_local_storage/2</h5>
+<br><b>copy_memory_file_to_local_storage</b>(+<i>MemoryFile</i>:memory_file_specifier,+<i>Key</i>:atom) is det
+<br><br>Copy from a memory file to Window.localStorage using the specified key.
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: memory_file.
+</li>
+
+<li class="indexed" id="pred_free_memory_file_1">
+<h5>free_memory_file/1</h5>
+<br><b>free_memory_file</b>(+<i>MemoryFile</i>:memory_file_specifier) is det
+<br><br>Free the internal storage for the memory file.
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: memory_file.
+</li>
+
+<li class="indexed" id="pred_new_memory_file_1">
+<h5>new_memory_file/1</h5>
+<br><b>new_memory_file</b>(-<i>MemoryFile</i>:memory_file_specifier) is det
+<br><br>Create a memory file. This allocates internal storage that should be freed using free_memory_file/1.
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: memory_file.
+</li>
+
+<li class="indexed" id="pred_open_memory_file_3">
+<h5>open_memory_file/3</h5>
+<br><b>open_memory_file</b>(+<i>MemoryFile</i>:memory_file_specifier,+<i>Mode</i>:stream_mode_atom,-<i>Stream</i>:stream_specifier) is det
+<br><br>Open a stream to read from , write into, or append to the given memory file.
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: memory_file.
+</li>
+
+</ul>
+</div>
 <div class="indexed" id="pred_cat_runtime">
 <h4>runtime</h4>
 <ul>
@@ -1965,7 +2052,7 @@ The unique predicates include several predicates for working with HTML documents
 
 <li class="indexed" id="pred_halt_0">
 <h5>halt/0</h5>
-<br><b>halt</b>() is det
+<br><b>halt</b> is det
 <br><br>Halt the WAM engine. The engine may be restarted - typically after evaluating the backtrack Javascript function.
 <br>
 <br><b>compat</b>: iso.
@@ -1974,7 +2061,7 @@ The unique predicates include several predicates for working with HTML documents
 
 <li class="indexed" id="pred_repeat_0">
 <h5>repeat/0</h5>
-<br><b>repeat</b>() is nondet
+<br><b>repeat</b> is nondet
 <br><br>Always succeeds on initial call and on all redo calls (it backtracks without bound).
 <br>
 <br><b>compat</b>: iso.
@@ -1984,11 +2071,60 @@ The unique predicates include several predicates for working with HTML documents
 <li class="indexed" id="pred_set_prolog_flag_2">
 <h5>set_prolog_flag/2</h5>
 <br><b>set_prolog_flag</b>(+<i>Flag</i>:term,?<i>Value</i>:term) is det
-<br><br>Set Prolog Flag to Value. Only certain flags are settable: char_conversion, debug, unknown, and double_quotes.
+<br><br>Set Prolog Flag to Value. Only certain flags are settable: char_conversion, debug, unknown, double_quotes, wam_log, and wam_log_size.
 <br>
 <br><b>arg</b>: <i>Flag</i>. a defined flag atom.
 <br><b>arg</b>: <i>Value</i>. a Prolog term.
 <br><b>compat</b>: iso.
+<br><b>cat</b>: runtime.
+</li>
+
+<li class="indexed" id="pred_statistics_0">
+<h5>statistics/0</h5>
+<br><b>statistics</b> is det
+<br><br>Display runtime statistics. These include WAM duration, current heap size in words,
+    maximum heap size encountered, and maximum stack size encountered.
+<br>
+<br><b>compat</b>: iso.
+<br><b>cat</b>: runtime.
+</li>
+
+<li class="indexed" id="pred_statistics_max_heap_1">
+<h5>statistics_max_heap/1</h5>
+<br><b>statistics_max_heap</b>(?<i>Value</i>:integer) is det
+<br><br>Size in words of the maximum storage allocated in the WAM heap since the WAM was initialized
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: runtime.
+</li>
+
+<li class="indexed" id="pred_statistics_max_stack_1">
+<h5>statistics_max_stack/1</h5>
+<br><b>statistics_max_stack</b>(?<i>Value</i>:integer) is det
+<br><br>Size in words of the maximum storage allocated in the WAM stack since the WAM was initialized
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: runtime.
+</li>
+
+<li class="indexed" id="pred_wam_duration_1">
+<h5>wam_duration/1</h5>
+<br><b>wam_duration</b> is det
+<br><br>Milliseconds spent in the WAM since start of the WAM
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: runtime.
+</li>
+
+<li class="indexed" id="pred_yield_0">
+<h5>yield/0</h5>
+<br><b>yield</b> is det
+<br><br>Yield (suspend) the WAM engine to allow any waiting HTML events to be processed.
+     The yield/0 predicate completes after these waiting events have been handled.
+     This can be used to make changes to the current web page and have them rendered
+     immediately instead of when the current top level query completes.
+<br>
+<br><b>compat</b>: proscriptls.
 <br><b>cat</b>: runtime.
 </li>
 
@@ -2014,6 +2150,7 @@ The unique predicates include several predicates for working with HTML documents
 <br><br>Term univ List. List is a list [Functor|Args] where functor(Term, Functor, Arity)
      and Args are the arguments of Term (if any):
      forall(between(1, Arity, N), (arg(N, Term, Arg), nth1(N, Args, Arg))).
+     If Args is null then Term is atomic (either an atom or a number) and is equal to Functor.
 <br>
 <br><b>arg</b>: <i>Term</i>. any Prolog term.
 <br><b>arg</b>: <i>List</i>. a list.
@@ -2243,7 +2380,7 @@ The unique predicates include several predicates for working with HTML documents
         <hr>
         <table style="width:100%">
         <tr>
-        <td>Version 1.4.1, November 2019.</td>
+        <td>Version 1.5.0, December 2019.</td>
         <td style="text-align:right">Powered by ProscriptLS Prolog - Logic at Your Service.</td>
         </tr>
         </table>
