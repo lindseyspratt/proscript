@@ -1820,7 +1820,7 @@ function add_clause_to_predicate(predicateP, head, body)
     var predicate = VAL(lookup_functor(atable[VAL(deref(memory[VAL(predicateP)+1]))], VAL(deref(memory[VAL(predicateP)+2]))));
     if (predicates[predicate] === undefined || (predicates[predicate].is_public && predicates[predicate].clause_keys.length === 0))
     {
-        let headString = term_to_string(head);
+        // let headString = term_to_string(head);
         // if(prolog_flag_values.wam_log === 'none' && headString.includes('location_modelx')) {
         //     prolog_flag_values.wam_log = 'local_storage_ring';
         // } else if(prolog_flag_values.wam_log !== 'none' && ! headString.includes('location_modelx')) {
