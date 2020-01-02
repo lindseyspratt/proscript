@@ -12,9 +12,9 @@
     op(700, yfx, >+>),
     op(700, yfx, >*>),
     op(700, yfx, >@>),
-    (>>)/2, (>->)/2, (>+>)/2, (>*>)/2, (>@>)/2]).
+    (>>)/2, (>>$)/2, (>->)/2, (>+>)/2, (>*>)/2, (>@>)/2]).
 
-:- meta_predicate(('>>'((:), (:)), '>*>'((:), (:) ), '>@>'((:), (:) ))).
+:- meta_predicate(('>>'((:), (:)), '>>$'((:), (:)), '>*>'((:), (:) ), '>@>'((:), (:) ))).
 
 :- op(200, fx, *).
 :- op(200, fx, @).
@@ -29,6 +29,7 @@
 :- op(700, yfx, >+>).
 :- op(700, yfx, >*>).
 :- op(700, yfx, >@>).
+:- op(700, yfx, >>$).
 
 % The ProscriptLS object language provides a concise way
 % to access object properties, methods and Element
@@ -112,6 +113,11 @@
     object_expression(ObjectExpression, Object),
     general_application(Object, Application).
 
+>>$(ObjectExpression, Application) :-
+    object_expression(ObjectExpression, Object),
+    general_application(Object, Application),
+    !.
+
 general_application(_, _M : []) :-
     !.
 general_application(Obj,  M : [H|T]) :-
@@ -155,7 +161,8 @@ general_application(Obj, M : Method) :-
     object_expression(ObjectExpression, Object),
     attribute_application(Object, Application).
 
-attribute_application(_, []).
+attribute_application(_, []) :-
+    !.
 attribute_application(Obj, [H|T]) :-
     !,
     attribute_application(Obj, H),
@@ -173,7 +180,8 @@ attribute_application(Obj, <:(Attribute, V)) :-
     object_expression(ObjectExpression, Object),
     property_application(Object, Application).
 
-property_application(_, []).
+property_application(_, []) :-
+    !.
 property_application(Obj, [H|T]) :-
     !,
     property_application(Obj, H),

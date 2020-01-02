@@ -2,9 +2,9 @@
 
 :- initialization(data_predicate_dynamics).
 
-data_predicates(xh, x_history,[old]).
-data_predicates(hp, h_ptr,[value]).
-data_predicates(q, query, [value]).
+data_predicates(xh, x_history, [], [old]).
+data_predicates(hp, h_ptr, [], [value]).
+data_predicates(q, query, [], [value]).
 
 prevent_backspace(Event) :-
     Event >> [

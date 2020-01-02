@@ -503,10 +503,11 @@ partition([X|Xs],Y,Ls,Rs) :-
         partition(Xs, Y, Ls, Rs).
 partition([X|Xs],Y,[X|Ls],Rs) :-
         X @=< Y,
+        !,
         partition(Xs,Y,Ls,Rs).
-
 partition([X|Xs],Y,Ls,[X|Rs]) :-
         X @> Y,
+        !,
         partition(Xs,Y,Ls,Rs).
 partition([],_,[],[]).
 
@@ -516,9 +517,11 @@ key_partition([XKey-_|Xs],YKey,Ls,Rs) :-
         key_partition(Xs,YKey,Ls,Rs).
 key_partition([XKey-X|Xs],YKey,[XKey-X|Ls],Rs) :-
         XKey @=< YKey,
+        !,
         key_partition(Xs,YKey,Ls,Rs).
 key_partition([XKey-X|Xs],YKey,Ls,[XKey-X|Rs]) :-
         XKey @> YKey,
+        !,
         key_partition(Xs,YKey,Ls,Rs).
 key_partition([],_,[],[]).
 

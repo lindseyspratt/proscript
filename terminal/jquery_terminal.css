@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.2.0
+ *           \/              /____/                              version 2.9.0
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,10 +12,10 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 17 Feb 2019 12:24:21 +0000
+ * Date: Sun, 24 Nov 2019 19:15:35 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
-.cmd .prompt, .cmd .prompt div {
+.cmd-prompt, .cmd-prompt div {
     display: inline-block;
 }
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6, .terminal pre, .cmd {
@@ -33,7 +33,7 @@
     z-index: 100;
 }
 */
-.cmd .clipboard {
+.cmd .cmd-clipboard {
     position: absolute;
     left: -16px;
     top: 0;
@@ -59,15 +59,18 @@
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * 1em);
 }
-.cmd .noselect, .cmd .noselect span,
-.cmd [role="presentation"]:not(.cursor-line) > span:last-child,
-.cmd .cursor-line > span:last-child > span:last-child {
+
+.cmd span.cmd-end-line,
+.cmd span.cmd-end-line span,
+.cmd div.cmd-end-line span[data-text]:last-child,
+.cmd div.cmd-end-line span[data-text]:last-child span,
+.cmd .cursor + span:empty {
     -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 .terminal img, .terminal audio, .terminal object, .terminal canvas {
     cursor: default;
@@ -78,7 +81,7 @@
     overflow-y: auto;
     /* overflow-x: hidden; */
 }
-terminal.temp {
+terminal.terminal-temp {
     visibility: hidden;
 }
 .terminal {
@@ -98,10 +101,11 @@ body.terminal, body.full-screen-terminal {
 body.full-screen-terminal .terminal {
     height: 100%;
 }
-.terminal > div:not(.font) {
+.terminal > div:not(.terminal-font) {
     min-height: 100%;
+    height: 100%;
 }
-.terminal > .resizer, .terminal > .font .resizer {
+.terminal > .terminal-resizer, .terminal > .terminal-font .terminal-resizer {
     position: absolute;
     top: 0;
     right: 0;
@@ -126,59 +130,34 @@ body.full-screen-terminal .terminal {
 .terminal a[tabindex="1000"]:focus {
     outline: none;
 }
-.terminal .inverted, .cmd .inverted {
+.terminal .inverted, .cmd .inverted,
+.terminal .terminal-inverted, .cmd .cmd-inverted {
     background-color: #aaa;
     color: #000;
 }
-.cmd .cursor {
+.cmd .cmd-cursor {
     display: inline-block;
-    position: relative;
-    height: 14px;
-    min-width: 1ch;
-    /* box-sizing: border-box; */
 }
-.cmd .cursor span span {
-    border-bottom: 3px solid transparent;
-    margin-bottom: -3px;
-    background-clip: content-box;
-    border-left: 1px solid transparent;
-    position: absolute;
-    top: 0;
-    /* margin-left: -1px; */
-    background-color: inherit;
-    color: inherit;
-    bottom: 0;
-    left: -1px;
-}
-.cmd .cursor-line > span:empty {
-    /* display: none; */
-}
-.cmd .cursor-line > span:empty + .cursor + span {
-    /*margin-left: -1px;*/
-}
-.cmd .cursor-line > span:not(.cursor):not(:empty) {
-    /* margin-left: -1px; */
-}
-.cmd .cursor-line > span {
+.cmd .cmd-cursor-line > span {
     display: inline-block;
-    float: left;
 }
-.cmd .cursor.blink span:not(.emoji) span {
+.cmd .cmd-cursor.cmd-blink span:not(.emoji) span {
     -webkit-animation: terminal-blink 1s infinite linear;
-    -moz-animation: terminal-blink 1s infinite linear;
-    -ms-animation: terminal-blink 1s infinite linear;
-    animation: terminal-blink 1s infinite linear;
+       -moz-animation: terminal-blink 1s infinite linear;
+        -ms-animation: terminal-blink 1s infinite linear;
+            animation: terminal-blink 1s infinite linear;
 }
-.cmd .cursor .emoji {
-    -webkit-animation: terminal-blink 1s infinite linear;
-    -moz-animation: terminal-blink 1s infinite linear;
-    -ms-animation: terminal-blink 1s infinite linear;
-    animation: terminal-blink 1s infinite linear;
+.cmd .cmd-cursor .emoji {
+        -webkit-animation: terminal-blink 1s infinite linear;
+           -moz-animation: terminal-blink 1s infinite linear;
+            -ms-animation: terminal-blink 1s infinite linear;
+                animation: terminal-blink 1s infinite linear;
 }
-.bar.terminal .inverted, .bar.cmd .inverted {
-    border-left-color: #aaa;
+.bar.terminal .inverted, .bar.cmd .cmd-inverted {
+    box-shadow: -2px 0 0 -1px #aaa;
+    box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
 }
-.terminal .terminal .terminal-output > div > div, .cmd .prompt {
+.terminal .terminal .terminal-output > div > div, .cmd .cmd-prompt {
     display: block;
     /*line-height: 15px;*/
     height: auto;
@@ -190,8 +169,11 @@ body.full-screen-terminal .terminal {
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
 }
-.cmd .prompt > span {
+.cmd .cmd-prompt > span {
     float: left;
+}
+.cmd span[style*="width"], .terminal span[style*="width"] {
+    display: inline-block;
 }
 .terminal,
 .terminal-output > :not(.raw) span,
@@ -203,26 +185,31 @@ body.full-screen-terminal .terminal {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     font-size: 12px;
-    line-height: 14px;
+    line-height: 15px;
 }
-.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error):not(.emoji),
-.cmd span:not(.inverted):not(.token):not(.emoji) {
+.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
+.cmd span:not(.cmd-inverted):not(.token):not(.emoji) {
     color: #aaa;
     background-color: #000;
 }
 .terminal-output > :not(.raw) .emoji, .cmd .emoji {
-    width: 14px;
     height: 14px;
-    background-size: cover;
-    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
     color: transparent;
     position: relative;
 }
+.terminal-output > :not(.raw) .emoji, .terminal-output > :not(.raw) .emoji span,
+.cmd .emoji, .cmd .emoji span {
+    display: inline-block;
+    width: 2ch;
+}
+
 .terminal, .cmd {
     box-sizing: border-box;
     cursor: text;
 }
-.cmd .cursor span:not(.token):not(.inverted) {
+.cmd .cmd-cursor span:not(.token):not(.inverted) {
     color: inherit;
     background-color: inherit;
 }
@@ -230,13 +217,13 @@ body.full-screen-terminal .terminal {
     color: transparent;
     background-color: transparent;
 }
-.cmd .cursor * {
+.cmd .cmd-cursor * {
     background-color: transparent;
 }
 .cmd div {
     clear: both;
 }
-.cmd .prompt + div {
+.cmd .cmd-prompt + div {
     clear: right;
 }
 .terminal-output > div > div, .cmd div {
@@ -249,7 +236,7 @@ terminal .terminal-output > div {
     overflow-wrap: break-word;
     word-wrap: break-word;
 }
-.terminal .font {
+.terminal .terminal-font {
     position: absolute;
     float: left;
     font-size: inherit;
@@ -258,13 +245,10 @@ terminal .terminal-output > div {
     left: 0;
     margin-bottom: 1px;
 }
-.terminal .terminal-output div span {
-    display: inline-block;
-}
-.cmd > span:not(.prompt) {
+.cmd > span:not(.cmd-prompt) {
     float: left;
 }
-.cmd .prompt span.line {
+.cmd .cmd-prompt span.cmd-line {
     display: block;
     float: none;
 }
@@ -274,16 +258,22 @@ terminal .terminal-output > div {
 .terminal td {
     border: 1px solid #aaa;
 }
-.cmd span[data-text]:not(.emoji) span {
-    background-color: inherit !important;
-    color: inherit !important;
+.cmd.cmd span[data-text]:not(.emoji) span {
+    background-color: inherit;
+    color: inherit;
 }
-.cmd [role="presentation"]:not(.cursor-line) {
+/* fix for underline on middle line */
+.cmd [role="presentation"].cmd-cursor-line {
+    position: relative;
+    z-index: 100;
+}
+/* prompt above cursor line */
+.cmd .cmd-prompt {
+    position: relative;
+    z-index: 200;
+}
+.cmd [role="presentation"]:not(.cmd-cursor-line) {
     overflow: hidden;
-}
-.cmd [role="presentation"] {
-    padding-bottom: 3px;
-    margin-bottom: -3px;
 }
 /*
  * this is set so animation can select original color as backgound for cursor
@@ -291,6 +281,9 @@ terminal .terminal-output > div {
  */
 .cmd {
     --original-color: var(--color, #aaa);
+}
+.cmd a[href] {
+    --original-color: var(--link-color, #0F60FF);
 }
 /* DEFAULT ANIMATION */
 @-webkit-keyframes terminal-blink {
@@ -332,7 +325,6 @@ terminal .terminal-output > div {
 /* GLOW ANIMATION */
 @-webkit-keyframes terminal-glow {
     0%, 50% {
-        left: 0;
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
@@ -340,26 +332,16 @@ terminal .terminal-output > div {
         box-shadow: 0 0 3px #aaa;
         -webkit-box-shadow: 0 0 3px var(--color, #aaa);
         box-shadow: 0 0 3px var(--color, #aaa);
-        border: none;
-        margin: 0;
-        padding: 0;
-        border-bottom: 2px solid #aaa;
-        border-bottom: 2px solid var(--color, #aaa);
     }
     50.1%, 100% {
-        left: 0;
         background-color: inherit;
         color: inherit;
         -webkit-box-shadow: none;
         box-shadow: none;
-        border: none;
-        margin: 0;
-        padding: 0;
     }
 }
 @-moz-keyframes terminal-glow {
     0%, 50% {
-        left: 0;
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
@@ -367,145 +349,105 @@ terminal .terminal-output > div {
         box-shadow: 0 0 3px #aaa;
         -moz-box-shadow: 0 0 3px var(--color, #aaa);
         box-shadow: 0 0 3px var(--color, #aaa);
-        border: none;
-        margin: 0;
-        padding: 0;
-        border-bottom: 2px solid #aaa;
-        border-bottom: 2px solid var(--color, #aaa);
     }
     50.1%, 100% {
-        left: 0;
         background-color: inherit;
         color: inherit;
         -moz-box-shadow: none;
         box-shadow: none;
-        border: none;
-        margin: 0;
-        padding: 0;
     }
 }
 @keyframes terminal-glow {
     0%, 50% {
-        left: 0;
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
         box-shadow: 0 0 3px #aaa;
         box-shadow: 0 0 3px var(--color, #aaa);
-        border: none;
-        margin: 0;
-        padding: 0;
-        border-bottom: 2px solid #aaa;
-        border-bottom: 2px solid var(--color, #aaa);
     }
     50.1%, 100% {
-        left: 0;
         background-color: inherit;
         color: inherit;
         box-shadow: none;
-        border: none;
-        margin: 0;
-        padding: 0;
     }
 }
 /* BAR ANIMATION */
 @-webkit-keyframes terminal-bar {
-    0%, 50% {
-        border-left-color: #aaa;
-        border-left-color: var(--color, #aaa);
-    }
-    50.1%, 100% {
-        border-left-color: #000;
-        border-left-color: var(--background, #000);
-    }
+  0%, 50% {
+      box-shadow: -2px 0 0 -1px #aaa;
+      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+  }
+  50.1%, 100% {
+      box-shadow: none;
+  }
 }
 @-moz-keyframes terminal-bar {
-    0%, 50% {
-        border-left-color: #aaa;
-        border-left-color: var(--color, #aaa);
-    }
-    50.1%, 100% {
-        border-left-color: #000;
-        border-left-color: var(--background, #000);
-    }
+  0%, 50% {
+      box-shadow: -2px 0 0 -1px #aaa;
+      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+  }
+  50.1%, 100% {
+      box-shadow: none;
+  }
 }
 @keyframes terminal-bar {
-    0%, 50% {
-        border-left-color: #aaa;
-        border-left-color: var(--color, #aaa);
-    }
-    50.1%, 100% {
-        border-left-color: #000;
-        border-left-color: var(--background, #000);
-    }
+  0%, 50% {
+      box-shadow: -2px 0 0 -1px #aaa;
+      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+  }
+  50.1%, 100% {
+      box-shadow: none;
+  }
 }
 /* UNDERLINE ANIMATION */
 @-webkit-keyframes terminal-underline {
-    0%, 50% {
-        border-left: none;
-        border-bottom-color: #aaa;
-        border-bottom-color: var(--color, #aaa);
-        left: 0;
-    }
-    50.1%, 100% {
-        border-left: none;
-        border-bottom-color: #000;
-        border-bottom-color: var(--background, #000);
-        left: 0;
-    }
+  0%, 50% {
+      box-shadow: 0 2px 0 #aaa;
+      box-shadow: 0 2px 0 var(--original-color, #aaa);
+  }
+  50.1%, 100% {
+      box-shadow: none;
+  }
 }
 @-moz-keyframes terminal-underline {
-    0%, 50% {
-        border-left: none;
-        border-bottom-color: #aaa;
-        border-bottom-color: var(--color, #aaa);
-        left: 0;
-    }
-    50.1%, 100% {
-        border-left: none;
-        border-bottom-color: #000;
-        border-bottom-color: var(--background, #000);
-        left: 0;
-    }
+  0%, 50% {
+      box-shadow: 0 2px 0 #aaa;
+      box-shadow: 0 2px 0 var(--original-color, #aaa);
+  }
+  50.1%, 100% {
+      box-shadow: none;
+  }
 }
 @keyframes terminal-underline {
-    0%, 50% {
-        border-bottom-color: #aaa;
-        border-bottom-color: var(--color, #aaa);
-        left: 0;
-    }
-    50.1%, 100% {
-        border-bottom-color: #000;
-        border-bottom-color: var(--background, #000);
-        left: 0;
-    }
+  0%, 50% {
+      box-shadow: 0 2px 0 #aaa;
+      box-shadow: 0 2px 0 var(--original-color, #aaa);
+  }
+  50.1%, 100% {
+      box-shadow: none;
+  }
 }
-.underline-animation .cursor.blink span span {
-    /* margin-top: 2px; */
-    border-left: none;
-    /* margin-left: 0; */
-    margin-right: -1px;
+.underline-animation .cmd-cursor.cmd-blink span span,
+.underline-animation .cmd-cursor.cmd-blink a {
     -webkit-animation-name: terminal-underline;
-    -moz-animation-name: terminal-underline;
-    -ms-animation-name: terminal-underline;
-    animation-name: terminal-underline;
-    left: 0;
+       -moz-animation-name: terminal-underline;
+        -ms-animation-name: terminal-underline;
+            animation-name: terminal-underline;
 }
-.glow-animation .cursor.blink span span {
-    border: none;
-    margin: 0;
-    padding: 0;
+.glow-animation .cmd-cursor.cmd-blink span span,
+.glow-animation .cmd-cursor.cmd-blink a {
     -webkit-animation-name: terminal-glow;
-    -moz-animation-name: terminal-glow;
-    -ms-animation-name: terminal-glow;
-    animation-name: terminal-glow;
+       -moz-animation-name: terminal-glow;
+        -ms-animation-name: terminal-glow;
+            animation-name: terminal-glow;
 }
-.bar-animation .cursor.blink span span {
+.bar-animation .cmd-cursor.cmd-blink span span,
+.bar-animation .cmd-cursor.cmd-blink a {
     -webkit-animation-name: terminal-bar;
-    -moz-animation-name: terminal-bar;
-    -ms-animation-name: terminal-bar;
-    animation-name: terminal-bar;
+       -moz-animation-name: terminal-bar;
+        -ms-animation-name: terminal-bar;
+            animation-name: terminal-bar;
 }
 /*
    Internet Explorer & Edge *, Safari ≤ 6
@@ -514,7 +456,7 @@ terminal .terminal-output > div {
 
 
 @supports (-ms-ime-align:auto) {
-    .cmd .clipboard {
+    .cmd .cmd-clipboard {
         margin-left: -9999px;
     }
     @keyframes terminal-blink {
@@ -550,7 +492,7 @@ terminal .terminal-output > div {
 }
 /* IE hack Edge one don't work in IE11 */
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .cmd .clipboard {
+    .cmd .cmd-clipboard {
         margin-left: -9999px;
     }
     .underline-animation .cursor.blink span span {
@@ -604,6 +546,7 @@ terminal .terminal-output > div {
 .terminal h6::selection,
 .terminal pre::selection,
 .terminal td::selection,
+.terminal .terminal-output::selection,
 .terminal .terminal-output div div::selection,
 .terminal .terminal-output div div a::selection,
 .terminal .terminal-output div span::selection,
@@ -622,8 +565,8 @@ terminal .terminal-output > div {
     color: #000;
 }
 
-.terminal .terminal-output > :not(.raw) .error,
-.terminal .terminal-output > :not(.raw) .error * {
+.terminal .terminal-output > :not(.raw) .terminal-error,
+.terminal .terminal-output > :not(.raw) .terminal-error * {
     color: red;
     color: var(--error-color, red);
 }
@@ -645,12 +588,12 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
-.terminal .terminal-output > :not(.raw) a[href] {
+.terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
     cursor: pointer;
 }
-.terminal .terminal-output > :not(.raw) a[href]:hover {
+.terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
     background-color: #0F60FF;
     background-color: var(--link-color, #0F60FF);
     color: var(--background, #000) !important;
@@ -680,11 +623,11 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error):not(.emoji),
+    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
-    .cmd span:not(.inverted):not(.token):not(.emoji),
+    .cmd span:not(.cmd-inverted):not(.token):not(.emoji),
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
@@ -698,17 +641,19 @@ terminal .terminal-output > div {
         display: inline-block;
     }
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token),
+    .terminal-output > :not(.raw) span,
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
+        /* TODO: investigate + 1px below that create space in selection it suppose to fix
+         *       cutting off underlines
+         */
         line-height: calc(var(--size, 1) * 14px);
     }
     .terminal-output > :not(.raw) .emoji, .cmd .emoji {
-        width: calc(var(--size, 1) * 14px) !important;
         height: calc(var(--size, 1) * 14px);
     }
     .cmd .clipboard {
@@ -721,28 +666,25 @@ terminal .terminal-output > div {
     .cmd div {
         min-height: calc(var(--size, 1) * 14px);
     }
-    .cmd .cursor.blink {
+    .cmd .cmd-cursor.cmd-blink {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .cmd .cursor.blink span:not(.emoji) span {
+    .cmd .cmd-cursor.cmd-blink span:not(.emoji) span,
+    .cmd .cmd-cursor.cmd-blink a {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
-        -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
-        -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
-        animation: var(--animation, terminal-blink) 1s infinite linear;
+           -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
+            -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
+                animation: var(--animation, terminal-blink) 1s infinite linear;
     }
-    .cmd .cursor.blink .emoji {
+    .cmd .cmd-cursor.cmd-blink .emoji {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
-        -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
-        -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
-        animation: var(--animation, terminal-blink) 1s infinite linear;
+           -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
+            -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
+                animation: var(--animation, terminal-blink) 1s infinite linear;
     }
-    .cmd .cursor.blink .emoji span {
+    .cmd .cmd-cursor.cmd-blink .emoji span {
         color: transparent;
-    }
-    .cmd .cursor {
-        height: calc(var(--size, 1) * 14px);
-        min-width: calc(var(--char-width, 7.23438) * 1px);
     }
     .terminal h1::-moz-selection,
     .terminal h2::-moz-selection,
@@ -759,7 +701,7 @@ terminal .terminal-output > div {
     .cmd > span span::-moz-selection,
     .cmd > div::-moz-selection,
     .cmd > div span::-moz-selection,
-    .cmd .prompt span::-moz-selection {
+    .cmd .cmd-prompt span::-moz-selection {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
@@ -785,7 +727,7 @@ terminal .terminal-output > div {
     .cmd > span span::selection,
     .cmd > div::selection,
     .cmd > div span::selection,
-    .cmd .prompt span::selection {
+    .cmd .cmd-prompt span::selection {
         background-color: var(--color, rgba(170, 170, 170, 0.99)) !important;
         color: var(--background, #000) !important;
     }
@@ -852,3 +794,41 @@ terminal .terminal-output > div {
     }
 }
 */
+/* style for autocomplete menu */
+.cmd .cursor-wrapper ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    float: left;
+    position: absolute;
+    top: 14px;
+    left: 0;
+}
+.cmd .cursor-wrapper li {
+    cursor: pointer;
+    white-space: nowrap;
+}
+.cmd .cursor-wrapper li:hover {
+    background: #aaa;
+    color: #000;
+}
+.cursor-wrapper {
+    position: relative;
+}
+/* images */
+.terminal-output div[style*="100%;"] {
+    overflow: hidden;
+}
+.terminal-output img {
+    display: block;
+}
+.cmd-cursor img {
+    border: 1px solid #ccc;
+    border: 1px solid var(--color, #ccc);
+}
+.terminal-output svg.terminal-broken-image {
+    height: calc(var(--size, 1) * 14px);
+}
+.terminal-output svg.terminal-broken-image use {
+    fill: var(--color, #ccc);
+}
