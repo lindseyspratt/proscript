@@ -4,13 +4,12 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Extended data_predicates.pl with undo. Updated JQuery terminal to 2.9.0.&#10;&#10;Changed console.pl to use new data_predicates/4.&#10;data_predicates.pl: changed to data_predicates/4 from /3 to add 'option' (undoable, ephemeral) argument; added use of undo module; added cuts for performance optimization; added 'action' predicate generation for get, set, update, and clear.&#10;Extended object.pl with &gt;&gt;$/2 - this is &gt;&gt;/2 with a trailing cut; added cuts for performance optimization.&#10;Added undo.pl to support undoing assertions (primarily of data_predicates data).&#10;bootstrap_js.pl: added cuts to partition/4 and key_partition/4 to prevent sort/2 from creating needless choicepoints.">
-      <change afterPath="$PROJECT_DIR$/library/undo.pl" afterDir="false" />
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Replaced 'proscript' with 'proscriptls'.&#10;&#10;Changed examples/*.html, library/README.md, comments, and documents to refer to ProscriptLS instead of Proscript or proscript.&#10;Renamed proscript_interpreter_terminal.js to proscriptls_interpreter_terminal.js.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.SDK.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.SDK.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/calculator_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/calculator_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/console_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/consult_console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/consult_console_source.html" afterDir="false" />
@@ -21,20 +20,26 @@
       <change beforePath="$PROJECT_DIR$/docs/likes_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/likes_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/simple_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/simple_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/tiles_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tiles_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/console.pl" beforeDir="false" afterPath="$PROJECT_DIR$/examples/console.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/calculator.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/calculator.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/console_button_test.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/console_button_test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/test.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tiles.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tiles.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/library/data_predicates.pl" beforeDir="false" afterPath="$PROJECT_DIR$/library/data_predicates.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/library/object.pl" beforeDir="false" afterPath="$PROJECT_DIR$/library/object.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/bootstrap_js.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/bootstrap_js.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal/jquery_terminal.css" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/jquery_terminal.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal/jquery_terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/jquery_terminal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version.txt" beforeDir="false" afterPath="$PROJECT_DIR$/version.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version_date.txt" beforeDir="false" afterPath="$PROJECT_DIR$/version_date.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/library/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/debugger.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/debugger.doc.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/docs_test.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/docs_test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/framework.index.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/framework.index.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/library.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/library.doc.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/objects.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/objects.doc.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_doc_node.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/foreign.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/foreign.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/promise.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/promise.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/web_interfaces.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/web_interfaces.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/terminal/terminal_test.html" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/terminal_test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_local_storage.html" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_local_storage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tests.html" beforeDir="false" afterPath="$PROJECT_DIR$/test/tests.html" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -51,60 +56,64 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/examples/console_button_test.pl">
+        <entry file="file://$PROJECT_DIR$/examples/tiles.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="885">
-              <caret line="59" column="45" selection-start-line="59" selection-start-column="2" selection-end-line="59" selection-end-column="45" />
+            <state relative-caret-position="240">
+              <caret line="16" column="51" selection-start-line="16" selection-start-column="51" selection-end-line="16" selection-end-column="51" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="157">
-              <caret line="523" column="10" selection-start-line="523" selection-start-column="10" selection-end-line="523" selection-end-column="10" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/examples/console_button_test.html">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="213">
-              <caret line="209" column="35" selection-start-line="209" selection-start-column="35" selection-end-line="209" selection-end-column="35" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/system/system.pl">
+        <entry file="file://$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="30">
-              <caret line="2" selection-start-line="2" selection-end-line="2" selection-end-column="25" />
+              <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
+        <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" selection-start-line="15" selection-end-line="15" />
+            <state relative-caret-position="164">
+              <caret line="772" column="44" selection-start-line="772" selection-start-column="44" selection-end-line="772" selection-end-column="44" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="172">
+              <caret line="43" column="49" selection-start-line="43" selection-start-column="49" selection-end-line="43" selection-end-column="49" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/docs/docs_test.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="90">
+              <caret line="6" column="7" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="209">
+              <caret line="273" column="7" selection-start-line="273" selection-start-column="7" selection-end-line="273" selection-end-column="7" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/examples/tiles.html">
+        <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="7" lean-forward="true" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+            <state relative-caret-position="103">
+              <caret line="42" column="16" lean-forward="true" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -122,14 +131,9 @@
         <entry file="file://$PROJECT_DIR$/version_date.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret column="12" lean-forward="true" selection-start-column="12" selection-end-column="12" />
+              <caret column="12" selection-start-column="12" selection-end-column="12" />
             </state>
           </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/node_tools/node_compile.js">
-          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -158,11 +162,19 @@
       <find>sort(</find>
       <find>data_predicate_dynamics1a</find>
       <find>proscript_in</find>
+      <find>proscript</find>
+      <find>Proscript</find>
+      <find>proscrip</find>
+      <find>index_doc</find>
+      <find>Get the ProscriptLS interpreter library</find>
+      <find>proscript_</find>
+      <find>proscriptls_doc_node</find>
     </findStrings>
     <replaceStrings>
       <replace>:-</replace>
       <replace>Heap</replace>
       <replace>proscriptls_in</replace>
+      <replace>ProscriptLS</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/src</dir>
@@ -180,7 +192,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/engine/foreign.js" />
         <option value="$PROJECT_DIR$/src/docs/objects.doc.template" />
         <option value="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" />
         <option value="$PROJECT_DIR$/src/docs/predicate_doc.pl" />
@@ -196,6 +207,14 @@
         <option value="$PROJECT_DIR$/version.txt" />
         <option value="$PROJECT_DIR$/version_date.txt" />
         <option value="$PROJECT_DIR$/examples/tiles.html" />
+        <option value="$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js" />
+        <option value="$PROJECT_DIR$/src/engine/foreign.js" />
+        <option value="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" />
+        <option value="$PROJECT_DIR$/src/docs/docs_test.html" />
+        <option value="$PROJECT_DIR$/examples/calculator.html" />
+        <option value="$PROJECT_DIR$/test/test_local_storage.html" />
+        <option value="$PROJECT_DIR$/src/docs/debugger.doc.template" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -216,6 +235,17 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="docs" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -270,7 +300,7 @@
       <workItem from="1576257588287" duration="184000" />
       <workItem from="1576258045082" duration="35000" />
       <workItem from="1576261683401" duration="12599000" />
-      <workItem from="1577740645125" duration="3044000" />
+      <workItem from="1577740645125" duration="5608000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -335,11 +365,18 @@
       <option name="project" value="LOCAL" />
       <updated>1575761675082</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Extended data_predicates.pl with undo. Updated version to 1.5.2.&#10;&#10;Changed console.pl to use new data_predicates/4.&#10;data_predicates.pl: changed to data_predicates/4 from /3 to add 'option' (undoable, ephemeral) argument; added use of undo module; added cuts for performance optimization; added 'action' predicate generation for get, set, update, and clear.&#10;Extended object.pl with &gt;&gt;$/2 - this is &gt;&gt;/2 with a trailing cut; added cuts for performance optimization.&#10;Added undo.pl to support undoing assertions (primarily of data_predicates data).&#10;bootstrap_js.pl: added cuts to partition/4 and key_partition/4 to prevent sort/2 from creating needless choicepoints.&#10;Fixed proscript_interpreter_terminal.js to use $.terminal.escape_formatting on strings to be output in the terminal (fixes a bug with strings containing '[[' due to nested lists).&#10;Updated JQuery terminal to 2.9.0.">
+      <created>1577935247723</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1577935247723</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="30873000" />
+    <option name="totallyTimeSpent" value="33437000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -353,9 +390,10 @@
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="837" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.656" visible="true" weight="0.20014094" />
-      <window_info id="Structure" order="1" sideWeight="0.344" side_tool="true" visible="true" weight="0.20014094" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65619546" visible="true" weight="0.20014094" />
+      <window_info id="Structure" order="1" sideWeight="0.34380454" side_tool="true" visible="true" weight="0.20014094" />
       <window_info id="Favorites" order="2" sideWeight="0.33809525" side_tool="true" weight="0.20413026" />
+      <window_info anchor="bottom" id="Messages" sideWeight="0.49964765" visible="true" weight="0.23087248" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3287037" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -366,7 +404,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.35185185" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.3287037" />
-      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" visible="true" weight="0.32885906" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5003524" side_tool="true" visible="true" weight="0.23087248" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -429,7 +467,8 @@
     <MESSAGE value="update workspace.xml." />
     <MESSAGE value="Merge branch 'local_storage'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="Changed version to 1.5.0. Added documentation. Cleaned up tiles.html.&#10;&#10;Fixed doc generator to not put empty parentheses on predicates." />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed version to 1.5.0. Added documentation. Cleaned up tiles.html.&#10;&#10;Fixed doc generator to not put empty parentheses on predicates." />
+    <MESSAGE value="Extended data_predicates.pl with undo. Updated version to 1.5.2.&#10;&#10;Changed console.pl to use new data_predicates/4.&#10;data_predicates.pl: changed to data_predicates/4 from /3 to add 'option' (undoable, ephemeral) argument; added use of undo module; added cuts for performance optimization; added 'action' predicate generation for get, set, update, and clear.&#10;Extended object.pl with &gt;&gt;$/2 - this is &gt;&gt;/2 with a trailing cut; added cuts for performance optimization.&#10;Added undo.pl to support undoing assertions (primarily of data_predicates data).&#10;bootstrap_js.pl: added cuts to partition/4 and key_partition/4 to prevent sort/2 from creating needless choicepoints.&#10;Fixed proscript_interpreter_terminal.js to use $.terminal.escape_formatting on strings to be output in the terminal (fixes a bug with strings containing '[[' due to nested lists).&#10;Updated JQuery terminal to 2.9.0." />
+    <option name="LAST_COMMIT_MESSAGE" value="Extended data_predicates.pl with undo. Updated version to 1.5.2.&#10;&#10;Changed console.pl to use new data_predicates/4.&#10;data_predicates.pl: changed to data_predicates/4 from /3 to add 'option' (undoable, ephemeral) argument; added use of undo module; added cuts for performance optimization; added 'action' predicate generation for get, set, update, and clear.&#10;Extended object.pl with &gt;&gt;$/2 - this is &gt;&gt;/2 with a trailing cut; added cuts for performance optimization.&#10;Added undo.pl to support undoing assertions (primarily of data_predicates data).&#10;bootstrap_js.pl: added cuts to partition/4 and key_partition/4 to prevent sort/2 from creating needless choicepoints.&#10;Fixed proscript_interpreter_terminal.js to use $.terminal.escape_formatting on strings to be output in the terminal (fixes a bug with strings containing '[[' due to nested lists).&#10;Updated JQuery terminal to 2.9.0." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/test/Makefile">
@@ -515,13 +554,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="118">
-          <caret line="2840" column="48" selection-start-line="2840" selection-start-column="43" selection-end-line="2840" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/docs/objects.doc.template">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -565,22 +597,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10245">
-          <caret line="683" selection-start-line="683" selection-end-line="683" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/system/debugger.pl">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24465">
-          <caret line="1631" column="4" selection-start-line="1631" selection-start-column="4" selection-end-line="1631" selection-end-column="4" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/docs/syntax.doc.template">
       <provider selected="true" editor-type-id="text-editor">
@@ -599,13 +617,6 @@
     <entry file="file://$PROJECT_DIR$/Makefile">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-364" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1125">
-          <caret line="187" lean-forward="true" selection-start-line="187" selection-end-line="187" />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/read.js">
@@ -680,14 +691,65 @@
     <entry file="file://$PROJECT_DIR$/version_date.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state>
-          <caret column="12" lean-forward="true" selection-start-column="12" selection-end-column="12" />
+          <caret column="12" selection-start-column="12" selection-end-column="12" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/tiles.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="7" lean-forward="true" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+        <state relative-caret-position="240">
+          <caret line="16" column="51" selection-start-line="16" selection-start-column="51" selection-end-line="16" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="164">
+          <caret line="772" column="44" selection-start-line="772" selection-start-column="44" selection-end-line="772" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="43" column="49" selection-start-line="43" selection-start-column="49" selection-end-line="43" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/docs_test.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" column="7" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="273" column="7" selection-start-line="273" selection-start-column="7" selection-end-line="273" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/proscriptls_doc_node.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="103">
+          <caret line="42" column="16" lean-forward="true" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
         </state>
       </provider>
     </entry>

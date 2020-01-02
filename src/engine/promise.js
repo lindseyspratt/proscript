@@ -14,7 +14,7 @@
 // runtime environment; request_promise_results/1 and
 // handle_promise_results/2, respectively.
 //
-// There is a utility Proscript predicate promise_result/2
+// There is a utility ProscriptLS predicate promise_result/2
 // that coordinates the use of request_promise_result/1 and
 // handle_promise_result/2 with suspending the WAM and
 // backtracking to restart the WAM:
@@ -91,7 +91,7 @@ function promise_callback(promise, result) {
 
 /**
  * promise_backtrack backtracks the WAM state then invokes the wam() function.
- * This is done indirectly if the proscript_interpreter_terminal if present.
+ * This is done indirectly if the proscriptls_interpreter_terminal if present.
  */
 function promise_backtrack() {
     if(typeof try_backtrack === 'undefined' || !try_backtrack) {

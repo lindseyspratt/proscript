@@ -19,7 +19,7 @@ jQuery(function ($, undefined) {
             this.echo('');
         }
     }, {
-        greetings: 'Proscript Interpreter',
+        greetings: 'ProscriptLS Interpreter',
         name: 'pl_interp',
         height: 600,
         prompt: '| ?- '

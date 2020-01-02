@@ -77,7 +77,7 @@ at <a href="http://www.j-paine.org/prolog/library.html">http://www.j-paine.org/p
     </ul>
 </li>
 <li>listut2.pl:
-    Additional list utility predicates created for Proscript.
+    Additional list utility predicates created for ProscriptLS.
     <ul>
         <li>append_lists/2</li>
         <li>select_list/4</li>

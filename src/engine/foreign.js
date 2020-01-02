@@ -770,7 +770,7 @@ function predicate_generate_initialization_goal(Module, Init) {
     return unify(namePL, Init);
  }
 
-// dynamic implies public. In proscript, public also implies dynamic.
+// dynamic implies public. In ProscriptLS, public also implies dynamic.
 // the is_public flag will be set to true in the saved state
 // for predicate Name/Arity.
 
@@ -1989,7 +1989,7 @@ function update_choicepoint_data(value)
     return true;
 }
 
-// used in proscript_interpreter_terminal.js
+// used in proscriptls_interpreter_terminal.js
 // noinspection JSUnusedLocalSymbols
 function destroy_all_choicepoints() {
     while(state.B !== 0) {

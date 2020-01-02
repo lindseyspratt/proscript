@@ -110,7 +110,7 @@ to simplify working with objects.
 </div>
 <div class="indexed" id="object_language">
     <h4>Object Language</h4>
-    The Proscript object language provides a concise way
+    The ProscriptLS object language provides a concise way
     to access object properties, methods and Element
     object attributes.
     There are operators for accessing these things individually

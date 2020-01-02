@@ -35,7 +35,7 @@
     </footer>
 </div>
 <!-- proscriptls interpreter
-<script src="{{1 @\+ home=>'../'}}terminal/proscript_interpreter_terminal.js" type="text/javascript"></script>
+<script src="{{1 @\+ home=>'../'}}terminal/proscriptls_interpreter_terminal.js" type="text/javascript"></script>
 <div id="proscriptinterpreter">
 </div>
 -->
