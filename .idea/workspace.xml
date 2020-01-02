@@ -6,27 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Changed version to 1.5.0. Added documentation. Cleaned up tiles.html.&#10;&#10;Fixed doc generator to not put empty parentheses on predicates.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.SDK.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.SDK.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/calculator_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/calculator_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/console_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/consult_console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/consult_console_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_about.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_about.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_doc.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_download.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_download.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/likes_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/likes_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/simple_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/simple_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/tiles_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tiles_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/tiles.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tiles.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/docs/items.predicates.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/items.predicates.doc.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/objects.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/objects.doc.template" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/docs/predicate_doc.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/predicate_doc.pl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/docs/predicates.sidenav.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/predicates.sidenav.template" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/docs/syntax.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/syntax.doc.template" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version.txt" beforeDir="false" afterPath="$PROJECT_DIR$/version.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version_date.txt" beforeDir="false" afterPath="$PROJECT_DIR$/version_date.txt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -43,10 +27,42 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
+        <entry file="file://$PROJECT_DIR$/examples/console_button_test.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="118">
-              <caret line="2840" column="48" selection-start-line="2840" selection-start-column="43" selection-end-line="2840" selection-end-column="48" />
+            <state relative-caret-position="885">
+              <caret line="59" column="45" selection-start-line="59" selection-start-column="2" selection-end-line="59" selection-end-column="45" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="7845">
+              <caret line="523" selection-start-line="523" selection-end-line="523" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/console_button_test.html">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3135">
+              <caret line="209" selection-start-line="209" selection-end-line="209" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/system/system.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="30">
+              <caret line="2" selection-start-line="2" selection-end-line="2" selection-end-column="25" />
             </state>
           </provider>
         </entry>
@@ -54,82 +70,42 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="303">
-              <caret line="43" column="18" lean-forward="true" selection-start-line="43" selection-start-column="18" selection-end-line="43" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/memory_files.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="123">
-              <caret line="285" column="25" selection-start-line="285" selection-start-column="9" selection-end-line="285" selection-end-column="25" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/docs/predicate_doc.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="317">
-              <caret line="134" column="5" lean-forward="true" selection-start-line="134" selection-start-column="5" selection-end-line="134" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="667" column="22" selection-start-line="667" selection-start-column="7" selection-end-line="667" selection-end-column="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/examples/tiles.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="450">
-              <caret line="30" column="4" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="1628" column="4" lean-forward="true" selection-start-line="1628" selection-start-column="4" selection-end-line="1628" selection-end-column="4" />
+            <state relative-caret-position="225">
+              <caret line="15" selection-start-line="15" selection-end-line="15" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/docs/syntax.doc.template">
+        <entry file="file://$PROJECT_DIR$/examples/tiles.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="193" column="4" selection-start-line="193" selection-start-column="4" selection-end-line="193" selection-end-column="4" />
+            <state relative-caret-position="135">
+              <caret line="9" column="7" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/tools/generate_predicate_doc.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="149">
-              <caret line="81" column="18" lean-forward="true" selection-start-line="81" selection-start-column="18" selection-end-line="81" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/docs/objects.doc.template">
+        <entry file="file://$PROJECT_DIR$/version.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret line="209" selection-start-line="209" selection-end-line="209" />
+              <caret column="5" selection-start-column="5" selection-end-column="5" />
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/version_date.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="12" selection-start-column="12" selection-end-column="12" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/node_tools/node_compile.js">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -169,11 +145,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="-2560" />
-    <option name="y" value="23" />
-    <option name="width" value="2560" />
-    <option name="height" value="1417" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="180" />
+    <option name="y" value="127" />
+    <option name="width" value="1080" />
+    <option name="height" value="629" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -187,22 +163,6 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
-              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-              <item name="docs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
-              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
-              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="docs" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -306,7 +266,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11553000" />
+    <option name="totallyTimeSpent" value="11632000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -318,11 +278,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1280" height="740" extended-state="6" />
-    <editor active="true" />
+    <frame x="0" y="23" width="1440" height="837" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.662037" visible="true" weight="0.20413026" />
-      <window_info id="Structure" order="1" sideWeight="0.33796296" side_tool="true" visible="true" weight="0.20413026" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65619546" visible="true" weight="0.20014094" />
+      <window_info id="Structure" order="1" sideWeight="0.34380454" side_tool="true" visible="true" weight="0.20014094" />
       <window_info id="Favorites" order="2" sideWeight="0.33809525" side_tool="true" weight="0.20413026" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3287037" />
@@ -475,13 +434,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8970">
-          <caret line="633" selection-start-line="633" selection-end-line="633" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="9600">
@@ -510,38 +462,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="32" column="19" selection-start-line="32" selection-start-column="19" selection-end-line="32" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="5" selection-start-column="5" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version_date.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="6" selection-start-column="6" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="118">
           <caret line="2840" column="48" selection-start-line="2840" selection-start-column="43" selection-end-line="2840" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="303">
-          <caret line="43" column="18" lean-forward="true" selection-start-line="43" selection-start-column="18" selection-end-line="43" selection-end-column="18" />
         </state>
       </provider>
     </entry>
@@ -587,13 +511,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/examples/tiles.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="30" column="4" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
@@ -605,6 +522,69 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="272">
           <caret line="193" column="4" selection-start-line="193" selection-start-column="4" selection-end-line="193" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7845">
+          <caret line="523" selection-start-line="523" selection-end-line="523" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/console_button_test.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3135">
+          <caret line="209" selection-start-line="209" selection-end-line="209" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/system/system.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" selection-start-line="2" selection-end-line="2" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="5" selection-start-column="5" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version_date.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="12" selection-start-column="12" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_tools/node_compile.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/Makefile" />
+    <entry file="file://$PROJECT_DIR$/examples/console_button_test.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="885">
+          <caret line="59" column="45" selection-start-line="59" selection-start-column="2" selection-end-line="59" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/tiles.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="7" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
         </state>
       </provider>
     </entry>
