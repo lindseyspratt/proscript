@@ -19,7 +19,7 @@ There are three more steps specific to setting up the terminal as a ProscriptLS 
     <li>
         Get the ProscriptLS interpreter library:
         <pre><code class="html">
-&lt;script type="text/javascript" src="proscript_interpreter_terminal.js">&lt;/script></code></pre>
+&lt;script type="text/javascript" src="proscriptls_interpreter_terminal.js">&lt;/script></code></pre>
     </li>
     <li>
         Create a DIV element with ID 'proscriptinterpreter'.

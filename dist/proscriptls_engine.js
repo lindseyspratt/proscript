@@ -765,7 +765,7 @@ function predicate_generate_initialization_goal(Module, Init) {
     return unify(namePL, Init);
  }
 
-// dynamic implies public. In proscript, public also implies dynamic.
+// dynamic implies public. In ProscriptLS, public also implies dynamic.
 // the is_public flag will be set to true in the saved state
 // for predicate Name/Arity.
 
@@ -1978,7 +1978,7 @@ function update_choicepoint_data(value)
     return true;
 }
 
-// used in proscript_interpreter_terminal.js
+// used in proscriptls_interpreter_terminal.js
 // noinspection JSUnusedLocalSymbols
 function destroy_all_choicepoints() {
     while(state.B !== 0) {
@@ -3727,7 +3727,7 @@ function engine_error(message) {
 // runtime environment; request_promise_results/1 and
 // handle_promise_results/2, respectively.
 //
-// There is a utility Proscript predicate promise_result/2
+// There is a utility ProscriptLS predicate promise_result/2
 // that coordinates the use of request_promise_result/1 and
 // handle_promise_result/2 with suspending the WAM and
 // backtracking to restart the WAM:
@@ -3804,7 +3804,7 @@ function promise_callback(promise, result) {
 
 /**
  * promise_backtrack backtracks the WAM state then invokes the wam() function.
- * This is done indirectly if the proscript_interpreter_terminal if present.
+ * This is done indirectly if the proscriptls_interpreter_terminal if present.
  */
 function promise_backtrack() {
     if(typeof try_backtrack === 'undefined' || !try_backtrack) {
@@ -13052,12 +13052,12 @@ and methods [Im.M1(...), ..., Im.Mk(...)], where:
   * Ipx != Ia for all 1 <= x <= j and 1 <= a <= n;
   * Imx != Ia for all 1 <= x <= k and 1 <= a <= n.
 
-The Proscript implementation provides explicit access to selected properties and methods
+The ProscriptLS implementation provides explicit access to selected properties and methods
 of various WebAPI objects and Javascript runtime objects.
 Currently the supported WebAPI objects are Node, Element, and HTMLElement.
 The Javascript runtime object is Promise.
 
-The properties are handled in the Javascript supporting Proscript
+The properties are handled in the Javascript supporting ProscriptLS
 in a systematic fashion using a propertyMap to map
 a property name to a property specification. The property specification defines
 the name and type properties and the objects(valueJS), objectValues(objectJS),

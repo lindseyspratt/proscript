@@ -39,12 +39,12 @@ and methods [Im.M1(...), ..., Im.Mk(...)], where:
   * Ipx != Ia for all 1 <= x <= j and 1 <= a <= n;
   * Imx != Ia for all 1 <= x <= k and 1 <= a <= n.
 
-The Proscript implementation provides explicit access to selected properties and methods
+The ProscriptLS implementation provides explicit access to selected properties and methods
 of various WebAPI objects and Javascript runtime objects.
 Currently the supported WebAPI objects are Node, Element, and HTMLElement.
 The Javascript runtime object is Promise.
 
-The properties are handled in the Javascript supporting Proscript
+The properties are handled in the Javascript supporting ProscriptLS
 in a systematic fashion using a propertyMap to map
 a property name to a property specification. The property specification defines
 the name and type properties and the objects(valueJS), objectValues(objectJS),

@@ -19,7 +19,7 @@ jQuery(function ($, undefined) {
             this.echo('');
         }
     }, {
-        greetings: 'Proscript Interpreter',
+        greetings: 'ProscriptLS Interpreter',
         name: 'pl_interp',
         height: 600,
         prompt: '| ?- '
@@ -75,7 +75,7 @@ function setup_term_for_instruction_input(term) {
         trace_instruction_level(command, term);
     }, {
         name: 'trace-instruction',
-        prompt: state.trace_instruction_prompt + ' : '
+        prompt: $.terminal.escape_formatting(state.trace_instruction_prompt + ' : ')
     });
 }
 
@@ -89,11 +89,11 @@ function trace_instruction_level(command, term) {
 function trace_instruction_level_after_running(term) {
     if (state.instruction_suspended) {
         instruction_suspend_set('false');
-        term.set_prompt(state.trace_instruction_prompt + ' : ');
+        term.set_prompt($.terminal.escape_formatting(state.trace_instruction_prompt + ' : '));
     } else {
         term.pop();
         if(state.trace_prompt) {
-            term.set_prompt(state.trace_prompt + ' ? ');
+            term.set_prompt($.terminal.escape_formatting(state.trace_prompt + ' ? '));
         }
     }
 }
@@ -107,10 +107,10 @@ function setup_term_for_input(term) {
             trace_level(command, term);
         }, {
             name: 'trace',
-            prompt: state.trace_prompt + ' ? '
+            prompt: $.terminal.escape_formatting(state.trace_prompt + ' ? ')
         });
     } else {
-        term.set_prompt(state.trace_prompt + ' ? ');
+        term.set_prompt($.terminal.escape_formatting(state.trace_prompt + ' ? '));
     }
 }
 
@@ -131,7 +131,7 @@ function trace_level_after_backtrack(term) {
         debug_msg("Instruction suspended");
         setup_term_for_instruction_input(term);
     } else if (state.suspended) {
-        term.set_prompt(state.trace_prompt + ' ? ');
+        term.set_prompt($.terminal.escape_formatting(state.trace_prompt + ' ? '));
     } else {
         term.pop();
 
@@ -186,7 +186,7 @@ function buffered_write(msg, term) {
             line = lines[ofst];
         }
 
-        term.echo(line);
+        term.echo($.terminal.escape_formatting(line));
     }
 
     buffer = (buffer ? buffer : '') + lines[lines.length - 1];

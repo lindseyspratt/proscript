@@ -66,7 +66,7 @@ From Edinburgh DEC-10 library.
 * sumlist/2
 
 ## listut2.pl
-Additional list utility predicates created for Proscript.
+Additional list utility predicates created for ProscriptLS.
 * select_list/4
 * contains_list/2
 * split_list/4
