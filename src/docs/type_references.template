@@ -670,7 +670,7 @@
 	(no methods)
 </li>
 <li class="indexed" id="api_window"><h5>Window (<a href="https://html.spec.whatwg.org/multipage/window-object.html">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Window'>MDN</a>): window</h5>
-<h6>Parents</h6><ul><li><a href='#api_eventtarget'>eventtarget</a></li><li><a href='#api_windowlocalstorage'>windowlocalstorage</a></li><li><a href='#api_windowsessionstorage'>windowsessionstorage</a></li></ul>
+<h6>Parents</h6><ul><li><a href='#api_eventtarget'>eventtarget</a></li><li><a href='#api_windowlocalstorage'>windowlocalstorage</a></li><li><a href='#api_windoworworkerglobalscope'>windoworworkerglobalscope</a></li><li><a href='#api_windowsessionstorage'>windowsessionstorage</a></li></ul>
 <h6>Properties</h6>
 	<ul>
 		<li><b>applicationCache</b>: <i>object</i></li>
@@ -713,6 +713,27 @@
 		<li><b>localStorage</b>: <i>object</i></li>
 	</ul>
 	(no methods)
+</li>
+<li class="indexed" id="api_windoworworkerglobalscope"><h5>windowOrWorkerGlobalScope (<a href="https://html.spec.whatwg.org/multipage/webappapis.html#windoworworkerglobalscope-mixin">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope'>MDN</a>): windoworworkerglobalscope</h5>
+<h6>Children</h6><ul><li><a href='#api_window'>window</a></li></ul>
+<h6>Properties</h6>
+	<ul>
+		<li><b>caches</b>: <i>object</i></li>
+		<li><b>crossOriginIsolated</b>: <i>boolean</i></li>
+		<li><b>indexedDB</b>: <i>object</i></li>
+		<li><b>isSecureContext</b>: <i>boolean</i></li>
+		<li><b>origin</b>: <i>atom</i></li>
+	</ul>
+<h6>Methods</h6>
+	<ul>
+		<li><b>atob</b>(<i>string</i>, <i>string</i>) [last arg is result]</li>
+		<li><b>btoa</b>(<i>string</i>, <i>string</i>) [last arg is result]</li>
+		<li><b>clearInterval</b>(<i>number</i>)</li>
+		<li><b>fetch</b>(<i>[string,object]</i>, <i>object</i>, <i>object</i>) [last arg is result]</li>
+		<li><b>queueMicrotask</b>(<i>goal_function</i>)</li>
+		<li><b>setInterval</b>(<i>goal_function</i>, <i>number</i>, <i>number</i>) [last arg is result]</li>
+		<li><b>setTimeout</b>(<i>goal_function</i>, <i>number</i>, <i>number</i>) [last arg is result]</li>
+	</ul>
 </li>
 <li class="indexed" id="api_windowsessionstorage"><h5>WindowSessionStorage (<a href="https://html.spec.whatwg.org/multipage/webstorage.html#windowsessionstorage">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API'>MDN</a>): windowsessionstorage</h5>
 <h6>Children</h6><ul><li><a href='#api_window'>window</a></li></ul>

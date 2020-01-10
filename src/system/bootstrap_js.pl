@@ -482,13 +482,24 @@ retractall1(_M1 : (M2 : Goal)):- !, retractall1(M2 : Goal), fail.
 retractall1(Goal):- retract1(Goal), fail. % Use the non-meta-predicate version of retract/1. retractall/1 already added Module info if appropriate.
 retractall1(_).
 
+sort(List, List) :-
+    check_sorted(List),
+    !.
+sort(List, Sorted) :-
+    sort1(List, Sorted).
 
-sort([X|Xs],Ys) :-
+sort1([X|Xs],Ys) :-
         partition(Xs,X,Left,Right),
-        sort(Left,Ls),
-        sort(Right,Rs),
+        sort1(Left,Ls),
+        sort1(Right,Rs),
         append(Ls,[X|Rs],Ys).
-sort([],[]).
+sort1([],[]).
+
+check_sorted([]).
+check_sorted([_]) :- !.
+check_sorted([H1,H2|T]) :-
+    H1 @=< H2,
+    check_sorted([H2|T]).
 
 keysort([Key-X|Xs],Ys) :-
         key_partition(Xs,Key,Left,Right),

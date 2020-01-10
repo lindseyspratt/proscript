@@ -1,4 +1,4 @@
-:- module(system_util, [member/2, write_list/2, write_list/3, capitalize/2]).
+:- module(system_util, [member/2, write_list/2, write_list/3, capitalize/2, random/1, random_between/3]).
 
 member(X, [X|_]).
 member(X, [_|Tail]) :-
@@ -35,3 +35,12 @@ capitalize_code(X, CX) :-
      ;
      CX = X
     ).
+
+random(R) :-
+    R is random_float.
+
+random_between(L, U, R) :-
+    integer(L), integer(U),
+    !,
+    U >= L,
+    R is L+random((U+1)-L).

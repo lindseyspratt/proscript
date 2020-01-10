@@ -47,6 +47,16 @@ function evaluate_expression(expression, evaluated)
         evaluated.value = Math.E;
         return true;
     }
+    else if (TAG(expression) === TAG_ATM && expression === lookup_atom("random_float"))
+    {
+        // returns a random value in the open interval 0.0 < Random < 1.0
+        let randomValue = Math.random();
+        while(randomValue === 0.0) {
+            randomValue = Math.random();
+        }
+        evaluated.value = randomValue;
+        return true;
+    }
     else if (TAG(expression) === TAG_STR)
     {
         var indicator;
@@ -158,6 +168,11 @@ function evaluate_expression(expression, evaluated)
             if (v[1] === 0)
                 return evaluation_error("zero_divisor");
             evaluated.value = round(v[0] /v[1]);        
+        }
+        else if (name === "random" && arity === 1) {
+            // random(L) returns integer X in range 0 =< X < L.
+            let max = Math.floor(v[0]);
+            evaluated.value =  Math.floor(Math.random() * max ); //The maximum is exclusive
         }
         else
         {
@@ -11947,7 +11962,7 @@ function get_object_id_container(term, idContainer) {
 
 var parentMap = new Map([
     ['eventtarget', []],
-    ['window', ['eventtarget', 'windowlocalstorage', 'windowsessionstorage']],
+    ['window', ['eventtarget', 'windowlocalstorage', 'windowsessionstorage', 'windoworworkerglobalscope']],
     ['node', ['eventtarget']],
     ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
     ['document', ['node', 'parentnode']],
@@ -14520,6 +14535,35 @@ webInterfaces.set('windowsessionstorage',
         reference: {name:'WindowSessionStorage',
             standard:'https://html.spec.whatwg.org/multipage/webstorage.html#windowsessionstorage',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API'
+        }
+    });
+
+
+var windowOrWorkerGlobalScopeInterfaceProperties = new Map( [
+    ['caches', SimpleProperty('object', 'caches')], // CacheStorage
+    ['crossOriginIsolated', SimpleProperty('boolean', 'crossOriginIsolated')],
+    ['indexedDB', SimpleProperty('object', 'indexedDB')], // IDBFactory
+    ['isSecureContext', SimpleProperty('boolean', 'isSecureContext')],
+    ['origin', SimpleProperty('atom', 'origin')]
+]);
+
+var windowOrWorkerGlobalScopeMethodSpecs = new Map([
+    ['btoa', {name:'btoa',arguments:[{type:'string'}],returns:{type:'string'}}],
+    ['atob', {name:'atob',arguments:[{type:'string'}],returns:{type:'string'}}],
+    ['clearInterval', {name: 'clearInterval',arguments:[{type:'number'}]}],
+    ['fetch', {name: 'fetch',arguments:[{type:['string','object']},{type:'object'}],returns:{type:'object'}}], // options object is HTMLOptionsCollection?, returns is Promise
+    ['queueMicrotask', {name: 'queueMicrotask',arguments:[{type:'goal_function'}]}],
+    ['setInterval', {name: 'setInterval',arguments:[{type:'goal_function'},{type:'number'}],returns:{type:'number'}}],
+    ['setTimeout', {name: 'setTimeout',arguments:[{type:'goal_function'},{type:'number'}],returns:{type:'number'}}]
+]);
+
+webInterfaces.set('windoworworkerglobalscope',
+    {name: 'windoworworkerglobalscope',
+        properties:windowOrWorkerGlobalScopeInterfaceProperties,
+        methods:windowOrWorkerGlobalScopeMethodSpecs,
+        reference: {name:'windowOrWorkerGlobalScope',
+            standard:'https://html.spec.whatwg.org/multipage/webappapis.html#windoworworkerglobalscope-mixin',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope'
         }
     });
 

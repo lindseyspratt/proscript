@@ -41,4 +41,5 @@
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_validitystate, 'index_doc.html', 'ValidityState']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_window, 'index_doc.html', 'Window']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_windowlocalstorage, 'index_doc.html', 'WindowLocalStorage']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_windoworworkerglobalscope, 'index_doc.html', 'windowOrWorkerGlobalScope']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_windowsessionstorage, 'index_doc.html', 'WindowSessionStorage']}}</li>

@@ -45,6 +45,16 @@ function evaluate_expression(expression, evaluated)
         evaluated.value = Math.E;
         return true;
     }
+    else if (TAG(expression) === TAG_ATM && expression === lookup_atom("random_float"))
+    {
+        // returns a random value in the open interval 0.0 < Random < 1.0
+        let randomValue = Math.random();
+        while(randomValue === 0.0) {
+            randomValue = Math.random();
+        }
+        evaluated.value = randomValue;
+        return true;
+    }
     else if (TAG(expression) === TAG_STR)
     {
         var indicator;
@@ -156,6 +166,11 @@ function evaluate_expression(expression, evaluated)
             if (v[1] === 0)
                 return evaluation_error("zero_divisor");
             evaluated.value = round(v[0] /v[1]);        
+        }
+        else if (name === "random" && arity === 1) {
+            // random(L) returns integer X in range 0 =< X < L.
+            let max = Math.floor(v[0]);
+            evaluated.value =  Math.floor(Math.random() * max ); //The maximum is exclusive
         }
         else
         {

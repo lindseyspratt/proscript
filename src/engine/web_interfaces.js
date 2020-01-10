@@ -1510,3 +1510,32 @@ webInterfaces.set('windowsessionstorage',
         }
     });
 
+
+var windowOrWorkerGlobalScopeInterfaceProperties = new Map( [
+    ['caches', SimpleProperty('object', 'caches')], // CacheStorage
+    ['crossOriginIsolated', SimpleProperty('boolean', 'crossOriginIsolated')],
+    ['indexedDB', SimpleProperty('object', 'indexedDB')], // IDBFactory
+    ['isSecureContext', SimpleProperty('boolean', 'isSecureContext')],
+    ['origin', SimpleProperty('atom', 'origin')]
+]);
+
+var windowOrWorkerGlobalScopeMethodSpecs = new Map([
+    ['btoa', {name:'btoa',arguments:[{type:'string'}],returns:{type:'string'}}],
+    ['atob', {name:'atob',arguments:[{type:'string'}],returns:{type:'string'}}],
+    ['clearInterval', {name: 'clearInterval',arguments:[{type:'number'}]}],
+    ['fetch', {name: 'fetch',arguments:[{type:['string','object']},{type:'object'}],returns:{type:'object'}}], // options object is HTMLOptionsCollection?, returns is Promise
+    ['queueMicrotask', {name: 'queueMicrotask',arguments:[{type:'goal_function'}]}],
+    ['setInterval', {name: 'setInterval',arguments:[{type:'goal_function'},{type:'number'}],returns:{type:'number'}}],
+    ['setTimeout', {name: 'setTimeout',arguments:[{type:'goal_function'},{type:'number'}],returns:{type:'number'}}]
+]);
+
+webInterfaces.set('windoworworkerglobalscope',
+    {name: 'windoworworkerglobalscope',
+        properties:windowOrWorkerGlobalScopeInterfaceProperties,
+        methods:windowOrWorkerGlobalScopeMethodSpecs,
+        reference: {name:'windowOrWorkerGlobalScope',
+            standard:'https://html.spec.whatwg.org/multipage/webappapis.html#windoworworkerglobalscope-mixin',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope'
+        }
+    });
+

@@ -103,7 +103,7 @@ function get_object_id_container(term, idContainer) {
 
 var parentMap = new Map([
     ['eventtarget', []],
-    ['window', ['eventtarget', 'windowlocalstorage', 'windowsessionstorage']],
+    ['window', ['eventtarget', 'windowlocalstorage', 'windowsessionstorage', 'windoworworkerglobalscope']],
     ['node', ['eventtarget']],
     ['parentnode', []], // ParentNode is a mixin, there is no constructor for it.
     ['document', ['node', 'parentnode']],
