@@ -6,10 +6,10 @@ SRC_TOOLS=../src/tools
 SRC_SYSTEM=../src/system
 
 all: cal.test chat_parser.test crypt.test ham.test meta_qsort.test nand.test nrev.test poly_10.test qsort.test \
-    queens.test queensn.test query.test reducer.test sendmore.test tak.test zebra.test boyer.test browse.test
+    queens.test queensn.test query.test reducer.test sendmore.test sort_terms.test tak.test zebra.test boyer.test browse.test
 
 %.test: %.pl $(ENGINE) standalone.js $(SRC_SYSTEM)/wam_compiler.pl
-		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['common.pl', 'hook.pl', '$<'], main_test(1)), halt"
+		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['common.pl', 'hook.pl', '$<'], main_test(2)), halt"
 		$(JSC) $(ENGINE) proscriptls_state.js standalone.js  -e "proscriptls_toplevel($(DEBUG))"
 
 

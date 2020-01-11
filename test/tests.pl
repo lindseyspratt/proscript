@@ -417,3 +417,4 @@ test(stat_max_stack, exit) :-
 test(stat_wam_duration, exit) :-
         wam_duration(M),
         M > 0.
+

@@ -488,12 +488,79 @@ sort(List, List) :-
 sort(List, Sorted) :-
     sort1(List, Sorted).
 
-sort1([X|Xs],Ys) :-
-        partition(Xs,X,Left,Right),
-        sort1(Left,Ls),
-        sort1(Right,Rs),
-        append(Ls,[X|Rs],Ys).
-sort1([],[]).
+sort1([X|Xs], Ys) :-
+    !,
+    sort2(X, Xs, Ys).
+sort1([], []).
+
+%sort1([X1, X2, X3, X4|Xs],Ys) :-
+%    !,
+%    sort_three(X1, X2, X3, SX1, SX2, SX3),
+%    sort2(SX2, [SX1, SX3, X4|Xs], Ys).
+%sort1([X1, X2, X3],[SX1, SX2, SX3]) :-
+%    !,
+%    sort_three(X1, X2, X3, SX1, SX2, SX3).
+%sort1([X1, X2],Ys) :-
+%    !,
+%    (X1 @=< X2
+%      -> Ys = [X1, X2]
+%    ;
+%     Ys = [X2, X2]
+%    ).
+%sort1([X],[X]).
+%sort1([],[]).
+%
+%sort_three(X1, X2, X3, SX1, SX2, SX3) :-
+%    X1 @=< X2
+%      -> (X2 @=< X3
+%           -> SX1 = X1, SX2 = X2, SX3 = X3
+%         ;
+%         X1 @=< X3
+%           -> SX1 = X1, SX2 = X3, SX3 = X2
+%         ;
+%         SX1 = X3, SX2 = X1, SX3 = X2
+%         )
+%    ;
+%    X3 @=< X2
+%      -> (X1 @=< X3
+%           -> SX1 = X3, SX2 = X2, SX3 = X1
+%         ;
+%          SX1 = X2, SX2 = X3, SX3 = X1
+%         )
+%    ;
+%    X1 @=< X3
+%      -> SX1 = X2, SX2 = X1, SX3 = X3
+%    ;
+%    SX1 = X2, SX2 = X3, SX3 = X1.
+
+%sort_three(X1, X2, X3, SX1, SX2, SX3) :-
+%    comparex(X1, X2, C12),
+%    comparex(X1, X3, C13),
+%    comparex(X2, X3, C23),
+%    sort_three1(C12, C13, C23, X1, X2, X3, SX1, SX2, SX3),
+%    !.
+%
+%comparex(A, B, X) :-
+%    compare(A, B, C),
+%    comparex1(C, X).
+%
+%comparex1(<, =<).
+%comparex1(=, =<).
+%comparex1(>, >).
+%
+%sort_three1(=<, _, =<, X1, X2, X3, X1, X2, X3).
+%sort_three1(=<, =<, >, X1, X2, X3, X1, X3, X2).
+%sort_three1(=<, >, >, X1, X2, X3, X3, X1, X2).
+%sort_three1(>, =<, =<, X1, X2, X3, X3, X2, X1).
+%sort_three1(>, >, =<, X1, X2, X3, X2, X3, X1).
+%sort_three1(>, =<, >, X1, X2, X3, X2, X1, X3).
+%sort_three1(>, >, >, X1, X2, X3, X2, X3, X1).
+
+sort2(X, Xs, Ys) :-
+    partition(Xs,X,Left,Right),
+    sort1(Left,Ls),
+    sort1(Right,Rs),
+    append(Ls,[X|Rs],Ys).
 
 check_sorted([]).
 check_sorted([_]) :- !.
