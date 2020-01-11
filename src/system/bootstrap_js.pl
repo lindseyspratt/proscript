@@ -501,12 +501,24 @@ check_sorted([H1,H2|T]) :-
     H1 @=< H2,
     check_sorted([H2|T]).
 
-keysort([Key-X|Xs],Ys) :-
+keysort(List, List) :-
+    check_keysorted(List),
+    !.
+keysort(List, Sorted) :-
+    keysort1(List, Sorted).
+
+check_keysorted([]).
+check_keysorted([_]) :- !.
+check_keysorted([H1-_V1,H2-V2|T]) :-
+    H1 @=< H2,
+    check_keysorted([H2-V2|T]).
+
+keysort1([Key-X|Xs],Ys) :-
         key_partition(Xs,Key,Left,Right),
-        keysort(Left,Ls),
-        keysort(Right,Rs),
+        keysort1(Left,Ls),
+        keysort1(Right,Rs),
         append(Ls,[Key-X|Rs],Ys).
-keysort([],[]).
+keysort1([],[]).
 
 partition([X|Xs],Y,Ls,Rs) :-
         X == Y,

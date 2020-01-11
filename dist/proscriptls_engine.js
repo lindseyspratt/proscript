@@ -2468,81 +2468,86 @@ function predicate_atom_codes(atom, codes)
 // return 0 if a === b
 // return 1 if a > b
 //
-function compare_terms(a, b)
+function compare_terms(aBase, bBase)
 {
-    switch(TAG(a))
-    {
-    case TAG_REF:
-        if (TAG(b) === TAG_REF)
-        {
-            if (a === b)
-                return 0;
-            else if (a > b)
+    let a = deref(aBase);
+    let b = deref(bBase);
+
+    switch(TAG(a)) {
+        case TAG_REF:
+            if (TAG(b) === TAG_REF) {
+                if (a === b)
+                    return 0;
+                else if (a > b)
+                    return 1;
+            }
+            return -1;
+        case TAG_FLT:
+            if (TAG(b) === TAG_REF)
                 return 1;
-        }
-        return -1;
-    case TAG_FLT:
-        if (TAG(b) === TAG_REF)
-            return 1;
-        if (TAG(b) === TAG_FLT)
-        {
-            if (floats[VAL(a)] === floats[VAL(b)])
-                return 0;
-            else if (floats[VAL(a)] > floats[VAL(b)])
+            if (TAG(b) === TAG_FLT) {
+                if (floats[VAL(a)] === floats[VAL(b)])
+                    return 0;
+                else if (floats[VAL(a)] > floats[VAL(b)])
+                    return 1;
+            }
+            return -1;
+        case TAG_INT:
+            if (TAG(b) === TAG_REF || TAG(b) === TAG_FLT)
                 return 1;
-        }
-        return -1;
-    case TAG_INT:
-        if (TAG(b) === TAG_REF || TAG(b) === TAG_FLT)
-            return 1;
-        if (TAG(b) === TAG_INT)
-        {
-            if (VAL(a) === VAL(b))
-                return 0;
-            else if (VAL(a) > VAL(b))
+            if (TAG(b) === TAG_INT) {
+                if (VAL(a) === VAL(b))
+                    return 0;
+                else if (VAL(a) > VAL(b))
+                    return 1;
+            }
+            return -1;
+        case TAG_ATM:
+            if (TAG(b) === TAG_REF || TAG(b) === TAG_FLT || TAG(b) === TAG_INT)
                 return 1;
-        }
-        return -1;
-    case TAG_ATM:
-        if (TAG(b) === TAG_REF || TAG(b) === TAG_FLT || TAG(b) === TAG_INT)
-            return 1;
-        if (TAG(b) === TAG_ATM)
-        {
-            if (atable[VAL(a)] === atable[VAL(b)])
-                return 0;
-            else if (atable[VAL(a)] > atable[VAL(b)])
-                return 1;
-        }
-        return -1;
-    case TAG_STR:
-    case TAG_LST:
-        if (TAG(b) === TAG_REF || TAG(b) === TAG_FLT || TAG(b) === TAG_INT || TAG(b) === TAG_ATM)
-            return 1;
-        var aftor;
-        var bftor;
-        if (TAG(a) === TAG_LST)
-            aftor = lookup_functor(".", 2);
-        else
+            if (TAG(b) === TAG_ATM) {
+                if (atable[VAL(a)] === atable[VAL(b)])
+                    return 0;
+                else if (atable[VAL(a)] > atable[VAL(b)])
+                    return 1;
+            }
+            return -1;
+        case TAG_STR:
+            if (TAG(b) !== TAG_STR)
+                return (TAG_STR - TAG(b)) > 0 ? 1 : -1;
+
+            var aftor;
+            var bftor;
             aftor = memory[VAL(a)];
-        if (TAG(b) === TAG_LST)
-            bftor = lookup_functor(".", 2);
-        else
             bftor = memory[VAL(b)];
-        if (ftable[VAL(aftor)][1] > ftable[VAL(bftor)][1])
-            return 1;
-        else if (ftable[VAL(aftor)][1] < ftable[VAL(bftor)][1])
-            return -1;
-        // At this point the arity is equal and we must compare the functor names
-        if (atable[ftable[VAL(aftor)][0]] > atable[ftable[VAL(bftor)][0]])
-            return 1;
-        else if(atable[ftable[VAL(aftor)][0]] < atable[ftable[VAL(bftor)][0]])
-            return -1;
-        // So the functors are the same and we must compare the arguments.
-        for (var i = 0; i < ftable[VAL(aftor)][1]; i++)
-        {
-            var result = compare_terms(memory[VAL(a)+1+i], memory[VAL(b)+1+i]);
+            if (ftable[VAL(aftor)][1] > ftable[VAL(bftor)][1])
+                return 1;
+            else if (ftable[VAL(aftor)][1] < ftable[VAL(bftor)][1])
+                return -1;
+            // At this point the arity is equal and we must compare the functor names
+            if (atable[ftable[VAL(aftor)][0]] > atable[ftable[VAL(bftor)][0]])
+                return 1;
+            else if (atable[ftable[VAL(aftor)][0]] < atable[ftable[VAL(bftor)][0]])
+                return -1;
+            // So the functors are the same and we must compare the arguments.
+            for (var i = 0; i < ftable[VAL(aftor)][1]; i++) {
+                let result = compare_terms(memory[VAL(a) + 1 + i], memory[VAL(b) + 1 + i]);
+                if (result !== 0)
+                    return result;
+            }
+            return 0;
+
+        case TAG_LST: {
+            if (TAG(b) !== TAG_LST)
+                return (TAG_LST - TAG(b)) > 0 ? 1 : -1;
+
+            // compare the head terms
+            let result = compare_terms(memory[VAL(a)], memory[VAL(b)]);
             if (result !== 0)
                 return result;
+            else
+            // compare the tail terms
+                return compare_terms(memory[VAL(a) + 1], memory[VAL(b) + 1]);
         }
     }
     return 0;

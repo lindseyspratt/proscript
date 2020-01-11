@@ -216,6 +216,36 @@ test(arithmetic_test(6), exit):-
 test(arithmetic_test(7), exit):-
         0x1000000 =:= 16 ^ 6.
 
+test(compare(1), exit) :-
+    X = 2/3,
+    X @> 2/1.
+
+test(compare(2), exit) :-
+    X = a,
+    X @< 2/1.
+
+test(compare(3), exit) :-
+    _X @< 2/1.
+
+test(compare(4), exit) :-
+    _X @< _Y.
+
+test(compare(5), exit) :-
+    1 @>= 1.
+
+test(compare(6), exit) :-
+    1.3 @< 1.
+
+test(compare(7), exit) :-
+    [A,B] = [1,2],
+    [C] = [3],
+    [A,B] @< [C,C].
+
+test(compare(8), exit) :-
+    deref_term(A, 3, 4),
+    deref_term(B, 1, 2),
+    A @> B.
+
 test(univ(1), exit):-
         foo(bar) =.. A,
         A == [foo, bar].
@@ -256,6 +286,9 @@ test(univ(10), exit) :-
 test(univ(11), exit) :-
         A =.. [0.3],
         A = 0.3.
+
+deref_term(X, A, B) :-
+    X = a(A,B).
 
 deterministic_goal.
 nondeterministic_goal.
