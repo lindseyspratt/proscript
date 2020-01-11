@@ -482,8 +482,8 @@ retractall1(_M1 : (M2 : Goal)):- !, retractall1(M2 : Goal), fail.
 retractall1(Goal):- retract1(Goal), fail. % Use the non-meta-predicate version of retract/1. retractall/1 already added Module info if appropriate.
 retractall1(_).
 
-sort(List, List) :-
-    check_sorted(List),
+sort(List, Sorted) :-
+    check_sorted(List, Sorted),
     !.
 sort(List, Sorted) :-
     sort1(List, Sorted).
@@ -493,92 +493,44 @@ sort1([X|Xs], Ys) :-
     sort2(X, Xs, Ys).
 sort1([], []).
 
-%sort1([X1, X2, X3, X4|Xs],Ys) :-
-%    !,
-%    sort_three(X1, X2, X3, SX1, SX2, SX3),
-%    sort2(SX2, [SX1, SX3, X4|Xs], Ys).
-%sort1([X1, X2, X3],[SX1, SX2, SX3]) :-
-%    !,
-%    sort_three(X1, X2, X3, SX1, SX2, SX3).
-%sort1([X1, X2],Ys) :-
-%    !,
-%    (X1 @=< X2
-%      -> Ys = [X1, X2]
-%    ;
-%     Ys = [X2, X2]
-%    ).
-%sort1([X],[X]).
-%sort1([],[]).
-%
-%sort_three(X1, X2, X3, SX1, SX2, SX3) :-
-%    X1 @=< X2
-%      -> (X2 @=< X3
-%           -> SX1 = X1, SX2 = X2, SX3 = X3
-%         ;
-%         X1 @=< X3
-%           -> SX1 = X1, SX2 = X3, SX3 = X2
-%         ;
-%         SX1 = X3, SX2 = X1, SX3 = X2
-%         )
-%    ;
-%    X3 @=< X2
-%      -> (X1 @=< X3
-%           -> SX1 = X3, SX2 = X2, SX3 = X1
-%         ;
-%          SX1 = X2, SX2 = X3, SX3 = X1
-%         )
-%    ;
-%    X1 @=< X3
-%      -> SX1 = X2, SX2 = X1, SX3 = X3
-%    ;
-%    SX1 = X2, SX2 = X3, SX3 = X1.
-
-%sort_three(X1, X2, X3, SX1, SX2, SX3) :-
-%    comparex(X1, X2, C12),
-%    comparex(X1, X3, C13),
-%    comparex(X2, X3, C23),
-%    sort_three1(C12, C13, C23, X1, X2, X3, SX1, SX2, SX3),
-%    !.
-%
-%comparex(A, B, X) :-
-%    compare(A, B, C),
-%    comparex1(C, X).
-%
-%comparex1(<, =<).
-%comparex1(=, =<).
-%comparex1(>, >).
-%
-%sort_three1(=<, _, =<, X1, X2, X3, X1, X2, X3).
-%sort_three1(=<, =<, >, X1, X2, X3, X1, X3, X2).
-%sort_three1(=<, >, >, X1, X2, X3, X3, X1, X2).
-%sort_three1(>, =<, =<, X1, X2, X3, X3, X2, X1).
-%sort_three1(>, >, =<, X1, X2, X3, X2, X3, X1).
-%sort_three1(>, =<, >, X1, X2, X3, X2, X1, X3).
-%sort_three1(>, >, >, X1, X2, X3, X2, X3, X1).
-
 sort2(X, Xs, Ys) :-
     partition(Xs,X,Left,Right),
     sort1(Left,Ls),
     sort1(Right,Rs),
     append(Ls,[X|Rs],Ys).
 
-check_sorted([]).
-check_sorted([_]) :- !.
-check_sorted([H1,H2|T]) :-
-    H1 @=< H2,
-    check_sorted([H2|T]).
+% check_sorted removes duplicates in an
+% already-in-order list.
 
-keysort(List, List) :-
-    check_keysorted(List),
+check_sorted([], []).
+check_sorted([H], [H]) :- !.
+check_sorted([H1,H2|T], L) :-
+    (H1 @< H2
+      -> L = [H1|LT]
+    ;
+    H1 == H2
+      -> L = LT
+    ),
+    check_sorted([H2|T], LT).
+
+keysort(List, Sorted) :-
+    check_keysorted(List, Sorted),
     !.
 keysort(List, Sorted) :-
     keysort1(List, Sorted).
 
-check_keysorted([]).
-check_keysorted([_]) :- !.
-check_keysorted([H1-_V1,H2-V2|T]) :-
-    H1 @=< H2,
-    check_keysorted([H2-V2|T]).
+check_keysorted([], []).
+check_keysorted([X], [X]) :- !.
+check_keysorted([H1-V1,H2-V2|T], L) :-
+    (H1 @< H2
+      -> L = [H1-V1|LT],
+         Next = [H2-V2|T]
+    ;
+    H1 == H2
+      -> L = LT,
+         Next = [H1-V1|T]
+    ),
+    check_keysorted(Next, LT).
 
 keysort1([Key-X|Xs],Ys) :-
         key_partition(Xs,Key,Left,Right),
@@ -592,11 +544,11 @@ partition([X|Xs],Y,Ls,Rs) :-
         !,
         partition(Xs, Y, Ls, Rs).
 partition([X|Xs],Y,[X|Ls],Rs) :-
-        X @=< Y,
+        X @< Y,
         !,
         partition(Xs,Y,Ls,Rs).
 partition([X|Xs],Y,Ls,[X|Rs]) :-
-        X @> Y,
+%        X @> Y,
         !,
         partition(Xs,Y,Ls,Rs).
 partition([],_,[],[]).
@@ -606,11 +558,11 @@ key_partition([XKey-_|Xs],YKey,Ls,Rs) :-
         !,
         key_partition(Xs,YKey,Ls,Rs).
 key_partition([XKey-X|Xs],YKey,[XKey-X|Ls],Rs) :-
-        XKey @=< YKey,
+        XKey @< YKey,
         !,
         key_partition(Xs,YKey,Ls,Rs).
 key_partition([XKey-X|Xs],YKey,Ls,[XKey-X|Rs]) :-
-        XKey @> YKey,
+%        XKey @> YKey,
         !,
         key_partition(Xs,YKey,Ls,Rs).
 key_partition([],_,[],[]).

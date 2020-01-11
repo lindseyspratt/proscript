@@ -418,3 +418,35 @@ test(stat_wam_duration, exit) :-
         wam_duration(M),
         M > 0.
 
+test(sort(1), exit) :-
+    sort([1,2,2], X),
+    !,
+    X = [1,2].
+
+test(sort(2), exit) :-
+    sort([2,1,2], X),
+    !,
+    X = [1,2].
+
+test(sort(3), exit) :-
+    sort([b(1),Z,3.2,a], X),
+    !,
+    % the sort placed the variable Z at the beginning of X.
+    % this can be tested by unifying Z with z.
+    Z = z,
+    X=[z,3.2,a,b(1)].
+
+test(keysort(1), exit) :-
+    keysort([1-a,2-b,2-c], X),
+    !,
+    X = [1-a,2-b].
+
+test(keysort(2), exit) :-
+    keysort([2-b,1-a,2-c], X),
+    !,
+    X = [1-a,2-b].
+
+test(keysort(3), exit) :-
+    keysort([3-c,2-b,1-a], X),
+    !,
+    X = [1-a,2-b,3-c].
