@@ -90,7 +90,17 @@
                     <li><a  class="index" id="syntax_index" href="#syntax"> Syntax </a></li>
                     <li><span class="caret"></span><a  class="index" id="predicates_index" href="#predicates"> Predicates </a>
                         <ul class='nested'>
-                            <li><span class="caret"></span><a  class="index" id="pred_cat_dom_index" href="#pred_cat_dom"> dom </a>
+                            <li><span class="caret"></span><a  class="index" id="pred_cat_arithmetic_index" href="#pred_cat_arithmetic"> arithmetic </a>
+<ul class='nested'>
+<li><a  class="index" id="pred_<_2_index" href="#pred_<_2"> (<)/2 </a></li>
+<li><a  class="index" id="pred_=:=_2_index" href="#pred_=:=_2"> (=:=)/2 </a></li>
+<li><a  class="index" id="pred_=<_2_index" href="#pred_=<_2"> (=<)/2 </a></li>
+<li><a  class="index" id="pred_=\=_2_index" href="#pred_=\=_2"> (=\=)/2 </a></li>
+<li><a  class="index" id="pred_>_2_index" href="#pred_>_2"> (>)/2 </a></li>
+<li><a  class="index" id="pred_>=_2_index" href="#pred_>=_2"> (>=)/2 </a></li>
+<li><a  class="index" id="pred_is_2_index" href="#pred_is_2"> (is)/2 </a></li>
+</ul></li>
+<li><span class="caret"></span><a  class="index" id="pred_cat_dom_index" href="#pred_cat_dom"> dom </a>
 <ul class='nested'>
 <li><a  class="index" id="pred_alert_1_index" href="#pred_alert_1"> alert/1 </a></li>
 <li><a  class="index" id="pred_append_dom_node_child_2_index" href="#pred_append_dom_node_child_2"> append_dom_node_child/2 </a></li>
@@ -140,19 +150,33 @@
 </ul></li>
 <li><span class="caret"></span><a  class="index" id="pred_cat_terms_index" href="#pred_cat_terms"> terms </a>
 <ul class='nested'>
-<li></li>
-<li></li>
-<li></li>
+<li><a  class="index" id="pred_=_2_index" href="#pred_=_2"> (=)/2 </a></li>
+<li><a  class="index" id="pred_=.._2_index" href="#pred_=.._2"> (=..)/2 </a></li>
+<li><a  class="index" id="pred_==_2_index" href="#pred_==_2"> (==)/2 </a></li>
+<li><a  class="index" id="pred_@<_2_index" href="#pred_@<_2"> (@<)/2 </a></li>
+<li><a  class="index" id="pred_@=<_2_index" href="#pred_@=<_2"> (@=<)/2 </a></li>
+<li><a  class="index" id="pred_@>_2_index" href="#pred_@>_2"> (@>)/2 </a></li>
+<li><a  class="index" id="pred_@>=_2_index" href="#pred_@>=_2"> (@>=)/2 </a></li>
 <li><a  class="index" id="pred_acyclic_term_1_index" href="#pred_acyclic_term_1"> acyclic_term/1 </a></li>
 <li><a  class="index" id="pred_arg_3_index" href="#pred_arg_3"> arg/3 </a></li>
 <li><a  class="index" id="pred_atom_1_index" href="#pred_atom_1"> atom/1 </a></li>
+<li><a  class="index" id="pred_atom_chars_2_index" href="#pred_atom_chars_2"> atom_chars/2 </a></li>
+<li><a  class="index" id="pred_atom_codes_2_index" href="#pred_atom_codes_2"> atom_codes/2 </a></li>
+<li><a  class="index" id="pred_atom_concat_3_index" href="#pred_atom_concat_3"> atom_concat/3 </a></li>
+<li><a  class="index" id="pred_atom_length_2_index" href="#pred_atom_length_2"> atom_length/2 </a></li>
+<li><a  class="index" id="pred_char_code_2_index" href="#pred_char_code_2"> char_code/2 </a></li>
+<li><a  class="index" id="pred_char_conversion_2_index" href="#pred_char_conversion_2"> char_conversion/2 </a></li>
 <li><a  class="index" id="pred_compare_3_index" href="#pred_compare_3"> compare/3 </a></li>
 <li><a  class="index" id="pred_compound_1_index" href="#pred_compound_1"> compound/1 </a></li>
 <li><a  class="index" id="pred_copy_term_2_index" href="#pred_copy_term_2"> copy_term/2 </a></li>
+<li><a  class="index" id="pred_current_char_conversion_2_index" href="#pred_current_char_conversion_2"> current_char_conversion/2 </a></li>
 <li><a  class="index" id="pred_float_1_index" href="#pred_float_1"> float/1 </a></li>
 <li><a  class="index" id="pred_functor_3_index" href="#pred_functor_3"> functor/3 </a></li>
 <li><a  class="index" id="pred_ground_1_index" href="#pred_ground_1"> ground/1 </a></li>
 <li><a  class="index" id="pred_integer_1_index" href="#pred_integer_1"> integer/1 </a></li>
+<li><a  class="index" id="pred_number_chars_2_index" href="#pred_number_chars_2"> number_chars/2 </a></li>
+<li><a  class="index" id="pred_number_codes_2_index" href="#pred_number_codes_2"> number_codes/2 </a></li>
+<li><a  class="index" id="pred_sub_atom_5_index" href="#pred_sub_atom_5"> sub_atom/5 </a></li>
 <li><a  class="index" id="pred_subsumes_term_2_index" href="#pred_subsumes_term_2"> subsumes_term/2 </a></li>
 <li><a  class="index" id="pred_var_1_index" href="#pred_var_1"> var/1 </a></li>
 </ul></li>
@@ -1695,6 +1719,88 @@ This directive has no effect. It is allowed in ProscriptLS source but are otherw
 There are many builin-in predicates defined for ProscriptLS.
 These include standard ISO Prolog predicates and predicates unique to ProscriptLS.
 The unique predicates include several predicates for working with HTML documents and Javascript.
+<div class="indexed" id="pred_cat_arithmetic">
+<h4>arithmetic</h4>
+<ul>
+<li class="indexed" id="pred_<_2">
+<h5>(<)/2</h5>
+<br><b><</b>(+<i>Left</i>:term,+<i>Right</i>:term) is det
+<br><br>The value of the arithmetic expression Left is less than the value of the arithmetic expression Right.
+<br>
+<br><b>arg</b>: <i>Left</i>. an arithmetic expression term.
+<br><b>arg</b>: <i>Right</i>. an arithmetic expression term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: arithmetic.
+</li>
+
+<li class="indexed" id="pred_=:=_2">
+<h5>(=:=)/2</h5>
+<br><b>=:=</b>(+<i>Left</i>:term,+<i>Right</i>:term) is det
+<br><br>The value of the arithmetic expression Left is equal  to the value of the arithmetic expression Right.
+<br>
+<br><b>arg</b>: <i>Left</i>. an arithmetic expression term.
+<br><b>arg</b>: <i>Right</i>. an arithmetic expression term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: arithmetic.
+</li>
+
+<li class="indexed" id="pred_=<_2">
+<h5>(=<)/2</h5>
+<br><b>=<</b>(+<i>Left</i>:term,+<i>Right</i>:term) is det
+<br><br>The value of the arithmetic expression Left is equal to or less than the value of the arithmetic expression Right.
+<br>
+<br><b>arg</b>: <i>Left</i>. an arithmetic expression term.
+<br><b>arg</b>: <i>Right</i>. an arithmetic expression term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: arithmetic.
+</li>
+
+<li class="indexed" id="pred_=\=_2">
+<h5>(=\=)/2</h5>
+<br><b>=\=</b>(+<i>Left</i>:term,+<i>Right</i>:term) is det
+<br><br>The value of the arithmetic expression Left is not equal  to the value of the arithmetic expression Right.
+<br>
+<br><b>arg</b>: <i>Left</i>. an arithmetic expression term.
+<br><b>arg</b>: <i>Right</i>. an arithmetic expression term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: arithmetic.
+</li>
+
+<li class="indexed" id="pred_>_2">
+<h5>(>)/2</h5>
+<br><b>></b>(+<i>Left</i>:term,+<i>Right</i>:term) is det
+<br><br>The value of the arithmetic expression Left is greater than the value of the arithmetic expression Right.
+<br>
+<br><b>arg</b>: <i>Left</i>. an arithmetic expression term.
+<br><b>arg</b>: <i>Right</i>. an arithmetic expression term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: arithmetic.
+</li>
+
+<li class="indexed" id="pred_>=_2">
+<h5>(>=)/2</h5>
+<br><b>>=</b>(+<i>Left</i>:term,+<i>Right</i>:term) is det
+<br><br>The value of the arithmetic expression Left is greater than or equal to the value of the arithmetic expression Right.
+<br>
+<br><b>arg</b>: <i>Left</i>. an arithmetic expression term.
+<br><b>arg</b>: <i>Right</i>. an arithmetic expression term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: arithmetic.
+</li>
+
+<li class="indexed" id="pred_is_2">
+<h5>(is)/2</h5>
+<br><b>is</b>(?<i>Result</i>:number,+<i>Expression</i>:term) is det
+<br><br>Result is the value of evaluating the arithmetic Expression.
+<br>
+<br><b>arg</b>: <i>Result</i>. a number.
+<br><b>arg</b>: <i>Expression</i>. an arithmetic expression term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: arithmetic.
+</li>
+
+</ul>
+</div>
 <div class="indexed" id="pred_cat_dom">
 <h4>dom</h4>
 <ul>
@@ -2191,6 +2297,50 @@ The unique predicates include several predicates for working with HTML documents
 <br><b>cat</b>: terms.
 </li>
 
+<li class="indexed" id="pred_@<_2">
+<h5>(@<)/2</h5>
+<br><b>@<</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 is less than Term2. This predicate can be used as an infix operator.
+<br>
+<br><b>arg</b>: <i>Term1</i>. a Prolog term.
+<br><b>arg</b>: <i>Term2</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_@=<_2">
+<h5>(@=<)/2</h5>
+<br><b>@=<</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 is less than or equal to Term2. This predicate can be used as an infix operator.
+<br>
+<br><b>arg</b>: <i>Term1</i>. a Prolog term.
+<br><b>arg</b>: <i>Term2</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_@>_2">
+<h5>(@>)/2</h5>
+<br><b>@></b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 is greater than Term2. This predicate can be used as an infix operator.
+<br>
+<br><b>arg</b>: <i>Term1</i>. a Prolog term.
+<br><b>arg</b>: <i>Term2</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_@>=_2">
+<h5>(@>=)/2</h5>
+<br><b>@>=</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 is greater than or equal to Term2. This predicate can be used as an infix operator.
+<br>
+<br><b>arg</b>: <i>Term1</i>. a Prolog term.
+<br><b>arg</b>: <i>Term2</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
 <li class="indexed" id="pred_acyclic_term_1">
 <h5>acyclic_term/1</h5>
 <br><b>acyclic_term</b>(?<i>Term</i>:term) is det
@@ -2223,16 +2373,84 @@ The unique predicates include several predicates for working with HTML documents
 <br><b>cat</b>: terms.
 </li>
 
+<li class="indexed" id="pred_atom_chars_2">
+<h5>atom_chars/2</h5>
+<br><b>atom_chars</b>(?<i>Atom</i>:atom,?<i>Chars</i>:list(atom)) is det
+<br><br>The name of Atom is the list of character atoms in Chars.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Chars</i>. a list of atoms.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_atom_codes_2">
+<h5>atom_codes/2</h5>
+<br><b>atom_codes</b>(?<i>Atom</i>:atom,?<i>Codes</i>:list(integer)) is det
+<br><br>The name of Atom is the list of character integers in Codes.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Codes</i>. a list of integers.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_atom_concat_3">
+<h5>atom_concat/3</h5>
+<br><b>atom_concat</b>(+<i>Atom1</i>:atom,+<i>Atom2</i>:atom,?<i>Concatenation</i>:atom) is det
+<br><br>The names of Atom1 and Atom2 are concatenated to create Concatenation.
+<br>
+<br><b>arg</b>: <i>Atom1</i>. an atom.
+<br><b>arg</b>: <i>Atom2</i>. an atom.
+<br><b>arg</b>: <i>Concatenation</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_atom_length_2">
+<h5>atom_length/2</h5>
+<br><b>atom_length</b>(+<i>Atom</i>:atom,?<i>Length</i>:integer) is det
+<br><br>Length is the number of characters in the name of Atom.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Length</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_char_code_2">
+<h5>char_code/2</h5>
+<br><b>char_code</b>(?<i>Atom</i>:atom,?<i>Code</i>:integer) is det
+<br><br>The name of Atom is a single character with integer character Code.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Code</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_char_conversion_2">
+<h5>char_conversion/2</h5>
+<br><b>char_conversion</b>(+<i>InChar</i>:atom,+<i>OutChar</i>:atom) is det
+<br><br>Add conversion of InChar to OutChar to the character conversion table. (This should be
+    a directive.)
+<br>
+<br><b>arg</b>: <i>InChar</i>. a single-character atom.
+<br><b>arg</b>: <i>OutChar</i>. a single-character atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
 <li class="indexed" id="pred_compare_3">
 <h5>compare/3</h5>
-<br><b>compare</b>(?<i>Indicator</i>:integer,?<i>Term1</i>:term,?<i>Term2</i>:term) is det
-<br><br>Indicator describes Term1 comparison with Term2. Any two Prolog terms are comparable.
-    Indicator is -1 if Term1 is less than Term 2, 0 if Term1 is identical to Term2, and 1 if Term1 is greater than Term2. 
+<br><b>compare</b>(?<i>Comparison</i>:atom,?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Comparison is the term-ordering between Term1 and Term2: < if Term1 @< Term2, = if Term1 == Term2, and > if
+    Term1 @> Term2.
 <br>
-<br><b>arg</b>: <i>Indicator</i>. -1, 0, or 1.
-<br><b>arg</b>: <i>Term1</i>. any Prolog term.
-<br><b>arg</b>: <i>Term2</i>. any Prolog term.
-<br><b>compat</b>: iso.
+<br><b>arg</b>: <i>Comparison</i>. <, =, or >.
+<br><b>arg</b>: <i>Term1</i>. a Prolog term.
+<br><b>arg</b>: <i>Term2</i>. a Prolog term.
+<br><b>compat</b>: swi.
 <br><b>cat</b>: terms.
 </li>
 
@@ -2254,6 +2472,20 @@ The unique predicates include several predicates for working with HTML documents
 <br>
 <br><b>arg</b>: <i>Term1</i>. a Prolog term.
 <br><b>arg</b>: <i>Term2</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_current_char_conversion_2">
+<h5>current_char_conversion/2</h5>
+<br><b>current_char_conversion</b>(-<i>InChar</i>:atom,-<i>OutChar</i>:atom) is nondet
+<br><b>current_char_conversion</b>(+<i>InChar</i>:atom,-<i>OutChar</i>:atom) is det
+<br><b>current_char_conversion</b>(-<i>InChar</i>:atom,+<i>OutChar</i>:atom) is det
+<br><b>current_char_conversion</b>(+<i>InChar</i>:atom,+<i>OutChar</i>:atom) is det
+<br><br>Character conversion table specifies that InChar is converted to OutChar when reading streams.
+<br>
+<br><b>arg</b>: <i>InChar</i>. a single-character atom.
+<br><b>arg</b>: <i>OutChar</i>. a single-character atom.
 <br><b>compat</b>: iso.
 <br><b>cat</b>: terms.
 </li>
@@ -2298,6 +2530,48 @@ The unique predicates include several predicates for working with HTML documents
 <br>
 <br><b>arg</b>: <i>Term</i>. any Prolog term.
 <br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_number_chars_2">
+<h5>number_chars/2</h5>
+<br><b>number_chars</b>(?<i>Number</i>:number,?<i>Chars</i>:list(atom)) is det
+<br><br>The name of Number is the list of character atoms in Chars.
+<br>
+<br><b>arg</b>: <i>Number</i>. a number.
+<br><b>arg</b>: <i>Chars</i>. a list of atoms.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_number_codes_2">
+<h5>number_codes/2</h5>
+<br><b>number_codes</b>(?<i>Number</i>:number,?<i>Codes</i>:list(integer)) is det
+<br><br>The name of Number is the list of character integers in Codes.
+<br>
+<br><b>arg</b>: <i>Number</i>. a number.
+<br><b>arg</b>: <i>Codes</i>. a list of integers.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: terms.
+</li>
+
+<li class="indexed" id="pred_sub_atom_5">
+<h5>sub_atom/5</h5>
+<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,-<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
+<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,+<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
+<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,+<i>Length</i>:integer,?<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
+<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,-<i>Length</i>:integer,-<i>Remaining</i>:integer,-<i>Subatom</i>:atom) is nondet
+<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,+<i>Length</i>:integer,-<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is nondet
+<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,-<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is nondet
+<br><br>The name of Subatom is a part of the name of Source that begins at position Start and has Length characters and there are Remaining
+    characters in Source after Subatom.
+<br>
+<br><b>arg</b>: <i>Source</i>. an atom.
+<br><b>arg</b>: <i>Start</i>. an integer.
+<br><b>arg</b>: <i>Length</i>. an integer.
+<br><b>arg</b>: <i>Remaining</i>. an integer.
+<br><b>arg</b>: <i>Subatom</i>. an atom.
+<br><b>compat</b>: proscriptls.
 <br><b>cat</b>: terms.
 </li>
 

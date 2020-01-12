@@ -564,6 +564,8 @@ function escape_atom(a)
     {
         if (chars[i] === "'")
             result += "\\'";
+        else if (chars[i] === "\\")
+            result += "\\\\";
         else
             result += chars[i];       
     }
@@ -582,6 +584,7 @@ function quote_atom(a)
 
     if (a.charAt(0) >= "A" && a.charAt(0) <= "Z")
         return "'" + escape_atom(a) + "'";
+
     var chars = a.split('');
     if (is_punctuation(chars[0]))
     {
@@ -595,7 +598,7 @@ function quote_atom(a)
     {
         for (var j = 0; j < chars.length; j++)
         {
-            if (is_punctuation(chars[j]) || chars[j] === ' ')
+            if (is_punctuation(chars[j]) || chars[j] === ' ' || chars[j] === '\\')
                 return "'" + escape_atom(a) + "'";
         }
     }

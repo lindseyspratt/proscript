@@ -166,7 +166,7 @@ generate_pred_cat_sidenav([Cat-H|T], Stream) :-
 generate_pred_cat_sidenav_entry(Cat, Preds, Stream) :-
     predicate_cat_label(Cat, Label),
     write(Stream, '<li><span class="caret"></span>{{1 @ Type & \'anchor.sidenav.template\' # [Type, doc, '),
-    write(Stream, Label),
+    writeq(Stream, Label),
     write(Stream, ', \'index_doc.html\', \''),
     write(Stream, Cat),
     writeln(Stream, '\']}}'),
@@ -182,10 +182,11 @@ generate_pred_sidenav([H|T], Stream) :-
 generate_pred_sidenav_entry(Pred, Stream) :-
     predicate_label(Pred, Label),
     write(Stream, '<li>{{1 @ Type & \'anchor.sidenav.template\' # [Type, doc, '),
-    write(Stream, Label),
-    write(Stream, ', \'index_doc.html\', \''),
-    write(Stream, Pred),
-    write(Stream, '\']}}</li>\n').
+    writeq(Stream, Label),
+    write(Stream, ', \'index_doc.html\', '),
+    format(atom(X), '~w', [Pred]),
+    writeq(Stream, X),
+    write(Stream, ']}}</li>\n').
 
 predicate_cat_label(Cat, Label) :-
     format(atom(Label), 'pred_cat_~w', [Cat]).

@@ -43,10 +43,6 @@ doc(acyclic_term/1,
     [arg(term, "any Prolog term"), compat(iso), cat(terms)] ).
 doc(subsumes_term/2, subsumes_term(? < term1 * term, ? < term2 * term) is det, "Term1 subsumes Term2.",
     [arg(term1, "any Prolog term"), arg(term2, "any Prolog term"), compat(iso), cat(terms)]).
-doc(compare/3, compare(? < indicator * integer, ? < term1 * term, ? < term2 * term) is det,
-    "Indicator describes Term1 comparison with Term2. Any two Prolog terms are comparable.
-    Indicator is -1 if Term1 is less than Term 2, 0 if Term1 is identical to Term2, and 1 if Term1 is greater than Term2. ",
-    [arg(indicator, "-1, 0, or 1"), arg(term1, "any Prolog term"), arg(term2, "any Prolog term"), compat(iso), cat(terms)]).
 doc(var/1, var(? < term * term) is det, "Term is a variable.", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
 doc(atom/1, atom(? < term * term) is det, "Term is an atom.", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
 doc(integer/1, integer(? < term * term) is det, "Term is an integer.", [arg(term, "any Prolog term"), compat(iso), cat(terms)]).
@@ -76,6 +72,90 @@ doc(copy_term/2, copy_term(? < term1 * term, ? < term2 * term) is det,
     "Term2 is the same as Term1 but with distinct variables such that Term1 and Term2 subsume each other and the
     variables of Term2 have not appeared in the proof tree before evaluating this predicate.",
     [arg(term1, "a Prolog term"), arg(term2, "a Prolog term"), compat(iso), cat(terms)]).
+doc(compare/3, compare(? < comparison * atom, ? < term1 * term, ? < term2 * term) is det,
+    "Comparison is the term-ordering between Term1 and Term2: < if Term1 @< Term2, = if Term1 == Term2, and > if
+    Term1 @> Term2.",
+    [arg(comparison, "<, =, or >"), arg(term1, "a Prolog term"), arg(term2, "a Prolog term"), compat(swi), cat(terms)]).
+doc(@< /2, '@<'(? < term1 * term, ? < term2 * term) is det,
+    "Term1 is less than Term2. This predicate can be used as an infix operator.",
+    [arg(term1, "a Prolog term"), arg(term2, "a Prolog term"), compat(iso), cat(terms)]).
+doc(@=< /2, '@=<'(? < term1 * term, ? < term2 * term) is det,
+    "Term1 is less than or equal to Term2. This predicate can be used as an infix operator.",
+    [arg(term1, "a Prolog term"), arg(term2, "a Prolog term"), compat(iso), cat(terms)]).
+doc(@>= /2, @>=(? < term1 * term, ? < term2 * term) is det,
+    "Term1 is greater than or equal to Term2. This predicate can be used as an infix operator.",
+    [arg(term1, "a Prolog term"), arg(term2, "a Prolog term"), compat(iso), cat(terms)]).
+doc(@> /2, @>(? < term1 * term, ? < term2 * term) is det,
+    "Term1 is greater than Term2. This predicate can be used as an infix operator.",
+    [arg(term1, "a Prolog term"), arg(term2, "a Prolog term"), compat(iso), cat(terms)]).
+doc(atom_length/2, atom_length(+ < atom * atom, ? < length * integer) is det,
+    "Length is the number of characters in the name of Atom.",
+    [arg(atom, "an atom"), arg(length, "an integer"), compat(iso), cat(terms)]).
+doc(atom_concat/3, atom_concat(+ < atom1 * atom, + < atom2 * atom, ? < concatenation * atom) is det,
+    "The names of Atom1 and Atom2 are concatenated to create Concatenation.",
+    [arg(atom1, "an atom"), arg(atom2, "an atom"), arg(concatenation, "an atom"), compat(iso), cat(terms)]).
+doc(sub_atom/5,
+    [sub_atom(+ < source * atom, + < start * integer, - < length * integer, + < remaining * integer, ? < subatom * atom) is det,
+     sub_atom(+ < source * atom, - < start * integer, + < length * integer, + < remaining * integer, ? < subatom * atom) is det,
+     sub_atom(+ < source * atom, + < start * integer, + < length * integer, ? < remaining * integer, ? < subatom * atom) is det,
+     sub_atom(+ < source * atom, + < start * integer, - < length * integer, - < remaining * integer, - < subatom * atom) is nondet,
+     sub_atom(+ < source * atom, - < start * integer, + < length * integer, - < remaining * integer, ? < subatom * atom) is nondet,
+     sub_atom(+ < source * atom, - < start * integer, - < length * integer, + < remaining * integer, ? < subatom * atom) is nondet
+    ],
+    "The name of Subatom is a part of the name of Source that begins at position Start and has Length characters and there are Remaining
+    characters in Source after Subatom.",
+    [arg(source, "an atom"), arg(start, "an integer"), arg(length, "an integer"), arg(remaining, "an integer"), arg(subatom, "an atom"),
+    compat(proscriptls), cat(terms)]).
+doc(char_code/2, char_code(? < atom * atom, ? < code * integer) is det,
+    "The name of Atom is a single character with integer character Code.",
+    [arg(atom, "an atom"), arg(code, "an integer"), compat(iso), cat(terms)]).
+doc(atom_chars/2, atom_chars(? < atom * atom, ? < chars * list(atom)) is det,
+    "The name of Atom is the list of character atoms in Chars.",
+    [arg(atom, "an atom"), arg(chars, "a list of atoms"), compat(iso), cat(terms)]).
+doc(atom_codes/2, atom_codes(? < atom * atom, ? < codes * list(integer)) is det,
+    "The name of Atom is the list of character integers in Codes.",
+    [arg(atom, "an atom"), arg(codes, "a list of integers"), compat(iso), cat(terms)]).
+doc(number_chars/2, number_chars(? < number * number, ? < chars * list(atom)) is det,
+    "The name of Number is the list of character atoms in Chars.",
+    [arg(number, "a number"), arg(chars, "a list of atoms"), compat(iso), cat(terms)]).
+doc(number_codes/2, number_codes(? < number * number, ? < codes * list(integer)) is det,
+    "The name of Number is the list of character integers in Codes.",
+    [arg(number, "a number"), arg(codes, "a list of integers"), compat(iso), cat(terms)]).
+doc(char_conversion/2, char_conversion(+ < inChar * atom, + < outChar *atom) is det,
+    "Add conversion of InChar to OutChar to the character conversion table. (This should be
+    a directive.)",
+    [arg(inChar, "a single-character atom"), arg(outChar, "a single-character atom"), compat(iso), cat(terms)]).
+doc(current_char_conversion/2, 
+    [current_char_conversion(- < inChar * atom, - < outChar *atom) is nondet,
+     current_char_conversion(+ < inChar * atom, - < outChar *atom) is det,
+     current_char_conversion(- < inChar * atom, + < outChar *atom) is det,
+     current_char_conversion(+ < inChar * atom, + < outChar *atom) is det
+    ],
+    "Character conversion table specifies that InChar is converted to OutChar when reading streams.",
+    [arg(inChar, "a single-character atom"), arg(outChar, "a single-character atom"), compat(iso), cat(terms)]).
+
+% Arithmetic
+doc('=:='/2, =:=( + < left * term, + < right * term) is det,
+    "The value of the arithmetic expression Left is equal  to the value of the arithmetic expression Right.",
+    [arg(left, "an arithmetic expression term"), arg(right, "an arithmetic expression term"), compat(iso), cat(arithmetic)]).
+doc('=\\=' /2, =\=( + < left * term, + < right * term) is det,
+    "The value of the arithmetic expression Left is not equal  to the value of the arithmetic expression Right.",
+    [arg(left, "an arithmetic expression term"), arg(right, "an arithmetic expression term"), compat(iso), cat(arithmetic)]).
+doc('>'/2, >( + < left * term, + < right * term) is det,
+    "The value of the arithmetic expression Left is greater than the value of the arithmetic expression Right.",
+    [arg(left, "an arithmetic expression term"), arg(right, "an arithmetic expression term"), compat(iso), cat(arithmetic)]).
+doc('>='/2, >=( + < left * term, + < right * term) is det,
+    "The value of the arithmetic expression Left is greater than or equal to the value of the arithmetic expression Right.",
+    [arg(left, "an arithmetic expression term"), arg(right, "an arithmetic expression term"), compat(iso), cat(arithmetic)]).
+doc('<'/2, <( + < left * term, + < right * term) is det,
+    "The value of the arithmetic expression Left is less than the value of the arithmetic expression Right.",
+    [arg(left, "an arithmetic expression term"), arg(right, "an arithmetic expression term"), compat(iso), cat(arithmetic)]).
+doc('=<'/2, =<( + < left * term, + < right * term) is det,
+    "The value of the arithmetic expression Left is equal to or less than the value of the arithmetic expression Right.",
+    [arg(left, "an arithmetic expression term"), arg(right, "an arithmetic expression term"), compat(iso), cat(arithmetic)]).
+doc(is/2, is( ? < result * number, + < expression * term) is det,
+    "Result is the value of evaluating the arithmetic Expression.",
+    [arg(result, "a number"), arg(expression, "an arithmetic expression term"), compat(iso), cat(arithmetic)]).
 
 % Runtime
 doc(halt/0, halt is det, "Halt the WAM engine. The engine may be restarted - typically after evaluating the backtrack Javascript function.",
