@@ -1611,6 +1611,8 @@ function predicate_gensym(root, sym)
 {
     if (gensyms[root] === undefined)
         gensyms[root] = 0;
+    else gensyms[root]++;
+
     return unify(lookup_atom(atable[VAL(root)] + gensyms[root]), sym);
 }
 

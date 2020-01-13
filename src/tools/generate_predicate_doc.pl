@@ -168,11 +168,32 @@ generate_pred_cat_sidenav_entry(Cat, Preds, Stream) :-
     write(Stream, '<li><span class="caret"></span>{{1 @ Type & \'anchor.sidenav.template\' # [Type, doc, '),
     writeq(Stream, Label),
     write(Stream, ', \'index_doc.html\', \''),
-    write(Stream, Cat),
+    display_category(Cat, DisplayCat),
+    write(Stream, DisplayCat),
     writeln(Stream, '\']}}'),
     writeln(Stream, '<ul class=\'nested\'>'),
     generate_pred_sidenav(Preds, Stream),
     write(Stream, '</ul></li>\n').
+
+display_category(Category, DisplayCategory) :-
+    atom_codes(Category, CategoryCodes),
+    substitute_all(CategoryCodes, "_", " ", DisplayCategoryCodes),
+    atom_codes(DisplayCategory, DisplayCategoryCodes).
+
+substitute_all([], _, _, []).
+substitute_all([H|T], [H|HT], Substitute, New) :-
+    !,
+    (append(HT, X, T)
+      -> append(Substitute, Tail, New)
+    ;
+    X = T,
+    Tail = New
+    ),
+    substitute_all(X, [H|HT], Substitute, Tail).
+substitute_all([H|T], [HP|TP], Substitute, [H|TN]) :-
+    H \= HP,
+    !,
+    substitute_all(T, [HP|TP], Substitute, TN).
 
 generate_pred_sidenav([],_).
 generate_pred_sidenav([H|T], Stream) :-

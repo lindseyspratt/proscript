@@ -8,6 +8,49 @@
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_>=_2', 'index_doc.html', '(>=)/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_is_2, 'index_doc.html', '(is)/2']}}</li>
 </ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_atomic_term_processing, 'index_doc.html', 'atomic term processing']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_chars_2, 'index_doc.html', 'atom_chars/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_codes_2, 'index_doc.html', 'atom_codes/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_concat_3, 'index_doc.html', 'atom_concat/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_length_2, 'index_doc.html', 'atom_length/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_char_code_2, 'index_doc.html', 'char_code/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_gensym_2, 'index_doc.html', 'gensym/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_number_chars_2, 'index_doc.html', 'number_chars/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_number_codes_2, 'index_doc.html', 'number_codes/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_sub_atom_5, 'index_doc.html', 'sub_atom/5']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_byte_io, 'index_doc.html', 'byte io']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_get_byte_2, 'index_doc.html', 'get_byte/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_peek_byte_2, 'index_doc.html', 'peek_byte/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_put_byte_2, 'index_doc.html', 'put_byte/2']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_character_io, 'index_doc.html', 'character io']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_get_char_1, 'index_doc.html', 'get_char/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_get_char_2, 'index_doc.html', 'get_char/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_get_code_1, 'index_doc.html', 'get_code/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_get_code_2, 'index_doc.html', 'get_code/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_peek_char_1, 'index_doc.html', 'peek_char/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_peek_char_2, 'index_doc.html', 'peek_char/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_peek_code_1, 'index_doc.html', 'peek_code/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_peek_code_2, 'index_doc.html', 'peek_code/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_put_char_1, 'index_doc.html', 'put_char/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_put_char_2, 'index_doc.html', 'put_char/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_put_code_1, 'index_doc.html', 'put_code/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_put_code_2, 'index_doc.html', 'put_code/2']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_clause_creation_and_destruction, 'index_doc.html', 'clause creation and destruction']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_abolish_1, 'index_doc.html', 'abolish/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_retract_1, 'index_doc.html', 'retract/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_retract_clause_2, 'index_doc.html', 'retract_clause/2']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_clause_retrieval_and_information, 'index_doc.html', 'clause retrieval and information']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_clause_2, 'index_doc.html', 'clause/2']}}</li>
+</ul></li>
 <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_dom, 'index_doc.html', 'dom']}}
 <ul class='nested'>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_alert_1, 'index_doc.html', 'alert/1']}}</li>
@@ -36,7 +79,20 @@
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_dom_object_property_3, 'index_doc.html', 'set_dom_object_property/3']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_toggle_dom_element_class_3, 'index_doc.html', 'toggle_dom_element_class/3']}}</li>
 </ul></li>
-<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_memory_file, 'index_doc.html', 'memory_file']}}
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_flag_updates, 'index_doc.html', 'flag updates']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_prolog_flag_2, 'index_doc.html', 'current_prolog_flag/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_prolog_flag_2, 'index_doc.html', 'set_prolog_flag/2']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_logic_and_control, 'index_doc.html', 'logic and control']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_fail_0, 'index_doc.html', 'fail/0']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_halt_0, 'index_doc.html', 'halt/0']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_repeat_0, 'index_doc.html', 'repeat/0']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_true_0, 'index_doc.html', 'true/0']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_yield_0, 'index_doc.html', 'yield/0']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_memory_file, 'index_doc.html', 'memory file']}}
 <ul class='nested'>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_copy_local_storage_to_memory_file_2, 'index_doc.html', 'copy_local_storage_to_memory_file/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_copy_memory_file_to_local_storage_2, 'index_doc.html', 'copy_memory_file_to_local_storage/2']}}</li>
@@ -46,45 +102,66 @@
 </ul></li>
 <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_runtime, 'index_doc.html', 'runtime']}}
 <ul class='nested'>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_prolog_flag_2, 'index_doc.html', 'current_prolog_flag/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_halt_0, 'index_doc.html', 'halt/0']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_repeat_0, 'index_doc.html', 'repeat/0']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_prolog_flag_2, 'index_doc.html', 'set_prolog_flag/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_statistics_0, 'index_doc.html', 'statistics/0']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_statistics_max_heap_1, 'index_doc.html', 'statistics_max_heap/1']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_statistics_max_stack_1, 'index_doc.html', 'statistics_max_stack/1']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_wam_duration_1, 'index_doc.html', 'wam_duration/1']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_yield_0, 'index_doc.html', 'yield/0']}}</li>
 </ul></li>
-<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_terms, 'index_doc.html', 'terms']}}
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_stream_selection_and_control, 'index_doc.html', 'stream selection and control']}}
 <ul class='nested'>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_=_2', 'index_doc.html', '(=)/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_=.._2', 'index_doc.html', '(=..)/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_at_end_of_stream_1, 'index_doc.html', 'at_end_of_stream/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_close_1, 'index_doc.html', 'close/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_input_1, 'index_doc.html', 'current_input/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_output_1, 'index_doc.html', 'current_output/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_flush_output_1, 'index_doc.html', 'flush_output/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_open_3, 'index_doc.html', 'open/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_open_4, 'index_doc.html', 'open/4']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_input_1, 'index_doc.html', 'set_input/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_output_1, 'index_doc.html', 'set_output/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_set_stream_position_2, 'index_doc.html', 'set_stream_position/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_stream_property_2, 'index_doc.html', 'stream_property/2']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_term_comparison, 'index_doc.html', 'term comparison']}}
+<ul class='nested'>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_==_2', 'index_doc.html', '(==)/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_@<_2', 'index_doc.html', '(@<)/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_@=<_2', 'index_doc.html', '(@=<)/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_@>_2', 'index_doc.html', '(@>)/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_@>=_2', 'index_doc.html', '(@>=)/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_acyclic_term_1, 'index_doc.html', 'acyclic_term/1']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_arg_3, 'index_doc.html', 'arg/3']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_1, 'index_doc.html', 'atom/1']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_chars_2, 'index_doc.html', 'atom_chars/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_codes_2, 'index_doc.html', 'atom_codes/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_concat_3, 'index_doc.html', 'atom_concat/3']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_length_2, 'index_doc.html', 'atom_length/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_char_code_2, 'index_doc.html', 'char_code/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_char_conversion_2, 'index_doc.html', 'char_conversion/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_compare_3, 'index_doc.html', 'compare/3']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_compound_1, 'index_doc.html', 'compound/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_subsumes_term_2, 'index_doc.html', 'subsumes_term/2']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_term_creation_and_decomposition, 'index_doc.html', 'term creation and decomposition']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_=.._2', 'index_doc.html', '(=..)/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_arg_3, 'index_doc.html', 'arg/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_to_term_3, 'index_doc.html', 'atom_to_term/3']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_copy_term_2, 'index_doc.html', 'copy_term/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_char_conversion_2, 'index_doc.html', 'current_char_conversion/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_float_1, 'index_doc.html', 'float/1']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_functor_3, 'index_doc.html', 'functor/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_term_variables_2, 'index_doc.html', 'term_variables/2']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_term_io, 'index_doc.html', 'term io']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_char_conversion_2, 'index_doc.html', 'char_conversion/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_char_conversion_2, 'index_doc.html', 'current_char_conversion/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_current_op_3, 'index_doc.html', 'current_op/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_op_3, 'index_doc.html', 'op/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_read_term_2, 'index_doc.html', 'read_term/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_read_term_3, 'index_doc.html', 'read_term/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_writeln_1, 'index_doc.html', 'writeln/1']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_term_unification, 'index_doc.html', 'term unification']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_=_2', 'index_doc.html', '(=)/2']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, 'pred_\\=_2', 'index_doc.html', '(\\=)/2']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_type_testing, 'index_doc.html', 'type testing']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_acyclic_term_1, 'index_doc.html', 'acyclic_term/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_atom_1, 'index_doc.html', 'atom/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_compound_1, 'index_doc.html', 'compound/1']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_float_1, 'index_doc.html', 'float/1']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_ground_1, 'index_doc.html', 'ground/1']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_integer_1, 'index_doc.html', 'integer/1']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_number_chars_2, 'index_doc.html', 'number_chars/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_number_codes_2, 'index_doc.html', 'number_codes/2']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_sub_atom_5, 'index_doc.html', 'sub_atom/5']}}</li>
-<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_subsumes_term_2, 'index_doc.html', 'subsumes_term/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_var_1, 'index_doc.html', 'var/1']}}</li>
 </ul></li>

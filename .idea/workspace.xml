@@ -8,13 +8,24 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/bootstrap_js.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/bootstrap_js.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/tests.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/tests.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/calculator_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/calculator_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/console_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/consult_console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/consult_console_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index_about.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_about.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index_doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_doc.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index_download.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_download.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/likes_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/likes_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/simple_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/simple_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/tiles_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tiles_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/items.predicates.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/items.predicates.doc.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/predicate_doc.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/predicate_doc.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/predicates.sidenav.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/predicates.sidenav.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/foreign.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/foreign.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -31,85 +42,82 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="259">
-              <caret line="2565" column="37" selection-start-line="2565" selection-start-column="37" selection-end-line="2565" selection-end-column="37" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="440">
+            <state relative-caret-position="2005">
               <caret line="533" selection-start-line="533" selection-end-line="533" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/tests.html">
+        <entry file="file://$PROJECT_DIR$/test/tests.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="26" column="29" selection-start-line="26" selection-start-column="29" selection-end-line="26" selection-end-column="29" />
+            <state relative-caret-position="276">
+              <caret line="442" selection-start-line="442" selection-end-line="442" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/docs/predicate_doc.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="401">
+              <caret line="155" column="47" selection-start-line="155" selection-start-column="47" selection-end-line="155" selection-end-column="47" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/tools/generate_predicate_doc.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="748">
+              <caret line="180" column="54" selection-start-line="180" selection-start-column="54" selection-end-line="180" selection-end-column="54" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/test/tests.pl">
+        <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="426">
-              <caret line="452" lean-forward="true" selection-start-line="452" selection-end-line="452" />
+            <state relative-caret-position="-416">
+              <caret line="507" column="28" selection-start-line="507" selection-start-column="26" selection-end-line="507" selection-end-column="28" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bench/qsort.pl">
+        <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="10" selection-start-line="7" selection-start-column="10" selection-end-line="7" selection-end-column="155" />
+            <state relative-caret-position="159">
+              <caret line="97" column="43" selection-start-line="97" selection-start-column="26" selection-end-line="97" selection-end-column="33" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bench/sort_terms.pl">
+        <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" selection-start-line="8" selection-end-line="8" />
+            <state relative-caret-position="1589">
+              <caret line="3254" column="43" selection-start-line="3254" selection-start-column="43" selection-end-line="3254" selection-end-column="43" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bench/crypt.pl">
+        <entry file="file://$PROJECT_DIR$/src/engine/read.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-385" />
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bench/queens.pl">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bench/Makefile">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="7" selection-start-line="7" selection-start-column="7" selection-end-line="7" selection-end-column="7" />
+            <state relative-caret-position="240">
+              <caret line="593" column="50" selection-start-line="593" selection-start-column="50" selection-end-line="593" selection-end-column="50" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bench/meta_qsort.pl">
+        <entry file="file://$PROJECT_DIR$/src/engine/stream.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="365">
-              <caret line="147" selection-start-line="147" selection-end-line="147" />
+            <state relative-caret-position="150">
+              <caret line="208" column="9" selection-start-line="208" selection-start-column="9" selection-end-line="208" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -118,29 +126,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>consult(</find>
-      <find>current_pre</find>
-      <find>current_predicate(</find>
-      <find>appendChild</find>
-      <find>append(</find>
-      <find>dom_app</find>
-      <find>compile_clause_initialization_directive</find>
-      <find>sort(</find>
-      <find>data_predicate_dynamics1a</find>
-      <find>proscript_in</find>
-      <find>proscript</find>
-      <find>Proscript</find>
-      <find>proscrip</find>
-      <find>index_doc</find>
-      <find>Get the ProscriptLS interpreter library</find>
-      <find>proscript_</find>
-      <find>proscriptls_doc_node</find>
-      <find>@&lt;</find>
-      <find>predicate_term_lt</find>
-      <find>array</find>
-      <find>options</find>
-      <find>random</find>
-      <find>keysort</find>
       <find>function method_property_types_to_list</find>
       <find>function predicate_dom_typ</find>
       <find>goal_function</find>
@@ -148,12 +133,37 @@
       <find>function deref</find>
       <find>TAG_LST</find>
       <find>compare</find>
+      <find>=..</find>
+      <find>sub_atom</find>
+      <find>predicate_c</find>
+      <find>char_code</find>
+      <find>out_char</find>
+      <find>escape</find>
+      <find>=\</find>
+      <find>get_byte</find>
+      <find>'term creation and decomposition'</find>
+      <find>stream_property_1</find>
+      <find>stream_property</find>
+      <find>term_io</find>
+      <find>=</find>
+      <find>term_variables</find>
+      <find>function predicate_gensy</find>
+      <find>gensym(</find>
+      <find>atom_to_term</find>
+      <find>retract_clause</find>
+      <find>read_term</find>
+      <find>close(</find>
+      <find>fail</find>
+      <find>doc(op</find>
+      <find>current_op</find>
     </findStrings>
     <replaceStrings>
       <replace>:-</replace>
       <replace>Heap</replace>
       <replace>proscriptls_in</replace>
       <replace>ProscriptLS</replace>
+      <replace>outChar</replace>
+      <replace>term_creation_and_decomposition</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/src</dir>
@@ -172,9 +182,6 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/src/docs/objects.doc.template" />
-        <option value="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" />
-        <option value="$PROJECT_DIR$/src/docs/predicate_doc.pl" />
-        <option value="$PROJECT_DIR$/docs/index_doc.html" />
         <option value="$PROJECT_DIR$/src/docs/syntax.doc.template" />
         <option value="$PROJECT_DIR$/terminal/jquery_terminal.js" />
         <option value="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" />
@@ -197,16 +204,22 @@
         <option value="$PROJECT_DIR$/src/system/system_util.pl" />
         <option value="$PROJECT_DIR$/src/engine/web_interfaces.js" />
         <option value="$PROJECT_DIR$/test/tests.html" />
-        <option value="$PROJECT_DIR$/src/engine/foreign.js" />
         <option value="$PROJECT_DIR$/bench/sort_terms.pl" />
         <option value="$PROJECT_DIR$/bench/Makefile" />
         <option value="$PROJECT_DIR$/src/system/bootstrap_js.pl" />
         <option value="$PROJECT_DIR$/test/tests.pl" />
+        <option value="$PROJECT_DIR$/src/docs/predicates.sidenav.template" />
+        <option value="$PROJECT_DIR$/docs/index_doc.html" />
+        <option value="$PROJECT_DIR$/src/engine/read.js" />
+        <option value="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" />
+        <option value="$PROJECT_DIR$/src/engine/foreign.js" />
+        <option value="$PROJECT_DIR$/src/docs/predicate_doc.pl" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="y" value="23" />
+    <option name="x" value="-4994" />
+    <option name="y" value="-477" />
     <option name="width" value="1440" />
     <option name="height" value="837" />
   </component>
@@ -221,6 +234,11 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -388,11 +406,25 @@
       <option name="project" value="LOCAL" />
       <updated>1578713008088</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Fixed sort check to remove duplicates.">
+      <created>1578775271641</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1578775271641</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Added some builtin doc. Fixed writeq escape of \.&#10;&#10;Added doc for arithmetic comparisons and 'is'/2, term comparisons, atom chars/codes, number codes, char conversion.&#10;Fixed quote_atom function in read.js to escape \.&#10;Fixed generate_predicate_doc.pl generate_pred_sidenav_entry/2 and generate_pred_cat_sidenav_entry/3 to use writeq for Label and Pred.">
+      <created>1578869596221</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1578869596221</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="59481000" />
+    <option name="totallyTimeSpent" value="82265000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -404,14 +436,13 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="837" extended-state="6" />
-    <editor active="true" />
+    <frame x="-5568" y="-846" width="2560" height="1417" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.65445024" visible="true" weight="0.14869626" />
-      <window_info id="Structure" order="1" sideWeight="0.34554973" side_tool="true" visible="true" weight="0.14869626" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6549491" visible="true" weight="0.13745569" />
+      <window_info id="Structure" order="1" sideWeight="0.34505087" side_tool="true" visible="true" weight="0.13745569" />
       <window_info id="Favorites" order="2" sideWeight="0.33809525" side_tool="true" weight="0.20413026" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3287037" />
+      <window_info anchor="bottom" id="Find" order="1" visible="true" weight="0.18415095" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32885906" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.061744966" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -421,7 +452,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.35167786" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.3261745" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5003524" side_tool="true" visible="true" weight="0.23087248" />
-      <window_info active="true" anchor="bottom" id="Messages" order="11" sideWeight="0.49964765" visible="true" weight="0.23087248" />
+      <window_info anchor="bottom" id="Messages" order="11" sideWeight="0.49964765" weight="0.23087248" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -489,30 +520,11 @@
     <MESSAGE value="Added WindowOrWorkerGlobalScope interface and random builtins.&#10;&#10;Optimized sort/2 to check if the 'input' list is already in sorted order.&#10;Added random/1 and random_between/3." />
     <MESSAGE value="Fixed compare_terms to deref args and handle lists correctly.&#10;&#10;Extended keysort/2 with presorted check.&#10;Added term compare tests." />
     <MESSAGE value="Added sort_terms benchmark." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added sort_terms benchmark." />
+    <MESSAGE value="Fixed sort check to remove duplicates." />
+    <MESSAGE value="Added some builtin doc. Fixed writeq escape of \.&#10;&#10;Added doc for arithmetic comparisons and 'is'/2, term comparisons, atom chars/codes, number codes, char conversion.&#10;Fixed quote_atom function in read.js to escape \.&#10;Fixed generate_predicate_doc.pl generate_pred_sidenav_entry/2 and generate_pred_cat_sidenav_entry/3 to use writeq for Label and Pred." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added some builtin doc. Fixed writeq escape of \.&#10;&#10;Added doc for arithmetic comparisons and 'is'/2, term comparisons, atom chars/codes, number codes, char conversion.&#10;Fixed quote_atom function in read.js to escape \.&#10;Fixed generate_predicate_doc.pl generate_pred_sidenav_entry/2 and generate_pred_cat_sidenav_entry/3 to use writeq for Label and Pred." />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/engine/gc.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="59">
-          <caret line="562" column="16" selection-start-line="562" selection-start-column="16" selection-end-line="562" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9600">
-          <caret line="786" column="3" selection-start-line="786" selection-start-column="3" selection-end-line="786" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/library/listut.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5595">
-          <caret line="377" selection-start-line="377" selection-end-line="377" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4905">
@@ -527,24 +539,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/tools/generate_predicate_doc.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="149">
-          <caret line="81" column="18" lean-forward="true" selection-start-line="81" selection-start-column="18" selection-end-line="81" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/memory_files.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="123">
           <caret line="285" column="25" selection-start-line="285" selection-start-column="9" selection-end-line="285" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/predicate_doc.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="134" column="5" lean-forward="true" selection-start-line="134" selection-start-column="5" selection-end-line="134" selection-end-column="5" />
         </state>
       </provider>
     </entry>
@@ -576,13 +574,6 @@
     <entry file="file://$PROJECT_DIR$/Makefile">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-364" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/read.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="626" column="35" selection-start-line="626" selection-start-column="35" selection-end-line="626" selection-end-column="35" />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
@@ -654,13 +645,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="273" column="7" selection-start-line="273" selection-start-column="7" selection-end-line="273" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/docs/proscriptls_doc_node.js" />
     <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
       <provider selected="true" editor-type-id="text-editor">
@@ -687,13 +671,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="278">
           <caret line="207" column="57" selection-start-line="207" selection-start-column="57" selection-end-line="207" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="151">
-          <caret line="461" column="51" selection-start-line="461" selection-start-column="34" selection-end-line="461" selection-end-column="51" />
         </state>
       </provider>
     </entry>
@@ -756,13 +733,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="2565" column="37" selection-start-line="2565" selection-start-column="37" selection-end-line="2565" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bench/meta_qsort.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="365">
@@ -799,17 +769,80 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/test/tests.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="276">
+          <caret line="442" selection-start-line="442" selection-end-line="442" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/predicates.sidenav.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="455">
+          <caret line="72" lean-forward="true" selection-start-line="72" selection-end-line="72" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="159">
+          <caret line="97" column="43" selection-start-line="97" selection-start-column="26" selection-end-line="97" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tools/generate_predicate_doc.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="748">
+          <caret line="180" column="54" selection-start-line="180" selection-start-column="54" selection-end-line="180" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/read.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="593" column="50" selection-start-line="593" selection-start-column="50" selection-end-line="593" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/stream.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="208" column="9" selection-start-line="208" selection-start-column="9" selection-end-line="208" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
+        <state relative-caret-position="2005">
           <caret line="533" selection-start-line="533" selection-end-line="533" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/tests.pl">
+    <entry file="file://$PROJECT_DIR$/bench/proscriptls_state.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="426">
-          <caret line="452" lean-forward="true" selection-start-line="452" selection-end-line="452" />
+        <state relative-caret-position="9753">
+          <caret line="11" column="1713" selection-start-line="11" selection-start-column="1713" selection-end-line="11" selection-end-column="1713" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1589">
+          <caret line="3254" column="43" selection-start-line="3254" selection-start-column="43" selection-end-line="3254" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/predicate_doc.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="401">
+          <caret line="155" column="47" selection-start-line="155" selection-start-column="47" selection-end-line="155" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-416">
+          <caret line="507" column="28" selection-start-line="507" selection-start-column="26" selection-end-line="507" selection-end-column="28" />
         </state>
       </provider>
     </entry>

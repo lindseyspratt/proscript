@@ -80,6 +80,343 @@
 
 </ul>
 </div>
+<div class="indexed" id="pred_cat_atomic_term_processing">
+<h4>atomic_term_processing</h4>
+<ul>
+<li class="indexed" id="pred_atom_chars_2">
+<h5>atom_chars/2</h5>
+<br><b>atom_chars</b>(?<i>Atom</i>:atom,?<i>Chars</i>:list(atom)) is det
+<br><br>The name of Atom is the list of character atoms in Chars.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Chars</i>. a list of atoms.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+<li class="indexed" id="pred_atom_codes_2">
+<h5>atom_codes/2</h5>
+<br><b>atom_codes</b>(?<i>Atom</i>:atom,?<i>Codes</i>:list(integer)) is det
+<br><br>The name of Atom is the list of character integers in Codes.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Codes</i>. a list of integers.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+<li class="indexed" id="pred_atom_concat_3">
+<h5>atom_concat/3</h5>
+<br><b>atom_concat</b>(+<i>Atom1</i>:atom,+<i>Atom2</i>:atom,?<i>Concatenation</i>:atom) is det
+<br><br>The names of Atom1 and Atom2 are concatenated to create Concatenation.
+<br>
+<br><b>arg</b>: <i>Atom1</i>. an atom.
+<br><b>arg</b>: <i>Atom2</i>. an atom.
+<br><b>arg</b>: <i>Concatenation</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+<li class="indexed" id="pred_atom_length_2">
+<h5>atom_length/2</h5>
+<br><b>atom_length</b>(+<i>Atom</i>:atom,?<i>Length</i>:integer) is det
+<br><br>Length is the number of characters in the name of Atom.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Length</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+<li class="indexed" id="pred_char_code_2">
+<h5>char_code/2</h5>
+<br><b>char_code</b>(?<i>Atom</i>:atom,?<i>Code</i>:integer) is det
+<br><br>The name of Atom is a single character with integer character Code.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Code</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+<li class="indexed" id="pred_gensym_2">
+<h5>gensym/2</h5>
+<br><b>gensym</b>(+<i>Root</i>:atom,?<i>NewAtom</i>:atom)
+<br><br>NewAtom is the concatenation of Root and increment of per-Root counter, starting at 0. Each use of gensym/2 with the same Root increments this counter.
+<br>
+<br><b>arg</b>: <i>Root</i>. an atom.
+<br><b>arg</b>: <i>NewAtom</i>. an atom.
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+<li class="indexed" id="pred_number_chars_2">
+<h5>number_chars/2</h5>
+<br><b>number_chars</b>(?<i>Number</i>:number,?<i>Chars</i>:list(atom)) is det
+<br><br>The name of Number is the list of character atoms in Chars.
+<br>
+<br><b>arg</b>: <i>Number</i>. a number.
+<br><b>arg</b>: <i>Chars</i>. a list of atoms.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+<li class="indexed" id="pred_number_codes_2">
+<h5>number_codes/2</h5>
+<br><b>number_codes</b>(?<i>Number</i>:number,?<i>Codes</i>:list(integer)) is det
+<br><br>The name of Number is the list of character integers in Codes.
+<br>
+<br><b>arg</b>: <i>Number</i>. a number.
+<br><b>arg</b>: <i>Codes</i>. a list of integers.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+<li class="indexed" id="pred_sub_atom_5">
+<h5>sub_atom/5</h5>
+<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,-<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
+<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,+<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
+<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,+<i>Length</i>:integer,?<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
+<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,-<i>Length</i>:integer,-<i>Remaining</i>:integer,-<i>Subatom</i>:atom) is nondet
+<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,+<i>Length</i>:integer,-<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is nondet
+<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,-<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is nondet
+<br><br>The name of Subatom is a part of the name of Source that begins at position Start and has Length characters and there are Remaining
+    characters in Source after Subatom.
+<br>
+<br><b>arg</b>: <i>Source</i>. an atom.
+<br><b>arg</b>: <i>Start</i>. an integer.
+<br><b>arg</b>: <i>Length</i>. an integer.
+<br><b>arg</b>: <i>Remaining</i>. an integer.
+<br><b>arg</b>: <i>Subatom</i>. an atom.
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: atomic_term_processing.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_byte_io">
+<h4>byte_io</h4>
+<ul>
+<li class="indexed" id="pred_get_byte_2">
+<h5>get_byte/2</h5>
+<br><b>get_byte</b>(+<i>Stream</i>:term,?<i>Byte</i>:integer)
+<br><br>Get next byte from Stream as Byte.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Byte</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: byte_io.
+</li>
+
+<li class="indexed" id="pred_peek_byte_2">
+<h5>peek_byte/2</h5>
+<br><b>peek_byte</b>(+<i>Stream</i>:term,?<i>Byte</i>:atom)
+<br><br>Peek at next byte in Stream as Byte. Do not advance stream position.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Byte</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: byte_io.
+</li>
+
+<li class="indexed" id="pred_put_byte_2">
+<h5>put_byte/2</h5>
+<br><b>put_byte</b>(+<i>Stream</i>:term,?<i>Byte</i>:integer)
+<br><br>Put Byte in Stream.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Byte</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: byte_io.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_character_io">
+<h4>character_io</h4>
+<ul>
+<li class="indexed" id="pred_get_char_1">
+<h5>get_char/1</h5>
+<br><b>get_char</b>(?<i>Char</i>:atom)
+<br><br>Get next character from current input stream as Char.
+<br>
+<br><b>arg</b>: <i>Char</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_get_char_2">
+<h5>get_char/2</h5>
+<br><b>get_char</b>(+<i>Stream</i>:term,?<i>Char</i>:atom)
+<br><br>Get next character from Stream as Char.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Char</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_get_code_1">
+<h5>get_code/1</h5>
+<br><b>get_code</b>(?<i>Code</i>:integer)
+<br><br>Get next character code from current input stream as Code.
+<br>
+<br><b>arg</b>: <i>Code</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_get_code_2">
+<h5>get_code/2</h5>
+<br><b>get_code</b>(+<i>Stream</i>:term,?<i>Code</i>:integer)
+<br><br>Get next character code from Stream as Code.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Code</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_peek_char_1">
+<h5>peek_char/1</h5>
+<br><b>peek_char</b>(?<i>Char</i>:atom)
+<br><br>Peek at next character in current inpu stream as Char. Do not advance stream position.
+<br>
+<br><b>arg</b>: <i>Char</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_peek_char_2">
+<h5>peek_char/2</h5>
+<br><b>peek_char</b>(+<i>Stream</i>:term,?<i>Char</i>:atom)
+<br><br>Peek at next character in Stream as Char. Do not advance stream position.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Char</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_peek_code_1">
+<h5>peek_code/1</h5>
+<br><b>peek_code</b>(?<i>Code</i>:atom)
+<br><br>Peek at next character code in current input stream as Code. Do not advance stream position.
+<br>
+<br><b>arg</b>: <i>Char</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_peek_code_2">
+<h5>peek_code/2</h5>
+<br><b>peek_code</b>(+<i>Stream</i>:term,?<i>Code</i>:atom)
+<br><br>Peek at next character code in Stream as Code. Do not advance stream position.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Char</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_put_char_1">
+<h5>put_char/1</h5>
+<br><b>put_char</b>(?<i>Char</i>:atom)
+<br><br>Put Char in current output stream.
+<br>
+<br><b>arg</b>: <i>Char</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_put_char_2">
+<h5>put_char/2</h5>
+<br><b>put_char</b>(+<i>Stream</i>:term,?<i>Char</i>:atom)
+<br><br>Put Char in Stream.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Char</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_put_code_1">
+<h5>put_code/1</h5>
+<br><b>put_code</b>(?<i>Code</i>:integer)
+<br><br>Put character Code in current output stream.
+<br>
+<br><b>arg</b>: <i>Code</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+<li class="indexed" id="pred_put_code_2">
+<h5>put_code/2</h5>
+<br><b>put_code</b>(+<i>Stream</i>:term,?<i>Code</i>:integer)
+<br><br>Put character Code in Stream.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Code</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: character_io.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_clause_creation_and_destruction">
+<h4>clause_creation_and_destruction</h4>
+<ul>
+<li class="indexed" id="pred_abolish_1">
+<h5>abolish/1</h5>
+<br><b>abolish</b>(+<i>Indicator</i>:term) is det
+<br><br>Removes the (dynamic) user defined procedure identified by its predicate indicator,
+    leaving the database in the same state as if this procedure had never existed.
+    (as defined in the ISO standard)
+<br>
+<br><b>arg</b>: <i>Indicator</i>. predicate indicator term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: clause_creation_and_destruction.
+</li>
+
+<li class="indexed" id="pred_retract_1">
+<h5>retract/1</h5>
+<br><b>retract</b>(+<i>Clause</i>:term) is nondet
+<br><br>Retract from the database the clauses which are unifiable with Clause.
+<br>
+<br><b>arg</b>: <i>Clause</i>. a clause term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: clause_creation_and_destruction.
+</li>
+
+<li class="indexed" id="pred_retract_clause_2">
+<h5>retract_clause/2</h5>
+<br><b>retract</b>(+<i>Head</i>:term,?<i>Body</i>:term) is nondet
+<br><br>Retract from the database the clauses which are unifiable with Head and Body.
+<br>
+<br><b>arg</b>: <i>Head</i>. a callable term.
+<br><b>arg</b>: <i>Body</i>. a term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: clause_creation_and_destruction.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_clause_retrieval_and_information">
+<h4>clause_retrieval_and_information</h4>
+<ul>
+<li class="indexed" id="pred_clause_2">
+<h5>clause/2</h5>
+<br><b>clause</b>(+<i>Head</i>:term,?<i>Body</i>:term)
+<br><br>A public user-defined procedure in the database has Head and Body.
+<br>
+<br><b>arg</b>: <i>Head</i>. a callable term.
+<br><b>arg</b>: <i>Body</i>. a callable term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: clause_retrieval_and_information.
+</li>
+
+</ul>
+</div>
 <div class="indexed" id="pred_cat_dom">
 <h4>dom</h4>
 <ul>
@@ -390,6 +727,89 @@
 
 </ul>
 </div>
+<div class="indexed" id="pred_cat_flag_updates">
+<h4>flag_updates</h4>
+<ul>
+<li class="indexed" id="pred_current_prolog_flag_2">
+<h5>current_prolog_flag/2</h5>
+<br><b>current_prolog_flag</b>(+<i>Flag</i>:term,?<i>Value</i>:term) is det
+<br><b>current_prolog_flag</b>(-<i>Flag</i>:term,?<i>Value</i>:term) is nondet
+<br><br>Prolog Flag has Value. The defined flags are: bounded,
+    max_integer, min_integer, integer_rounding_function,
+    char_conversion, debug, max_arity, unknown, double_quotes, and dialect.
+<br>
+<br><b>arg</b>: <i>Flag</i>. a defined flag atom.
+<br><b>arg</b>: <i>Value</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: flag_updates.
+</li>
+
+<li class="indexed" id="pred_set_prolog_flag_2">
+<h5>set_prolog_flag/2</h5>
+<br><b>set_prolog_flag</b>(+<i>Flag</i>:term,?<i>Value</i>:term) is det
+<br><br>Set Prolog Flag to Value. Only certain flags are settable: char_conversion, debug, unknown, double_quotes, wam_log, and wam_log_size.
+<br>
+<br><b>arg</b>: <i>Flag</i>. a defined flag atom.
+<br><b>arg</b>: <i>Value</i>. a Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: flag_updates.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_logic_and_control">
+<h4>logic_and_control</h4>
+<ul>
+<li class="indexed" id="pred_fail_0">
+<h5>fail/0</h5>
+<br><b>fail</b> is det
+<br><br>This goal always fails.
+<br>
+<br><b>compat</b>: iso.
+<br><b>cat</b>: logic_and_control.
+</li>
+
+<li class="indexed" id="pred_halt_0">
+<h5>halt/0</h5>
+<br><b>halt</b> is det
+<br><br>Halt the WAM engine. The engine may be restarted - typically after evaluating the backtrack Javascript function.
+<br>
+<br><b>compat</b>: iso.
+<br><b>cat</b>: logic_and_control.
+</li>
+
+<li class="indexed" id="pred_repeat_0">
+<h5>repeat/0</h5>
+<br><b>repeat</b> is nondet
+<br><br>Always succeeds on initial call and on all redo calls (it backtracks without bound).
+<br>
+<br><b>compat</b>: iso.
+<br><b>cat</b>: logic_and_control.
+</li>
+
+<li class="indexed" id="pred_true_0">
+<h5>true/0</h5>
+<br><b>true</b> is det
+<br><br>This goal always succeeds.
+<br>
+<br><b>compat</b>: iso.
+<br><b>cat</b>: logic_and_control.
+</li>
+
+<li class="indexed" id="pred_yield_0">
+<h5>yield/0</h5>
+<br><b>yield</b> is det
+<br><br>Yield (suspend) the WAM engine to allow any waiting HTML events to be processed.
+     The yield/0 predicate completes after these waiting events have been handled.
+     This can be used to make changes to the current web page and have them rendered
+     immediately instead of when the current top level query completes.
+<br>
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: logic_and_control.
+</li>
+
+</ul>
+</div>
 <div class="indexed" id="pred_cat_memory_file">
 <h4>memory_file</h4>
 <ul>
@@ -443,49 +863,6 @@
 <div class="indexed" id="pred_cat_runtime">
 <h4>runtime</h4>
 <ul>
-<li class="indexed" id="pred_current_prolog_flag_2">
-<h5>current_prolog_flag/2</h5>
-<br><b>current_prolog_flag</b>(+<i>Flag</i>:term,?<i>Value</i>:term) is det
-<br><b>current_prolog_flag</b>(-<i>Flag</i>:term,?<i>Value</i>:term) is nondet
-<br><br>Prolog Flag has Value. The defined flags are: bounded,
-    max_integer, min_integer, integer_rounding_function,
-    char_conversion, debug, max_arity, unknown, double_quotes, and dialect.
-<br>
-<br><b>arg</b>: <i>Flag</i>. a defined flag atom.
-<br><b>arg</b>: <i>Value</i>. a Prolog term.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: runtime.
-</li>
-
-<li class="indexed" id="pred_halt_0">
-<h5>halt/0</h5>
-<br><b>halt</b> is det
-<br><br>Halt the WAM engine. The engine may be restarted - typically after evaluating the backtrack Javascript function.
-<br>
-<br><b>compat</b>: iso.
-<br><b>cat</b>: runtime.
-</li>
-
-<li class="indexed" id="pred_repeat_0">
-<h5>repeat/0</h5>
-<br><b>repeat</b> is nondet
-<br><br>Always succeeds on initial call and on all redo calls (it backtracks without bound).
-<br>
-<br><b>compat</b>: iso.
-<br><b>cat</b>: runtime.
-</li>
-
-<li class="indexed" id="pred_set_prolog_flag_2">
-<h5>set_prolog_flag/2</h5>
-<br><b>set_prolog_flag</b>(+<i>Flag</i>:term,?<i>Value</i>:term) is det
-<br><br>Set Prolog Flag to Value. Only certain flags are settable: char_conversion, debug, unknown, double_quotes, wam_log, and wam_log_size.
-<br>
-<br><b>arg</b>: <i>Flag</i>. a defined flag atom.
-<br><b>arg</b>: <i>Value</i>. a Prolog term.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: runtime.
-</li>
-
 <li class="indexed" id="pred_statistics_0">
 <h5>statistics/0</h5>
 <br><b>statistics</b> is det
@@ -501,6 +878,7 @@
 <br><b>statistics_max_heap</b>(?<i>Value</i>:integer) is det
 <br><br>Size in words of the maximum storage allocated in the WAM heap since the WAM was initialized
 <br>
+<br><b>arg</b>: <i>Value</i>. an integer.
 <br><b>compat</b>: proscriptls.
 <br><b>cat</b>: runtime.
 </li>
@@ -510,6 +888,7 @@
 <br><b>statistics_max_stack</b>(?<i>Value</i>:integer) is det
 <br><br>Size in words of the maximum storage allocated in the WAM stack since the WAM was initialized
 <br>
+<br><b>arg</b>: <i>Value</i>. an integer.
 <br><b>compat</b>: proscriptls.
 <br><b>cat</b>: runtime.
 </li>
@@ -519,52 +898,136 @@
 <br><b>wam_duration</b> is det
 <br><br>Milliseconds spent in the WAM since start of the WAM
 <br>
-<br><b>compat</b>: proscriptls.
-<br><b>cat</b>: runtime.
-</li>
-
-<li class="indexed" id="pred_yield_0">
-<h5>yield/0</h5>
-<br><b>yield</b> is det
-<br><br>Yield (suspend) the WAM engine to allow any waiting HTML events to be processed.
-     The yield/0 predicate completes after these waiting events have been handled.
-     This can be used to make changes to the current web page and have them rendered
-     immediately instead of when the current top level query completes.
-<br>
+<br><b>arg</b>: <i>Value</i>. an integer.
 <br><b>compat</b>: proscriptls.
 <br><b>cat</b>: runtime.
 </li>
 
 </ul>
 </div>
-<div class="indexed" id="pred_cat_terms">
-<h4>terms</h4>
+<div class="indexed" id="pred_cat_stream_selection_and_control">
+<h4>stream_selection_and_control</h4>
 <ul>
-<li class="indexed" id="pred_=_2">
-<h5>(=)/2</h5>
-<br><b>=</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
-<br><br>Term1 unifies with Term2.
+<li class="indexed" id="pred_at_end_of_stream_1">
+<h5>at_end_of_stream/1</h5>
+<br><b>at_end_of_stream</b>(+<i>Stream</i>:term)
+<br><br>Stream position is at its end.
 <br>
-<br><b>arg</b>: <i>Term1</i>. any Prolog term.
-<br><b>arg</b>: <i>Term2</i>. any Prolog term.
+<br><b>arg</b>: <i>Stream</i>. a stream term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: stream_selection_and_control.
 </li>
 
-<li class="indexed" id="pred_=.._2">
-<h5>(=..)/2</h5>
-<br><b>=..</b>(?<i>Term</i>:term,?<i>List</i>:list) is det
-<br><br>Term univ List. List is a list [Functor|Args] where functor(Term, Functor, Arity)
-     and Args are the arguments of Term (if any):
-     forall(between(1, Arity, N), (arg(N, Term, Arg), nth1(N, Args, Arg))).
-     If Args is null then Term is atomic (either an atom or a number) and is equal to Functor.
+<li class="indexed" id="pred_close_1">
+<h5>close/1</h5>
+<br><b>close</b>(+<i>Stream</i>:term)
+<br><br>Close Stream.
 <br>
-<br><b>arg</b>: <i>Term</i>. any Prolog term.
-<br><b>arg</b>: <i>List</i>. a list.
+<br><b>arg</b>: <i>Stream</i>. a stream term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: stream_selection_and_control.
 </li>
 
+<li class="indexed" id="pred_current_input_1">
+<h5>current_input/1</h5>
+<br><b>set_input</b>(+<i>Stream</i>:term)
+<br><br>Current input stream is Stream.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+<li class="indexed" id="pred_current_output_1">
+<h5>current_output/1</h5>
+<br><b>set_output</b>(+<i>Stream</i>:term)
+<br><br>Current output stream is Stream.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+<li class="indexed" id="pred_flush_output_1">
+<h5>flush_output/1</h5>
+<br><b>flush_output</b>(+<i>Stream</i>:term)
+<br><br>Flush output Stream.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+<li class="indexed" id="pred_open_3">
+<h5>open/3</h5>
+<br><b>open</b>(+<i>SourceSink</i>:term,+<i>Mode</i>:atom,-<i>Stream</i>:term) is det
+<br><br>Open a text file source or sink with default options, creating a Stream term by which to access that source or sink.
+<br>
+<br><b>arg</b>: <i>SourceSink</i>. a term.
+<br><b>arg</b>: <i>Mode</i>. a stream mode atom: 'read', 'write', 'append'.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+<li class="indexed" id="pred_open_4">
+<h5>open/4</h5>
+<br><b>open</b>(+<i>SourceSink</i>:term,+<i>Mode</i>:atom,-<i>Stream</i>:term,+<i>Options</i>:list) is det
+<br><br>Open a source or sink, creating a Stream term by which to access that source or sink.
+<br>
+<br><b>arg</b>: <i>SourceSink</i>. a term.
+<br><b>arg</b>: <i>Mode</i>. a stream mode atom: 'read', 'write', 'append'.
+<br><b>arg</b>: <i>Options</i>. a list of stream options.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+<li class="indexed" id="pred_set_input_1">
+<h5>set_input/1</h5>
+<br><b>set_input</b>(+<i>Stream</i>:term)
+<br><br>Sets current input stream to Stream.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+<li class="indexed" id="pred_set_output_1">
+<h5>set_output/1</h5>
+<br><b>set_output</b>(+<i>Stream</i>:term)
+<br><br>Sets current output stream to Stream.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+<li class="indexed" id="pred_set_stream_position_2">
+<h5>set_stream_position/2</h5>
+<br><b>set_stream_position</b>(+<i>Stream</i>:term,+<i>Position</i>:integer)
+<br><br>Set Stream position to Position.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Position</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+<li class="indexed" id="pred_stream_property_2">
+<h5>stream_property/2</h5>
+<br><b>stream_property</b>(?<i>Stream</i>:term,?<i>Property</i>:term)
+<br><br>Enumerates all the pairs of open streams together with their properties.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Property</i>. a property term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: stream_selection_and_control.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_term_comparison">
+<h4>term_comparison</h4>
+<ul>
 <li class="indexed" id="pred_==_2">
 <h5>(==)/2</h5>
 <br><b>==</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
@@ -573,7 +1036,7 @@
 <br><b>arg</b>: <i>Term1</i>. any Prolog term.
 <br><b>arg</b>: <i>Term2</i>. any Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_comparison.
 </li>
 
 <li class="indexed" id="pred_@<_2">
@@ -584,7 +1047,7 @@
 <br><b>arg</b>: <i>Term1</i>. a Prolog term.
 <br><b>arg</b>: <i>Term2</i>. a Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_comparison.
 </li>
 
 <li class="indexed" id="pred_@=<_2">
@@ -595,7 +1058,7 @@
 <br><b>arg</b>: <i>Term1</i>. a Prolog term.
 <br><b>arg</b>: <i>Term2</i>. a Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_comparison.
 </li>
 
 <li class="indexed" id="pred_@>_2">
@@ -606,7 +1069,7 @@
 <br><b>arg</b>: <i>Term1</i>. a Prolog term.
 <br><b>arg</b>: <i>Term2</i>. a Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_comparison.
 </li>
 
 <li class="indexed" id="pred_@>=_2">
@@ -617,107 +1080,7 @@
 <br><b>arg</b>: <i>Term1</i>. a Prolog term.
 <br><b>arg</b>: <i>Term2</i>. a Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_acyclic_term_1">
-<h5>acyclic_term/1</h5>
-<br><b>acyclic_term</b>(?<i>Term</i>:term) is det
-<br><br>Term is a acyclic.
-<br>
-<br><b>arg</b>: <i>Term</i>. any Prolog term.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_arg_3">
-<h5>arg/3</h5>
-<br><b>arg</b>(+<i>Position</i>:integer,+<i>Term</i>:term,?<i>Arg</i>:term) is det
-<br><br>Argument at Position of Term is Arg. 
-<br>
-<br><b>arg</b>: <i>Position</i>. an integer.
-<br><b>arg</b>: <i>Term</i>. a term.
-<br><b>arg</b>: <i>Arg</i>. a term.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_atom_1">
-<h5>atom/1</h5>
-<br><b>atom</b>(?<i>Term</i>:term) is det
-<br><br>Term is an atom.
-<br>
-<br><b>arg</b>: <i>Term</i>. any Prolog term.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_atom_chars_2">
-<h5>atom_chars/2</h5>
-<br><b>atom_chars</b>(?<i>Atom</i>:atom,?<i>Chars</i>:list(atom)) is det
-<br><br>The name of Atom is the list of character atoms in Chars.
-<br>
-<br><b>arg</b>: <i>Atom</i>. an atom.
-<br><b>arg</b>: <i>Chars</i>. a list of atoms.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_atom_codes_2">
-<h5>atom_codes/2</h5>
-<br><b>atom_codes</b>(?<i>Atom</i>:atom,?<i>Codes</i>:list(integer)) is det
-<br><br>The name of Atom is the list of character integers in Codes.
-<br>
-<br><b>arg</b>: <i>Atom</i>. an atom.
-<br><b>arg</b>: <i>Codes</i>. a list of integers.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_atom_concat_3">
-<h5>atom_concat/3</h5>
-<br><b>atom_concat</b>(+<i>Atom1</i>:atom,+<i>Atom2</i>:atom,?<i>Concatenation</i>:atom) is det
-<br><br>The names of Atom1 and Atom2 are concatenated to create Concatenation.
-<br>
-<br><b>arg</b>: <i>Atom1</i>. an atom.
-<br><b>arg</b>: <i>Atom2</i>. an atom.
-<br><b>arg</b>: <i>Concatenation</i>. an atom.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_atom_length_2">
-<h5>atom_length/2</h5>
-<br><b>atom_length</b>(+<i>Atom</i>:atom,?<i>Length</i>:integer) is det
-<br><br>Length is the number of characters in the name of Atom.
-<br>
-<br><b>arg</b>: <i>Atom</i>. an atom.
-<br><b>arg</b>: <i>Length</i>. an integer.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_char_code_2">
-<h5>char_code/2</h5>
-<br><b>char_code</b>(?<i>Atom</i>:atom,?<i>Code</i>:integer) is det
-<br><br>The name of Atom is a single character with integer character Code.
-<br>
-<br><b>arg</b>: <i>Atom</i>. an atom.
-<br><b>arg</b>: <i>Code</i>. an integer.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_char_conversion_2">
-<h5>char_conversion/2</h5>
-<br><b>char_conversion</b>(+<i>InChar</i>:atom,+<i>OutChar</i>:atom) is det
-<br><br>Add conversion of InChar to OutChar to the character conversion table. (This should be
-    a directive.)
-<br>
-<br><b>arg</b>: <i>InChar</i>. a single-character atom.
-<br><b>arg</b>: <i>OutChar</i>. a single-character atom.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_comparison.
 </li>
 
 <li class="indexed" id="pred_compare_3">
@@ -730,17 +1093,63 @@
 <br><b>arg</b>: <i>Term1</i>. a Prolog term.
 <br><b>arg</b>: <i>Term2</i>. a Prolog term.
 <br><b>compat</b>: swi.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_comparison.
 </li>
 
-<li class="indexed" id="pred_compound_1">
-<h5>compound/1</h5>
-<br><b>compound</b>(?<i>Term</i>:term) is det
-<br><br>Term is compound - either a structure or a list.
+<li class="indexed" id="pred_subsumes_term_2">
+<h5>subsumes_term/2</h5>
+<br><b>subsumes_term</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 subsumes Term2.
+<br>
+<br><b>arg</b>: <i>Term1</i>. any Prolog term.
+<br><b>arg</b>: <i>Term2</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_comparison.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_term_creation_and_decomposition">
+<h4>term_creation_and_decomposition</h4>
+<ul>
+<li class="indexed" id="pred_=.._2">
+<h5>(=..)/2</h5>
+<br><b>=..</b>(?<i>Term</i>:term,?<i>List</i>:list) is det
+<br><br>Term univ List. List is a list [Functor|Args] where functor(Term, Functor, Arity)
+     and Args are the arguments of Term (if any):
+     forall(between(1, Arity, N), (arg(N, Term, Arg), nth1(N, Args, Arg))).
+     If Args is null then Term is atomic (either an atom or a number) and is equal to Functor.
 <br>
 <br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>arg</b>: <i>List</i>. a list.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_creation_and_decomposition.
+</li>
+
+<li class="indexed" id="pred_arg_3">
+<h5>arg/3</h5>
+<br><b>arg</b>(+<i>Position</i>:integer,+<i>Term</i>:term,?<i>Arg</i>:term) is det
+<br><br>Argument at Position of Term is Arg. 
+<br>
+<br><b>arg</b>: <i>Position</i>. an integer.
+<br><b>arg</b>: <i>Term</i>. a term.
+<br><b>arg</b>: <i>Arg</i>. a term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_creation_and_decomposition.
+</li>
+
+<li class="indexed" id="pred_atom_to_term_3">
+<h5>atom_to_term/3</h5>
+<br><b>atom_to_term</b>(+<i>Atom</i>:atom,?<i>Term</i>:term,?<i>Bindings</i>:list) is det
+<br><br>Term is the result of reading the name of Atom with the ProscriptLS parser. Bindings is a list of terms of the form 'name = variable'
+    where 'name' is the name of each variable found in Atom and 'variable' is the ProscriptLS variable to which that named variable
+    is converted in Term.
+<br>
+<br><b>arg</b>: <i>Atom</i>. an atom.
+<br><b>arg</b>: <i>Term</i>. a term.
+<br><b>arg</b>: <i>Bindings</i>. a list of (Name = Variable) terms.
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: term_creation_and_decomposition.
 </li>
 
 <li class="indexed" id="pred_copy_term_2">
@@ -752,7 +1161,48 @@
 <br><b>arg</b>: <i>Term1</i>. a Prolog term.
 <br><b>arg</b>: <i>Term2</i>. a Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_creation_and_decomposition.
+</li>
+
+<li class="indexed" id="pred_functor_3">
+<h5>functor/3</h5>
+<br><b>functor</b>(+<i>Term</i>:integer,?<i>Name</i>:term,?<i>Arity</i>:term) is det
+<br><b>functor</b>(-<i>Term</i>:integer,+<i>Name</i>:term,+<i>Arity</i>:term) is det
+<br><br>Term has functor Name and Arity arguments. 
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>arg</b>: <i>Name</i>. an atom.
+<br><b>arg</b>: <i>Arity</i>. an integer.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_creation_and_decomposition.
+</li>
+
+<li class="indexed" id="pred_term_variables_2">
+<h5>term_variables/2</h5>
+<br><b>term_variables</b>(?<i>Term</i>:term,?<i>Variables</i>:list) is det
+<br><br>Variables are the variables in Term.
+<br>
+<br><b>arg</b>: <i>Term</i>. a term.
+<br><b>arg</b>: <i>Variables</i>. a list of one term (variable) for each variable in Term.
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: term_creation_and_decomposition.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_term_io">
+<h4>term_io</h4>
+<ul>
+<li class="indexed" id="pred_char_conversion_2">
+<h5>char_conversion/2</h5>
+<br><b>char_conversion</b>(+<i>InChar</i>:atom,+<i>OutChar</i>:atom) is det
+<br><br>Add conversion of InChar to OutChar to the character conversion table. (This should be
+    a directive.)
+<br>
+<br><b>arg</b>: <i>InChar</i>. a single-character atom.
+<br><b>arg</b>: <i>OutChar</i>. a single-character atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_io.
 </li>
 
 <li class="indexed" id="pred_current_char_conversion_2">
@@ -766,7 +1216,128 @@
 <br><b>arg</b>: <i>InChar</i>. a single-character atom.
 <br><b>arg</b>: <i>OutChar</i>. a single-character atom.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: term_io.
+</li>
+
+<li class="indexed" id="pred_current_op_3">
+<h5>current_op/3</h5>
+<br><b>current_op</b>(?<i>Priority</i>:integer,?<i>Specifier</i>:atom,?<i>Operator</i>:atom)
+<br><br>Operator is currently defined with Priority and Specifier for reading and writing terms.
+<br>
+<br><b>arg</b>: <i>Priority</i>. an integer.
+<br><b>arg</b>: <i>Specifier</i>. an atom: fx, fy, xfx, xfy, yfx, yf, xf.
+<br><b>arg</b>: <i>Operator</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_io.
+</li>
+
+<li class="indexed" id="pred_op_3">
+<h5>op/3</h5>
+<br><b>op</b>(?<i>Priority</i>:integer,?<i>Specifier</i>:atom,?<i>Operator</i>:atom)
+<br><br>Update the operator table with Operator as defined with Priority and Specifier for reading and writing terms.
+<br>
+<br><b>arg</b>: <i>Priority</i>. an integer.
+<br><b>arg</b>: <i>Specifier</i>. an atom: fx, fy, xfx, xfy, yfx, yf, xf.
+<br><b>arg</b>: <i>Operator</i>. an atom.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_io.
+</li>
+
+<li class="indexed" id="pred_read_term_2">
+<h5>read_term/2</h5>
+<br><b>read_term</b>(?<i>Term</i>:term,+<i>Options</i>:list)
+<br><br>Reads from the current input stream a single Term and instantiates
+    accordingly the read Options list. (as described by ISO standard)
+<br>
+<br><b>arg</b>: <i>Term</i>. a term.
+<br><b>arg</b>: <i>Options</i>. a read options list.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_io.
+</li>
+
+<li class="indexed" id="pred_read_term_3">
+<h5>read_term/3</h5>
+<br><b>read_term</b>(+<i>Stream</i>:stream_term,?<i>Term</i>:term,+<i>Options</i>:list)
+<br><br>Reads from Stream a single Term and instantiates
+    accordingly the read Options list.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Term</i>. a term.
+<br><b>arg</b>: <i>Options</i>. a read options list.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_io.
+</li>
+
+<li class="indexed" id="pred_writeln_1">
+<h5>writeln/1</h5>
+<br><b>writeln</b>(+<i>Term</i>:term)
+<br><br>Write Term followed by a newline to the current output stream.
+<br>
+<br><b>arg</b>: <i>Term</i>. a term.
+<br><b>compat</b>: proscriptls.
+<br><b>cat</b>: term_io.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_term_unification">
+<h4>term_unification</h4>
+<ul>
+<li class="indexed" id="pred_=_2">
+<h5>(=)/2</h5>
+<br><b>=</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 unifies with Term2.
+<br>
+<br><b>arg</b>: <i>Term1</i>. any Prolog term.
+<br><b>arg</b>: <i>Term2</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_unification.
+</li>
+
+<li class="indexed" id="pred_\=_2">
+<h5>(\=)/2</h5>
+<br><b>\=</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
+<br><br>Term1 does not unify with Term2.
+<br>
+<br><b>arg</b>: <i>Term1</i>. any Prolog term.
+<br><b>arg</b>: <i>Term2</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_unification.
+</li>
+
+</ul>
+</div>
+<div class="indexed" id="pred_cat_type_testing">
+<h4>type_testing</h4>
+<ul>
+<li class="indexed" id="pred_acyclic_term_1">
+<h5>acyclic_term/1</h5>
+<br><b>acyclic_term</b>(?<i>Term</i>:term) is det
+<br><br>Term is a acyclic.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: type_testing.
+</li>
+
+<li class="indexed" id="pred_atom_1">
+<h5>atom/1</h5>
+<br><b>atom</b>(?<i>Term</i>:term) is det
+<br><br>Term is an atom.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: type_testing.
+</li>
+
+<li class="indexed" id="pred_compound_1">
+<h5>compound/1</h5>
+<br><b>compound</b>(?<i>Term</i>:term) is det
+<br><br>Term is compound - either a structure or a list.
+<br>
+<br><b>arg</b>: <i>Term</i>. any Prolog term.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: type_testing.
 </li>
 
 <li class="indexed" id="pred_float_1">
@@ -776,20 +1347,7 @@
 <br>
 <br><b>arg</b>: <i>Term</i>. any Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_functor_3">
-<h5>functor/3</h5>
-<br><b>functor</b>(+<i>Term</i>:integer,?<i>Name</i>:term,?<i>Arity</i>:term) is det
-<br><b>functor</b>(-<i>Term</i>:integer,+<i>Name</i>:term,+<i>Arity</i>:term) is det
-<br><br>Term has functor Name and Arity arguments. 
-<br>
-<br><b>arg</b>: <i>Term</i>. any Prolog term.
-<br><b>arg</b>: <i>Name</i>. an atom.
-<br><b>arg</b>: <i>Arity</i>. an integer.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: type_testing.
 </li>
 
 <li class="indexed" id="pred_ground_1">
@@ -799,7 +1357,7 @@
 <br>
 <br><b>arg</b>: <i>Term</i>. any Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: type_testing.
 </li>
 
 <li class="indexed" id="pred_integer_1">
@@ -809,60 +1367,7 @@
 <br>
 <br><b>arg</b>: <i>Term</i>. any Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_number_chars_2">
-<h5>number_chars/2</h5>
-<br><b>number_chars</b>(?<i>Number</i>:number,?<i>Chars</i>:list(atom)) is det
-<br><br>The name of Number is the list of character atoms in Chars.
-<br>
-<br><b>arg</b>: <i>Number</i>. a number.
-<br><b>arg</b>: <i>Chars</i>. a list of atoms.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_number_codes_2">
-<h5>number_codes/2</h5>
-<br><b>number_codes</b>(?<i>Number</i>:number,?<i>Codes</i>:list(integer)) is det
-<br><br>The name of Number is the list of character integers in Codes.
-<br>
-<br><b>arg</b>: <i>Number</i>. a number.
-<br><b>arg</b>: <i>Codes</i>. a list of integers.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_sub_atom_5">
-<h5>sub_atom/5</h5>
-<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,-<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
-<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,+<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
-<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,+<i>Length</i>:integer,?<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is det
-<br><b>sub_atom</b>(+<i>Source</i>:atom,+<i>Start</i>:integer,-<i>Length</i>:integer,-<i>Remaining</i>:integer,-<i>Subatom</i>:atom) is nondet
-<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,+<i>Length</i>:integer,-<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is nondet
-<br><b>sub_atom</b>(+<i>Source</i>:atom,-<i>Start</i>:integer,-<i>Length</i>:integer,+<i>Remaining</i>:integer,?<i>Subatom</i>:atom) is nondet
-<br><br>The name of Subatom is a part of the name of Source that begins at position Start and has Length characters and there are Remaining
-    characters in Source after Subatom.
-<br>
-<br><b>arg</b>: <i>Source</i>. an atom.
-<br><b>arg</b>: <i>Start</i>. an integer.
-<br><b>arg</b>: <i>Length</i>. an integer.
-<br><b>arg</b>: <i>Remaining</i>. an integer.
-<br><b>arg</b>: <i>Subatom</i>. an atom.
-<br><b>compat</b>: proscriptls.
-<br><b>cat</b>: terms.
-</li>
-
-<li class="indexed" id="pred_subsumes_term_2">
-<h5>subsumes_term/2</h5>
-<br><b>subsumes_term</b>(?<i>Term1</i>:term,?<i>Term2</i>:term) is det
-<br><br>Term1 subsumes Term2.
-<br>
-<br><b>arg</b>: <i>Term1</i>. any Prolog term.
-<br><b>arg</b>: <i>Term2</i>. any Prolog term.
-<br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: type_testing.
 </li>
 
 <li class="indexed" id="pred_var_1">
@@ -872,7 +1377,7 @@
 <br>
 <br><b>arg</b>: <i>Term</i>. any Prolog term.
 <br><b>compat</b>: iso.
-<br><b>cat</b>: terms.
+<br><b>cat</b>: type_testing.
 </li>
 
 </ul>
