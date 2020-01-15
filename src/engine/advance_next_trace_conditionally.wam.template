@@ -1,0 +1,9 @@
+    // 'trace_next' and 'leap_trace_next' only occur when call/1 is invoked by '$trace'.
+    if (state.trace_call === 'trace_next') {
+        state.trace_call = 'trace';
+        debug_msg("Set state.trace_call from 'trace_next' to " + state.trace_call);
+    } else if (state.trace_call === 'leap_trace_next') {
+        state.trace_call = 'leap_trace';
+        debug_msg("Set state.trace_call from 'leap_trace_next' to " + state.trace_call);
+    }
+

@@ -1,66 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AnalysisUIOptions">
+    <option name="SPLITTER_PROPORTION" value="0.2748252" />
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Merge with 'undo' branch.">
-      <change afterPath="$PROJECT_DIR$/library/undo.pl" afterDir="false" />
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Introduced template-based macros for WAM.&#10;&#10;Extracted wam and wam1 functions from wam.js to create wam.template and changed engine/Makefile to create wam_core.js from wam.template, trace_call_or_execute.wam.template, and advance_next_trace_conditionally.wam.template.&#10;Fixed wam_compiler.pl use of read_term/3 to be compatible with SWIPL 8.0.3 where read_term(A, B, [singleton(S)]) now returns all singletons of B in S, including ones that are not 'warnable' such as '_' and '_X'.&#10;Extended web_test_element.pl to check for height of 18 or 19 and web_test_html_element.pl to check for height of 20 or 21.">
+      <change afterPath="$PROJECT_DIR$/src/engine/advance_next_trace_conditionally.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/trace_call_or_execute.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam_core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.SDK.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.SDK.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/calculator_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/calculator_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/console_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/consult_console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/consult_console_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_about.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_about.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_doc.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index_download.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_download.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/likes_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/likes_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/simple_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/simple_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/tiles_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tiles_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/calculator.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/calculator.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/console.pl" beforeDir="false" afterPath="$PROJECT_DIR$/examples/console.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/console_button_test.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/console_button_test.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/tiles.html" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tiles.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/library/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/library/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/library/data_predicates.pl" beforeDir="false" afterPath="$PROJECT_DIR$/library/data_predicates.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/library/object.pl" beforeDir="false" afterPath="$PROJECT_DIR$/library/object.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/debugger.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/debugger.doc.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/docs_test.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/docs_test.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/framework.index.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/framework.index.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/library.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/library.doc.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/objects.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/objects.doc.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_doc_node.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/foreign.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/foreign.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/promise.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/promise.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/web_interfaces.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/web_interfaces.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/bootstrap_js.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/bootstrap_js.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal/jquery_terminal.css" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/jquery_terminal.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal/jquery_terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/jquery_terminal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal/terminal_test.html" beforeDir="false" afterPath="$PROJECT_DIR$/terminal/terminal_test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/decode_instruction.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/decode_instruction.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/object.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/object.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/wam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/system/wam_compiler.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/wam_compiler.pl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_local_storage.html" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_local_storage.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/tests.html" beforeDir="false" afterPath="$PROJECT_DIR$/test/tests.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version.txt" beforeDir="false" afterPath="$PROJECT_DIR$/version.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version_date.txt" beforeDir="false" afterPath="$PROJECT_DIR$/version_date.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/web_test_element.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/web_test_element.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/web_test_html_element.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/web_test_html_element.pl" afterDir="false" />
     </list>
-    <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
-    <ignored path="$PROJECT_DIR$/../proscript/temp/" />
-    <ignored path="$PROJECT_DIR$/../proscript/tmp/" />
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -69,122 +37,24 @@
   <component name="FavoritesManager">
     <favorites_list name="proscriptls" />
   </component>
-  <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/index.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="35" column="7" lean-forward="true" selection-start-line="35" selection-start-column="7" selection-end-line="35" selection-end-column="7" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
-  </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>predicate_statistics_heap_size</find>
-      <find>state.H++</find>
-      <find>Stack</find>
-      <find>local</find>
-      <find>decode_instruction</find>
-      <find>format_term</find>
-      <find>[[</find>
-      <find>escape_formatting</find>
-      <find>escap</find>
-      <find>initializ</find>
-      <find>delayed_initialization</find>
-      <find>process_delayed_initializations</find>
-      <find>consult(</find>
-      <find>current_pre</find>
-      <find>current_predicate(</find>
-      <find>appendChild</find>
-      <find>append(</find>
-      <find>dom_app</find>
-      <find>compile_clause_initialization_directive</find>
-      <find>sort(</find>
-      <find>data_predicate_dynamics1a</find>
-      <find>proscript_in</find>
-      <find>proscript</find>
-      <find>Proscript</find>
-      <find>proscrip</find>
-      <find>index_doc</find>
-      <find>Get the ProscriptLS interpreter library</find>
-      <find>proscript_</find>
-      <find>proscriptls_doc_node</find>
-    </findStrings>
-    <replaceStrings>
-      <replace>:-</replace>
-      <replace>Heap</replace>
-      <replace>proscriptls_in</replace>
-      <replace>ProscriptLS</replace>
-    </replaceStrings>
-    <dirStrings>
-      <dir>$PROJECT_DIR$/src</dir>
-      <dir>$PROJECT_DIR$</dir>
-    </dirStrings>
-  </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="lindseyspratt &lt;lindsey.spratt@logicforsystems.com&gt;" />
+      </list>
+    </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="IdeDocumentHistory">
-    <option name="CHANGED_PATHS">
-      <list>
-        <option value="$PROJECT_DIR$/src/docs/objects.doc.template" />
-        <option value="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" />
-        <option value="$PROJECT_DIR$/src/docs/predicate_doc.pl" />
-        <option value="$PROJECT_DIR$/docs/index_doc.html" />
-        <option value="$PROJECT_DIR$/src/docs/syntax.doc.template" />
-        <option value="$PROJECT_DIR$/terminal/jquery_terminal.js" />
-        <option value="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" />
-        <option value="$PROJECT_DIR$/terminal/terminal_test.html" />
-        <option value="$PROJECT_DIR$/src/system/wam_compiler.pl" />
-        <option value="$PROJECT_DIR$/src/system/bootstrap_js.pl" />
-        <option value="$PROJECT_DIR$/library/data_predicates.pl" />
-        <option value="$PROJECT_DIR$/examples/tiles.pl" />
-        <option value="$PROJECT_DIR$/version.txt" />
-        <option value="$PROJECT_DIR$/version_date.txt" />
-        <option value="$PROJECT_DIR$/examples/tiles.html" />
-        <option value="$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js" />
-        <option value="$PROJECT_DIR$/src/engine/foreign.js" />
-        <option value="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" />
-        <option value="$PROJECT_DIR$/src/docs/docs_test.html" />
-        <option value="$PROJECT_DIR$/examples/calculator.html" />
-        <option value="$PROJECT_DIR$/test/test_local_storage.html" />
-        <option value="$PROJECT_DIR$/src/docs/debugger.doc.template" />
-        <option value="$PROJECT_DIR$/README.md" />
-      </list>
-    </option>
-  </component>
-  <component name="ProjectFrameBounds">
-    <option name="y" value="23" />
-    <option name="width" value="1440" />
-    <option name="height" value="837" />
-  </component>
-  <component name="ProjectView">
-    <navigator proportions="" version="1">
-      <foldersAlwaysOnTop value="true" />
-    </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
-              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-    </panes>
+  <component name="ProjectId" id="1WOpdG52CRGExuVgY5ijXj1GiFr" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -195,6 +65,7 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
     <property name="two.files.diff.last.used.folder" value="$PROJECT_DIR$/../mosaic-pls/proscriptls_sdk/terminal" />
   </component>
   <component name="RecentsManager">
@@ -202,15 +73,15 @@
       <recent name="$PROJECT_DIR$/terminal" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
+  <component name="ServiceViewManager">
+    <option name="viewStates">
       <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
       </list>
     </option>
   </component>
@@ -234,6 +105,7 @@
       <workItem from="1576258045082" duration="35000" />
       <workItem from="1576261683401" duration="12599000" />
       <workItem from="1577740645125" duration="5608000" />
+      <workItem from="1579030584329" duration="12837000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -308,9 +180,6 @@
     <option name="localTasksCounter" value="11" />
     <servers />
   </component>
-  <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34849000" />
-  </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
       <is-autoscroll-to-source value="true" />
@@ -319,29 +188,6 @@
       <are-packages-shown value="true" />
       <is-autoscroll-to-source value="true" />
     </todo-panel>
-  </component>
-  <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="837" extended-state="6" />
-    <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.65445024" visible="true" weight="0.14869626" />
-      <window_info id="Structure" order="1" sideWeight="0.34554973" side_tool="true" visible="true" weight="0.14869626" />
-      <window_info id="Favorites" order="2" sideWeight="0.33809525" side_tool="true" weight="0.20413026" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3287037" />
-      <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39969134" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.3287037" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" weight="0.35185185" />
-      <window_info anchor="bottom" id="Terminal" order="9" weight="0.3287037" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5003524" side_tool="true" visible="true" weight="0.23087248" />
-      <window_info active="true" anchor="bottom" id="Messages" order="11" sideWeight="0.49964765" visible="true" weight="0.23087248" />
-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-    </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -357,20 +203,7 @@
         <entry key="MAIN">
           <value>
             <State>
-              <option name="RECENTLY_FILTERED_USER_GROUPS">
-                <collection />
-              </option>
-              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
-                <collection />
-              </option>
-              <option name="COLUMN_ORDER">
-                <list>
-                  <option value="0" />
-                  <option value="1" />
-                  <option value="2" />
-                  <option value="3" />
-                </list>
-              </option>
+              <option name="COLUMN_ORDER" />
             </State>
           </value>
         </entry>
@@ -402,282 +235,31 @@
     <MESSAGE value="Changed version to 1.5.0. Added documentation. Cleaned up tiles.html.&#10;&#10;Fixed doc generator to not put empty parentheses on predicates." />
     <MESSAGE value="Extended data_predicates.pl with undo. Updated version to 1.5.2.&#10;&#10;Changed console.pl to use new data_predicates/4.&#10;data_predicates.pl: changed to data_predicates/4 from /3 to add 'option' (undoable, ephemeral) argument; added use of undo module; added cuts for performance optimization; added 'action' predicate generation for get, set, update, and clear.&#10;Extended object.pl with &gt;&gt;$/2 - this is &gt;&gt;/2 with a trailing cut; added cuts for performance optimization.&#10;Added undo.pl to support undoing assertions (primarily of data_predicates data).&#10;bootstrap_js.pl: added cuts to partition/4 and key_partition/4 to prevent sort/2 from creating needless choicepoints.&#10;Fixed proscript_interpreter_terminal.js to use $.terminal.escape_formatting on strings to be output in the terminal (fixes a bug with strings containing '[[' due to nested lists).&#10;Updated JQuery terminal to 2.9.0." />
     <MESSAGE value="Merge with 'undo' branch." />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge with 'undo' branch." />
+    <MESSAGE value="Introduced template-based macros for WAM.&#10;&#10;Extracted wam and wam1 functions from wam.js to create wam.template and changed engine/Makefile to create wam_core.js from wam.template and trace_call_or_execute.wam.template.&#10;Fixed wam_compiler.pl use of read_term/3 to be compatible with SWIPL 8.0.3 where read_term(A, B, [singleton(S)]) now returns all singletons of B in S, including ones that are not 'warnable' such as '_' and '_X'.&#10;Extended web_test_element.pl to check for height of 18 or 19 and web_test_html_element.pl to check for height of 20 or 21." />
+    <MESSAGE value="Introduced template-based macros for WAM.&#10;&#10;Extracted wam and wam1 functions from wam.js to create wam.template and changed engine/Makefile to create wam_core.js from wam.template, trace_call_or_execute.wam.template, and advance_next_trace_conditionally.wam.template.&#10;Fixed wam_compiler.pl use of read_term/3 to be compatible with SWIPL 8.0.3 where read_term(A, B, [singleton(S)]) now returns all singletons of B in S, including ones that are not 'warnable' such as '_' and '_X'.&#10;Extended web_test_element.pl to check for height of 18 or 19 and web_test_html_element.pl to check for height of 20 or 21." />
+    <option name="LAST_COMMIT_MESSAGE" value="Introduced template-based macros for WAM.&#10;&#10;Extracted wam and wam1 functions from wam.js to create wam.template and changed engine/Makefile to create wam_core.js from wam.template, trace_call_or_execute.wam.template, and advance_next_trace_conditionally.wam.template.&#10;Fixed wam_compiler.pl use of read_term/3 to be compatible with SWIPL 8.0.3 where read_term(A, B, [singleton(S)]) now returns all singletons of B in S, including ones that are not 'warnable' such as '_' and '_X'.&#10;Extended web_test_element.pl to check for height of 18 or 19 and web_test_html_element.pl to check for height of 20 or 21." />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
-  <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/test/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="690">
-          <caret line="46" selection-start-line="46" selection-end-line="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_tools/node_goal.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_tools/node_goal_module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="750">
-          <caret line="50" column="8" selection-start-line="50" selection-start-column="8" selection-end-line="50" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dist/proscriptls_engine.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="29835">
-          <caret line="1989" column="13" selection-start-line="1989" selection-start-column="9" selection-end-line="1989" selection-end-column="13" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-673">
-          <caret line="2117" column="1" selection-start-line="2117" selection-start-column="1" selection-end-line="2117" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/tests.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="232">
-          <caret line="16" column="14" selection-start-line="16" selection-start-column="14" selection-end-line="16" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/record.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="303">
-          <caret line="123" column="32" selection-start-line="123" selection-start-column="13" selection-end-line="123" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/gc.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="59">
-          <caret line="562" column="16" selection-start-line="562" selection-start-column="16" selection-end-line="562" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/web_interfaces.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20550">
-          <caret line="1512" selection-start-line="1512" selection-end-line="1512" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9600">
-          <caret line="786" column="3" selection-start-line="786" selection-start-column="3" selection-end-line="786" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/library/listut.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5595">
-          <caret line="377" selection-start-line="377" selection-end-line="377" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4905">
-          <caret line="332" column="1" selection-start-line="332" selection-start-column="1" selection-end-line="332" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/objects.doc.template">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="209" selection-start-line="209" selection-end-line="209" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/tools/generate_predicate_doc.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="149">
-          <caret line="81" column="18" lean-forward="true" selection-start-line="81" selection-start-column="18" selection-end-line="81" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/memory_files.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="123">
-          <caret line="285" column="25" selection-start-line="285" selection-start-column="9" selection-end-line="285" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/predicate_doc.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="134" column="5" lean-forward="true" selection-start-line="134" selection-start-column="5" selection-end-line="134" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/terminal/jquery.terminal-2.9.0.js" />
-    <entry file="file://$PROJECT_DIR$/terminal/jquery_terminal.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="128835">
-          <caret line="8589" column="62" selection-start-line="8589" selection-start-column="62" selection-end-line="8589" selection-end-column="62" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/debugger.pl">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/syntax.doc.template">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3195">
-          <caret line="213" column="4" selection-start-line="213" selection-start-column="4" selection-end-line="213" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/terminal/terminal_test.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="55" selection-start-line="5" selection-start-column="55" selection-end-line="5" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-364" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/read.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="626" column="35" selection-start-line="626" selection-start-column="35" selection-end-line="626" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="960">
-          <caret line="64" selection-start-line="64" selection-end-line="64" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7320">
-          <caret line="488" column="9" selection-start-line="488" selection-start-column="9" selection-end-line="488" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/console_button_test.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="885">
-          <caret line="59" column="45" selection-start-line="59" selection-start-column="2" selection-end-line="59" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/console_button_test.html">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/system.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" selection-start-line="2" selection-end-line="2" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_tools/node_compile.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="157">
-          <caret line="523" column="10" selection-start-line="523" selection-start-column="10" selection-end-line="523" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="213">
-          <caret line="209" column="35" selection-start-line="209" selection-start-column="35" selection-end-line="209" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" selection-start-line="15" selection-end-line="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="5" selection-start-column="5" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version_date.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="12" selection-start-column="12" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/tiles.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" column="51" selection-start-line="16" selection-start-column="51" selection-end-line="16" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="164">
-          <caret line="772" column="44" selection-start-line="772" selection-start-column="44" selection-end-line="772" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/tools/wam_bootstrap.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="172">
-          <caret line="43" column="49" selection-start-line="43" selection-start-column="49" selection-end-line="43" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/docs_test.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="7" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docs/index_doc.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="273" column="7" selection-start-line="273" selection-start-column="7" selection-end-line="273" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/proscriptls_doc_node.js" />
-    <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="103">
-          <caret line="42" column="16" lean-forward="true" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="35" column="7" lean-forward="true" selection-start-line="35" selection-start-column="7" selection-end-line="35" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
+  <component name="WindowStateProjectService">
+    <state x="670" y="349" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1579098203713">
+      <screen x="0" y="23" width="2048" height="1052" />
+    </state>
+    <state x="670" y="349" key="#com.intellij.fileTypes.FileTypeChooser/0.23.2048.1052@0.23.2048.1052" timestamp="1579098203713" />
+    <state x="767" y="394" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1579115431563">
+      <screen x="0" y="23" width="2048" height="1052" />
+    </state>
+    <state x="767" y="394" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.23.2048.1052@0.23.2048.1052" timestamp="1579115431563" />
+    <state x="158" y="23" width="1890" height="1052" key="CommitChangelistDialog2" timestamp="1579114793515">
+      <screen x="0" y="23" width="2048" height="1052" />
+    </state>
+    <state x="158" y="23" width="1890" height="1052" key="CommitChangelistDialog2/0.23.2048.1052@0.23.2048.1052" timestamp="1579114793515" />
+    <state x="533" y="188" key="SettingsEditor" timestamp="1579115313848">
+      <screen x="0" y="23" width="2048" height="1052" />
+    </state>
+    <state x="533" y="188" key="SettingsEditor/0.23.2048.1052@0.23.2048.1052" timestamp="1579115313848" />
+    <state x="680" y="160" width="687" height="777" key="find.popup" timestamp="1579104996326">
+      <screen x="0" y="23" width="2048" height="1052" />
+    </state>
+    <state x="680" y="160" width="687" height="777" key="find.popup/0.23.2048.1052@0.23.2048.1052" timestamp="1579104996326" />
   </component>
 </project>

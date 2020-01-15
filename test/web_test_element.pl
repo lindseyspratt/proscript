@@ -23,13 +23,17 @@ test('Element', 'class of test1 finds 1 classes [foo, bar]', succeeded) :-
                 A^dom_object_property(A, E, class,C),
                 [bar, foo]).
 
-test('Element', 'clientHeight of test1 finds value 19', succeeded) :-
+test('Element', 'clientHeight of test1 finds value 18 or 19', succeeded) :-
     dom_element_attribute_value(E, id, test1),
-    dom_object_property(_, E, clientHeight, 19).
+    dom_object_property(_, E, clientHeight, X),
+    (X = 18;X = 19),
+    !.
 
-test('Element', 'generic clientHeight of test1 finds value 19', succeeded) :-
+test('Element', 'generic clientHeight of test1 finds value 18 or 19', succeeded) :-
     dom_element_attribute_value(E, id, test1),
-    dom_object_property([clientHeight, number], E, clientHeight, 19).
+    dom_object_property([clientHeight, number], E, clientHeight, X),
+    (X = 18;X = 19),
+    !.
 
 test('Element', 'clientLeft of test1 finds value 1', succeeded) :-
     dom_element_attribute_value(E, id, test1),
@@ -86,9 +90,11 @@ test('Element', 'previousElementSibling of nextElementSibling of test1 finds nod
     dom_object_property(_, E, nextElementSibling,C),
     dom_object_property(_, C, previousElementSibling,E).
 
-test('Element', 'scrollHeight of test1 finds value 19', succeeded) :-
+test('Element', 'scrollHeight of test1 finds value 18 or 19', succeeded) :-
     dom_element_attribute_value(E, id, test1),
-    dom_object_property(_, E, scrollHeight, 19).
+    dom_object_property(_, E, scrollHeight, X),
+    (X = 18;X = 19),
+    !.
 
 test('Element', 'scrollLeft of test1 finds value 0', succeeded) :-
     dom_element_attribute_value(E, id, test1),

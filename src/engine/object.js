@@ -246,7 +246,7 @@ function convert_method_spec(specTerm, resultContainer) {
     if(! convert_type_terms(typeTermsListPL, argTypesContainer)) {
         return false;
     }
-    result.arguments = argTypesContainer.value;
+    result["arguments"] = argTypesContainer.value;
 
     let specTermTailTailPL = deref(memory[VAL(specTermTailPL) + 1]); // tail of specTermTailPL
     if(specTermTailTailPL !== NIL) {

@@ -1499,7 +1499,11 @@ analyze_singletons([H|T], VariableNames, TermBase, Term) :-
         (current_compilation_module(Module, _Stream) -> true;Module=none),
         assign_variable_names(VariableNames),
         trim_singletons([H|T], TrimmedSingletons),
-        writeln('WARNING'(singleton_variables(TrimmedSingletons), in(Module:TermBase) )).
+        (TrimmedSingletons = []
+          -> true
+        ;
+        writeln('WARNING'(singleton_variables(TrimmedSingletons), in(Module:TermBase) ))
+        ).
 
 assign_variable_names([]).
 assign_variable_names([VariableName = Variable|T]) :-
@@ -1507,8 +1511,28 @@ assign_variable_names([VariableName = Variable|T]) :-
         assign_variable_names(T).
 
 trim_singletons([], []).
-trim_singletons([VN = _V|T], [VN|TT]) :-
+trim_singletons([VN = _V|T], Trimmed) :-
+        (warnable_singleton(VN)
+          -> Trimmed = [VN|TT]
+        ;
+        Trimmed = TT
+        ),
         trim_singletons(T, TT).
+
+warnable_singleton(Name) :-
+    atom_codes(Name, NameCodes),
+    % _ and _ Upper are not warnable
+    NameCodes = [First|Rest],
+    ([First] \="_"
+      -> true
+    ;
+    Rest = []
+      -> true
+    ;
+    Rest = [Second|_],
+    \+ uppercase_letter_code(Second)
+      -> true
+    ).
 
 compile_stream_term(_, end_of_file, Mode):-
         !,

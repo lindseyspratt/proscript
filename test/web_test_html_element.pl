@@ -19,9 +19,11 @@ test('HTMLElement', 'lang of test1 finds empty string', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_property(_, E, lang,'').
 
-test('HTMLElement', 'offsetHeight of test1 finds value 19', succeeded) :-
+test('HTMLElement', 'offsetHeight of test1 finds value 20 or 21', succeeded) :-
     dom_element_attribute_value(E, id, test1),
-    dom_object_property(_, E, offsetHeight, 21).
+    dom_object_property(_, E, offsetHeight, X),
+    (X = 20;X = 21),
+    !.
 
 test('HTMLElement', 'offsetLeft of test1 finds value 0', succeeded) :-
     dom_element_attribute_value(E, id, test1),

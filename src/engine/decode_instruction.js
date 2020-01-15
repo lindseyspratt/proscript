@@ -148,8 +148,8 @@ function decode_instruction_general(predicateID, codePosition, code) {
     }
 
     let op = code[codePosition];
-    let instruction = '';
-    let instructionSize = -1;
+    let instruction;
+    let instructionSize;
     let goalPredicate = 'none';
 
     switch(op) {

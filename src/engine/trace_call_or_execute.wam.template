@@ -1,0 +1,4 @@
+    (state.trace_call === "trace" || state.trace_call === "leap_trace") &&
+    ! {{1 @ Functor => Functor}}.startsWith("debugger:") && ! {{1 @ Functor => Functor}}.startsWith("system:$trace") &&
+    ! state.foreign_retry &&
+    {{1 @ Functor => Functor}} !== "true" && {{1 @ Functor => Functor}} !== "system:true" && state.trace_predicate  // trace_or_call_execute({{1 @ Functor => Functor}})
