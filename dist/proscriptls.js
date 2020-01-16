@@ -4281,7 +4281,7 @@ function predicate_copy_local_storage_to_memory_file(key, memfile) {
 
     return unify(memfile, memfileCreated);
 }
-// File wam.js
+// File wam/wam.js
 "use strict";
 
 /* For general documentation, see wam_compiler.pl
@@ -4454,20 +4454,6 @@ function abort(why)
     throw why;
 }
 
-function bind(a, b)
-{
-    if (TAG(a) === TAG_REF && (TAG(b) !== TAG_REF || VAL(b) < VAL(a)))
-    {
-        memory[VAL(a)] = b;
-        trail(a);
-    }
-    else
-    {
-        memory[VAL(b)] = a;
-        trail(b);
-    }
-}
-
 function tidy_trail()
 {
     let t = memory[state.B + memory[state.B] + CP_TR];
@@ -4486,17 +4472,6 @@ function tidy_trail()
             state.TR = state.TR - 1;
         }
     }   
-}
-
-function trail(v)
-{
-    if (v < state.HB || (state.H < v && v < state.B))
-    {
-        memory[state.TR++] = v;
-    }
-    else
-    {
-    }
 }
 
 function unwind_trail(from, to)
@@ -4584,21 +4559,6 @@ function unify(a, b)
     return !failed;
 }
 
-function deref(p)
-{
-    while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
-    {
-        let q = memory[VAL(p)];
-        if (q === undefined) // FIXME: Check that q =< p?
-        {
-            abort("Bad memory access: @" + p);
-        }
-        else
-            p = q;
-    }
-    return p;
-}
-
 // noinspection JSUnusedGlobalSymbols
 function explicit_deref(p)
 {
@@ -4613,26 +4573,6 @@ function explicit_deref(p)
             p = q;
     }
     return p;
-}
-
-
-// This should be a macro
-/**
- * @return {number}
- */
-function TAG(p)
-{
-    // >>> is unsigned-right-shift. Nice.
-    return (p >>> WORD_BITS) & TAG_MASK;
-}
-
-// This should be a macro
-/**
- * @return {number}
- */
-function VAL(p)
-{
-    return p & ((1 << WORD_BITS)-1);
 }
 
 function ftable_arity(ftor) {
@@ -4688,29 +4628,6 @@ function predicate_set_backtrack_frame(B) {
     return true;
 }
 
-// Returns a <STR, f/n> cell. This MUST be followed (eventually) by n args. Attempting to print the term (or otherwise use) the term before then will result in chaos
-// ftor must have the ATM tag!
-function alloc_structure(ftor)
-{
-    let tmp = state.H;
-    memory[state.H++] = ftor;
-    if(state.H > maxHeapSize) {
-        maxHeapSize = state.H;
-    }
-    return tmp ^ (TAG_STR << WORD_BITS);
-}
-
-function alloc_var()
-{
-    let result = state.H ^ (TAG_REF << WORD_BITS);
-    memory[state.H] = result;    
-    state.H++;
-    if(state.H > maxHeapSize) {
-        maxHeapSize = state.H;
-    }
-    return result;
-}
-
 function alloc_list()
 {
     let result = (state.H+1) ^ (TAG_LST << WORD_BITS);
@@ -4733,40 +4650,6 @@ function add_to_call_log(msg) {
     }
     call_log.push(currentPredicateString + ": " + msg);
 }
-
-function wam_complete_call_or_execute(predicate) {
-   if (predicate.clauses && predicate.clause_keys && predicate.clause_keys.length > 0
-           && predicate.clauses[predicate.clause_keys[0]]) {
-        //stdout("Complete " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
-//        add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
-        state.B0 = state.B;
-        state.num_of_args = ftable[code[state.P + 1]][1];
-        state.current_predicate = predicate;
-        let key = (predicate.index) ? predicate.index : predicate.clause_keys[0];
-        code = predicate.clauses[key].code;
-       if(! code) {
-           throw 'code is undefined';
-       }
-
-       state.P = 0;
-       return true;
-    } else {
-        return false;
-    }
-}
-
-function wam_setup_and_call_foreign() {
-//    add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
-
-    state.num_of_args = ftable[code[state.P+1]][1];
-    let args = new Array(state.num_of_args);
-    for (let i = 0; i < state.num_of_args; i++)
-        args[i] = deref(register[i]);
-    let result = foreign_predicates[code[state.P+1]].apply(null, args);
-    state.foreign_retry = false;
-    return result;
-}
-
 
 function wam_create_choicepoint(nextCP, prefix) {
     // 'n' (memory[newB]) is the number of slots of the dynamic initial portion of the choicepoint frame.
@@ -5339,7 +5222,7 @@ function log(target, msg) {
         }
     }
 }
-// File wam_core.js
+// File wam/wam_core.js
 "use strict";
 
 let memory = new Array(HEAP_SIZE + STACK_SIZE + TRAIL_SIZE);
@@ -5349,6 +5232,215 @@ let state;
 
 // Stack for managing cleanup handlers needed during a cut
 let cleanups = [];
+
+/**
+ * @return {number}
+ */
+function TAG(p)
+{
+    let result;
+        // result = TAG(p)
+    // >>> is unsigned-right-shift. Nice.
+    result = (p >>> WORD_BITS) & TAG_MASK;
+
+    return result;
+}
+
+/**
+ * @return {number}
+ */
+function VAL(p)
+{
+    let result;
+        // result = VAL(p)
+    result = p & ((1 << WORD_BITS)-1);
+
+    return result;
+}
+
+
+function deref(p)
+{
+    let result;
+        // BEGIN: result = deref(p);
+    let localP = p;
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    result = localP;
+    // END: result = deref(p);
+
+    return result;
+}
+
+function alloc_var()
+{
+    let result;
+        // BEGIN: result = alloc_var()
+    result = state.H ^ (TAG_REF << WORD_BITS);
+    memory[state.H] = result;
+    state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    // END: result = alloc_var()
+
+    return result;
+}
+
+// Returns a <STR, f/n> cell. This MUST be followed (eventually) by n args. Attempting to print the term (or otherwise use) the term before then will result in chaos
+// ftor must have the ATM tag!
+function alloc_structure(ftor)
+{
+    let result;
+    // BEGIN: result = alloc_structure(ftor)
+    let tmp = state.H;
+    memory[state.H++] = ftor;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    result = tmp ^ (TAG_STR << WORD_BITS);
+// END: result = alloc_structure(ftor)
+
+    return result;
+}
+
+function trail(v)
+{
+     // BEGIN: trail(v)
+    if (v < state.HB || (state.H < v && v < state.B))
+    {
+        memory[state.TR++] = v;
+    }
+    else
+    {
+    }
+// END: trail(v)
+
+}
+
+function bind(a, b)
+{
+    // BEGIN bind(a, b)
+    let aWord = a;
+    let bWord = b;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(a, b)
+}
 
 function wam_setup_trace_call(target_ftor_ofst) {
     // Create a 'traceArgStructure' for 'X(A0, ..., An-1)', copying
@@ -5571,8 +5663,30 @@ function wam1()
                         };
 
                         //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
-                        let result =
-                            wam_complete_call_or_execute(predicate);
+                        let result;
+
+                        
+// complete_call_or_execute(predicate, result)
+   if (predicate.clauses && predicate.clause_keys && predicate.clause_keys.length > 0
+           && predicate.clauses[predicate.clause_keys[0]]) {
+        //stdout("Complete " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
+//        add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+        state.B0 = state.B;
+        state.num_of_args = ftable[code[state.P + 1]][1];
+        state.current_predicate = predicate;
+        let key = (predicate.index) ? predicate.index : predicate.clause_keys[0];
+        code = predicate.clauses[key].code;
+       if(! code) {
+           throw 'code is undefined';
+       }
+
+       state.P = 0;
+       result = true;
+    } else {
+       result = false;
+    }
+
+
                         if (!result && !backtrack()) {
                             return wamExit(false);
                         }
@@ -5589,7 +5703,20 @@ function wam1()
                             offset: state.P + 3
                         };
                         //stdout("Calling (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
-                        let result = wam_setup_and_call_foreign();
+                        let result;
+
+                        
+// setup_and_call_foreign(result)
+//    add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+    state.num_of_args = ftable[code[state.P+1]][1];
+    let args = new Array(state.num_of_args);
+    for (let i = 0; i < state.num_of_args; i++)
+        args[i] = deref(register[i]);
+    result = foreign_predicates[code[state.P+1]].apply(null, args);
+    state.foreign_retry = false;
+
+
+
                         if (result)
                             state.P = state.P + 3;
                         else if (!backtrack()) {
@@ -5637,14 +5764,49 @@ function wam1()
                         // No need to save continuation for execute
 
                         //stdout("Executing " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
-                        let result =
-                            wam_complete_call_or_execute(predicate);
+                        let result;
+
+                        
+// complete_call_or_execute(predicate, result)
+   if (predicate.clauses && predicate.clause_keys && predicate.clause_keys.length > 0
+           && predicate.clauses[predicate.clause_keys[0]]) {
+        //stdout("Complete " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
+//        add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+        state.B0 = state.B;
+        state.num_of_args = ftable[code[state.P + 1]][1];
+        state.current_predicate = predicate;
+        let key = (predicate.index) ? predicate.index : predicate.clause_keys[0];
+        code = predicate.clauses[key].code;
+       if(! code) {
+           throw 'code is undefined';
+       }
+
+       state.P = 0;
+       result = true;
+    } else {
+       result = false;
+    }
+
+
                         if (!result && !backtrack()) {
                             return wamExit(false);
                         }
                     } else if (foreign_predicates[code[state.P + 1]] !== undefined) {
                         //stdout("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
-                        let result = wam_setup_and_call_foreign();
+                        let result;
+
+                        
+// setup_and_call_foreign(result)
+//    add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+    state.num_of_args = ftable[code[state.P+1]][1];
+    let args = new Array(state.num_of_args);
+    for (let i = 0; i < state.num_of_args; i++)
+        args[i] = deref(register[i]);
+    result = foreign_predicates[code[state.P+1]].apply(null, args);
+    state.foreign_retry = false;
+
+
+
                         if (result) {
                             state.current_predicate = state.CP.predicate;
                             code = state.CP.code;
@@ -5722,11 +5884,150 @@ function wam1()
             // onto the stack to avoid dangling references to things that are about to be cleaned up
             if (memory[register_location] < state.E) {
                 // No, so we can just behave like put_value
-                register[code[state.P + 2]] = deref(memory[register_location])
+
+                    // BEGIN: register[code[state.P + 2]] = deref(memory[register_location]);
+    let localP = memory[register_location];
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    register[code[state.P + 2]] = localP;
+    // END: register[code[state.P + 2]] = deref(memory[register_location]);
+
+
             } else {
                 // Yes, so we need to push a new variable instead
-                let v = alloc_var();
-                bind(v, memory[register_location]);
+                let v;
+                    // BEGIN: v = alloc_var()
+    v = state.H ^ (TAG_REF << WORD_BITS);
+    memory[state.H] = v;
+    state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    // END: v = alloc_var()
+
+
+
+                // BEGIN bind(v, memory[register_location])
+    let aWord = v;
+    let bWord = memory[register_location];
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(v, memory[register_location])
+
                 register[code[state.P + 2]] = v;
             }
             state.P += 3;
@@ -5744,7 +6045,15 @@ function wam1()
             continue;
 
         case 12: // put_structure
-            register[code[state.P+2]] = alloc_structure(code[state.P+1] ^ (TAG_ATM << WORD_BITS));
+            // BEGIN: register[code[state.P+2]] = alloc_structure(code[state.P+1] ^ (TAG_ATM << WORD_BITS))
+    let tmp = state.H;
+    memory[state.H++] = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    register[code[state.P+2]] = tmp ^ (TAG_STR << WORD_BITS);
+// END: register[code[state.P+2]] = alloc_structure(code[state.P+1] ^ (TAG_ATM << WORD_BITS))
+
             state.mode = WRITE;
             state.P += 3;
             continue;
@@ -5793,7 +6102,45 @@ function wam1()
 
         case 17: // get_constant C from Ai
             // First, get what is in Ai into sym
-            sym = deref(register[code[state.P+2]]);
+
+                // BEGIN: sym = deref(register[code[state.P+2]]);
+    let localP = register[code[state.P+2]];
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    sym = localP;
+    // END: sym = deref(register[code[state.P+2]]);
+
+
             // Then get arg. This is an atom index, not a <CON, i> cell. It needs to be made into the latter!
             arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
             state.P += 3;
@@ -5810,13 +6157,59 @@ function wam1()
             continue;
 
         case 18: // get_nil
-            sym = deref(register[code[state.P+1]]);
+        {
+                // BEGIN: sym = deref(register[code[state.P+1]]);
+    let localP = register[code[state.P+1]];
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    sym = localP;
+    // END: sym = deref(register[code[state.P+1]]);
+
+
             state.P += 1;
-            if (TAG(sym) === TAG_REF)
+            let symTag;
+
+                // symTag = TAG(sym)
+    // >>> is unsigned-right-shift. Nice.
+    symTag = (sym >>> WORD_BITS) & TAG_MASK;
+
+
+            if (symTag === TAG_REF)
                 bind(sym, NIL);
             else if (sym !== NIL)
                 if (!backtrack())
                     return wamExit(false);
+        }
             continue;
 
 

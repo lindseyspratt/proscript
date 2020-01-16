@@ -1,0 +1,3 @@
+    // {{2 @ Result => Result}} = TAG({{1 @ Word => Word }})
+    // >>> is unsigned-right-shift. Nice.
+    {{2 @ Result => Result}} = ({{1 @ Word => Word }} >>> WORD_BITS) & TAG_MASK;

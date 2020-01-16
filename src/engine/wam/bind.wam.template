@@ -1,0 +1,40 @@
+// BEGIN bind({{1 @ A => A}}, {{2 @ B => B}})
+    let aWord = {{1 @ A => A}};
+    let bWord = {{2 @ B => B}};
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+    {{'tag.wam.template' # [aWord, aTag]}}
+    if (aTag === TAG_REF) {
+        {{'tag.wam.template' # [bWord, bTag]}}
+        if (bTag !== TAG_REF)
+        {
+            {{'val.wam.template' # [aWord, aVal]}}
+            memory[aVal] = bWord;
+            {{'trail.wam.template' # [aWord]}}
+        }
+        else {
+            {{'val.wam.template' # [aWord, aVal]}}
+            {{'val.wam.template' # [bWord, bVal]}}
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                {{'trail.wam.template' # [aWord]}}
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                {{'trail.wam.template' # [bWord]}}
+            }
+        }
+    }
+    else
+    {
+        {{'val.wam.template' # [bWord, bVal]}}
+        memory[bVal] = aWord;
+        {{'trail.wam.template' # [bWord]}}
+    }
+// END bind({{1 @ A => A}}, {{2 @ B => B}})

@@ -5,29 +5,28 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Introduced template-based macros for WAM.&#10;&#10;Extracted wam and wam1 functions from wam.js to create wam.template and changed engine/Makefile to create wam_core.js from wam.template, trace_call_or_execute.wam.template, and advance_next_trace_conditionally.wam.template.&#10;Fixed wam_compiler.pl use of read_term/3 to be compatible with SWIPL 8.0.3 where read_term(A, B, [singleton(S)]) now returns all singletons of B in S, including ones that are not 'warnable' such as '_' and '_X'.&#10;Extended web_test_element.pl to check for height of 18 or 19 and web_test_html_element.pl to check for height of 20 or 21.">
-      <change afterPath="$PROJECT_DIR$/src/engine/advance_next_trace_conditionally.wam.template" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/engine/trace_call_or_execute.wam.template" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/engine/wam.template" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/engine/wam_core.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Reorganized wam code to engine/wam dir. Added more macro templates.">
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/Makefile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/alloc_structure.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/alloc_var.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/bind.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/complete_call_or_execute.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/deref.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/setup_and_call_foreign.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/tag.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/trail.wam.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/engine/wam/val.wam.template" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/decode_instruction.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/decode_instruction.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/object.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/object.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/wam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/wam_compiler.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/wam_compiler.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/web_test_element.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/web_test_element.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/web_test_html_element.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/web_test_html_element.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/advance_next_trace_conditionally.wam.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/advance_next_trace_conditionally.wam.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/trace_call_or_execute.wam.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/trace_call_or_execute.wam.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/wam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/wam.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/wam.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/wam.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/wam_core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/wam_core.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,17 +58,22 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/engine/wam" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="Errors" />
+    <property name="settings.editor.selected.configurable" value="preferences.fileTypes" />
     <property name="two.files.diff.last.used.folder" value="$PROJECT_DIR$/../mosaic-pls/proscriptls_sdk/terminal" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/engine/wam" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/engine/wam" />
       <recent name="$PROJECT_DIR$/terminal" />
     </key>
   </component>
@@ -105,7 +109,7 @@
       <workItem from="1576258045082" duration="35000" />
       <workItem from="1576261683401" duration="12599000" />
       <workItem from="1577740645125" duration="5608000" />
-      <workItem from="1579030584329" duration="12837000" />
+      <workItem from="1579030584329" duration="24494000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -177,7 +181,14 @@
       <option name="project" value="LOCAL" />
       <updated>1577935247723</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Introduced template-based macros for WAM.&#10;&#10;Extracted wam and wam1 functions from wam.js to create wam.template and changed engine/Makefile to create wam_core.js from wam.template, trace_call_or_execute.wam.template, and advance_next_trace_conditionally.wam.template.&#10;Fixed wam_compiler.pl use of read_term/3 to be compatible with SWIPL 8.0.3 where read_term(A, B, [singleton(S)]) now returns all singletons of B in S, including ones that are not 'warnable' such as '_' and '_X'.&#10;Extended web_test_element.pl to check for height of 18 or 19 and web_test_html_element.pl to check for height of 20 or 21.">
+      <created>1579115697992</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1579115697992</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TodoView">
@@ -249,14 +260,19 @@
       <screen x="0" y="23" width="2048" height="1052" />
     </state>
     <state x="767" y="394" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.23.2048.1052@0.23.2048.1052" timestamp="1579115431563" />
-    <state x="158" y="23" width="1890" height="1052" key="CommitChangelistDialog2" timestamp="1579114793515">
+    <state x="158" y="23" width="1890" height="1050" key="CommitChangelistDialog2" timestamp="1579191218172">
       <screen x="0" y="23" width="2048" height="1052" />
     </state>
-    <state x="158" y="23" width="1890" height="1052" key="CommitChangelistDialog2/0.23.2048.1052@0.23.2048.1052" timestamp="1579114793515" />
-    <state x="533" y="188" key="SettingsEditor" timestamp="1579115313848">
+    <state x="158" y="23" width="1890" height="1050" key="CommitChangelistDialog2/0.23.2048.1050@0.23.2048.1050" timestamp="1579115697634" />
+    <state x="158" y="23" width="1890" height="1052" key="CommitChangelistDialog2/0.23.2048.1052@0.23.2048.1052" timestamp="1579191218172" />
+    <state x="533" y="188" key="SettingsEditor" timestamp="1579191155892">
       <screen x="0" y="23" width="2048" height="1052" />
     </state>
-    <state x="533" y="188" key="SettingsEditor/0.23.2048.1052@0.23.2048.1052" timestamp="1579115313848" />
+    <state x="533" y="188" key="SettingsEditor/0.23.2048.1052@0.23.2048.1052" timestamp="1579191155892" />
+    <state x="624" y="270" key="Vcs.Push.Dialog.v2" timestamp="1579115712925">
+      <screen x="0" y="23" width="2048" height="1050" />
+    </state>
+    <state x="624" y="270" key="Vcs.Push.Dialog.v2/0.23.2048.1050@0.23.2048.1050" timestamp="1579115712925" />
     <state x="680" y="160" width="687" height="777" key="find.popup" timestamp="1579104996326">
       <screen x="0" y="23" width="2048" height="1052" />
     </state>

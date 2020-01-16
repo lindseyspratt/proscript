@@ -170,20 +170,6 @@ function abort(why)
     throw why;
 }
 
-function bind(a, b)
-{
-    if (TAG(a) === TAG_REF && (TAG(b) !== TAG_REF || VAL(b) < VAL(a)))
-    {
-        memory[VAL(a)] = b;
-        trail(a);
-    }
-    else
-    {
-        memory[VAL(b)] = a;
-        trail(b);
-    }
-}
-
 function tidy_trail()
 {
     let t = memory[state.B + memory[state.B] + CP_TR];
@@ -202,19 +188,6 @@ function tidy_trail()
             state.TR = state.TR - 1;
         }
     }   
-}
-
-function trail(v)
-{
-    if (v < state.HB || (state.H < v && v < state.B))
-    {
-        debug_msg("Trailing " + v);
-        memory[state.TR++] = v;
-    }
-    else
-    {
-        debug_msg("NOT Trailing " + v + " because neither v < " + state.HB + " nor " + state.H + " < v < " + state.B);
-    }
 }
 
 function unwind_trail(from, to)
@@ -303,22 +276,6 @@ function unify(a, b)
     return !failed;
 }
 
-function deref(p)
-{
-    while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
-    {
-        let q = memory[VAL(p)];
-        if (q === undefined) // FIXME: Check that q =< p?
-        {
-            debug_msg("Illegal memory access in deref: " + hex(p) + ". Dumping...");
-            abort("Bad memory access: @" + p);
-        }
-        else
-            p = q;
-    }
-    return p;
-}
-
 // noinspection JSUnusedGlobalSymbols
 function explicit_deref(p)
 {
@@ -334,26 +291,6 @@ function explicit_deref(p)
             p = q;
     }
     return p;
-}
-
-
-// This should be a macro
-/**
- * @return {number}
- */
-function TAG(p)
-{
-    // >>> is unsigned-right-shift. Nice.
-    return (p >>> WORD_BITS) & TAG_MASK;
-}
-
-// This should be a macro
-/**
- * @return {number}
- */
-function VAL(p)
-{
-    return p & ((1 << WORD_BITS)-1);
 }
 
 function ftable_arity(ftor) {
@@ -413,29 +350,6 @@ function predicate_set_backtrack_frame(B) {
     return true;
 }
 
-// Returns a <STR, f/n> cell. This MUST be followed (eventually) by n args. Attempting to print the term (or otherwise use) the term before then will result in chaos
-// ftor must have the ATM tag!
-function alloc_structure(ftor)
-{
-    let tmp = state.H;
-    memory[state.H++] = ftor;
-    if(state.H > maxHeapSize) {
-        maxHeapSize = state.H;
-    }
-    return tmp ^ (TAG_STR << WORD_BITS);
-}
-
-function alloc_var()
-{
-    let result = state.H ^ (TAG_REF << WORD_BITS);
-    memory[state.H] = result;    
-    state.H++;
-    if(state.H > maxHeapSize) {
-        maxHeapSize = state.H;
-    }
-    return result;
-}
-
 function alloc_list()
 {
     let result = (state.H+1) ^ (TAG_LST << WORD_BITS);
@@ -458,40 +372,6 @@ function add_to_call_log(msg) {
     }
     call_log.push(currentPredicateString + ": " + msg);
 }
-
-function wam_complete_call_or_execute(predicate) {
-   if (predicate.clauses && predicate.clause_keys && predicate.clause_keys.length > 0
-           && predicate.clauses[predicate.clause_keys[0]]) {
-        //stdout("Complete " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
-//        add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
-        state.B0 = state.B;
-        state.num_of_args = ftable[code[state.P + 1]][1];
-        state.current_predicate = predicate;
-        let key = (predicate.index) ? predicate.index : predicate.clause_keys[0];
-        code = predicate.clauses[key].code;
-       if(! code) {
-           throw 'code is undefined';
-       }
-
-       state.P = 0;
-       return true;
-    } else {
-        return false;
-    }
-}
-
-function wam_setup_and_call_foreign() {
-//    add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
-
-    state.num_of_args = ftable[code[state.P+1]][1];
-    let args = new Array(state.num_of_args);
-    for (let i = 0; i < state.num_of_args; i++)
-        args[i] = deref(register[i]);
-    let result = foreign_predicates[code[state.P+1]].apply(null, args);
-    state.foreign_retry = false;
-    return result;
-}
-
 
 function wam_create_choicepoint(nextCP, prefix) {
     // 'n' (memory[newB]) is the number of slots of the dynamic initial portion of the choicepoint frame.

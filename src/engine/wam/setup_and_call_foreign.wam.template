@@ -1,0 +1,10 @@
+
+// setup_and_call_foreign(result)
+//    add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+    state.num_of_args = ftable[code[state.P+1]][1];
+    let args = new Array(state.num_of_args);
+    for (let i = 0; i < state.num_of_args; i++)
+        args[i] = deref(register[i]);
+    {{ 1 @ Result => Result}} = foreign_predicates[code[state.P+1]].apply(null, args);
+    state.foreign_retry = false;
+

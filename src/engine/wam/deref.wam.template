@@ -1,0 +1,27 @@
+    // BEGIN: {{2 @ Result => Result}} = deref({{1 @ P => P}});
+    let localP = {{1 @ P => P}};
+    let tagResult;
+
+    {{'tag.wam.template' # [localP, tagResult]}}
+
+    let valResult;
+
+    {{'val.wam.template' # [localP, valResult]}}
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            debug_msg("Illegal memory access in deref: " + hex(localP) + ". Dumping...");
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+    {{'tag.wam.template' # [localP, tagResult]}}
+    {{'val.wam.template' # [localP, valResult]}}
+    }
+
+    {{2 @ Result => Result}} = localP;
+    // END: {{2 @ Result => Result}} = deref({{1 @ P => P}});

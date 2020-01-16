@@ -21,7 +21,7 @@ clean:
 dist/proscriptls_state.js: src/system/* src/tools/wam_bootstrap.pl
 		cd src/system && make
 
-dist/proscriptls_engine.js: src/engine/* src/tools/js_preprocess.pl
+dist/proscriptls_engine.js: src/engine/* src/engine/wam/*.template src/tools/js_preprocess.pl
 		cd src/engine && make
 
 # invoke node_goal.js to check that there are no dangling references in state recorded in dist/proscriptls_state.js.

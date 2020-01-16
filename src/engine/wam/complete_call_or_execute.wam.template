@@ -1,0 +1,20 @@
+
+// complete_call_or_execute(predicate, result)
+   if ({{ 1 @ Pred => Pred}}.clauses && {{ 1 @ Pred => Pred}}.clause_keys && {{ 1 @ Pred => Pred}}.clause_keys.length > 0
+           && {{ 1 @ Pred => Pred}}.clauses[{{ 1 @ Pred => Pred}}.clause_keys[0]]) {
+        //stdout("Complete " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
+//        add_to_call_log(atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+        state.B0 = state.B;
+        state.num_of_args = ftable[code[state.P + 1]][1];
+        state.current_predicate = {{ 1 @ Pred => Pred}};
+        let key = ({{ 1 @ Pred => Pred}}.index) ? {{ 1 @ Pred => Pred}}.index : {{ 1 @ Pred => Pred}}.clause_keys[0];
+        code = {{ 1 @ Pred => Pred}}.clauses[key].code;
+       if(! code) {
+           throw 'code is undefined';
+       }
+
+       state.P = 0;
+       {{ 2 @ Result => Result}} = true;
+    } else {
+       {{ 2 @ Result => Result}} = false;
+    }

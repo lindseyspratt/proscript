@@ -1,0 +1,2 @@
+    // {{2 @ Result => Result}} = VAL({{1 @ Word => Word }})
+    {{2 @ Result => Result}} = {{1 @ Word => Word }} & ((1 << WORD_BITS)-1);

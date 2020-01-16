@@ -1,0 +1,8 @@
+// BEGIN: {{2 @ Result => Result}} = alloc_structure({{1 @ FTOR => FTOR}})
+    let tmp = state.H;
+    memory[state.H++] = {{1 @ FTOR => FTOR}};
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    {{2 @ Result => Result}} = tmp ^ (TAG_STR << WORD_BITS);
+// END: {{2 @ Result => Result}} = alloc_structure({{1 @ FTOR => FTOR}})

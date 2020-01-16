@@ -1,0 +1,8 @@
+    // BEGIN: {{1 @ Result => Result}} = alloc_var()
+    {{1 @ Result => Result}} = state.H ^ (TAG_REF << WORD_BITS);
+    memory[state.H] = {{1 @ Result => Result}};
+    state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    // END: {{1 @ Result => Result}} = alloc_var()

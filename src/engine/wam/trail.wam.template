@@ -1,0 +1,11 @@
+// BEGIN: trail({{ 1 @ V => V}})
+    if ({{ 1 @ V => V}} < state.HB || (state.H < {{ 1 @ V => V}} && {{ 1 @ V => V}} < state.B))
+    {
+        debug_msg("Trailing " + {{ 1 @ V => V}});
+        memory[state.TR++] = {{ 1 @ V => V}};
+    }
+    else
+    {
+        debug_msg("NOT Trailing " + {{ 1 @ V => V}} + " because neither {{ 1 @ V => V}} < " + state.HB + " nor " + state.H + " < {{ 1 @ V => V}} < " + state.B);
+    }
+// END: trail({{ 1 @ V => V}})
