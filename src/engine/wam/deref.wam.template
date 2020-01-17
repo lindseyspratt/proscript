@@ -1,3 +1,4 @@
+{
     // BEGIN: {{2 @ Result => Result}} = deref({{1 @ P => P}});
     let localP = {{1 @ P => P}};
     let tagResult;
@@ -19,9 +20,10 @@
         else
             localP = q;
 
-    {{'tag.wam.template' # [localP, tagResult]}}
-    {{'val.wam.template' # [localP, valResult]}}
+        {{'tag.wam.template' # [localP, tagResult]}}
+        {{'val.wam.template' # [localP, valResult]}}
     }
 
     {{2 @ Result => Result}} = localP;
     // END: {{2 @ Result => Result}} = deref({{1 @ P => P}});
+}

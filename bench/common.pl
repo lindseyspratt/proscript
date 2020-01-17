@@ -1,11 +1,11 @@
 % A generic benchmark interface
 
-main_test(Count) :-
+main_test(Test, Functor, Count) :-
     !,
-	do_bench(Count).
+	do_bench(Test, Functor, Count).
 
 
-do_bench(Count) :-
+do_bench(Test, Functor, Count) :-
     statistics,
 	get_cpu_time(T1),
 	iterate_bench(Count),
@@ -19,7 +19,18 @@ do_bench(Count) :-
 	write(' iters, total time : '),
 	write(Time),
 	write(' msec'),
-	nl.
+	nl,
+	statistics_max_heap(Heap),
+	record_info(Functor, Test,TimeIt,Time,Heap).
+
+record_info(Functor, Test,Iter,Total,Heap) :-
+    %atom_concat(Functor, '.pl', File),
+    %open(File, write, Stream),
+    Goal =.. [Functor,Test,Iter,Total,Heap],
+    writeq(Goal), write('.\n').
+    %close(Stream).
+
+
 
 iterate_bench(Count) :-
 	rep(Count, Last),

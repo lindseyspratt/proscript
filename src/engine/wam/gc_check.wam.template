@@ -1,0 +1,4 @@
+// gc_check({{1 @ T => T}})
+// noinspection JSBitwiseOperatorUsage
+if ({{1 @ T => T}} & M_BIT)
+    abort("GC exception: " + hex({{1 @ T => T}}) + " has M_BIT set");

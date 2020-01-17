@@ -636,13 +636,6 @@ function unify_number(numberJS, numberPL) {
     }
 }
 
-function gc_check(t)
-{
-    // noinspection JSBitwiseOperatorUsage
-    if (t & M_BIT)
-        abort("GC exception: " + hex(t) + " has M_BIT set");
-}
-
 function check_stacks(m)
 {
     gc_debug("Checking stacks " + m);

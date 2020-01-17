@@ -1,0 +1,15 @@
+{
+// BEGIN: unwind_trail({{1 @ From => From}}, {{2 @ To => To}})
+debug_msg("unwinding trail from " + {{1 @ From => From}} + " to " + {{2 @ To => To}});
+
+// noinspection UnnecessaryLocalVariableJS
+let unwindFrom = {{1 @ From => From}};
+// noinspection UnnecessaryLocalVariableJS
+let unwindTo = {{2 @ To => To}};
+
+for (let i = unwindFrom; i < unwindTo; i++)
+{
+    memory[memory[i]] = memory[i] ^ (TAG_REF << WORD_BITS);
+}
+// END: unwind_trail({{1 @ From => From}}, {{2 @ To => To}})
+}

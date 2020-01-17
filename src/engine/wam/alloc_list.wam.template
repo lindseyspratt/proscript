@@ -1,0 +1,8 @@
+// BEGIN: {{1 @ Result => Result}} = alloc_list()
+{{1 @ Result => Result}} = (state.H+1) ^ (TAG_LST << WORD_BITS);
+memory[state.H] = {{1 @ Result => Result}};
+state.H++;
+if(state.H > maxHeapSize) {
+    maxHeapSize = state.H;
+}
+// END: {{1 @ Result => Result}} = alloc_list()

@@ -190,151 +190,11 @@ function tidy_trail()
     }   
 }
 
-function unwind_trail(from, to)
-{
-    debug_msg("unwinding trail from " + from + " to " + to);
-    for (let i = from; i < to; i++)
-    {
-        memory[memory[i]] = memory[i] ^ (TAG_REF << WORD_BITS);
-    }
-}
-
-// Returns boolean
-function unify(a, b)
-{
-    let PDL = [];
-
-    PDL.push(a);
-    PDL.push(b);
-    let failed = false;
-    while (PDL.length !== 0 && !failed)
-    {
-        let d1 = deref(PDL.pop());
-        let d2 = deref(PDL.pop());
-        // if d1 == d2 then just proceed with the rest of the PDL. Otherwise we need to try and unify them, or fail
-        if (d1 !== d2)
-        {
-            let type1 = TAG(d1);
-            let val1 = VAL(d1);
-            let type2 = TAG(d2);
-            let val2 = VAL(d2);
-            if (type1 === TAG_REF)
-            {
-                bind(d1, d2);
-            }
-            else
-            {
-                switch(type2)
-                {
-                case TAG_REF:
-                    bind(d1, d2);
-                    break;
-                case TAG_ATM:
-                case TAG_INT:
-                    failed = true;
-                    break;
-                case TAG_FLT:
-                    if (type1 === TAG_FLT)
-                    {
-                        debug(floats[val1] + " vs " + floats[val2]);
-                    }
-                    failed = true;
-                    break;
-                case TAG_LST:
-                    if (type1 === TAG_LST)
-                    {                        
-                        PDL.push(memory[val1]); // unify heads
-                        PDL.push(memory[val2]);
-                        PDL.push(memory[val1+1]); // unify tails
-                        PDL.push(memory[val2+1]);
-                    }
-                    else
-                        failed = true; // list and non-list
-                    break;
-                case TAG_STR:
-                    if (type1 === TAG_STR)
-                    {
-                        let f1 = VAL(memory[val1]);
-                        let f2 = VAL(memory[val2]);
-                        if (f1 === f2)
-                        {
-                            for (let i = 0; i < ftable[f1][1]; i++)
-                            {
-                                PDL.push(val1 + 1 + i);
-                                PDL.push(val2 + 1 + i);
-                            }
-                        }
-                        else
-                            failed = true; // different functors
-                    }
-                    else
-                        failed = true; // str and atom/list
-                }
-            }
-        }
-    }
-    return !failed;
-}
-
-// noinspection JSUnusedGlobalSymbols
-function explicit_deref(p)
-{
-    while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
-    {
-        let q = memory[VAL(p)];
-        debug_msg("Dereferencing " + hex(p) + " -> " + hex(q));
-        if (q === undefined)
-        {
-            abort("Bad memory access: @" + p);
-        }
-        else
-            p = q;
-    }
-    return p;
-}
-
 function ftable_arity(ftor) {
     if(ftable[ftor] === undefined) {
         throw('no ftable entry at ' + ftor);
     }
     return ftable[ftor][1];
-}
-
-// Ideally this would be inlined, but javascript does not support macros. Ultimately this could be generated dynamically.
-function backtrack()
-{    
-    debug_msg("Backtracking. State.B is " + state.B);
-    if (state.B <= HEAP_SIZE)
-    {
-        return false;
-    }
-    debug_msg("Choicepoint has " + memory[state.B] + " saved args");
-    state.B0 = memory[state.B + memory[state.B] + CP_B0];
-    // Also unwind any trailed bindings
-    unwind_trail(memory[state.B + memory[state.B] + CP_TR], state.TR);
-    let next = memory[state.B + memory[state.B] + CP_Next];
-    state.P = next.offset;
-    code = next.code;
-    if(! code) {
-        throw 'code is undefined';
-    }
-
-    state.current_predicate = next.predicate;
-    if(state.current_predicate) {
-        state.num_of_args = ftable[state.current_predicate.key][1];
-    }
-
-    if(state.trace_call !== 'no_trace') {
-        let traceCallPL = memory[state.B + memory[state.B] + CP_TC];
-        state.trace_call = atable[VAL(traceCallPL)];
-        if(! state.trace_call) {
-            throw 'backtrack trace_call is undefined';
-        }
-        state.trace_info = memory[state.B + memory[state.B] + CP_TI];
-    }
-    debug_msg("Set state.trace_call to " + state.trace_call);
-    debug_msg("Set state.P to " + state.P);
-    return true;
 }
 
 function predicate_get_backtrack_frame(B) {
@@ -348,17 +208,6 @@ function predicate_set_backtrack_frame(B) {
     state.B = VAL(B);
     //stdout('Backtrack frame set to ' + state.B + '\n');
     return true;
-}
-
-function alloc_list()
-{
-    let result = (state.H+1) ^ (TAG_LST << WORD_BITS);
-    memory[state.H] = result;    
-    state.H++;
-    if(state.H > maxHeapSize) {
-        maxHeapSize = state.H;
-    }
-    return result;
 }
 
 let call_log = [];

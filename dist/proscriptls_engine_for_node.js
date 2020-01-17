@@ -4474,145 +4474,11 @@ function tidy_trail()
     }   
 }
 
-function unwind_trail(from, to)
-{
-    for (let i = from; i < to; i++)
-    {
-        memory[memory[i]] = memory[i] ^ (TAG_REF << WORD_BITS);
-    }
-}
-
-// Returns boolean
-function unify(a, b)
-{
-    let PDL = [];
-
-    PDL.push(a);
-    PDL.push(b);
-    let failed = false;
-    while (PDL.length !== 0 && !failed)
-    {
-        let d1 = deref(PDL.pop());
-        let d2 = deref(PDL.pop());
-        // if d1 == d2 then just proceed with the rest of the PDL. Otherwise we need to try and unify them, or fail
-        if (d1 !== d2)
-        {
-            let type1 = TAG(d1);
-            let val1 = VAL(d1);
-            let type2 = TAG(d2);
-            let val2 = VAL(d2);
-            if (type1 === TAG_REF)
-            {
-                bind(d1, d2);
-            }
-            else
-            {
-                switch(type2)
-                {
-                case TAG_REF:
-                    bind(d1, d2);
-                    break;
-                case TAG_ATM:
-                case TAG_INT:
-                    failed = true;
-                    break;
-                case TAG_FLT:
-                    if (type1 === TAG_FLT)
-                    {
-                        debug(floats[val1] + " vs " + floats[val2]);
-                    }
-                    failed = true;
-                    break;
-                case TAG_LST:
-                    if (type1 === TAG_LST)
-                    {                        
-                        PDL.push(memory[val1]); // unify heads
-                        PDL.push(memory[val2]);
-                        PDL.push(memory[val1+1]); // unify tails
-                        PDL.push(memory[val2+1]);
-                    }
-                    else
-                        failed = true; // list and non-list
-                    break;
-                case TAG_STR:
-                    if (type1 === TAG_STR)
-                    {
-                        let f1 = VAL(memory[val1]);
-                        let f2 = VAL(memory[val2]);
-                        if (f1 === f2)
-                        {
-                            for (let i = 0; i < ftable[f1][1]; i++)
-                            {
-                                PDL.push(val1 + 1 + i);
-                                PDL.push(val2 + 1 + i);
-                            }
-                        }
-                        else
-                            failed = true; // different functors
-                    }
-                    else
-                        failed = true; // str and atom/list
-                }
-            }
-        }
-    }
-    return !failed;
-}
-
-// noinspection JSUnusedGlobalSymbols
-function explicit_deref(p)
-{
-    while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
-    {
-        let q = memory[VAL(p)];
-        if (q === undefined)
-        {
-            abort("Bad memory access: @" + p);
-        }
-        else
-            p = q;
-    }
-    return p;
-}
-
 function ftable_arity(ftor) {
     if(ftable[ftor] === undefined) {
         throw('no ftable entry at ' + ftor);
     }
     return ftable[ftor][1];
-}
-
-// Ideally this would be inlined, but javascript does not support macros. Ultimately this could be generated dynamically.
-function backtrack()
-{    
-    if (state.B <= HEAP_SIZE)
-    {
-        return false;
-    }
-    state.B0 = memory[state.B + memory[state.B] + CP_B0];
-    // Also unwind any trailed bindings
-    unwind_trail(memory[state.B + memory[state.B] + CP_TR], state.TR);
-    let next = memory[state.B + memory[state.B] + CP_Next];
-    state.P = next.offset;
-    code = next.code;
-    if(! code) {
-        throw 'code is undefined';
-    }
-
-    state.current_predicate = next.predicate;
-    if(state.current_predicate) {
-        state.num_of_args = ftable[state.current_predicate.key][1];
-    }
-
-    if(state.trace_call !== 'no_trace') {
-        let traceCallPL = memory[state.B + memory[state.B] + CP_TC];
-        state.trace_call = atable[VAL(traceCallPL)];
-        if(! state.trace_call) {
-            throw 'backtrack trace_call is undefined';
-        }
-        state.trace_info = memory[state.B + memory[state.B] + CP_TI];
-    }
-    return true;
 }
 
 function predicate_get_backtrack_frame(B) {
@@ -4626,17 +4492,6 @@ function predicate_set_backtrack_frame(B) {
     state.B = VAL(B);
     //stdout('Backtrack frame set to ' + state.B + '\n');
     return true;
-}
-
-function alloc_list()
-{
-    let result = (state.H+1) ^ (TAG_LST << WORD_BITS);
-    memory[state.H] = result;    
-    state.H++;
-    if(state.H > maxHeapSize) {
-        maxHeapSize = state.H;
-    }
-    return result;
 }
 
 let call_log = [];
@@ -5262,7 +5117,8 @@ function VAL(p)
 function deref(p)
 {
     let result;
-        // BEGIN: result = deref(p);
+    {
+    // BEGIN: result = deref(p);
     let localP = p;
     let tagResult;
 
@@ -5287,18 +5143,18 @@ function deref(p)
         else
             localP = q;
 
-        // tagResult = TAG(localP)
+            // tagResult = TAG(localP)
     // >>> is unsigned-right-shift. Nice.
     tagResult = (localP >>> WORD_BITS) & TAG_MASK;
 
-        // valResult = VAL(localP)
+            // valResult = VAL(localP)
     valResult = localP & ((1 << WORD_BITS)-1);
 
     }
 
     result = localP;
     // END: result = deref(p);
-
+}
     return result;
 }
 
@@ -5334,6 +5190,21 @@ function alloc_structure(ftor)
     return result;
 }
 
+function alloc_list()
+{
+    let result;
+    // BEGIN: result = alloc_list()
+result = (state.H+1) ^ (TAG_LST << WORD_BITS);
+memory[state.H] = result;
+state.H++;
+if(state.H > maxHeapSize) {
+    maxHeapSize = state.H;
+}
+// END: result = alloc_list()
+
+    return result;
+}
+
 function trail(v)
 {
      // BEGIN: trail(v)
@@ -5346,6 +5217,21 @@ function trail(v)
     }
 // END: trail(v)
 
+}
+
+function unwind_trail(from, to)
+{
+    {
+// BEGIN: unwind_trail(from, to)
+let unwindFrom = from;
+// noinspection UnnecessaryLocalVariableJS
+        let unwindTo = to;
+for (let i = unwindFrom; i < unwindTo; i++)
+{
+    memory[memory[i]] = memory[i] ^ (TAG_REF << WORD_BITS);
+}
+// END: unwind_trail(from, to)
+}
 }
 
 function bind(a, b)
@@ -5442,6 +5328,413 @@ function bind(a, b)
 // END bind(a, b)
 }
 
+function gc_check(t)
+{
+    // gc_check(t)
+// noinspection JSBitwiseOperatorUsage
+if (t & M_BIT)
+    abort("GC exception: " + hex(t) + " has M_BIT set");
+
+}
+
+// Returns boolean
+function unify(a, b)
+{
+    let PDL = [];
+
+    PDL.push(a);
+    PDL.push(b);
+    let failed = false;
+    while (PDL.length !== 0 && !failed)
+    {
+        let d1 = PDL.pop();
+        let d2 = PDL.pop();
+        {
+    // BEGIN: d1 = deref(d1);
+    let localP = d1;
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+            // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+            // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    d1 = localP;
+    // END: d1 = deref(d1);
+}
+        {
+    // BEGIN: d2 = deref(d2);
+    let localP = d2;
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+            // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+            // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    d2 = localP;
+    // END: d2 = deref(d2);
+}
+        // if d1 == d2 then just proceed with the rest of the PDL. Otherwise we need to try and unify them, or fail
+        if (d1 !== d2)
+        {
+            let type1;
+            let val1;
+            let type2;
+            let val2;
+                // type1 = TAG(d1)
+    // >>> is unsigned-right-shift. Nice.
+    type1 = (d1 >>> WORD_BITS) & TAG_MASK;
+
+                // val1 = VAL(d1)
+    val1 = d1 & ((1 << WORD_BITS)-1);
+
+                // type2 = TAG(d2)
+    // >>> is unsigned-right-shift. Nice.
+    type2 = (d2 >>> WORD_BITS) & TAG_MASK;
+
+                // val2 = VAL(d2)
+    val2 = d2 & ((1 << WORD_BITS)-1);
+
+            if (type1 === TAG_REF)
+            {
+                // BEGIN bind(d1, d2)
+    let aWord = d1;
+    let bWord = d2;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(d1, d2)
+            }
+            else
+            {
+                switch(type2)
+                {
+                    case TAG_REF:
+                        // BEGIN bind(d1, d2)
+    let aWord = d1;
+    let bWord = d2;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(d1, d2)
+                        break;
+                    case TAG_ATM:
+                    case TAG_INT:
+                        failed = true;
+                        break;
+                    case TAG_FLT:
+                        if (type1 === TAG_FLT)
+                        {
+                            debug(floats[val1] + " vs " + floats[val2]);
+                        }
+                        failed = true;
+                        break;
+                    case TAG_LST:
+                        if (type1 === TAG_LST)
+                        {
+                            PDL.push(memory[val1]); // unify heads
+                            PDL.push(memory[val2]);
+                            PDL.push(memory[val1+1]); // unify tails
+                            PDL.push(memory[val2+1]);
+                        }
+                        else
+                            failed = true; // list and non-list
+                        break;
+                    case TAG_STR:
+                        if (type1 === TAG_STR)
+                        {
+                            let f1;
+                            let f2;
+                                // f1 = VAL(memory[val1])
+    f1 = memory[val1] & ((1 << WORD_BITS)-1);
+
+                                // f2 = VAL(memory[val2])
+    f2 = memory[val2] & ((1 << WORD_BITS)-1);
+
+                            if (f1 === f2)
+                            {
+                                for (let i = 0; i < ftable[f1][1]; i++)
+                                {
+                                    PDL.push(val1 + 1 + i);
+                                    PDL.push(val2 + 1 + i);
+                                }
+                            }
+                            else
+                                failed = true; // different functors
+                        }
+                        else
+                            failed = true; // str and atom/list
+                }
+            }
+        }
+    }
+    return !failed;
+}
+
+// Ideally this would be inlined, but javascript does not support macros. Ultimately this could be generated dynamically.
+function backtrack()
+{
+    if (state.B <= HEAP_SIZE)
+    {
+        return false;
+    }
+    state.B0 = memory[state.B + memory[state.B] + CP_B0];
+    // Also unwind any trailed bindings
+    {
+// BEGIN: unwind_trail(memory[state.B + memory[state.B] + CP_TR], state.TR)
+let unwindFrom = memory[state.B + memory[state.B] + CP_TR];
+let unwindTo = state.TR;
+for (let i = unwindFrom; i < unwindTo; i++)
+{
+    memory[memory[i]] = memory[i] ^ (TAG_REF << WORD_BITS);
+}
+// END: unwind_trail(memory[state.B + memory[state.B] + CP_TR], state.TR)
+}
+    let next = memory[state.B + memory[state.B] + CP_Next];
+    state.P = next.offset;
+    code = next.code;
+    if(! code) {
+        throw 'code is undefined';
+    }
+
+    state.current_predicate = next.predicate;
+    if(state.current_predicate) {
+        state.num_of_args = ftable[state.current_predicate.key][1];
+    }
+
+    if(state.trace_call !== 'no_trace') {
+        let traceCallPL = memory[state.B + memory[state.B] + CP_TC];
+        let valTraceCallPl;
+            // valTraceCallPl = VAL(traceCallPL)
+    valTraceCallPl = traceCallPL & ((1 << WORD_BITS)-1);
+
+        state.trace_call = atable[valTraceCallPl];
+        if(! state.trace_call) {
+            throw 'backtrack trace_call is undefined';
+        }
+        state.trace_info = memory[state.B + memory[state.B] + CP_TI];
+    }
+
+    return true;
+}
+
 function wam_setup_trace_call(target_ftor_ofst) {
     // Create a 'traceArgStructure' for 'X(A0, ..., An-1)', copying
     // args A0 through An from register[0] to register[n-1]
@@ -5471,6 +5764,7 @@ function wam_setup_trace_call(target_ftor_ofst) {
     register[2] = PL_put_integer(state.trace_identifier);
     return traceArgArity;
 }
+
 
 function wam() {
     try {
@@ -5885,7 +6179,8 @@ function wam1()
             if (memory[register_location] < state.E) {
                 // No, so we can just behave like put_value
 
-                    // BEGIN: register[code[state.P + 2]] = deref(memory[register_location]);
+                {
+    // BEGIN: register[code[state.P + 2]] = deref(memory[register_location]);
     let localP = memory[register_location];
     let tagResult;
 
@@ -5910,18 +6205,18 @@ function wam1()
         else
             localP = q;
 
-        // tagResult = TAG(localP)
+            // tagResult = TAG(localP)
     // >>> is unsigned-right-shift. Nice.
     tagResult = (localP >>> WORD_BITS) & TAG_MASK;
 
-        // valResult = VAL(localP)
+            // valResult = VAL(localP)
     valResult = localP & ((1 << WORD_BITS)-1);
 
     }
 
     register[code[state.P + 2]] = localP;
     // END: register[code[state.P + 2]] = deref(memory[register_location]);
-
+}
 
             } else {
                 // Yes, so we need to push a new variable instead
@@ -6059,7 +6354,15 @@ function wam1()
             continue;
 
         case 13: // put_list
-            register[code[state.P+1]] = alloc_list();
+            // BEGIN: register[code[state.P+1]] = alloc_list()
+register[code[state.P+1]] = (state.H+1) ^ (TAG_LST << WORD_BITS);
+memory[state.H] = register[code[state.P+1]];
+state.H++;
+if(state.H > maxHeapSize) {
+    maxHeapSize = state.H;
+}
+// END: register[code[state.P+1]] = alloc_list()
+
             state.mode = WRITE;
             state.P += 2;
             continue;
@@ -6085,7 +6388,11 @@ function wam1()
         case 16: // get_value
         {
             let target = register[code[state.P + 3]];
-            gc_check(target);
+            // gc_check(target)
+// noinspection JSBitwiseOperatorUsage
+if (target & M_BIT)
+    abort("GC exception: " + hex(target) + " has M_BIT set");
+
             if (code[state.P + 1] === 0) // Y-register
             {
                 let register_location = state.E + code[state.P + 2] + 2;
@@ -6103,7 +6410,8 @@ function wam1()
         case 17: // get_constant C from Ai
             // First, get what is in Ai into sym
 
-                // BEGIN: sym = deref(register[code[state.P+2]]);
+            {
+    // BEGIN: sym = deref(register[code[state.P+2]]);
     let localP = register[code[state.P+2]];
     let tagResult;
 
@@ -6128,26 +6436,120 @@ function wam1()
         else
             localP = q;
 
-        // tagResult = TAG(localP)
+            // tagResult = TAG(localP)
     // >>> is unsigned-right-shift. Nice.
     tagResult = (localP >>> WORD_BITS) & TAG_MASK;
 
-        // valResult = VAL(localP)
+            // valResult = VAL(localP)
     valResult = localP & ((1 << WORD_BITS)-1);
 
     }
 
     sym = localP;
     // END: sym = deref(register[code[state.P+2]]);
-
+}
 
             // Then get arg. This is an atom index, not a <CON, i> cell. It needs to be made into the latter!
             arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
             state.P += 3;
-            if (TAG(sym) === TAG_REF)
+            let symTag;
+                // symTag = TAG(sym)
+    // >>> is unsigned-right-shift. Nice.
+    symTag = (sym >>> WORD_BITS) & TAG_MASK;
+
+            if (symTag=== TAG_REF)
             {
                 // If Ai is variable, then we need to bind. This is when foo(bar) is called like foo(X).
-                bind(sym, arg);
+                // BEGIN bind(sym, arg)
+    let aWord = sym;
+    let bWord = arg;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(sym, arg)
             }
             else if (sym !== arg)
             {
@@ -6158,7 +6560,8 @@ function wam1()
 
         case 18: // get_nil
         {
-                // BEGIN: sym = deref(register[code[state.P+1]]);
+            {
+    // BEGIN: sym = deref(register[code[state.P+1]]);
     let localP = register[code[state.P+1]];
     let tagResult;
 
@@ -6183,18 +6586,18 @@ function wam1()
         else
             localP = q;
 
-        // tagResult = TAG(localP)
+            // tagResult = TAG(localP)
     // >>> is unsigned-right-shift. Nice.
     tagResult = (localP >>> WORD_BITS) & TAG_MASK;
 
-        // valResult = VAL(localP)
+            // valResult = VAL(localP)
     valResult = localP & ((1 << WORD_BITS)-1);
 
     }
 
     sym = localP;
     // END: sym = deref(register[code[state.P+1]]);
-
+}
 
             state.P += 1;
             let symTag;
@@ -6204,8 +6607,98 @@ function wam1()
     symTag = (sym >>> WORD_BITS) & TAG_MASK;
 
 
-            if (symTag === TAG_REF)
-                bind(sym, NIL);
+            if (symTag === TAG_REF) {
+                // BEGIN bind(sym, NIL)
+    let aWord = sym;
+    let bWord = NIL;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(sym, NIL)
+            }
             else if (sym !== NIL)
                 if (!backtrack())
                     return wamExit(false);
@@ -6216,15 +6709,164 @@ function wam1()
         case 19: // get_structure
         {
             let structure_ftor = code[state.P + 1] ^ (TAG_ATM << WORD_BITS);
-            let addr = deref(register[code[state.P + 2]]);
+
+            let addr;
+            {
+    // BEGIN: addr = deref(register[code[state.P + 2]]);
+    let localP = register[code[state.P + 2]];
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+            // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+            // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    addr = localP;
+    // END: addr = deref(register[code[state.P + 2]]);
+}
+
             state.P += 3;
-            if (TAG(addr) === TAG_REF) {
+
+            let tagAddr;
+                // tagAddr = TAG(addr)
+    // >>> is unsigned-right-shift. Nice.
+    tagAddr = (addr >>> WORD_BITS) & TAG_MASK;
+
+            let valAddr;
+                // valAddr = VAL(addr)
+    valAddr = addr & ((1 << WORD_BITS)-1);
+
+
+            if (tagAddr === TAG_REF) {
                 state.mode = WRITE;
-                let a = alloc_structure(structure_ftor);
-                bind(memory[addr], a);
-            } else if (TAG(addr) === TAG_STR && memory[VAL(addr)] === structure_ftor) {
+                let a;
+                // BEGIN: a = alloc_structure(structure_ftor)
+    let tmp = state.H;
+    memory[state.H++] = structure_ftor;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    a = tmp ^ (TAG_STR << WORD_BITS);
+// END: a = alloc_structure(structure_ftor)
+
+                // BEGIN bind(memory[addr], a)
+    let aWord = memory[addr];
+    let bWord = a;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(memory[addr], a)
+            } else if (tagAddr === TAG_STR && memory[valAddr] === structure_ftor) {
                 state.mode = READ;
-                state.S = VAL(addr) + 1;
+                state.S = valAddr + 1;
             } else {
                 if (!backtrack())
                     return wamExit(false);
@@ -6236,66 +6878,407 @@ function wam1()
         {
             let addr = deref(register[code[state.P + 1]]);
             state.P += 2;
-            if (TAG(addr) === TAG_REF) {
+            let tagAddr;
+                // tagAddr = TAG(addr)
+    // >>> is unsigned-right-shift. Nice.
+    tagAddr = (addr >>> WORD_BITS) & TAG_MASK;
+
+
+            if (tagAddr === TAG_REF) {
                 // predicate called with var and we are expecting a list
                 let l = state.H ^ (TAG_LST << WORD_BITS);
-                bind(memory[addr], l);
+
+                // BEGIN bind(memory[addr], l)
+    let aWord = memory[addr];
+    let bWord = l;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(memory[addr], l)
                 state.mode = WRITE;
-            } else if (TAG(addr) === TAG_LST) {
-                state.S = VAL(addr);
+            } else if (tagAddr === TAG_LST) {
+                let valAddr;
+                    // valAddr = VAL(addr)
+    valAddr = addr & ((1 << WORD_BITS)-1);
+
+                state.S = valAddr;
                 state.mode = READ;
             } else if (!backtrack())
                 return wamExit(false);
         }
             continue;
 
-        case 21: // get_integer I from Ai
+        case 21:
+        {
+
+            // get_integer I from Ai
             // First, get what is in Ai into sym
-            sym = deref(register[code[state.P+2]]);
+            let sym;
+            {
+    // BEGIN: sym = deref(register[code[state.P + 2]]);
+    let localP = register[code[state.P + 2]];
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+            // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+            // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    sym = localP;
+    // END: sym = deref(register[code[state.P + 2]]);
+}
             // Then get arg. This is the actual integer, not a <INT, i> cell. It needs to be made into the latter!
-            arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+            let arg = (code[state.P + 1] & ((1 << WORD_BITS) - 1)) ^ (TAG_INT << WORD_BITS);
             state.P += 3;
-            if (TAG(sym) === TAG_REF)
-            {
+            let tagSym;
+                // tagSym = TAG(sym)
+    // >>> is unsigned-right-shift. Nice.
+    tagSym = (sym >>> WORD_BITS) & TAG_MASK;
+
+            if (tagSym === TAG_REF) {
                 // If Ai is variable, then we need to bind. This is when foo(7) is called like foo(X).
-                bind(sym, arg);
+                // BEGIN bind(sym, arg)
+    let aWord = sym;
+    let bWord = arg;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
             }
-            else if (sym !== arg)
+            else
             {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(sym, arg)
+            } else if (sym !== arg) {
                 if (!backtrack())
                     return wamExit(false);
             }
+        }
             continue;
 
         case 22: // unify_void
             if (state.mode === READ)
                 state.S += code[state.P+1];
             else
-                for (let i = 0; i < code[state.P+1]; i++)
-                    alloc_var();
+                for (let i = 0; i < code[state.P+1]; i++) {
+                    let dummyResult;
+                        // BEGIN: dummyResult = alloc_var()
+    dummyResult = state.H ^ (TAG_REF << WORD_BITS);
+    memory[state.H] = dummyResult;
+    state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    // END: dummyResult = alloc_var()
+
+                }
             state.P += 2;
             continue;
 
         case 23: //unify_variable
+        {
+            let source;
             if (state.mode === READ) // If reading, consume the next symbol
             {
                 source = memory[state.S++];
+            } else {
+                // source = alloc_var(); // If writing, create a new var
+                    // BEGIN: source = alloc_var()
+    source = state.H ^ (TAG_REF << WORD_BITS);
+    memory[state.H] = source;
+    state.H++;
+    if(state.H > maxHeapSize) {
+        maxHeapSize = state.H;
+    }
+    // END: source = alloc_var()
+
             }
-            else
+            if (code[state.P + 1] === 0) // Y-register
             {
-                source = alloc_var(); // If writing, create a new var
-            }
-            if (code[state.P+1] === 0) // Y-register
-            {
-                let register_location = state.E + code[state.P+2] + 2;
+                let register_location = state.E + code[state.P + 2] + 2;
                 // GC: This needs to be trailed if state.B is not 0, apparently
-                bind(memory[register_location], source);
+                //bind(memory[register_location], source);
+                // BEGIN bind(memory[register_location], source)
+    let aWord = memory[register_location];
+    let bWord = source;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
             }
             else
             {
-                register[code[state.P+2]] = source;
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(memory[register_location], source)
+            } else {
+                register[code[state.P + 2]] = source;
             }
             state.P += 3;
+        }
             continue;
 
         case 24: // unify_value
@@ -6350,15 +7333,148 @@ function wam1()
                 } else {
                     addr = register[code[state.P + 2]];
                 }
-                addr = deref(addr);
-                if (VAL(addr) < state.H) {
+                //addr = deref(addr);
+                {
+    // BEGIN: addr = deref(addr);
+    let localP = addr;
+    let tagResult;
+
+        // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+
+    let valResult;
+
+        // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+
+    while(tagResult === TAG_REF && valResult !== memory[valResult])
+    {
+        let q = memory[valResult];
+        if (q === undefined) // FIXME: Check that q =< p?
+        {
+            abort("Bad memory access: @" + localP);
+        }
+        else
+            localP = q;
+
+            // tagResult = TAG(localP)
+    // >>> is unsigned-right-shift. Nice.
+    tagResult = (localP >>> WORD_BITS) & TAG_MASK;
+
+            // valResult = VAL(localP)
+    valResult = localP & ((1 << WORD_BITS)-1);
+
+    }
+
+    addr = localP;
+    // END: addr = deref(addr);
+}
+
+                let valAddr;
+                    // valAddr = VAL(addr)
+    valAddr = addr & ((1 << WORD_BITS)-1);
+
+                if (valAddr < state.H) {
                     // Address is on the heap. Just push the value onto the top of the heap
                     memory[state.H++] = addr;
                 } else {
                     // Address is on the stack. Push a new variable onto the heap and bind to the value
                     let fresh = state.H ^ (TAG_REF << WORD_BITS);
                     memory[state.H++] = fresh;
-                    bind(fresh, addr);
+                    //bind(fresh, addr);
+                    // BEGIN bind(fresh, addr)
+    let aWord = fresh;
+    let bWord = addr;
+
+    let aTag;
+    let aVal;
+
+    let bTag;
+    let bVal;
+
+        // aTag = TAG(aWord)
+    // >>> is unsigned-right-shift. Nice.
+    aTag = (aWord >>> WORD_BITS) & TAG_MASK;
+
+    if (aTag === TAG_REF) {
+            // bTag = TAG(bWord)
+    // >>> is unsigned-right-shift. Nice.
+    bTag = (bWord >>> WORD_BITS) & TAG_MASK;
+
+        if (bTag !== TAG_REF)
+        {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+            memory[aVal] = bWord;
+            // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+        }
+        else {
+                // aVal = VAL(aWord)
+    aVal = aWord & ((1 << WORD_BITS)-1);
+
+                // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+            if(bVal < aVal) {
+                memory[aVal] = bWord;
+                // BEGIN: trail(aWord)
+    if (aWord < state.HB || (state.H < aWord && aWord < state.B))
+    {
+        memory[state.TR++] = aWord;
+    }
+    else
+    {
+    }
+// END: trail(aWord)
+
+            }
+            else
+            {
+                memory[bVal] = aWord;
+                // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+            }
+        }
+    }
+    else
+    {
+            // bVal = VAL(bWord)
+    bVal = bWord & ((1 << WORD_BITS)-1);
+
+        memory[bVal] = aWord;
+        // BEGIN: trail(bWord)
+    if (bWord < state.HB || (state.H < bWord && bWord < state.B))
+    {
+        memory[state.TR++] = bWord;
+    }
+    else
+    {
+    }
+// END: trail(bWord)
+
+    }
+// END bind(fresh, addr)
                     if (code[state.P + 1] === 1)
                         register[code[state.P + 2]] = fresh; // also set X(i) if X-register
                 }
@@ -10218,13 +11334,6 @@ function unify_number(numberJS, numberPL) {
     } else {
         return PL_unify_float(numberPL, numberJS);
     }
-}
-
-function gc_check(t)
-{
-    // noinspection JSBitwiseOperatorUsage
-    if (t & M_BIT)
-        abort("GC exception: " + hex(t) + " has M_BIT set");
 }
 
 function check_stacks(m)

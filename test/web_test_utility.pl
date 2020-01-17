@@ -29,6 +29,7 @@ report_test_summary :-
     findall(fail(ID, X, Expected, Result), test_fail_info(ID, X, Expected, Result), Failures),
     length(Failures, FC),
     writeln(fail(FC)),
+    statistics,
     % "Pass " PC "Fail " FC
     number_codes(PC, PCs),
     number_codes(FC, FCs),

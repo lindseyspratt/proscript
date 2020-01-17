@@ -52,14 +52,156 @@ function alloc_structure(ftor)
     return result;
 }
 
+function alloc_list()
+{
+    let result;
+    {{'alloc_list.wam.template' # [result]}}
+    return result;
+}
+
 function trail(v)
 {
      {{'trail.wam.template' # [v]}}
 }
 
+function unwind_trail(from, to)
+{
+    {{'unwind_trail.wam.template' # [from, to]}}
+}
+
 function bind(a, b)
 {
     {{'bind.wam.template' # [a, b]}}
+}
+
+function gc_check(t)
+{
+    {{'gc_check.wam.template' # [t]}}
+}
+
+// Returns boolean
+function unify(a, b)
+{
+    let PDL = [];
+
+    PDL.push(a);
+    PDL.push(b);
+    let failed = false;
+    while (PDL.length !== 0 && !failed)
+    {
+        let d1 = PDL.pop();
+        let d2 = PDL.pop();
+        {{'deref.wam.template' # [d1,d1]}}
+        {{'deref.wam.template' # [d2,d2]}}
+        // if d1 == d2 then just proceed with the rest of the PDL. Otherwise we need to try and unify them, or fail
+        if (d1 !== d2)
+        {
+            let type1;
+            let val1;
+            let type2;
+            let val2;
+            {{'tag.wam.template' # [d1,type1]}}
+            {{'val.wam.template' # [d1,val1]}}
+            {{'tag.wam.template' # [d2,type2]}}
+            {{'val.wam.template' # [d2,val2]}}
+            if (type1 === TAG_REF)
+            {
+                {{'bind.wam.template' # [d1, d2]}}
+            }
+            else
+            {
+                switch(type2)
+                {
+                    case TAG_REF:
+                        {{'bind.wam.template' # [d1, d2]}}
+                        break;
+                    case TAG_ATM:
+                    case TAG_INT:
+                        failed = true;
+                        break;
+                    case TAG_FLT:
+                        if (type1 === TAG_FLT)
+                        {
+                            debug(floats[val1] + " vs " + floats[val2]);
+                        }
+                        failed = true;
+                        break;
+                    case TAG_LST:
+                        if (type1 === TAG_LST)
+                        {
+                            PDL.push(memory[val1]); // unify heads
+                            PDL.push(memory[val2]);
+                            PDL.push(memory[val1+1]); // unify tails
+                            PDL.push(memory[val2+1]);
+                        }
+                        else
+                            failed = true; // list and non-list
+                        break;
+                    case TAG_STR:
+                        if (type1 === TAG_STR)
+                        {
+                            let f1;
+                            let f2;
+                            {{'val.wam.template' # ['memory[val1]',f1]}}
+                            {{'val.wam.template' # ['memory[val2]',f2]}}
+                            if (f1 === f2)
+                            {
+                                for (let i = 0; i < ftable[f1][1]; i++)
+                                {
+                                    PDL.push(val1 + 1 + i);
+                                    PDL.push(val2 + 1 + i);
+                                }
+                            }
+                            else
+                                failed = true; // different functors
+                        }
+                        else
+                            failed = true; // str and atom/list
+                }
+            }
+        }
+    }
+    return !failed;
+}
+
+// Ideally this would be inlined, but javascript does not support macros. Ultimately this could be generated dynamically.
+function backtrack()
+{
+    debug_msg("Backtracking. State.B is " + state.B);
+    if (state.B <= HEAP_SIZE)
+    {
+        return false;
+    }
+    debug_msg("Choicepoint has " + memory[state.B] + " saved args");
+    state.B0 = memory[state.B + memory[state.B] + CP_B0];
+    // Also unwind any trailed bindings
+    {{'unwind_trail.wam.template' # ['memory[state.B + memory[state.B] + CP_TR]', 'state.TR']}}
+    let next = memory[state.B + memory[state.B] + CP_Next];
+    state.P = next.offset;
+    code = next.code;
+    if(! code) {
+        throw 'code is undefined';
+    }
+
+    state.current_predicate = next.predicate;
+    if(state.current_predicate) {
+        state.num_of_args = ftable[state.current_predicate.key][1];
+    }
+
+    if(state.trace_call !== 'no_trace') {
+        let traceCallPL = memory[state.B + memory[state.B] + CP_TC];
+        let valTraceCallPl;
+        {{'val.wam.template' # [traceCallPL, valTraceCallPl]}}
+        state.trace_call = atable[valTraceCallPl];
+        if(! state.trace_call) {
+            throw 'backtrack trace_call is undefined';
+        }
+        state.trace_info = memory[state.B + memory[state.B] + CP_TI];
+    }
+
+    debug_msg("Set state.trace_call to " + state.trace_call);
+    debug_msg("Set state.P to " + state.P);
+    return true;
 }
 
 function wam_setup_trace_call(target_ftor_ofst) {
@@ -91,6 +233,7 @@ function wam_setup_trace_call(target_ftor_ofst) {
     register[2] = PL_put_integer(state.trace_identifier);
     return traceArgArity;
 }
+
 
 function wam() {
     try {
@@ -487,7 +630,7 @@ function wam1()
             continue;
 
         case 13: // put_list
-            register[code[state.P+1]] = alloc_list();
+            {{'alloc_list.wam.template' # ['register[code[state.P+1]]']}}
             state.mode = WRITE;
             state.P += 2;
             continue;
@@ -515,7 +658,7 @@ function wam1()
         case 16: // get_value
         {
             let target = register[code[state.P + 3]];
-            gc_check(target);
+            {{'gc_check.wam.template' # [target]}}
             if (code[state.P + 1] === 0) // Y-register
             {
                 let register_location = state.E + code[state.P + 2] + 2;
@@ -539,10 +682,12 @@ function wam1()
             // Then get arg. This is an atom index, not a <CON, i> cell. It needs to be made into the latter!
             arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
             state.P += 3;
-            if (TAG(sym) === TAG_REF)
+            let symTag;
+            {{'tag.wam.template' # [sym, symTag]}}
+            if (symTag=== TAG_REF)
             {
                 // If Ai is variable, then we need to bind. This is when foo(bar) is called like foo(X).
-                bind(sym, arg);
+                {{'bind.wam.template' # [sym, arg]}}
             }
             else if (sym !== arg)
             {
@@ -561,8 +706,9 @@ function wam1()
 
             {{'tag.wam.template' # [sym, symTag]}}
 
-            if (symTag === TAG_REF)
-                bind(sym, NIL);
+            if (symTag === TAG_REF) {
+                {{'bind.wam.template' # [sym, 'NIL']}}
+            }
             else if (sym !== NIL)
                 if (!backtrack())
                     return wamExit(false);
@@ -573,17 +719,27 @@ function wam1()
         case 19: // get_structure
         {
             let structure_ftor = code[state.P + 1] ^ (TAG_ATM << WORD_BITS);
-            let addr = deref(register[code[state.P + 2]]);
+
+            let addr;
+            {{'deref.wam.template' # ['register[code[state.P + 2]]', addr]}}
+
             state.P += 3;
-            if (TAG(addr) === TAG_REF) {
+
+            let tagAddr;
+            {{'tag.wam.template' # [addr, tagAddr]}}
+            let valAddr;
+            {{'val.wam.template' # [addr, valAddr]}}
+
+            if (tagAddr === TAG_REF) {
                 debug_msg("Arg passed is unbound. Proceeding in WRITE mode");
                 state.mode = WRITE;
-                let a = alloc_structure(structure_ftor);
-                bind(memory[addr], a);
-            } else if (TAG(addr) === TAG_STR && memory[VAL(addr)] === structure_ftor) {
-                debug_msg("Arg passed is bound to the right functor. Proceeding in READ mode from " + (VAL(addr) + 1));
+                let a;
+                {{'alloc_structure.wam.template' # [structure_ftor, a]}}
+                {{'bind.wam.template' # ['memory[addr]', a]}}
+            } else if (tagAddr === TAG_STR && memory[valAddr] === structure_ftor) {
+                debug_msg("Arg passed is bound to the right functor. Proceeding in READ mode from " + (valAddr + 1));
                 state.mode = READ;
-                state.S = VAL(addr) + 1;
+                state.S = valAddr + 1;
             } else {
                 if (!backtrack())
                     return wamExit(false);
@@ -595,73 +751,86 @@ function wam1()
         {
             let addr = deref(register[code[state.P + 1]]);
             state.P += 2;
-            if (TAG(addr) === TAG_REF) {
+            let tagAddr;
+            {{'tag.wam.template' # [addr, tagAddr]}}
+
+            if (tagAddr === TAG_REF) {
                 // predicate called with var and we are expecting a list
                 let l = state.H ^ (TAG_LST << WORD_BITS);
-                bind(memory[addr], l);
+
+                {{'bind.wam.template' # ['memory[addr]', l]}}
                 debug_msg("Bound memory[" + addr + "] ( " + memory[addr] + ") to (LST," + state.H + ")");
                 state.mode = WRITE;
-            } else if (TAG(addr) === TAG_LST) {
-                debug_msg("get_list will proceed in read mode from " + VAL(addr));
-                state.S = VAL(addr);
+            } else if (tagAddr === TAG_LST) {
+                let valAddr;
+                {{'val.wam.template' # [addr, valAddr]}}
+                debug_msg("get_list will proceed in read mode from " + valAddr);
+                state.S = valAddr;
                 state.mode = READ;
             } else if (!backtrack())
                 return wamExit(false);
         }
             continue;
 
-        case 21: // get_integer I from Ai
+        case 21:
+        {
+
+            // get_integer I from Ai
             // First, get what is in Ai into sym
-            sym = deref(register[code[state.P+2]]);
+            let sym;
+            {{'deref.wam.template' # ['register[code[state.P + 2]]', sym]}}
             // Then get arg. This is the actual integer, not a <INT, i> cell. It needs to be made into the latter!
-            arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+            let arg = (code[state.P + 1] & ((1 << WORD_BITS) - 1)) ^ (TAG_INT << WORD_BITS);
             state.P += 3;
-            if (TAG(sym) === TAG_REF)
-            {
+            let tagSym;
+            {{'tag.wam.template' # [sym, tagSym]}}
+            if (tagSym === TAG_REF) {
                 // If Ai is variable, then we need to bind. This is when foo(7) is called like foo(X).
-                bind(sym, arg);
-            }
-            else if (sym !== arg)
-            {
+                {{'bind.wam.template' # [sym, arg]}}
+            } else if (sym !== arg) {
                 debug_msg("Could not get constant: " + hex(sym) + " from " + hex(arg));
                 if (!backtrack())
                     return wamExit(false);
             }
+        }
             continue;
 
         case 22: // unify_void
             if (state.mode === READ)
                 state.S += code[state.P+1];
             else
-                for (let i = 0; i < code[state.P+1]; i++)
-                    alloc_var();
+                for (let i = 0; i < code[state.P+1]; i++) {
+                    let dummyResult;
+                    {{'alloc_var.wam.template' # [dummyResult]}}
+                }
             state.P += 2;
             continue;
 
         case 23: //unify_variable
+        {
+            let source;
             if (state.mode === READ) // If reading, consume the next symbol
             {
                 source = memory[state.S++];
-                debug_msg("Unifying existing variable: " + hex(source) + " at " + (state.S-1));
+                debug_msg("Unifying existing variable: " + hex(source) + " at " + (state.S - 1));
                 debug_msg(term_to_string(source));
-            }
-            else
-            {
-                source = alloc_var(); // If writing, create a new var
+            } else {
+                // source = alloc_var(); // If writing, create a new var
+                {{'alloc_var.wam.template'  # [source] }}
                 debug_msg("Allocated new variable: " + source);
             }
-            if (code[state.P+1] === 0) // Y-register
+            if (code[state.P + 1] === 0) // Y-register
             {
-                debug_msg("... for register Y" + code[state.P+2]);
-                let register_location = state.E + code[state.P+2] + 2;
+                debug_msg("... for register Y" + code[state.P + 2]);
+                let register_location = state.E + code[state.P + 2] + 2;
                 // GC: This needs to be trailed if state.B is not 0, apparently
-                bind(memory[register_location], source);
-            }
-            else
-            {
-                register[code[state.P+2]] = source;
+                //bind(memory[register_location], source);
+                {{'bind.wam.template' # ['memory[register_location]', source]}}
+            } else {
+                register[code[state.P + 2]] = source;
             }
             state.P += 3;
+        }
             continue;
 
         case 24: // unify_value
@@ -716,8 +885,12 @@ function wam1()
                 } else {
                     addr = register[code[state.P + 2]];
                 }
-                addr = deref(addr);
-                if (VAL(addr) < state.H) {
+                //addr = deref(addr);
+                {{'deref.wam.template' # [addr, addr]}}
+
+                let valAddr;
+                {{'val.wam.template' # [addr, valAddr]}}
+                if (valAddr < state.H) {
                     debug_msg("Unify local: already safe at " + hex(addr));
                     // Address is on the heap. Just push the value onto the top of the heap
                     debug_msg(term_to_string(addr));
@@ -728,7 +901,8 @@ function wam1()
                     let fresh = state.H ^ (TAG_REF << WORD_BITS);
                     memory[state.H++] = fresh;
                     debug_msg("Binding fresh variable " + fresh + " to " + addr);
-                    bind(fresh, addr);
+                    //bind(fresh, addr);
+                    {{'bind.wam.template' # [fresh, addr]}}
                     if (code[state.P + 1] === 1)
                         register[code[state.P + 2]] = fresh; // also set X(i) if X-register
                 }

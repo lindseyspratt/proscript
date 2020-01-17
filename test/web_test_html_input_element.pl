@@ -71,7 +71,8 @@ test('HTMLInputElement', 'formTarget of input ', succeeded) :-
 
 test('HTMLInputElement', 'height of input ', succeeded) :-
     dom_element_attribute_value(E, id, input_image),
-    dom_object_property(_, E, height,17).
+    dom_object_property(_, E, height,X),
+    (X = 17;X = 16). % 17 for safari, 16 for chrome.
 
 test('HTMLInputElement', 'indeterminate of input ', succeeded) :-
     dom_element_attribute_value(E, id, input_checkbox),
@@ -147,7 +148,8 @@ test('HTMLInputElement', 'valueAsNumber of input ', succeeded) :-
 
 test('HTMLInputElement', 'width of input ', succeeded) :-
     dom_element_attribute_value(E, id, input_image),
-    dom_object_property(_, E, width,51).
+    dom_object_property(_, E, width,X),
+    (X = 51;X = 62). % 51 for safari, 62 for chrome.
 
 test('HTMLInputElement', 'willValidate of input ', succeeded) :-
     dom_element_attribute_value(E, id, input_text),
