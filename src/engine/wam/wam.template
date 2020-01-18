@@ -259,269 +259,28 @@ function wam1()
     state.running = true;
     while (state.running)
     {
-        debug_msg("---");
-        debug_msg("P=" + (((state.current_predicate == null)?("no predicate"):(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1])) + "@" + state.P + ": " + code[state.P]) + ", H=" + state.H + ", B=" + state.B + ", B0=" + state.B0 + ", E=" + state.E);
-
-        // The conditional "prolog_flag_values.wam_log !== 'none'" avoids the call to log() in the common case.
-        // This makes a noticeable difference in performance.
-
-        if(prolog_flag_values.wam_log !== 'none')
-            log(prolog_flag_values.wam_log, decode_instruction(state.current_predicate, state.P).string);
-
-        if(state.trace_call === 'trace' && state.trace_instruction &&
-            (state.trace_instruction === 'trace' || state.trace_instruction === 'step')) {
-            let instruction = decode_instruction(state.current_predicate, state.P);
-            if (state.trace_instruction === 'step') {
-                // set up the prompt to be displayed before reading a command character into
-                // input_buffer
-                state.trace_instruction_prompt = instruction.string;
-                let char = get_terminal_char();
-                if (char) {
-                    if (char === 'm') {
-                        // show internal debug info for current instruction (if DEBUG===true in Makefile)
-                        debugging = true;
-                        // break at next instruction
-                        state.trace_instruction = 'step';
-                    } else if (char === 'x') {
-                        // do not show internal debug info for current instruction
-                        debugging = false;
-                        // break at next instruction
-                        state.trace_instruction = 'step';
-                    } else if (char === 'y') {
-                        // do not show internal debug info for current and subsequent instructions
-                        debugging = false;
-                        // do not break at next instruction
-                        state.trace_instruction = 'trace';
-                    } else if (char === 'z') {
-                        // show internal debug info for current and subsequent instructions (if DEBUG===true in Makefile)
-                        debugging = true;
-                        // do not break at next instruction
-                        state.trace_instruction = 'trace';
-                    } else {
-                        stdout('Invalid command ' + char + '. Command must be "m", "x", "y", or "z".\n');
-                        instruction_suspend_set('true');
-                        return wamExit(true);
-                    }
-                } else {
-                    // No command character was available,
-                    // return to the wam caller (jquery terminal) where the
-                    // current prompt will be displayed (showing the current instruction)
-                    // the user will enter a command character,
-                    // the wam caller (jquery terminal) calls the wam again with the same
-                    // wam state as was present earlier so that the re-called wam
-                    // can continue the evaluation.
-                    instruction_suspend_set('true');
-                    return wamExit(true);
-                }
-            } else {
-                stdout(instruction.string + '\n');
-            }
-        } else {
-           debugging = false;
-        }
-
         if(! code) {
             throw 'code is undefined';
         }
+
+        wam_inst_prelude();
+
         // Decode an instruction
         switch(code[state.P]) {
             case 1: // allocate
-            {
-                let tmpE;
-                if (state.E > state.B) {
-                    debug_msg("P=" + state.P + " Top frame is an environment, at " + state.E + " with previous environment of " + memory[state.E] + " and CP of " + memory[state.E + E_CP]);
-                    let nextEnvironmentOfst = state.CP.code[state.CP.offset - 1] + 2; // this is as corrected by Ait-Kaci in wamerratum.txt.
-                    // if(nextEnvironmentOfst > 10000) {
-                    //     dump_environments();
-                    //     dump_choicepoints();
-                    //     gcWrite('very large environment. size='+ nextEnvironmentOfst);
-                    // }
-                    tmpE = state.E + nextEnvironmentOfst;
-                } else {
-                    debug_msg("Top frame is a choicepoint, at " + state.B);
-                    tmpE = state.B + memory[state.B] + CP_SIZE;
-                }
-
-                // if(tmpE > HEAP_SIZE + 60000) {
-                //     dump_environments();
-                //     dump_choicepoints();
-                //     gcWrite('environment for large stack. new E='+tmpE);
-                // }
-
-                debug_msg("Environment size is: " + state.CP.code[state.CP.offset - 1]);
-                if (tmpE === undefined || isNaN(tmpE))
-                    abort("Top of frame is garbage: " + tmpE);
-                if (tmpE < HEAP_SIZE ) {
-                    abort("Top of frame less than minimum stack address (HEAP_SIZE=" + HEAP_SIZE + ") in allocate: " + hex(tmpE));
-                } else if (tmpE > HEAP_SIZE + STACK_SIZE) {
-                    // dump_environments();
-                    // dump_choicepoints();
-                    abort("Top of frame greater than maximum stack address (HEAP_SIZE+STACK_SIZE="+HEAP_SIZE+"+"+STACK_SIZE+"="+(HEAP_SIZE+STACK_SIZE) + ") in allocate: " + hex(tmpE));
-                }
-
-                debug_msg("Allocating an environment at " + tmpE + " Y0 is at " + (tmpE + 2) + " state.B is " + state.B);
-                // Save old environment and continuation
-                memory[tmpE] = state.E;
-                memory[tmpE + 1] = state.CP;
-                state.E = tmpE;
-                state.P += 1;
-
-                if(maxStackSize < tmpE+1) {
-                    maxStackSize = tmpE+1;
-                }
-
-            }
+                wam_inst_allocate();
                 continue;
 
             case 2: // deallocate
-                debug_msg("state.B is currently " + state.B);
-                debug_msg("state.E is currently " + state.E);
-                state.CP = memory[state.E + E_CP];
-                debug_msg("state.CP set to " + state.CP + " from memory[" + (state.E + E_CP) + "]");
-                if (memory[state.E] < HEAP_SIZE || memory[state.E] > HEAP_SIZE + STACK_SIZE)
-                    abort("Top of frame " + memory[state.E] + " exceeds bounds in deallocate. Environment is " + state.E + " P = " + state.P);
-
-                state.E = memory[state.E];
-                debug_msg("Deallocate: E is reduced to " + state.E);
-                state.P += 1;
+                wam_inst_deallocate();
                 continue;
 
             case 3: // call
-
-                functor = atable[ftable[code[state.P + 1]][0]];
-                if ({{'trace_call_or_execute.wam.template' # [functor]}}) {
-                    // Trace this call of X(...).
-                    // Suspend tracing to prevent the trace mechanism from tracing itself.
-                    state.CP = {
-                        code: code,
-                        predicate: state.current_predicate,
-                        offset: state.P + 3
-                    };
-                    state.B0 = state.B;
-
-                    wam_suspend_trace();
-
-                    debug_msg("Set state.trace_call to " + state.trace_call);
-
-                    state.trace_identifier++;
-
-                    let target_ftor_ofst = code[state.P + 1];
-                    wam_setup_trace_call(target_ftor_ofst);
-
-                    debug_msg("Calling trace " + atable[ftable[target_ftor_ofst][0]] + "/" + ftable[target_ftor_ofst][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
-
-                    state.num_of_args = 3;
-                    state.current_predicate = state.trace_predicate;
-                    code = state.trace_code;
-                    state.P = 0;
-                } else {
-                    {{ 'advance_next_trace_conditionally.wam.template' # [] }}
-
-                    predicate = predicates[code[state.P + 1]];
-                    if (predicate !== undefined) {
-                        // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
-                        state.CP = {
-                            code: code,
-                            predicate: state.current_predicate,
-                            offset: state.P + 3
-                        };
-
-                        //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
-                        debug_msg("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
-                        let result;
-
-                        {{ 'complete_call_or_execute.wam.template' # [predicate, result]}}
-
-                        if (!result && !backtrack()) {
-                            return wamExit(false);
-                        }
-                    } else if (foreign_predicates[code[state.P + 1]] !== undefined) {
-                        // This is a bit counter-intuitive since it seems like we are never going to get a proceed to use the CP.
-                        // Remember that any time we might need CP to be saved, it will be. (If there is more than one goal, there will be an environment).
-                        // If there is only one goal (ie a chain rule) then we will be in execute already, not call.
-                        // This means it is never unsafe to set CP in a call port.
-                        // Further, remember that state.CP is used to create choicepoints (and environments), and since foreign frames may create these, we must set CP to
-                        // something sensible, even though we never expect to use it to actually continue execution from.
-                        state.CP = {
-                            code: code,
-                            predicate: state.current_predicate,
-                            offset: state.P + 3
-                        };
-                        //stdout("Calling (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
-                        debug_msg("Calling (foreign) " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " and setting CP to " + (state.P + 3));
-                        let result;
-
-                        {{ 'setup_and_call_foreign.wam.template' # [result] }}
-
-                        if (result)
-                            state.P = state.P + 3;
-                        else if (!backtrack()) {
-                            return wamExit(false);
-                        }
-                    } else {
-                        if (!undefined_predicate(code[state.P + 1]))
-                            return wamExit(false);
-                    }
-                }
+                wam_inst_call();
                 continue;
 
             case 4: // execute
-                functor = atable[ftable[code[state.P + 1]][0]];
-
-                if ({{'trace_call_or_execute.wam.template' # [functor]}}) {
-                    wam_suspend_trace();
-
-                    state.trace_identifier++;
-                    debug_msg("Set state.trace_call to " + state.trace_call);
-                    let target_ftor = code[state.P + 1];
-                    wam_setup_trace_call(target_ftor);
-
-                    debug_msg("Executing trace " + atable[ftable[target_ftor][0]] + "/" + ftable[target_ftor][1]);
-                    state.B0 = state.B;
-                    state.num_of_args = 3;
-                    state.current_predicate = state.trace_predicate;
-                    code = state.trace_code;
-                    state.P = 0;
-                } else {
-                    {{ 'advance_next_trace_conditionally.wam.template' # []}}
-
-                    predicate = predicates[code[state.P + 1]];
-
-                    if (predicate !== undefined) {
-                        // No need to save continuation for execute
-
-                        //stdout("Executing " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
-                        debug_msg("Executing " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
-                        let result;
-
-                        {{ 'complete_call_or_execute.wam.template' # [predicate, result]}}
-
-                        if (!result && !backtrack()) {
-                            return wamExit(false);
-                        }
-                    } else if (foreign_predicates[code[state.P + 1]] !== undefined) {
-                        //stdout("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
-                        debug_msg("Executing (foreign) " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
-                        let result;
-
-                        {{ 'setup_and_call_foreign.wam.template' # [result] }}
-
-                        debug_msg("Foreign result: " + result + " and CP: " + state.CP);
-                        if (result) {
-                            state.current_predicate = state.CP.predicate;
-                            code = state.CP.code;
-                            if (!code) {
-                                throw 'code is undefined';
-                            }
-
-                            state.P = state.CP.offset;
-                        } else if (!backtrack())
-                            return wamExit(false);
-                    } else {
-                        if (!undefined_predicate(code[state.P + 1]))
-                            return wamExit(false);
-                    }
-                }
+                wam_inst_execute();
                 continue;
 
             case 5: // proceed
@@ -1476,4 +1235,262 @@ function wam1()
         }
     }
     return wamExit(true);
+}
+
+function wam_inst_prelude() {
+    debug_msg("---");
+    debug_msg("P=" + (((state.current_predicate == null)?("no predicate"):(atable[ftable[state.current_predicate.key][0]] + "/" + ftable[state.current_predicate.key][1])) + "@" + state.P + ": " + code[state.P]) + ", H=" + state.H + ", B=" + state.B + ", B0=" + state.B0 + ", E=" + state.E);
+
+    // The conditional "prolog_flag_values.wam_log !== 'none'" avoids the call to log() in the common case.
+    // This makes a noticeable difference in performance.
+
+    if(prolog_flag_values.wam_log !== 'none')
+        log(prolog_flag_values.wam_log, decode_instruction(state.current_predicate, state.P).string);
+
+    if(state.trace_call === 'trace' && state.trace_instruction &&
+        (state.trace_instruction === 'trace' || state.trace_instruction === 'step')) {
+        let instruction = decode_instruction(state.current_predicate, state.P);
+        if (state.trace_instruction === 'step') {
+            // set up the prompt to be displayed before reading a command character into
+            // input_buffer
+            state.trace_instruction_prompt = instruction.string;
+            let char = get_terminal_char();
+            if (char) {
+                if (char === 'm') {
+                    // show internal debug info for current instruction (if DEBUG===true in Makefile)
+                    debugging = true;
+                    // break at next instruction
+                    state.trace_instruction = 'step';
+                } else if (char === 'x') {
+                    // do not show internal debug info for current instruction
+                    debugging = false;
+                    // break at next instruction
+                    state.trace_instruction = 'step';
+                } else if (char === 'y') {
+                    // do not show internal debug info for current and subsequent instructions
+                    debugging = false;
+                    // do not break at next instruction
+                    state.trace_instruction = 'trace';
+                } else if (char === 'z') {
+                    // show internal debug info for current and subsequent instructions (if DEBUG===true in Makefile)
+                    debugging = true;
+                    // do not break at next instruction
+                    state.trace_instruction = 'trace';
+                } else {
+                    stdout('Invalid command ' + char + '. Command must be "m", "x", "y", or "z".\n');
+                    instruction_suspend_set('true');
+                    return wamExit(true);
+                }
+            } else {
+                // No command character was available,
+                // return to the wam caller (jquery terminal) where the
+                // current prompt will be displayed (showing the current instruction)
+                // the user will enter a command character,
+                // the wam caller (jquery terminal) calls the wam again with the same
+                // wam state as was present earlier so that the re-called wam
+                // can continue the evaluation.
+                instruction_suspend_set('true');
+                return wamExit(true);
+            }
+        } else {
+            stdout(instruction.string + '\n');
+        }
+    } else {
+       debugging = false;
+    }
+}
+
+function wam_inst_allocate() {
+    let tmpE;
+    if (state.E > state.B) {
+        debug_msg("P=" + state.P + " Top frame is an environment, at " + state.E + " with previous environment of " + memory[state.E] + " and CP of " + memory[state.E + E_CP]);
+        let nextEnvironmentOfst = state.CP.code[state.CP.offset - 1] + 2; // this is as corrected by Ait-Kaci in wamerratum.txt.
+        // if(nextEnvironmentOfst > 10000) {
+        //     dump_environments();
+        //     dump_choicepoints();
+        //     gcWrite('very large environment. size='+ nextEnvironmentOfst);
+        // }
+        tmpE = state.E + nextEnvironmentOfst;
+    } else {
+        debug_msg("Top frame is a choicepoint, at " + state.B);
+        tmpE = state.B + memory[state.B] + CP_SIZE;
+    }
+
+    // if(tmpE > HEAP_SIZE + 60000) {
+    //     dump_environments();
+    //     dump_choicepoints();
+    //     gcWrite('environment for large stack. new E='+tmpE);
+    // }
+
+    debug_msg("Environment size is: " + state.CP.code[state.CP.offset - 1]);
+    if (tmpE === undefined || isNaN(tmpE))
+        abort("Top of frame is garbage: " + tmpE);
+    if (tmpE < HEAP_SIZE ) {
+        abort("Top of frame less than minimum stack address (HEAP_SIZE=" + HEAP_SIZE + ") in allocate: " + hex(tmpE));
+    } else if (tmpE > HEAP_SIZE + STACK_SIZE) {
+        // dump_environments();
+        // dump_choicepoints();
+        abort("Top of frame greater than maximum stack address (HEAP_SIZE+STACK_SIZE="+HEAP_SIZE+"+"+STACK_SIZE+"="+(HEAP_SIZE+STACK_SIZE) + ") in allocate: " + hex(tmpE));
+    }
+
+    debug_msg("Allocating an environment at " + tmpE + " Y0 is at " + (tmpE + 2) + " state.B is " + state.B);
+    // Save old environment and continuation
+    memory[tmpE] = state.E;
+    memory[tmpE + 1] = state.CP;
+    state.E = tmpE;
+    state.P += 1;
+
+    if(maxStackSize < tmpE+1) {
+        maxStackSize = tmpE+1;
+    }
+}
+
+function wam_inst_deallocate() {
+    debug_msg("state.B is currently " + state.B);
+    debug_msg("state.E is currently " + state.E);
+    state.CP = memory[state.E + E_CP];
+    debug_msg("state.CP set to " + state.CP + " from memory[" + (state.E + E_CP) + "]");
+    if (memory[state.E] < HEAP_SIZE || memory[state.E] > HEAP_SIZE + STACK_SIZE)
+        abort("Top of frame " + memory[state.E] + " exceeds bounds in deallocate. Environment is " + state.E + " P = " + state.P);
+
+    state.E = memory[state.E];
+    debug_msg("Deallocate: E is reduced to " + state.E);
+    state.P += 1;
+}
+
+function wam_inst_call() {
+    let functor = atable[ftable[code[state.P + 1]][0]];
+    if ({{'trace_call_or_execute.wam.template' # [functor]}}) {
+        // Trace this call of X(...).
+        // Suspend tracing to prevent the trace mechanism from tracing itself.
+        state.CP = {
+            code: code,
+            predicate: state.current_predicate,
+            offset: state.P + 3
+        };
+        state.B0 = state.B;
+
+        wam_suspend_trace();
+
+        debug_msg("Set state.trace_call to " + state.trace_call);
+
+        state.trace_identifier++;
+
+        let target_ftor_ofst = code[state.P + 1];
+        wam_setup_trace_call(target_ftor_ofst);
+
+        debug_msg("Calling trace " + atable[ftable[target_ftor_ofst][0]] + "/" + ftable[target_ftor_ofst][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
+
+        state.num_of_args = 3;
+        state.current_predicate = state.trace_predicate;
+        code = state.trace_code;
+        state.P = 0;
+    } else {
+        {{ 'advance_next_trace_conditionally.wam.template' # [] }}
+
+        let predicate = predicates[code[state.P + 1]];
+        if (predicate !== undefined) {
+            // Set CP to the next instruction so that when the predicate is finished executing we know where to come back to
+            state.CP = {
+                code: code,
+                predicate: state.current_predicate,
+                offset: state.P + 3
+            };
+
+            //stdout("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + '\n');
+            debug_msg("Calling " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " so setting CP to " + (state.P + 3) + ", argument is " + code[state.P + 2]);
+            let result;
+
+            {{ 'complete_call_or_execute.wam.template' # [predicate, result]}}
+
+            if (!result && !backtrack()) {
+                return wamExit(false);
+            }
+        } else if (foreign_predicates[code[state.P + 1]] !== undefined) {
+            // This is a bit counter-intuitive since it seems like we are never going to get a proceed to use the CP.
+            // Remember that any time we might need CP to be saved, it will be. (If there is more than one goal, there will be an environment).
+            // If there is only one goal (ie a chain rule) then we will be in execute already, not call.
+            // This means it is never unsafe to set CP in a call port.
+            // Further, remember that state.CP is used to create choicepoints (and environments), and since foreign frames may create these, we must set CP to
+            // something sensible, even though we never expect to use it to actually continue execution from.
+            state.CP = {
+                code: code,
+                predicate: state.current_predicate,
+                offset: state.P + 3
+            };
+            //stdout("Calling (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
+            debug_msg("Calling (foreign) " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1] + " and setting CP to " + (state.P + 3));
+            let result;
+
+            {{ 'setup_and_call_foreign.wam.template' # [result] }}
+
+            if (result)
+                state.P = state.P + 3;
+            else if (!backtrack()) {
+                return wamExit(false);
+            }
+        } else {
+            if (!undefined_predicate(code[state.P + 1]))
+                return wamExit(false);
+        }
+    }
+}
+
+function wam_inst_execute() {
+    let functor = atable[ftable[code[state.P + 1]][0]];
+
+    if ({{'trace_call_or_execute.wam.template' # [functor]}}) {
+        wam_suspend_trace();
+
+        state.trace_identifier++;
+        debug_msg("Set state.trace_call to " + state.trace_call);
+        let target_ftor = code[state.P + 1];
+        wam_setup_trace_call(target_ftor);
+
+        debug_msg("Executing trace " + atable[ftable[target_ftor][0]] + "/" + ftable[target_ftor][1]);
+        state.B0 = state.B;
+        state.num_of_args = 3;
+        state.current_predicate = state.trace_predicate;
+        code = state.trace_code;
+        state.P = 0;
+    } else {
+        {{ 'advance_next_trace_conditionally.wam.template' # []}}
+
+        let predicate = predicates[code[state.P + 1]];
+
+        if (predicate !== undefined) {
+            // No need to save continuation for execute
+
+            //stdout("Executing " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
+            debug_msg("Executing " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+            let result;
+
+            {{ 'complete_call_or_execute.wam.template' # [predicate, result]}}
+
+            if (!result && !backtrack()) {
+                return wamExit(false);
+            }
+        } else if (foreign_predicates[code[state.P + 1]] !== undefined) {
+            //stdout("Executing (foreign) " + atable[ftable[code[state.P+1]][0]] + "/" + ftable[code[state.P+1]][1] + '\n');
+            debug_msg("Executing (foreign) " + atable[ftable[code[state.P + 1]][0]] + "/" + ftable[code[state.P + 1]][1]);
+            let result;
+
+            {{ 'setup_and_call_foreign.wam.template' # [result] }}
+
+            debug_msg("Foreign result: " + result + " and CP: " + state.CP);
+            if (result) {
+                state.current_predicate = state.CP.predicate;
+                code = state.CP.code;
+                if (!code) {
+                    throw 'code is undefined';
+                }
+
+                state.P = state.CP.offset;
+            } else if (!backtrack())
+                return wamExit(false);
+        } else {
+            if (!undefined_predicate(code[state.P + 1]))
+                return wamExit(false);
+        }
+    }
 }

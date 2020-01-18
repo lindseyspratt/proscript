@@ -5,31 +5,13 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Added more wam macro templates. Added benchmark data.">
-      <change afterPath="$PROJECT_DIR$/bench/data/bench_3.pl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bench/data/bench_4.pl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bench/data/bench_5.pl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/engine/wam/alloc_list.wam.template" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/engine/wam/gc_check.wam.template" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/engine/wam/unwind_trail.wam.template" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/function_timing.js" afterDir="false" />
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Inroduced wam_inst_* functions for some instructions.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/bench/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/common.pl" beforeDir="false" afterPath="$PROJECT_DIR$/bench/common.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/data/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/bench/data/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/data/bench_master.pl" beforeDir="false" afterPath="$PROJECT_DIR$/bench/data/bench_master.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/gc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/gc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/wam/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/wam/deref.wam.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/deref.wam.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/wam/wam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/wam.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/wam/wam.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/wam.template" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/wam/wam_core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam/wam_core.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/web_test_html_input_element.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/web_test_html_input_element.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/web_test_utility.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/web_test_utility.pl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +95,9 @@
       <workItem from="1576261683401" duration="12599000" />
       <workItem from="1577740645125" duration="5608000" />
       <workItem from="1579030584329" duration="39715000" />
-      <workItem from="1579273109237" duration="5203000" />
+      <workItem from="1579273109237" duration="7808000" />
+      <workItem from="1579289140673" duration="2000" />
+      <workItem from="1579383190246" duration="798000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -199,7 +183,14 @@
       <option name="project" value="LOCAL" />
       <updated>1579191367026</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Added more wam macro templates. Added benchmark data.">
+      <created>1579283845134</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1579283845134</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TodoView">
@@ -261,7 +252,8 @@
     <MESSAGE value="Introduced template-based macros for WAM.&#10;&#10;Extracted wam and wam1 functions from wam.js to create wam.template and changed engine/Makefile to create wam_core.js from wam.template, trace_call_or_execute.wam.template, and advance_next_trace_conditionally.wam.template.&#10;Fixed wam_compiler.pl use of read_term/3 to be compatible with SWIPL 8.0.3 where read_term(A, B, [singleton(S)]) now returns all singletons of B in S, including ones that are not 'warnable' such as '_' and '_X'.&#10;Extended web_test_element.pl to check for height of 18 or 19 and web_test_html_element.pl to check for height of 20 or 21." />
     <MESSAGE value="Reorganized wam code to engine/wam dir. Added more macro templates." />
     <MESSAGE value="Added more wam macro templates. Added benchmark data." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added more wam macro templates. Added benchmark data." />
+    <MESSAGE value="Inroduced wam_inst_* functions for some instructions." />
+    <option name="LAST_COMMIT_MESSAGE" value="Inroduced wam_inst_* functions for some instructions." />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -273,20 +265,20 @@
       <screen x="0" y="23" width="2048" height="1052" />
     </state>
     <state x="767" y="394" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.23.2048.1052@0.23.2048.1052" timestamp="1579115431563" />
-    <state x="158" y="23" width="1890" height="1050" key="CommitChangelistDialog2" timestamp="1579282750247">
+    <state x="158" y="23" width="1890" height="1050" key="CommitChangelistDialog2" timestamp="1579385000094">
       <screen x="0" y="23" width="2048" height="1052" />
     </state>
     <state x="158" y="23" width="1890" height="1050" key="CommitChangelistDialog2/0.23.2048.1050@0.23.2048.1050" timestamp="1579115697634" />
-    <state x="158" y="23" width="1890" height="1052" key="CommitChangelistDialog2/0.23.2048.1052@0.23.2048.1052" timestamp="1579282750247" />
-    <state x="533" y="188" key="SettingsEditor" timestamp="1579280203054">
+    <state x="158" y="23" width="1890" height="1052" key="CommitChangelistDialog2/0.23.2048.1052@0.23.2048.1052" timestamp="1579385000094" />
+    <state x="533" y="188" key="SettingsEditor" timestamp="1579385015678">
       <screen x="0" y="23" width="2048" height="1052" />
     </state>
-    <state x="533" y="188" key="SettingsEditor/0.23.2048.1052@0.23.2048.1052" timestamp="1579280203054" />
-    <state x="624" y="270" key="Vcs.Push.Dialog.v2" timestamp="1579191369995">
+    <state x="533" y="188" key="SettingsEditor/0.23.2048.1052@0.23.2048.1052" timestamp="1579385015678" />
+    <state x="624" y="270" key="Vcs.Push.Dialog.v2" timestamp="1579283851752">
       <screen x="0" y="23" width="2048" height="1052" />
     </state>
     <state x="624" y="270" key="Vcs.Push.Dialog.v2/0.23.2048.1050@0.23.2048.1050" timestamp="1579115712925" />
-    <state x="624" y="270" key="Vcs.Push.Dialog.v2/0.23.2048.1052@0.23.2048.1052" timestamp="1579191369995" />
+    <state x="624" y="270" key="Vcs.Push.Dialog.v2/0.23.2048.1052@0.23.2048.1052" timestamp="1579283851752" />
     <state x="680" y="161" width="687" height="777" key="find.popup" timestamp="1579282815206">
       <screen x="0" y="23" width="2048" height="1052" />
     </state>
