@@ -397,10 +397,10 @@ function parse_term_options(options)
     {
         if (TAG(options) !== TAG_LST)
             return type_error("list", options);
-        var head = memory[VAL(options)];
+        var head = get_arg(options, 0); //memory[VAL(options)];
         if (TAG(head) !== TAG_STR)
             return type_error("option", head);
-        var ftor = memory[VAL(head)];
+        var ftor = get_arg(head, 0); //memory[VAL(head)];
         if (ftor === lookup_functor("quoted",1))
         {
             result.quoted = (memory[VAL(head)+1] === yes)  // TODO: Should this (and following) use deref?
@@ -415,21 +415,21 @@ function parse_term_options(options)
         }
         else if (ftor === lookup_functor("variables",1))
         {
-            result.variables = memory[VAL(head)+1];
+            result.variables = get_arg(head, 1); //memory[VAL(head)+1];
         }
         else if (ftor === lookup_functor("variable_names",1))
         {
-            result.variable_names = memory[VAL(head)+1];
+            result.variable_names = get_arg(head, 1); //memory[VAL(head)+1];
         }
         else if (ftor === lookup_functor("singletons",1))
         {
-            result.singletons = memory[VAL(head)+1];
+            result.singletons = get_arg(head, 1); //memory[VAL(head)+1];
         }
         else
         {
             return type_error(options, head);
         }
-        options =  memory[VAL(options)+1];
+        options =  get_arg(options, 1); //memory[VAL(options)+1];
     }
     return result;
 }
@@ -653,8 +653,8 @@ function format_term(value, options)
     case TAG_FLT:
         return floats[VAL(value)] + "";
     case TAG_STR:
-        var ftor = VAL(memory[VAL(value)]);
-        let arg = memory[VAL(value)+1];
+        var ftor = VAL(get_arg(value, 0)); //memory[VAL(value)]);
+        let arg = get_arg(value, 1); //memory[VAL(value)+1];
 
         if (options.numbervars === true && ftor === VAL(lookup_functor('$VAR', 1)) && TAG(arg) === TAG_INT)
         {
@@ -721,8 +721,8 @@ function format_term(value, options)
             return "'.'(" + format_term(memory[VAL(value)], options) + "," + format_term(memory[VAL(value)+1], options) + ")";
         // Otherwise we need to print the list in list-form
         result = "[";
-        var head = memory[VAL(value)];
-        var tail = memory[VAL(value)+1];
+        var head = get_arg(value, 0); //memory[VAL(value)];
+        var tail = get_arg(value, 1); //memory[VAL(value)+1];
         while (true)
         {
             result += format_term(head, options);
@@ -730,8 +730,8 @@ function format_term(value, options)
                 return result + "]";
             else if (TAG(tail) === TAG_LST)
             {
-                head = memory[VAL(tail)];
-                tail = memory[VAL(tail)+1];
+                head = get_arg(tail, 0); //memory[VAL(tail)];
+                tail = get_arg(tail, 1); //memory[VAL(tail)+1];
                 result += ",";
             }
             else 

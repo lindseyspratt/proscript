@@ -327,24 +327,6 @@ function deref(p)
     return p;
 }
 
-// noinspection JSUnusedGlobalSymbols
-function explicit_deref(p)
-{
-    while(TAG(p) === TAG_REF && VAL(p) !== memory[VAL(p)])
-    {
-        let q = memory[VAL(p)];
-        debug_msg("Dereferencing " + hex(p) + " -> " + hex(q));
-        if (q === undefined)
-        {
-            abort("Bad memory access: @" + p);
-        }
-        else
-            p = q;
-    }
-    return p;
-}
-
-
 // This should be a macro
 /**
  * @return {number}

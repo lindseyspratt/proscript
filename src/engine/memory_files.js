@@ -80,8 +80,8 @@ function fromByteArray(byteArray)
 function atom_list_to_array(listPL) {
 
     let result = [];
-    var head = memory[VAL(listPL)];
-    var tail = memory[VAL(listPL)+1];
+    var head = get_arg(listPL, 0); //memory[VAL(listPL)];
+    var tail = get_arg(listPL, 1); //memory[VAL(listPL)+1];
     while (true)
     {
         if(TAG(head) !== TAG_ATM) {
@@ -94,8 +94,8 @@ function atom_list_to_array(listPL) {
             return result;
         else if (TAG(tail) === TAG_LST)
         {
-            head = memory[VAL(tail)];
-            tail = memory[VAL(tail)+1];
+            head = get_arg(listPL, 0); //memory[VAL(tail)];
+            tail = get_arg(listPL, 1); //memory[VAL(tail)+1];
         }
         else
             throw('Invalid atom list. Last item was not NIL.');
@@ -129,7 +129,7 @@ function get_memory_file_id_container(term, idContainer, reportError) {
         return reportError && type_error('memory_file', term);
     var ftor = VAL(memory[VAL(term)]);
     if (atable[ftable[ftor][0]] === '$memory_file' && ftable_arity(ftor) === 1) {
-        var arg = memory[VAL(term) + 1];
+        var arg = get_arg(term, 1); //memory[VAL(term) + 1];
         if (TAG(arg) !== TAG_INT)
             return reportError && type_error("memory_file arg integer", arg);
         return getIntegerPropertyValue(arg, idContainer, reportError);

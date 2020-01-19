@@ -178,7 +178,7 @@ function record_term(t)
         while (TAG(t) === TAG_LST)
         {
             value.push(record_term(VAL(t)));
-            t = memory[VAL(t)+1];
+            t = get_arg(t, 1); //memory[VAL(t)+1];
         }
         list.tail = record_term(t);
         return list;
