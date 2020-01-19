@@ -4,13 +4,8 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="">
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="fixup! Converted memory refs in foreign.js to always deref, using get_arg.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/fli.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/fli.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/memory_files.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/memory_files.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/read.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/read.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/record.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/record.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/wam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -25,53 +20,7 @@
     <favorites_list name="proscriptls" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="248">
-              <caret line="743" column="61" lean-forward="true" selection-start-line="743" selection-start-column="61" selection-end-line="743" selection-end-column="61" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/fli.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="182">
-              <caret line="392" column="44" selection-start-line="392" selection-start-column="44" selection-end-line="392" selection-end-column="44" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/memory_files.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="100" column="34" selection-start-line="100" selection-start-column="34" selection-end-line="100" selection-end-column="34" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="332" column="3" lean-forward="true" selection-start-line="332" selection-start-column="3" selection-end-line="332" selection-end-column="3" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/read.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="519" column="13" lean-forward="true" selection-start-line="519" selection-start-column="13" selection-end-line="519" selection-end-column="13" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -103,8 +52,8 @@
       <find>doc(op</find>
       <find>current_op</find>
       <find>memory[</find>
-      <find>get_arg</find>
       <find>= memory</find>
+      <find>get_arg</find>
     </findStrings>
     <replaceStrings>
       <replace>:-</replace>
@@ -121,6 +70,11 @@
     </dirStrings>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="lindsey.spratt &lt;lindsey.spratt@logicforsystems.com&gt;" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
@@ -189,11 +143,6 @@
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
-              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -260,7 +209,7 @@
       <workItem from="1576258045082" duration="35000" />
       <workItem from="1576261683401" duration="12599000" />
       <workItem from="1577740645125" duration="5608000" />
-      <workItem from="1579385727916" duration="5387000" />
+      <workItem from="1579385727916" duration="7956000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -388,11 +337,18 @@
       <option name="project" value="LOCAL" />
       <updated>1579391750048</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Converted more memory[VAL(...)...] refs to always deref, using get_arg.">
+      <created>1579394368395</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1579394368395</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="88645000" />
+    <option name="totallyTimeSpent" value="91214000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -406,8 +362,8 @@
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="836" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65156794" visible="true" weight="0.24594785" />
-      <window_info id="Structure" order="1" sideWeight="0.34843206" side_tool="true" visible="true" weight="0.24594785" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65210086" visible="true" weight="0.24594785" />
+      <window_info id="Structure" order="1" sideWeight="0.34789917" side_tool="true" visible="true" weight="0.24594785" />
       <window_info id="Favorites" order="2" sideWeight="0.33809525" side_tool="true" weight="0.20413026" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.18415095" />
@@ -417,9 +373,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32751676" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.49964765" visible="true" weight="0.22849463" />
+      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.49964765" visible="true" weight="0.20026882" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.3261745" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5003524" side_tool="true" visible="true" weight="0.22849463" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5003524" side_tool="true" visible="true" weight="0.20026882" />
       <window_info anchor="bottom" id="Messages" order="11" sideWeight="0.49964765" weight="0.23087248" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -492,7 +448,8 @@
     <MESSAGE value="Added some builtin doc. Fixed writeq escape of \.&#10;&#10;Added doc for arithmetic comparisons and 'is'/2, term comparisons, atom chars/codes, number codes, char conversion.&#10;Fixed quote_atom function in read.js to escape \.&#10;Fixed generate_predicate_doc.pl generate_pred_sidenav_entry/2 and generate_pred_cat_sidenav_entry/3 to use writeq for Label and Pred." />
     <MESSAGE value="Added doc for many predicates. Fixed gensym to increment counter.&#10;&#10;Extended generate_pred_cat_sidenav_entry/3 to convert category terms to display strings with '-' replaced by space (' ')." />
     <MESSAGE value="Converted memory refs in foreign.js to always deref, using get_arg." />
-    <option name="LAST_COMMIT_MESSAGE" value="Converted memory refs in foreign.js to always deref, using get_arg." />
+    <MESSAGE value="Converted more memory[VAL(...)...] refs to always deref, using get_arg." />
+    <option name="LAST_COMMIT_MESSAGE" value="Converted more memory[VAL(...)...] refs to always deref, using get_arg." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/docs/objects.doc.template">
@@ -776,14 +733,7 @@
     <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="248">
-          <caret line="743" column="61" lean-forward="true" selection-start-line="743" selection-start-column="61" selection-end-line="743" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/fli.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="392" column="44" selection-start-line="392" selection-start-column="44" selection-end-line="392" selection-end-column="44" />
+          <caret line="743" column="61" selection-start-line="743" selection-start-column="61" selection-end-line="743" selection-end-column="61" />
         </state>
       </provider>
     </entry>
@@ -797,14 +747,21 @@
     <entry file="file://$PROJECT_DIR$/src/engine/read.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
-          <caret line="519" column="13" lean-forward="true" selection-start-line="519" selection-start-column="13" selection-end-line="519" selection-end-column="13" />
+          <caret line="519" column="13" selection-start-line="519" selection-start-column="13" selection-end-line="519" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="332" column="3" lean-forward="true" selection-start-line="332" selection-start-column="3" selection-end-line="332" selection-end-column="3" />
+        <state relative-caret-position="24">
+          <caret line="324" column="18" lean-forward="true" selection-start-line="324" selection-start-column="18" selection-end-line="324" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/fli.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="392" column="44" selection-start-line="392" selection-start-column="44" selection-end-line="392" selection-end-column="44" />
         </state>
       </provider>
     </entry>
