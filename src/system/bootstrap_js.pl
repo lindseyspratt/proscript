@@ -672,7 +672,7 @@ decode_instructions(PredicateName, Codes, Current, BeyondEnd) :-
 % succeeds and the evaluation of the program that called yield/0 continues.
 
 yield :-
-    eval_javascript('setTimeout(() => {promise_backtrack();}, 0)'),
+    eval_javascript('state.wamYielded = true; setTimeout(() => {state.wamYielded = false;promise_backtrack();}, 0)'),
     halt.
 yield :-
     true.

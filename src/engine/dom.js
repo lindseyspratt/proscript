@@ -829,6 +829,12 @@ function call_directives(mode) {
 // This allows the asserta/assertz clauses to persist across calls of proscriptls.
 
 function proscriptls(queryJS, displaySucceededMsg) {
+    if(state.wamYielded) {
+        // delay until wamYielded is false.
+        setTimeout(proscriptls(queryJS, displaySucceededMsg), 0);
+        return;
+    }
+
     let saved_state;
     let saved_registers;
     let saved_code;

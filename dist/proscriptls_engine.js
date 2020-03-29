@@ -4472,7 +4472,8 @@ function initialize()
              trace_predicate: trace_predicate,
              trace_code: trace_code,
              trace_prompt: '>',
-             suspended: false};
+             suspended: false,
+             wamYielded: false};
     code = bootstrap_code;
     cleanups = [];
 }
@@ -4940,11 +4941,10 @@ function wamExit(result) {
 function wam() {
     try {
         return wam1();
-    } catch(e) {
+    } catch (e) {
         wamExit(e);
         throw e;
     }
-
 }
 
 function wam1()
@@ -5681,7 +5681,7 @@ function wam1()
                 }
                 state.B = state.B0;
                 if (state.B > 0) {
-                    //state.HB = memory[state.B + memory[state.B] + CP_H]; // fix from wamerratum.txt
+                    state.HB = memory[state.B + memory[state.B] + CP_H]; // fix from wamerratum.txt
                     tidy_trail();
                 }
             }
@@ -5702,7 +5702,7 @@ function wam1()
                 }
                 state.B = y;
                 if (state.B > 0) {
-                    //state.HB = memory[state.B + memory[state.B] + CP_H]; // fix from wamerratum.txt
+                    state.HB = memory[state.B + memory[state.B] + CP_H]; // fix from wamerratum.txt
                     tidy_trail();
                 }
             } else {
@@ -10844,6 +10844,12 @@ function call_directives(mode) {
 // This allows the asserta/assertz clauses to persist across calls of proscriptls.
 
 function proscriptls(queryJS, displaySucceededMsg) {
+    if(state.wamYielded) {
+        // delay until wamYielded is false.
+        setTimeout(proscriptls(queryJS, displaySucceededMsg), 0);
+        return;
+    }
+
     let saved_state;
     let saved_registers;
     let saved_code;

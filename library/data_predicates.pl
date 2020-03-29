@@ -253,15 +253,15 @@ retract_assert_clauses([FirstClause|OtherClauses]) :-
     retract_assert_clause(FirstClause),
     assert_clauses(OtherClauses).
 
-retract_assert_clause(Head :- Body) :-
+retract_assert_clause(Module:Head :- Body) :-
     functor(Head, Functor, Arity),
-    (current_predicate(Functor/Arity)
+    (current_predicate(Module:Functor/Arity)
       ->  functor(TemplateHead, Functor, Arity),
-          retractall(TemplateHead :- _)
+          retractall(Module:TemplateHead :- _)
     ;
     true
     ),
-    asserta(Head :- Body).
+    asserta(Module:Head :- Body).
 
 assert_clauses([]).
 assert_clauses([H|T]) :-

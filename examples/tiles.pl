@@ -134,6 +134,7 @@ on_click_active_hand_tile(ID) :-
     true
     ),
     asserta(is_selected(ID)),
+    yield,
     draw_all_tile(ID, Ctx).
 
 
