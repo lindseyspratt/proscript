@@ -55,7 +55,7 @@ function predicate_get_code(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, (_get_code(s.value) & ((1 << (WORD_BITS-1))-1)) ^ (TAG_INT << WORD_BITS));
+    return unify(c, PL_put_integer(_get_code(s.value)));
 }
 
 function predicate_get_byte(stream, c)
@@ -63,7 +63,7 @@ function predicate_get_byte(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, (getb(s.value) & ((1 << (WORD_BITS-1))-1)) ^ (TAG_INT << WORD_BITS));
+    return unify(c, PL_put_integer(getb(s.value))); //(getb(s.value) & ((1 << (WORD_BITS-1))-1)) ^ (TAG_INT << WORD_BITS));
 }
 
 function predicate_peek_char(stream, c)
@@ -79,7 +79,7 @@ function predicate_peek_code(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, _peek_code(s.value) ^ (TAG_INT << WORD_BITS));
+    return unify(c, PL_put_integer(_peek_code(s.value)));
 }
 
 function predicate_peek_byte(stream, c)
@@ -87,7 +87,7 @@ function predicate_peek_byte(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, (peekb(s.value) & ((1 << (WORD_BITS-1))-1)) ^ (TAG_INT << WORD_BITS));
+    return unify(c, PL_put_integer(peekb(s.value)));
 }
 
 function predicate_put_char(stream, c)

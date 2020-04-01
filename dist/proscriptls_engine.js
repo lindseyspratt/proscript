@@ -22,10 +22,7 @@ function evaluate_expression(expression, evaluated)
     expression = deref(expression);
     if (TAG(expression) === TAG_INT)
     {
-        if ((VAL(expression) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
-            evaluated.value = VAL(expression) - (1 << WORD_BITS);
-        else
-            evaluated.value = VAL(expression);
+        evaluated.value = PL_get_integer(expression);
         return true;
     }
     if (TAG(expression) === TAG_FLT)
@@ -1423,7 +1420,7 @@ function integer_list_to_term_array(listPL) {
             throw('Invalid integer list. Item is not an integer.');
         }
 
-        result.push(VAL(head));
+        result.push(PL_get_integer(head));
 
         if (tail === NIL)
             return result;
@@ -2501,8 +2498,10 @@ function compare_terms(aBase, bBase)
             if (TAG(b) === TAG_INT) {
                 if (VAL(a) === VAL(b))
                     return 0;
-                else if (VAL(a) > VAL(b))
-                    return 1;
+                else {
+                    if (PL_get_integer(a) > PL_get_integer(b))
+                        return 1;
+                }
             }
             return -1;
         case TAG_ATM:
@@ -7137,10 +7136,7 @@ function format_term(value, options)
             return quote_atom(atom);
         return atom;
     case TAG_INT:
-        if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
-            return (VAL(value) - (1 << WORD_BITS)) + "";
-        else
-            return VAL(value) + "";
+        return PL_get_integer(value) + "";
         // fall-through
     case TAG_FLT:
         return floats[VAL(value)] + "";
@@ -7246,7 +7242,7 @@ function expression_to_term(s, varmap, singletons, termObject)
     {
         if (s === ~~s)
         {
-            newTerm = (s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+            newTerm = PL_put_integer(s); //(s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
         }
         else
         {
@@ -8113,7 +8109,7 @@ function record_term(t)
                 value: floats[VAL(t)]};
     case TAG_INT:
         return {type: TAG_INT,
-                value: VAL(t)};
+                value: PL_get_integer(t)};
     case TAG_LST:
         var value = [];
         var list = {type: TAG_LST,
@@ -8161,7 +8157,7 @@ function recall_term(e, varmap)
     case TAG_FLT:
         return lookup_float(e.value);
     case TAG_INT:
-        return e.value ^ (TAG_INT << WORD_BITS);
+        return PL_put_integer(e.value); //e.value ^ (TAG_INT << WORD_BITS);
     case TAG_LST: {
         let result = alloc_var();
         var tail = result;
@@ -8362,8 +8358,12 @@ function PL_get_atom_chars(term)
  */
 function PL_get_integer(term)
 {
-    if (TAG(term) === TAG_INT)
-        return VAL(term);
+    if (TAG(term) === TAG_INT) {
+        if ((VAL(term) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
+            return (VAL(term) - (1 << WORD_BITS));
+        else
+            return VAL(term);
+    }
     throw("type_error: integer");
 }
 
@@ -8453,7 +8453,7 @@ function PL_put_atom_chars(chars)
  */
 function PL_put_integer(integer)
 {
-    return integer ^ (TAG_INT << WORD_BITS);
+    return (integer & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS)
 }
 
 /*
@@ -8665,7 +8665,7 @@ function predicate_get_code(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, (_get_code(s.value) & ((1 << (WORD_BITS-1))-1)) ^ (TAG_INT << WORD_BITS));
+    return unify(c, PL_put_integer(_get_code(s.value)));
 }
 
 function predicate_get_byte(stream, c)
@@ -8673,7 +8673,7 @@ function predicate_get_byte(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, (getb(s.value) & ((1 << (WORD_BITS-1))-1)) ^ (TAG_INT << WORD_BITS));
+    return unify(c, PL_put_integer(getb(s.value))); //(getb(s.value) & ((1 << (WORD_BITS-1))-1)) ^ (TAG_INT << WORD_BITS));
 }
 
 function predicate_peek_char(stream, c)
@@ -8689,7 +8689,7 @@ function predicate_peek_code(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, _peek_code(s.value) ^ (TAG_INT << WORD_BITS));
+    return unify(c, PL_put_integer(_peek_code(s.value)));
 }
 
 function predicate_peek_byte(stream, c)
@@ -8697,7 +8697,7 @@ function predicate_peek_byte(stream, c)
     var s = {};
     if (!get_stream(stream, s))
         return false;
-    return unify(c, (peekb(s.value) & ((1 << (WORD_BITS-1))-1)) ^ (TAG_INT << WORD_BITS));
+    return unify(c, PL_put_integer(peekb(s.value)));
 }
 
 function predicate_put_char(stream, c)
@@ -14844,12 +14844,7 @@ function getIntegerPropertyValue(value, container, reportError) {
         return reportError && type_error('integer', value);
     }
 
-    let result;
-    if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
-        result = VAL(value) - (1 << WORD_BITS);
-    else
-        result = VAL(value);
-    container.value = result;
+    container.value = PL_get_integer(value);
     return true;
 }
 

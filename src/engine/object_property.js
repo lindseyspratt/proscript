@@ -278,12 +278,7 @@ function getIntegerPropertyValue(value, container, reportError) {
         return reportError && type_error('integer', value);
     }
 
-    let result;
-    if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
-        result = VAL(value) - (1 << WORD_BITS);
-    else
-        result = VAL(value);
-    container.value = result;
+    container.value = PL_get_integer(value);
     return true;
 }
 

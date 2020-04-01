@@ -436,6 +436,11 @@ test(sort(3), exit) :-
     Z = z,
     X=[z,3.2,a,b(1)].
 
+test(sort(4), exit) :-
+    sort([-1, 1, -2], S),
+    !,
+    S = [-2,-1,1].
+
 test(keysort(1), exit) :-
     keysort([1-a,2-b,2-c], X),
     !,

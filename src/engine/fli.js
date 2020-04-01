@@ -167,8 +167,12 @@ function PL_get_atom_chars(term)
  */
 function PL_get_integer(term)
 {
-    if (TAG(term) === TAG_INT)
-        return VAL(term);
+    if (TAG(term) === TAG_INT) {
+        if ((VAL(term) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
+            return (VAL(term) - (1 << WORD_BITS));
+        else
+            return VAL(term);
+    }
     throw("type_error: integer");
 }
 
@@ -258,7 +262,7 @@ function PL_put_atom_chars(chars)
  */
 function PL_put_integer(integer)
 {
-    return integer ^ (TAG_INT << WORD_BITS);
+    return (integer & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS)
 }
 
 /*

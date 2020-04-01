@@ -170,7 +170,7 @@ function record_term(t)
                 value: floats[VAL(t)]};
     case TAG_INT:
         return {type: TAG_INT,
-                value: VAL(t)};
+                value: PL_get_integer(t)};
     case TAG_LST:
         var value = [];
         var list = {type: TAG_LST,
@@ -218,7 +218,7 @@ function recall_term(e, varmap)
     case TAG_FLT:
         return lookup_float(e.value);
     case TAG_INT:
-        return e.value ^ (TAG_INT << WORD_BITS);
+        return PL_put_integer(e.value); //e.value ^ (TAG_INT << WORD_BITS);
     case TAG_LST: {
         let result = alloc_var();
         var tail = result;

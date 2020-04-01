@@ -20,10 +20,7 @@ function evaluate_expression(expression, evaluated)
     expression = deref(expression);
     if (TAG(expression) === TAG_INT)
     {
-        if ((VAL(expression) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
-            evaluated.value = VAL(expression) - (1 << WORD_BITS);
-        else
-            evaluated.value = VAL(expression);
+        evaluated.value = PL_get_integer(expression);
         return true;
     }
     if (TAG(expression) === TAG_FLT)
@@ -1428,7 +1425,7 @@ function integer_list_to_term_array(listPL) {
             throw('Invalid integer list. Item is not an integer.');
         }
 
-        result.push(VAL(head));
+        result.push(PL_get_integer(head));
 
         if (tail === NIL)
             return result;
@@ -2523,8 +2520,10 @@ function compare_terms(aBase, bBase)
             if (TAG(b) === TAG_INT) {
                 if (VAL(a) === VAL(b))
                     return 0;
-                else if (VAL(a) > VAL(b))
-                    return 1;
+                else {
+                    if (PL_get_integer(a) > PL_get_integer(b))
+                        return 1;
+                }
             }
             return -1;
         case TAG_ATM:

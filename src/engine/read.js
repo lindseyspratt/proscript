@@ -645,10 +645,7 @@ function format_term(value, options)
             return quote_atom(atom);
         return atom;
     case TAG_INT:
-        if ((VAL(value) & (1 << (WORD_BITS-1))) === (1 << (WORD_BITS-1)))
-            return (VAL(value) - (1 << WORD_BITS)) + "";
-        else
-            return VAL(value) + "";
+        return PL_get_integer(value) + "";
         // fall-through
     case TAG_FLT:
         return floats[VAL(value)] + "";
@@ -754,7 +751,7 @@ function expression_to_term(s, varmap, singletons, termObject)
     {
         if (s === ~~s)
         {
-            newTerm = (s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
+            newTerm = PL_put_integer(s); //(s & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
         }
         else
         {
