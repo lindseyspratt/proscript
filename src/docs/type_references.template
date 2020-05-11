@@ -117,11 +117,11 @@
 	</ul>
 <h6>Methods</h6>
 	<ul>
-		<li><b>getPropertyPriority</b>(<i>string</i>, <i>atom</i>) [last arg is result]</li>
-		<li><b>getPropertyValue</b>(<i>string</i>, <i>atom</i>) [last arg is result]</li>
+		<li><b>getPropertyPriority</b>(<i>string</i>, <i>string</i>) [last arg is result]</li>
+		<li><b>getPropertyValue</b>(<i>string</i>, <i>string</i>) [last arg is result]</li>
 		<li><b>item</b>(<i>integer</i>, <i>atom</i>) [last arg is result]</li>
-		<li><b>removeProperty</b>(<i>string</i>, <i>atom</i>) [last arg is result]</li>
-		<li><b>setProperty</b>(<i>string</i>, <i>string</i>, <i>atom</i>)</li>
+		<li><b>removeProperty</b>(<i>string</i>, <i>string</i>) [last arg is result]</li>
+		<li><b>setProperty</b>(<i>string</i>, <i>string</i>, <i>string</i>)</li>
 	</ul>
 </li>
 <li class="indexed" id="api_customelementregistry"><h5>CustomElementRegistry (<a href="https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry'>MDN</a>): customelementregistry</h5>
@@ -235,7 +235,7 @@
 	<ul>
 		<li><b>composedPath</b>(<i>object</i>) [last arg is result]</li>
 		<li><b>preventDefault</b></li>
-		<li><b>setProperty</b>(<i>string</i>, <i>string</i>, <i>atom</i>)</li>
+		<li><b>setProperty</b>(<i>string</i>, <i>string</i>, <i>string</i>)</li>
 		<li><b>stopImmediatePropagation</b></li>
 		<li><b>stopPropagation</b></li>
 	</ul>
@@ -286,7 +286,7 @@
 	<ul>
 		<li><b>getContext</b>(<i>string</i>, <i>object</i>) [last arg is result]</li>
 		<li><b>removeProperty</b>(<i>string</i>, <i>atom</i>) [last arg is result]</li>
-		<li><b>setProperty</b>(<i>string</i>, <i>string</i>, <i>atom</i>)</li>
+		<li><b>setProperty</b>(<i>string</i>, <i>string</i>, <i>string</i>)</li>
 		<li><b>toBlob</b>(<i>goal_function</i>, <i>string</i>, <i>float</i>)</li>
 		<li><b>toDataURL</b>(<i>string</i>, <i>float</i>, <i>string_codes</i>) [last arg is result]</li>
 	</ul>
@@ -506,12 +506,30 @@
 <h6>Parents</h6><ul><li><a href='#api_uievent'>uievent</a></li></ul>
 <h6>Properties</h6>
 	<ul>
+		<li><b>altKey</b>: <i>boolean</i></li>
+		<li><b>button</b>: <i>number</i></li>
+		<li><b>buttons</b>: <i>number</i></li>
 		<li><b>clientX</b>: <i>number</i></li>
 		<li><b>clientY</b>: <i>number</i></li>
+		<li><b>ctrlKey</b>: <i>boolean</i></li>
+		<li><b>metaKey</b>: <i>boolean</i></li>
+		<li><b>movementX</b>: <i>number</i></li>
+		<li><b>movementY</b>: <i>number</i></li>
+		<li><b>mozInputSource</b>: <i>atom</i></li>
+		<li><b>offsetX</b>: <i>number</i></li>
+		<li><b>offsetY</b>: <i>number</i></li>
 		<li><b>pageX</b>: <i>number</i></li>
 		<li><b>pageY</b>: <i>number</i></li>
+		<li><b>region</b>: <i>atom</i></li>
+		<li><b>relatedTarget</b>: <i>object</i></li>
+		<li><b>screenX</b>: <i>number</i></li>
+		<li><b>screenY</b>: <i>number</i></li>
+		<li><b>shiftKey</b>: <i>boolean</i></li>
 	</ul>
-	(no methods)
+<h6>Methods</h6>
+	<ul>
+		<li><b>getModifierState</b>(<i>string</i>, <i>boolean</i>) [last arg is result]</li>
+	</ul>
 </li>
 <li class="indexed" id="api_navigator"><h5>Navigator (<a href="https://html.spec.whatwg.org/multipage/system-state.html#navigator">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/Navigator'>MDN</a>): navigator</h5>
 <h6>Parents</h6><ul><li><a href='#api_navigatorcontentutils'>navigatorcontentutils</a></li><li><a href='#api_navigatorcookies'>navigatorcookies</a></li><li><a href='#api_navigatorid'>navigatorid</a></li><li><a href='#api_navigatorlanguage'>navigatorlanguage</a></li><li><a href='#api_navigatoronline'>navigatoronline</a></li></ul>

@@ -456,7 +456,7 @@ function convert_result(resultJS, spec, module, resultContainer, reportError) {
             }
             return reportError && type_error('union: ' + spec.type, lookup_atom(JSON.stringify(resultJS)));
         }
-    } else if(spec.type === 'atom') {
+    } else if(spec.type === 'atom' || spec.type === 'string') {
         resultPL = lookup_atom(resultJS);
     } else if(spec.type === 'string_codes') {
         resultPL = string_to_codes(resultJS);

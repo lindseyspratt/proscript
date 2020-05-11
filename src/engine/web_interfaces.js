@@ -649,7 +649,7 @@ var htmlCanvasElementMethodSpecs = new Map([
     ['toBlob',{name:'toBlob',arguments:[{type:'goal_function'},{type:'string'},{type:'float'}]}],
     ['toDataURL',{name:'toDataURL',arguments:[{type:'string'},{type:'float'}],returns:{type:'string_codes'}}], // 2nd arg is between 0 and 1. Result is a data URL.
     ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'string'}]}]
 ]);
 
 webInterfaces.set('htmlcanvaselement',
@@ -880,7 +880,7 @@ var eventMethodSpecs = new Map([
     ['preventDefault',{name:'preventDefault',arguments:[]}],
     ['stopImmediatePropagation',{name:'stopImmediatePropagation',arguments:[]}],
     ['stopPropagation',{name:'stopPropagation',arguments:[]}],
-    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'string'}]}]
 ]);
 
 webInterfaces.set('event',
@@ -901,11 +901,11 @@ var cssStyleDeclarationInterfaceProperties = new Map( [
 
 
 var cssStyleDeclarationMethodSpecs = new Map([
-    ['getPropertyPriority',{name:'getPropertyPriority',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['getPropertyValue',{name:'getPropertyValue',arguments:[{type:'string'}],returns:{type:'atom'}}],
+    ['getPropertyPriority',{name:'getPropertyPriority',arguments:[{type:'string'}],returns:{type:'string'}}],
+    ['getPropertyValue',{name:'getPropertyValue',arguments:[{type:'string'}],returns:{type:'string'}}],
     ['item',{name:'item',arguments:[{type:'integer'}],returns:{type:'atom'}}],
-    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'atom'}}],
-    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'atom'}]}]
+    ['removeProperty',{name:'removeProperty',arguments:[{type:'string'}],returns:{type:'string'}}],
+    ['setProperty',{name:'setProperty',arguments:[{type:'string'},{type:'string'},{type:'string'}]}]
 ]);
 
 webInterfaces.set('cssstyledeclaration',
@@ -1157,10 +1157,26 @@ var mouseEventInterfaceProperties = new Map( [
     ['clientX', SimpleProperty('number', 'clientX')],
     ['clientY', SimpleProperty('number', 'clientY')],
     ['pageX', SimpleProperty('number', 'pageX')],
-    ['pageY', SimpleProperty('number', 'pageY')]
+    ['pageY', SimpleProperty('number', 'pageY')],
+    ['altKey', SimpleProperty('boolean', 'altKey')],
+    ['button', SimpleProperty('number', 'button')],
+    ['buttons', SimpleProperty('number', 'buttons')],
+    ['ctrlKey', SimpleProperty('boolean', 'ctrlKey')],
+    ['metaKey', SimpleProperty('boolean', 'metaKey')],
+    ['movementX', SimpleProperty('number', 'movementX')],
+    ['movementY', SimpleProperty('number', 'movementY')],
+    ['mozInputSource', SimpleProperty('atom', 'mozInputSource')],
+    ['offsetX', SimpleProperty('number', 'offsetX')],
+    ['offsetY', SimpleProperty('number', 'offsetY')],
+    ['region', SimpleProperty('atom', 'region')],
+    ['relatedTarget', SimpleProperty('object', 'relatedTarget')],
+    ['screenX', SimpleProperty('number', 'screenX')],
+    ['screenY', SimpleProperty('number', 'screenY')],
+    ['shiftKey', SimpleProperty('boolean', 'shiftKey')]
 ]);
 
 var mouseEventMethodSpecs = new Map([
+    ['getModifierState',{name:'getModifierState',arguments:[{type:'string'}],returns:{type:'boolean'}}],
 ]);
 
 webInterfaces.set('mouseevent',

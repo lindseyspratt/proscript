@@ -455,3 +455,8 @@ test(keysort(3), exit) :-
     keysort([3-c,2-b,1-a], X),
     !,
     X = [1-a,2-b,3-c].
+
+test(write, exit) :-
+    write_term(atom(Result), [a,b,c], [max_depth(3)]),
+    !,
+    Result = '[a,b,...]'.

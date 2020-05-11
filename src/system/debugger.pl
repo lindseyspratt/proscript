@@ -230,13 +230,15 @@ notrace_backtrackable :-
 '$trace_create_prompt'(K, Goal, ID, Prompt) :-
     pad_number(ID, 7, PaddedID),
     pad_number(K, 5, PaddedK),
-    concat_list([PaddedID, PaddedK, ' ', Goal], Prompt).
+    write_term(atom(GoalAtom), Goal, [max_depth(5), quoted(true), ignore_ops(false), numbervars(true)]),
+    concat_list([PaddedID, PaddedK, ' ', GoalAtom], Prompt).
 
 '$trace_create_prompt'(K, Port, Goal, ID, Prompt) :-
     pad_number(ID, 7, PaddedID),
     pad_number(K, 5, PaddedK),
     capitalize(Port, CapitalizedPort),
-    concat_list([PaddedID, PaddedK, ' ', CapitalizedPort, ': ', Goal], Prompt).
+    write_term(atom(GoalAtom), Goal, [max_depth(5), quoted(true), ignore_ops(false), numbervars(true)]),
+    concat_list([PaddedID, PaddedK, ' ', CapitalizedPort, ': ', GoalAtom], Prompt).
 
 
 '$trace_read_and_cmd'(P, G, Anc, ID, B) :-

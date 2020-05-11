@@ -486,18 +486,17 @@ sort(List, Sorted) :-
     check_sorted(List, Sorted),
     !.
 sort(List, Sorted) :-
-    sort1(List, Sorted).
+    sort1(List, Sorted, []).
 
-sort1([X|Xs], Ys) :-
+sort1([X|Xs], Ys, YsTail) :-
     !,
-    sort2(X, Xs, Ys).
-sort1([], []).
+    sort2(X, Xs, Ys, YsTail).
+sort1([], Ys, Ys).
 
-sort2(X, Xs, Ys) :-
+sort2(X, Xs, Ys, YsTail) :-
     partition(Xs,X,Left,Right),
-    sort1(Left,Ls),
-    sort1(Right,Rs),
-    append(Ls,[X|Rs],Ys).
+    sort1(Left,Ys, [X|Rs]),
+    sort1(Right,Rs, YsTail).
 
 % check_sorted removes duplicates in an
 % already-in-order list.
@@ -517,7 +516,7 @@ keysort(List, Sorted) :-
     check_keysorted(List, Sorted),
     !.
 keysort(List, Sorted) :-
-    keysort1(List, Sorted).
+    keysort1(List, Sorted, []).
 
 check_keysorted([], []).
 check_keysorted([X], [X]) :- !.
@@ -532,12 +531,11 @@ check_keysorted([H1-V1,H2-V2|T], L) :-
     ),
     check_keysorted(Next, LT).
 
-keysort1([Key-X|Xs],Ys) :-
+keysort1([Key-X|Xs],Ys, YsTail) :-
         key_partition(Xs,Key,Left,Right),
-        keysort1(Left,Ls),
-        keysort1(Right,Rs),
-        append(Ls,[Key-X|Rs],Ys).
-keysort1([],[]).
+        keysort1(Left,Ys, [Key-X|Rs]),
+        keysort1(Right,Rs, YsTail).
+keysort1([],Ys,Ys).
 
 partition([X|Xs],Y,Ls,Rs) :-
         X == Y,

@@ -1691,7 +1691,10 @@ print_bindings(Vars):-
         print_bindings_1(Vars).
 print_bindings_1([]):- !.
 print_bindings_1([Name=Value|Bindings]):-
-        writeln(Name=Value),
+        write(Name), % do not 'quote' the variable name.
+        write(=),
+        write_term(Value, [max_depth(5), quoted(true), ignore_ops(false), numbervars(true)]),
+        writeln(''),
         print_bindings_1(Bindings).
 
 repl(Atom):-

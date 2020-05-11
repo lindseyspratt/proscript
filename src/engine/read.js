@@ -425,6 +425,10 @@ function parse_term_options(options)
         {
             result.singletons = get_arg(head, 1); //memory[VAL(head)+1];
         }
+        else if (ftor === lookup_functor("max_depth",1))
+        {
+            result.max_depth = PL_get_integer(get_arg(head, 1)); //memory[VAL(head)+1];
+        }
         else
         {
             return type_error(options, head);
@@ -545,6 +549,16 @@ function predicate_write_term(stream, term, options)
     if (!(options = parse_term_options(options)))
         return false;
     var value = format_term(term, options);
+
+    //look for atom(X)
+    if (TAG(stream) === TAG_STR) {
+        let ftor = VAL(memory[VAL(stream)]);
+        if (atable[ftable[ftor][0]] === "atom" && ftable_arity(ftor) === 1) {
+            let arg = get_arg(stream, 1); //memory[VAL(stream)+1];
+            return unify(arg, lookup_atom(value));
+        }
+    }
+
     var s = {};
     if (!get_stream(stream, s))
         return false;
@@ -615,12 +629,26 @@ function is_operator(ftor)
 }
 
 
-function format_term(value, options)
+function format_term(value, options, depth)
 {
     var result;
+    let localDepth = depth;
+    if(typeof localDepth === 'undefined') {
+        localDepth = 1;
+    }
+    let maxDepth = options.max_depth;
+    if(typeof maxDepth === 'undefined') {
+        maxDepth = 0; // '0' means no max depth limit.
+    }
+
+    if(maxDepth > 0 && localDepth > maxDepth) {
+        return '...';
+    }
+
+    let nextDepth = localDepth + 1;
 
     if (value === undefined)
-        return lookup_atom('!undefined!');
+        return '!undefined!';
         //abort("Illegal memory access in format_term: " + hex(value) + ". Dumping...");
     value = deref(value);
     var lTop;
@@ -664,10 +692,13 @@ function format_term(value, options)
         if (!is_operator(ftor) || options.ignore_ops === true)
         {
             // Print in canonical form functor(arg1, arg2, ...)
-            result = format_term(ftable[ftor][0] ^ (TAG_ATM << WORD_BITS), options) + "(";
+            result = format_term(ftable[ftor][0] ^ (TAG_ATM << WORD_BITS), options, localDepth) + "(";
             for (var i = 0; i < ftable_arity(ftor); i++)
             {
-                result += format_term(memory[VAL(value)+1+i], options);
+                result += format_term(memory[VAL(value)+1+i], options, nextDepth++);
+                if(maxDepth > 0 && nextDepth > maxDepth) {
+                    break;
+                }
                 if (i+1 < ftable_arity(ftor))
                     result += ",";
             }
@@ -680,7 +711,7 @@ function format_term(value, options)
             if (ftable_arity(ftor) === 2 && infix_operators[fname] !== undefined)
             {
                 // Infix operator
-                var lhs = format_term(memory[VAL(value)+1], options);
+                var lhs = format_term(memory[VAL(value)+1], options, nextDepth);
                 if (is_punctuation_charAt(lhs, lhs.length-1) && !is_punctuation(fname.charAt(0)))
                     result = lhs + fname;
                 else if (!is_punctuation_charAt(lhs, lhs.length-1) && is_punctuation(fname.charAt(0)))
@@ -689,7 +720,7 @@ function format_term(value, options)
                 {
                     result = lhs + " " + fname;
                 }
-                var rhs1 = format_term(memory[VAL(value)+2], options);
+                var rhs1 = format_term(memory[VAL(value)+2], options, nextDepth+1);
 
                 if (is_punctuation_charAt(rhs1, 0) && !is_punctuation(fname.charAt(fname.length-1)))
                     return result + rhs1;
@@ -701,7 +732,7 @@ function format_term(value, options)
             else if (ftable_arity(ftor) === 1 && prefix_operators[fname] !== undefined)
             {
                 // Prefix operator
-                var rhs2 = format_term(memory[VAL(value)+1], options);
+                var rhs2 = format_term(memory[VAL(value)+1], options, nextDepth);
                 if (is_punctuation_charAt(rhs2, 0) && !is_punctuation(fname.charAt(fname.length-1)))
                     return fname + rhs2;
                 else if (!is_punctuation_charAt(rhs2,0) && is_punctuation(fname.charAt(fname.length-1)))
@@ -715,15 +746,16 @@ function format_term(value, options)
         }
     case TAG_LST:
         if (options.ignore_ops)
-            return "'.'(" + format_term(memory[VAL(value)], options) + "," + format_term(memory[VAL(value)+1], options) + ")";
+            return "'.'(" + format_term(memory[VAL(value)], options, nextDepth) + "," + format_term(memory[VAL(value)+1], options, nextDepth+1) + ")";
         // Otherwise we need to print the list in list-form
         result = "[";
         var head = get_arg(value, 0); //memory[VAL(value)];
         var tail = get_arg(value, 1); //memory[VAL(value)+1];
         while (true)
         {
-            result += format_term(head, options);
-            if (tail === NIL)
+            result += format_term(head, options, nextDepth);
+
+            if (tail === NIL || (maxDepth > 0 && nextDepth > maxDepth))
                 return result + "]";
             else if (TAG(tail) === TAG_LST)
             {
@@ -732,8 +764,9 @@ function format_term(value, options)
                 result += ",";
             }
             else 
-                return result + "|" + format_term(tail, options) + "]";
-        }        
+                return result + "|" + format_term(tail, options, nextDepth) + "]";
+            nextDepth++ ;
+        }
     }
 }
 

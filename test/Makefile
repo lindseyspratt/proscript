@@ -18,9 +18,9 @@ jsc_test:		$(ENGINE) standalone.js proscriptls_state.js
 .PHONY: jsc_test node_test
 
 proscriptls_state.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl \
-            $(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
-            $(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl tests.pl\
-            $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
+			$(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
+			$(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl tests.pl\
+			$(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['tests.pl'], run_unit_tests), halt"
 
 node_test: $(NODE_TOOLS)/node_toplevel.js proscriptls_state.js
@@ -37,9 +37,9 @@ clean_index:
 		rm -f proscriptls_index_state.js;
 
 proscriptls_index_state.js: index_test.pl $(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl \
-            $(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
-            $(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl\
-            $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
+			$(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
+			$(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl\
+			$(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', [index(basic), '$<'], '$@', baz(f(c))), halt"
 
 node_index_test: $(NODE_TOOLS)/node_toplevel.js proscriptls_index_state.js
@@ -49,9 +49,9 @@ clean_factorial:
 		rm -f proscriptls_factorial_state.js;
 
 xproscriptls_factorial_state.js: factorial.pl $(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl \
-            $(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
-            $(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl\
-            $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
+			$(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
+			$(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl\
+			$(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['$<'], '$@', (factorial(5, N),writeln(N))), halt"
 
 proscriptls_factorial_state.js:  ../dist/proscriptls_engine_for_node.js factorial.pl\
@@ -69,9 +69,9 @@ clean_struct:
 		rm -f proscriptls_struct_state.js;
 
 xproscriptls_struct_state.js: struct.pl $(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl \
-            $(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
-            $(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl\
-            $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
+			$(SRC_SYSTEM)/wam_compiler.pl $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
+			$(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/testing.pl\
+			$(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap_util.pl
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g "bootstrap('$(SRC_SYSTEM)/', ['$<'], '$@', (struct(5, N),writeln(N))), halt"
 
 proscriptls_struct_state.js:  ../dist/proscriptls_engine_for_node.js struct.pl\
