@@ -4,26 +4,26 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Updated to version 1.5.5.">
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.SDK.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.SDK.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/calculator_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/calculator_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/console_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/consult_console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/consult_console_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index_about.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_about.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/index_doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_doc.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/type_references.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/type_references.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/object_method.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/object_method.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/read.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/read.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/web_interfaces.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/web_interfaces.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/bootstrap_js.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/bootstrap_js.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/debugger.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/debugger.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/wam_compiler.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/wam_compiler.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/test/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/tests.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/tests.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index_download.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_download.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/likes_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/likes_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/simple_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/simple_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/tiles_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tiles_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/version.txt" beforeDir="false" afterPath="$PROJECT_DIR$/version.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/version_date.txt" beforeDir="false" afterPath="$PROJECT_DIR$/version_date.txt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -61,16 +61,7 @@
         <entry file="file://$PROJECT_DIR$/src/engine/read.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-527">
-              <caret line="693" column="63" lean-forward="true" selection-start-line="693" selection-start-column="63" selection-end-line="693" selection-end-column="63" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/fli.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="167">
-              <caret line="167" column="9" selection-start-line="167" selection-start-column="9" selection-end-line="167" selection-end-column="9" />
+              <caret line="693" column="63" selection-start-line="693" selection-start-column="63" selection-end-line="693" selection-end-column="63" />
             </state>
           </provider>
         </entry>
@@ -79,12 +70,12 @@
         <entry file="file://$PROJECT_DIR$/src/system/debugger.pl">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="2220">
-              <caret line="148" column="6" lean-forward="true" selection-start-line="148" selection-start-column="6" selection-end-line="148" selection-end-column="6" />
+              <caret line="148" column="6" selection-start-line="148" selection-start-column="6" selection-end-line="148" selection-end-column="6" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/version.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state>
@@ -97,7 +88,7 @@
         <entry file="file://$PROJECT_DIR$/version_date.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret column="2" lean-forward="true" selection-start-column="2" selection-end-column="5" />
+              <caret column="3" selection-start-column="3" selection-end-column="3" />
             </state>
           </provider>
         </entry>
@@ -106,7 +97,7 @@
         <entry file="file://$PROJECT_DIR$/test/tests.pl">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="414">
-              <caret line="461" column="25" lean-forward="true" selection-start-line="461" selection-start-column="25" selection-end-line="461" selection-end-column="25" />
+              <caret line="461" column="25" selection-start-line="461" selection-start-column="25" selection-end-line="461" selection-end-column="25" />
             </state>
           </provider>
         </entry>
@@ -115,7 +106,7 @@
         <entry file="file://$PROJECT_DIR$/Makefile">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="465">
-              <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
+              <caret line="31" selection-start-line="31" selection-end-line="31" />
             </state>
           </provider>
         </entry>
@@ -124,7 +115,16 @@
         <entry file="file://$PROJECT_DIR$/test/Makefile">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="315">
-              <caret line="21" column="75" lean-forward="true" selection-start-line="21" selection-start-column="75" selection-end-line="21" selection-end-column="75" />
+              <caret line="21" column="75" selection-start-line="21" selection-start-column="75" selection-end-line="21" selection-end-column="75" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/bench/Makefile">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="19" selection-start-line="19" selection-end-line="19" />
             </state>
           </provider>
         </entry>
@@ -243,8 +243,8 @@
         <option value="$PROJECT_DIR$/src/system/wam_compiler.pl" />
         <option value="$PROJECT_DIR$/src/engine/read.js" />
         <option value="$PROJECT_DIR$/test/tests.pl" />
-        <option value="$PROJECT_DIR$/version_date.txt" />
         <option value="$PROJECT_DIR$/version.txt" />
+        <option value="$PROJECT_DIR$/version_date.txt" />
       </list>
     </option>
   </component>
@@ -265,6 +265,16 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="bench" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -306,15 +316,9 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Makefile.all (4)">
+  <component name="RunManager" selected="Makefile.all (1)">
     <configuration name="all (1)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/test/Makefile" target="all" workingDirectory="" arguments="">
-        <envs />
-      </makefile>
-      <method v="2" />
-    </configuration>
-    <configuration name="all (2)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
+      <makefile filename="$PROJECT_DIR$/bench/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
@@ -331,8 +335,14 @@
       </makefile>
       <method v="2" />
     </configuration>
-    <configuration name="all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+    <configuration name="all (5)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
       <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/test/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
@@ -345,11 +355,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Makefile.all (4)" />
-        <item itemvalue="Makefile.all (3)" />
-        <item itemvalue="Makefile.all (2)" />
         <item itemvalue="Makefile.all (1)" />
         <item itemvalue="Makefile.all" />
+        <item itemvalue="Makefile.all (5)" />
+        <item itemvalue="Makefile.all (4)" />
+        <item itemvalue="Makefile.all (3)" />
       </list>
     </recent_temporary>
   </component>
@@ -385,7 +395,7 @@
       <workItem from="1585501647983" duration="11970000" />
       <workItem from="1587483537244" duration="61000" />
       <workItem from="1587486567560" duration="5890000" />
-      <workItem from="1587741107740" duration="16485000" />
+      <workItem from="1587741107740" duration="17955000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -555,11 +565,18 @@
       <option name="project" value="LOCAL" />
       <updated>1587648799982</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Object method spec fixes. Extended MouseEvent API. Added max_depth option to write_term; used it in debugger and repl. Optimized sort/2 and keysort/2.&#10;&#10;Added 'string' as a result type in object method.&#10;read.js: Added max_depth to parse_term_options function, added depth arg and max_depth checking to format_term function, added atom(X) as pseudo-stream to predicate_write_term function.&#10;web_interfaces.js: Fixed getPropertyPriority, getPropertyValue, removeProperty, and setProperty arg types from 'atom' to 'string', completed mouseEvent properties (e.g. altKey, button, screenX), added getModifierState method to mouseevent.&#10;Changed sort/2 and keysort/2 in bootstrap_js.pl to use difference list instead of append/3.&#10;Changed debugger to use write_term/3 with max_depth(5).&#10;Changed print_bindings_1/1 (used by top level repl/1) to use write_term/2 with max_depth(5) and quoted(true) for the Value of the binding.&#10;Added write_term test to tests.pl.">
+      <created>1589230693224</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1589230693224</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="159541000" />
+    <option name="totallyTimeSpent" value="161011000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -573,12 +590,12 @@
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="836" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.62759924" visible="true" weight="0.22246066" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.62759924" visible="true" weight="0.22246066" />
       <window_info id="Structure" order="1" sideWeight="0.37240076" side_tool="true" visible="true" weight="0.22246066" />
       <window_info id="Favorites" order="2" sideWeight="0.33809525" side_tool="true" weight="0.20413026" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49642345" weight="0.32258064" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49499285" visible="true" weight="0.2889785" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49499285" visible="true" weight="0.2889785" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.061744966" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -672,7 +689,9 @@
     <MESSAGE value="Fixed handling of negative integers.&#10;&#10;Fixed several bugs in handling of negative integers. This included '-1 @&gt; 1' being true.&#10;Generally replaced VAL(x) with PL_get_integer(x), where PL_get_integer(x) uses 'VAL(x) - (1 &lt;&lt; WORD_BITS)' to get value of 'x' as a negative integer and just 'VAL(x)' when value of 'x' is a positive integer. 'x' represents a negative integer if and only if '(VAL(x) &amp; (1 &lt;&lt; (WORD_BITS-1))) === (1 &lt;&lt; (WORD_BITS-1))'.&#10;Also replaced code to create integer term from integer 'x' with 'PL_put_integer(x)' =&gt; '(x &amp; ((1 &lt;&lt; WORD_BITS)-1)) ^ (TAG_INT &lt;&lt; WORD_BITS)'.&#10;foreign.js: Fixed evaluate_expression, integer_list_to_term_array, and compare_terms to use PL_get_integer.&#10;object_property.js: Fixed getIntegerPropertyValue to use PL_get_integer.&#10;read.js: Fixed format_term and expression_to_term to use PL_get_integer.&#10;record.js: Fixed record_term to use PL_put_integer.&#10;stream.js: Fixed predicate_get_code, predicate_get_byte, predicate_peek_code, and predicate_peek_byte to use PL_put_integer.&#10;tests.pl: Added sort(4) test to check sorting of negative integers." />
     <MESSAGE value="Updated to version 1.5.5." />
     <MESSAGE value="Exploring new memory model." />
-    <option name="LAST_COMMIT_MESSAGE" value="Exploring new memory model." />
+    <MESSAGE value="&#10;&#10;Added 'string' as a result type in object method.&#10;read.js: Added max_depth to parse_term_options function, added depth arg and max_depth checking to format_term function, added atom(X) as pseudo-stream to predicate_write_term function.&#10;web_interfaces.js: Fixed getPropertyPriority, getPropertyValue, removeProperty, and setProperty arg types from 'atom' to 'string', completed mouseEvent properties (e.g. altKey, button, screenX), added getModifierState method to mouseevent.&#10;Changed sort/2 and keysort/2 in bootstrap_js.pl to use difference list instead of append/3.&#10;Changed debugger to use write_term/3 with max_depth(5).&#10;Changed print_bindings_1/1 (used by top level repl/1) to use write_term/2 with max_depth(5) and quoted(true) for the Value of the binding.&#10;Added write_term test to tests.pl." />
+    <MESSAGE value="Object method spec fixes. Extended MouseEvent API. Added max_depth option to write_term; used it in debugger and repl. Optimized sort/2 and keysort/2.&#10;&#10;Added 'string' as a result type in object method.&#10;read.js: Added max_depth to parse_term_options function, added depth arg and max_depth checking to format_term function, added atom(X) as pseudo-stream to predicate_write_term function.&#10;web_interfaces.js: Fixed getPropertyPriority, getPropertyValue, removeProperty, and setProperty arg types from 'atom' to 'string', completed mouseEvent properties (e.g. altKey, button, screenX), added getModifierState method to mouseevent.&#10;Changed sort/2 and keysort/2 in bootstrap_js.pl to use difference list instead of append/3.&#10;Changed debugger to use write_term/3 with max_depth(5).&#10;Changed print_bindings_1/1 (used by top level repl/1) to use write_term/2 with max_depth(5) and quoted(true) for the Value of the binding.&#10;Added write_term test to tests.pl." />
+    <option name="LAST_COMMIT_MESSAGE" value="Object method spec fixes. Extended MouseEvent API. Added max_depth option to write_term; used it in debugger and repl. Optimized sort/2 and keysort/2.&#10;&#10;Added 'string' as a result type in object method.&#10;read.js: Added max_depth to parse_term_options function, added depth arg and max_depth checking to format_term function, added atom(X) as pseudo-stream to predicate_write_term function.&#10;web_interfaces.js: Fixed getPropertyPriority, getPropertyValue, removeProperty, and setProperty arg types from 'atom' to 'string', completed mouseEvent properties (e.g. altKey, button, screenX), added getModifierState method to mouseevent.&#10;Changed sort/2 and keysort/2 in bootstrap_js.pl to use difference list instead of append/3.&#10;Changed debugger to use write_term/3 with max_depth(5).&#10;Changed print_bindings_1/1 (used by top level repl/1) to use write_term/2 with max_depth(5) and quoted(true) for the Value of the binding.&#10;Added write_term test to tests.pl." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -834,13 +853,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bench/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="19" selection-start-line="19" selection-end-line="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.SDK.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
@@ -947,31 +959,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/read.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-527">
-          <caret line="693" column="63" lean-forward="true" selection-start-line="693" selection-start-column="63" selection-end-line="693" selection-end-column="63" />
+          <caret line="693" column="63" selection-start-line="693" selection-start-column="63" selection-end-line="693" selection-end-column="63" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/tests.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="414">
-          <caret line="461" column="25" lean-forward="true" selection-start-line="461" selection-start-column="25" selection-end-line="461" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="21" column="75" lean-forward="true" selection-start-line="21" selection-start-column="75" selection-end-line="21" selection-end-column="75" />
+          <caret line="461" column="25" selection-start-line="461" selection-start-column="25" selection-end-line="461" selection-end-column="25" />
         </state>
       </provider>
     </entry>
@@ -985,14 +983,7 @@
     <entry file="file://$PROJECT_DIR$/src/system/debugger.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2220">
-          <caret line="148" column="6" lean-forward="true" selection-start-line="148" selection-start-column="6" selection-end-line="148" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version_date.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="2" lean-forward="true" selection-start-column="2" selection-end-column="5" />
+          <caret line="148" column="6" selection-start-line="148" selection-start-column="6" selection-end-line="148" selection-end-column="6" />
         </state>
       </provider>
     </entry>
@@ -1000,6 +991,34 @@
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="5" selection-start-column="5" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version_date.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="3" selection-start-column="3" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" column="75" selection-start-line="21" selection-start-column="75" selection-end-line="21" selection-end-column="75" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" selection-start-line="19" selection-end-line="19" />
         </state>
       </provider>
     </entry>
