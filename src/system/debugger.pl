@@ -6,6 +6,7 @@
 :- use_module(system_util).
 
 :- dynamic('$trace_spy_specification'/3).
+:- dynamic('$trace_max_depth'/1).
 
 trace :-
     '$trace_set'(trace).
@@ -230,14 +231,18 @@ notrace_backtrackable :-
 '$trace_create_prompt'(K, Goal, ID, Prompt) :-
     pad_number(ID, 7, PaddedID),
     pad_number(K, 5, PaddedK),
-    write_term(atom(GoalAtom), Goal, [max_depth(5), quoted(true), ignore_ops(false), numbervars(true)]),
+    extract_module(Goal, ModuleGoal),
+    ('$trace_max_depth'(Depth)->true;Depth=10),
+    write_term(atom(GoalAtom), ModuleGoal, [max_depth(Depth), quoted(true), ignore_ops(false), numbervars(true)]),
     concat_list([PaddedID, PaddedK, ' ', GoalAtom], Prompt).
 
 '$trace_create_prompt'(K, Port, Goal, ID, Prompt) :-
     pad_number(ID, 7, PaddedID),
     pad_number(K, 5, PaddedK),
     capitalize(Port, CapitalizedPort),
-    write_term(atom(GoalAtom), Goal, [max_depth(5), quoted(true), ignore_ops(false), numbervars(true)]),
+    extract_module(Goal, ModuleGoal),
+    ('$trace_max_depth'(Depth)->true;Depth=10),
+    write_term(atom(GoalAtom), ModuleGoal, [max_depth(Depth), quoted(true), ignore_ops(false), numbervars(true)]),
     concat_list([PaddedID, PaddedK, ' ', CapitalizedPort, ': ', GoalAtom], Prompt).
 
 
@@ -248,12 +253,13 @@ notrace_backtrackable :-
 
 
 '$trace_check_command'(X) :-
-    read_char(X),
-    member(X, [c, s, l, (+), (-), f, r, g, a, n, m, x, y, z]),
+    read_char(XRaw),
+    atom_to_term(XRaw, X, _),
+    member(X, [c, s, l, (+), (-), d(_), w, f, r, g, a, n, m, x, y, z]),
     !.
 
 '$trace_check_command'(X) :-
-    writeln('Commands are: "c" (creep), "s" (skip), "l" (leap), "+" (spy this), "-" (nospy this), "f" (fail), "r" (retry), "g" (ancestors), "a" (abort), "n" (nodebug), "m" (creep wam), "x" (creep wam long), "y" (trace wam), "z" (trace wam long).'),
+    writeln('Commands are: "c" (creep), "s" (skip), "l" (leap), "+" (spy this), "-" (nospy this), \n    "d(Depth)" (prompt max depth Depth), "w" (d(0)),  \n    "f" (fail), "r" (retry), "g" (ancestors), "a" (abort), "n" (nodebug), \n    "m" (creep wam), "x" (creep wam long), "y" (trace wam), "z" (trace wam long).'),
     '$trace_check_command'(X).
 
 
@@ -320,6 +326,17 @@ notrace_backtrackable :-
 '$trace_cmd'(a, _, _, _, _, _) :- % abort
     !,
     halt.
+
+'$trace_cmd'(d(Depth), P, G, Anc, ID, B) :-
+    !,
+    retractall('$trace_max_depth'(_)),
+    asserta('$trace_max_depth'(Depth)),
+    '$trace_prompt'(P, G, Anc, ID),
+    '$trace_read_and_cmd'(P, G, Anc, ID, B).
+
+'$trace_cmd'(w, P, G, Anc, ID, B) :- % ancestors
+    !,
+    '$trace_cmd'(d(0), P, G, Anc, ID, B).
 
 '$trace_cmd'(g, P, G, Anc, ID, B) :- % ancestors
     !,
@@ -409,6 +426,19 @@ read_char(X) :- '$suspend', get_terminal_char(X).
 '$suspend' :- '$suspend_set'(true), halt. % the evaluation is un-suspended using backtrack().
 '$suspend' :- '$suspend_set'(false).
 
+
+extract_module(Goal, ModuleGoal) :-
+    Goal =.. [Functor|Args],
+    atom_codes(Functor, FunctorCodes),
+    (append(Head, ":", Prefix),
+     append(Prefix, Tail, FunctorCodes)
+      -> atom_codes(Module, Head),
+         atom_codes(Local, Tail),
+         MGoal =.. [Local|Args],
+         ModuleGoal = (Module : MGoal)
+    ;
+    ModuleGoal = Goal
+    ).
 
 pad_number(N, Size, PaddedN) :-
     number_codes(N, NCodes),

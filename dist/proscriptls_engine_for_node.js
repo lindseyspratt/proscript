@@ -7183,15 +7183,20 @@ function format_term(value, options, depth)
         if (!is_operator(ftor) || options.ignore_ops === true)
         {
             // Print in canonical form functor(arg1, arg2, ...)
-            result = format_term(ftable[ftor][0] ^ (TAG_ATM << WORD_BITS), options, localDepth) + "(";
+
+            result = format_term(ftable[ftor][0] ^ (TAG_ATM << WORD_BITS), options, localDepth) + "("; //
             for (var i = 0; i < ftable_arity(ftor); i++)
             {
-                result += format_term(memory[VAL(value)+1+i], options, nextDepth++);
+                result += format_term(memory[VAL(value)+1+i], options, nextDepth);
                 if(maxDepth > 0 && nextDepth > maxDepth) {
                     break;
                 }
-                if (i+1 < ftable_arity(ftor))
+
+                if (i+1 < ftable_arity(ftor)) {
                     result += ",";
+                }
+
+                nextDepth++;
             }
             return result + ")";            
         }
