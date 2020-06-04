@@ -147,7 +147,7 @@ test('HTMLInputElement', 'valueAsNumber of input ', succeeded) :-
 
 test('HTMLInputElement', 'width of input ', succeeded) :-
     dom_element_attribute_value(E, id, input_image),
-    dom_object_property(_, E, width,51).
+    dom_object_property(_, E, width,50).
 
 test('HTMLInputElement', 'willValidate of input ', succeeded) :-
     dom_element_attribute_value(E, id, input_text),

@@ -86,9 +86,9 @@ test('Element', 'previousElementSibling of nextElementSibling of test1 finds nod
     dom_object_property(_, E, nextElementSibling,C),
     dom_object_property(_, C, previousElementSibling,E).
 
-test('Element', 'scrollHeight of test1 finds value 19', succeeded) :-
+test('Element', 'scrollHeight of test1 finds value 20', succeeded) :-
     dom_element_attribute_value(E, id, test1),
-    dom_object_property(_, E, scrollHeight, 19).
+    dom_object_property(_, E, scrollHeight, 20).
 
 test('Element', 'scrollLeft of test1 finds value 0', succeeded) :-
     dom_element_attribute_value(E, id, test1),
@@ -112,16 +112,16 @@ test('Element', 'tag of test1 is DIV', succeeded) :-
 test('Element', 'getBoundingClientRect of test1 is particular rectangle', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_method(E, getBoundingClientRect(X)),
-    X=dom_rect(8, A, B1, _B2, 8, A, C1, _C2),
-    B1 is C1 + 8.
-    % X=dom_rect(8,-177,1336,-156,8,-177,1328,21). % Safari
-    % X=dom_rect(8,-167,1432,-145,8,-167,1424,21). % Firefox, Mac
+    X=dom_rect(T, A, B1, _B2, T, A, C1, _C2),
+    B1 is C1 + T,
+    8 =:= round(T).
 
 test('Element', 'generic getBoundingClientRect of test1 is particular rectangle', succeeded) :-
     dom_element_attribute_value(E, id, test1),
     dom_object_method(E, getBoundingClientRect(X), [getBoundingClientRect, [], dom_rect]),
-    X=dom_rect(8, A, B1, _B2, 8, A, C1, _C2),
-    B1 is C1 + 8.
+    X=dom_rect(T, A, B1, _B2, T, A, C1, _C2),
+    B1 is C1 + T,
+    8 =:= round(T).
 
 test('Element', 'insertAdjacentElement of new div afterEnd of test1', succeeded) :-
     dom_element_attribute_value(E, id, test1),

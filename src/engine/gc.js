@@ -772,6 +772,18 @@ function dump_environments(initial, envsize, cp)
 
         gcWrite('environment at ' + e + ' has ' + envsize + ' slots. predicate=' + predicate + ', cp.predicate.key=' + envcp.predicate.key + ', cp.offset=' + envcp.offset);
         envcp = memory[e+1];
+        if(typeof envcp === 'undefined' ) {
+            gcWrite('CP is undefined at ' + e+1);
+            break;
+        } else if(typeof envcp.code === 'undefined' ) {
+            gcWrite('CP.code is undefined for envcp ' + envcp + ' at ' + e+1);
+            break;
+        } else if(typeof envcp.offset === 'undefined' ) {
+            gcWrite('CP.offset is undefined for envcp ' + envcp + ' at ' + e+1);
+            break;
+        }
+
+
         // work out the size of the previous environment, using the CP pointer saved in THIS environment.
         // This is why we had to pass size in to mark_environments()
         envsize = envcp.code[envcp.offset-1];

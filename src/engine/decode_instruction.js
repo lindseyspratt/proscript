@@ -256,7 +256,7 @@ function decode_instruction_general(predicateID, codePosition, code) {
         {
             let I = code[codePosition + 1];
             instruction = opNames[op] + '(x(' + I + '))';
-            instructionSize = 1;
+            instructionSize = 2;
             break;
         }
         case 12: // put_structure: [12, F, I]
@@ -555,11 +555,11 @@ function decode_instruction_general(predicateID, codePosition, code) {
             let table;
             let size;
             if(T === 0) {
-                let decoding = decode_switch_table_sequence('constant',codePosition + 2);
+                let decoding = decode_switch_table_sequence('constant',codePosition + 2, code);
                 size = decoding.size;
                 table = 'seq(' + decoding.string + ')';
             } else if(T === 1) {
-                let decoding = decode_switch_table_hash('constant',codePosition + 2);
+                let decoding = decode_switch_table_hash('constant',codePosition + 2, code);
                 size = decoding.size;
                 table = 'hash(' + decoding.string + ')';
             }
@@ -573,11 +573,11 @@ function decode_instruction_general(predicateID, codePosition, code) {
             let table = '';
             let size;
             if(T === 0) {
-                let decoding = decode_switch_table_sequence('structure',codePosition + 2);
+                let decoding = decode_switch_table_sequence('structure',codePosition + 2, code);
                 size = decoding.size;
                 table = 'seq(' + decoding.string + ')';
             } else if(T === 1) {
-                let decoding = decode_switch_table_hash('structure',codePosition + 2);
+                let decoding = decode_switch_table_hash('structure',codePosition + 2, code);
                 size = decoding.size;
                 table = 'hash(' + decoding.string + ')';
             }
@@ -641,7 +641,7 @@ function decode_address(address) {
     }
 }
 
-function decode_switch_table_sequence(dataType, codePosition) {
+function decode_switch_table_sequence(dataType, codePosition, code) {
     let N = code[codePosition];
     let table = '';
     for(let ofst = 0;ofst < 2*N;ofst+=2) {
@@ -667,7 +667,7 @@ function decode_switch_table_sequence(dataType, codePosition) {
     return {size: size, string: table};
 }
 
-function decode_switch_table_hash(dataType, codePosition) {
+function decode_switch_table_hash(dataType, codePosition, code) {
     // hash: Size, BA1, ..., BASize, B1N, B1K1, B1V1, ..., B1KN, B1VN, B2N, ...
     // hash([a,b...],[c,d,...],...)
 
@@ -681,7 +681,7 @@ function decode_switch_table_hash(dataType, codePosition) {
             seq = 'fail';
         } else {
             let BAX = BA ^ 0x80000000;
-            let decoding = decode_switch_table_sequence(dataType, BAX);
+            let decoding = decode_switch_table_sequence(dataType, BAX, code);
             size += decoding.size;
             seq = '[' + decoding.string + ']';
         }

@@ -831,7 +831,8 @@ function call_directives(mode) {
 function proscriptls(queryJS, displaySucceededMsg) {
     if(state.wamYielded) {
         // delay until wamYielded is false.
-        setTimeout(proscriptls(queryJS, displaySucceededMsg), 0);
+        gcWrite('waiting on wamYielded: proscriptls(' + queryJS + ',' + displaySucceededMsg + ')');
+        setTimeout(proscriptls, 10, queryJS, displaySucceededMsg);
         return;
     }
 
@@ -929,7 +930,7 @@ function proscriptls_apply(goalArguments, module, goal) {
         let argumentUnificationsPrefix = unificationExpressions.join(", ");
         goalReconstituted = argumentUnificationsPrefix + ", " + goalString;
     } else {
-        goalReconstituted = goal;
+        goalReconstituted = module + ": (" + goal + ")";
     }
 
     proscriptls(goalReconstituted);

@@ -76,6 +76,8 @@ Some gotchas:
     :- use_module('../tools/wam_bootstrap_util').
     :- use_module(url). % in proscriptls system.
     :- use_module(system_util). % in proscriptls system.
+:- else.
+    yield.
 :- endif.
 
 :- use_module(wam_assemble).
@@ -989,6 +991,7 @@ compile_head_unification([Arg|Args], State, S2, PermanentVariables, [unify_varia
         !,
         fresh_variable(State, S1, Xi),
         compile_head_unification(Args, S1, S2, PermanentVariables, O1, Tail, U).
+
 complete_head_unification([], S, S, _PermanentVariables, Tail, Tail).
 complete_head_unification([unify(Xi, Arg)|U], S1, S3, PermanentVariables, Opcodes, Tail):-
         compile_head_arg(Arg, S1, S2, Xi, PermanentVariables, Opcodes, O1),

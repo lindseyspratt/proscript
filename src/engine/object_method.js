@@ -469,14 +469,16 @@ function convert_result(resultJS, spec, module, resultContainer, reportError) {
     } else if(spec.type === 'dom_rect') {
         let ftor = lookup_functor('dom_rect', 8);
         resultPL = alloc_structure(ftor);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.left);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.top);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.right);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.bottom);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.x);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.y);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.width);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.height);
+        let elements = [resultJS.left, resultJS.top, resultJS.right, resultJS.bottom,
+            resultJS.x, resultJS.y, resultJS.width, resultJS.height];
+        for(let element of elements) {
+            let localContainer = {};
+            if (!getNumberPLPropertyValue(element, localContainer, reportError)) {
+                return false;
+            } else {
+                memory[state.H++] = localContainer.value;
+            }
+        }
     } else {
         return reportError && type_error('method result specification type', lookup_atom(spec.type));
     }

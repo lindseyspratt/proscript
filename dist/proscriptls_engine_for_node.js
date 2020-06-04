@@ -4847,13 +4847,13 @@ function wam_create_choicepoint(nextCP, prefix) {
     }
 
     memory[newB] = state.num_of_args + prefix.length;
-    var n = memory[newB];
+    let n = memory[newB];
     for (let prefixOfst = 0; prefixOfst < prefix.length; prefixOfst++) {
         memory[newB + prefixOfst + 1] = prefix[prefixOfst];
     }
     let prefixAdjust = prefix.length + 1;
 
-    for (var i = 0; i < state.num_of_args; i++) {
+    for (let i = 0; i < state.num_of_args; i++) {
         memory[newB + prefixAdjust + i] = register[i];
     }
     // Save the current context
@@ -4937,11 +4937,71 @@ function wamExit(result) {
     return result;
 }
 
+let reportedLargeStack = false;
+
+function wamValidStackAddr(description, tmpE, instruction) {
+    if (tmpE < HEAP_SIZE ) {
+        abort("The " + description + " " + tmpE + " is less than minimum stack address (HEAP_SIZE=" + HEAP_SIZE + ") in " + instruction + " instruction.");
+    } else if (tmpE > HEAP_SIZE + STACK_SIZE) {
+        abort("The " + description + " " + tmpE + " is greater than maximum stack address (HEAP_SIZE+STACK_SIZE="+HEAP_SIZE+"+"+STACK_SIZE+"="+(HEAP_SIZE+STACK_SIZE) + ") in " + instruction + " instruction.");
+    } else if (! reportedLargeStack && tmpE > HEAP_SIZE + 0.75 * STACK_SIZE ) {
+        dumpWrite('Large stack (' + description + '): ' + tmpE);
+        dump_environments();
+        dump_choicepoints();
+        reportedLargeStack = true;
+    } else if (reportedLargeStack && tmpE <  HEAP_SIZE + 0.70 * STACK_SIZE ) {
+        reportedLargeStack = false;
+    }
+}
+
+function wamValidStackVarAddr(description, varID, tmpE, instruction) {
+    if (tmpE < HEAP_SIZE ) {
+        dump_environments();
+        abort("The " + description + " " + varID + ' ' + tmpE + " is less than minimum stack address (HEAP_SIZE=" + HEAP_SIZE + ") in " + instruction + " instruction.");
+    } else if (tmpE > HEAP_SIZE + STACK_SIZE) {
+        dump_environments();
+        dump_choicepoints();
+        abort("The " + description + " " + varID + ' ' + tmpE + " is greater than maximum stack address (HEAP_SIZE+STACK_SIZE="+HEAP_SIZE+"+"+STACK_SIZE+"="+(HEAP_SIZE+STACK_SIZE) + ") in " + instruction + " instruction.");
+    } else if (! reportedLargeStack && tmpE > HEAP_SIZE + 0.75 * STACK_SIZE ) {
+        dumpWrite('Large stack (' + description + ' ' + varID + '): ' + tmpE);
+        dump_environments();
+        dump_choicepoints();
+        reportedLargeStack = true;
+    } else if (reportedLargeStack && tmpE <  HEAP_SIZE + 0.70 * STACK_SIZE ) {
+        reportedLargeStack = false;
+    }
+}
+
+function wamValidHeapOrStackAddr(description, tmpE, instruction) {
+    if (tmpE < 0 ) {
+        abort("The " + description + " " + tmpE + " is less than minimum heap+stack address (0) in " + instruction + " instruction.");
+    } else if (tmpE > HEAP_SIZE + STACK_SIZE) {
+        abort("The " + description + " " + tmpE + " is greater than maximum heap+stack address (HEAP_SIZE+STACK_SIZE="+HEAP_SIZE+"+"+STACK_SIZE+"="+(HEAP_SIZE+STACK_SIZE) + ") in " + instruction + " instruction.");
+    } else if (! reportedLargeStack && tmpE > HEAP_SIZE + 0.75 * STACK_SIZE ) {
+        dumpWrite('Large stack (' + description + '): ' + tmpE);
+        dump_environments();
+        dump_choicepoints();
+        reportedLargeStack = true;
+    } else if (reportedLargeStack && tmpE <  HEAP_SIZE + 0.70 * STACK_SIZE ) {
+        reportedLargeStack = false;
+    }
+}
+
+function wamValidHeapAddr(description, addr, instruction) {
+    if (addr < 0 ) {
+        abort("The " + description + " " + addr + " is less than minimum heap address (0) in " + instruction + " instruction.");
+    } else if (addr >= HEAP_SIZE) {
+        abort("The " + description + " " + addr + " is equal to or greater than maximum heap address (HEAP_SIZE="+HEAP_SIZE + ") in " + instruction + " instruction.");
+    }
+}
+
 function wam() {
     try {
         return wam1();
     } catch (e) {
         wamExit(e);
+        dump_environments();
+        dump_choicepoints();
         throw e;
     }
 }
@@ -5047,13 +5107,8 @@ function wam1()
 
                 if (tmpE === undefined || isNaN(tmpE))
                     abort("Top of frame is garbage: " + tmpE);
-                if (tmpE < HEAP_SIZE ) {
-                    abort("Top of frame less than minimum stack address (HEAP_SIZE=" + HEAP_SIZE + ") in allocate: " + hex(tmpE));
-                } else if (tmpE > HEAP_SIZE + STACK_SIZE) {
-                    // dump_environments();
-                    // dump_choicepoints();
-                    abort("Top of frame greater than maximum stack address (HEAP_SIZE+STACK_SIZE="+HEAP_SIZE+"+"+STACK_SIZE+"="+(HEAP_SIZE+STACK_SIZE) + ") in allocate: " + hex(tmpE));
-                }
+
+                wamValidStackAddr('CP of new environment frame', tmpE+1, 'allocate');
 
                 // Save old environment and continuation
                 memory[tmpE] = state.E;
@@ -5070,8 +5125,7 @@ function wam1()
 
             case 2: // deallocate
                 state.CP = memory[state.E + E_CP];
-                if (memory[state.E] < HEAP_SIZE || memory[state.E] > HEAP_SIZE + STACK_SIZE)
-                    abort("Top of frame " + memory[state.E] + " exceeds bounds in deallocate. Environment is " + state.E + " P = " + state.P);
+                wamValidStackAddr('previous base of environment frame', memory[state.E], 'deallocate');
 
                 state.E = memory[state.E];
                 state.P += 1;
@@ -5212,9 +5266,11 @@ function wam1()
 
             case 6: // put_variable: Initialize a new variable in Yn, and also put it into Ai
             {
-                let register_location = state.E + code[state.P + 1] + 2;
-                memory[register_location] = register_location ^ (TAG_REF << WORD_BITS);
-                register[code[state.P + 2]] = register_location ^ (TAG_REF << WORD_BITS);
+                let varID = code[state.P + 1];
+                let register_location6 = state.E + varID + 2;
+                wamValidStackAddr('environment variable ' + code[state.P + 1], register_location6, 'put_variable');
+                memory[register_location6] = register_location6 ^ (TAG_REF << WORD_BITS);
+                register[code[state.P + 2]] = register_location6 ^ (TAG_REF << WORD_BITS);
                 state.P += 3;
                 // noinspection UnnecessaryContinueJS
                 continue;
@@ -5224,6 +5280,7 @@ function wam1()
             {
 
                 let freshvar = state.H ^ (TAG_REF << WORD_BITS);
+                wamValidHeapAddr('heap top', state.H, 'put_variable');
                 memory[state.H] = freshvar;
                 register[code[state.P + 1]] = freshvar;
                 register[code[state.P + 2]] = freshvar;
@@ -5238,10 +5295,12 @@ function wam1()
         case 8: // put_value
             if (code[state.P+1] === 0) // Y-register
             {
-                let register_location = state.E + code[state.P+2] + 2;
-                if (memory[register_location] === undefined)
+                let register_location8 = state.E + code[state.P+2] + 2;
+                wamValidStackVarAddr('read stack var Y', code[state.P+2], register_location8, 'put_value');
+
+                if (memory[register_location8] === undefined)
                     abort("Invalid memory access in put_value");
-                register[code[state.P+3]] = memory[register_location];
+                register[code[state.P+3]] = memory[register_location8];
             }
             else
             {
@@ -5252,16 +5311,17 @@ function wam1()
 
         case 9: // put_unsafe_value
         {
-            let register_location = state.E + code[state.P + 1] + 2;
+            let register_location9 = state.E + code[state.P + 1] + 2;
             // This is the unsafe bit. If the value now in register[code[state.P+2]] is on the stack (that is, it is > E) then we have to push a new variables
             // onto the stack to avoid dangling references to things that are about to be cleaned up
-            if (memory[register_location] < state.E) {
+            wamValidStackVarAddr('read stack var Y', code[state.P+1], register_location9, 'put_unsafe_value');
+            if (memory[register_location9] < state.E) {
                 // No, so we can just behave like put_value
-                register[code[state.P + 2]] = deref(memory[register_location])
+                register[code[state.P + 2]] = deref(memory[register_location9])
             } else {
                 // Yes, so we need to push a new variable instead
                 let v = alloc_var();
-                bind(v, memory[register_location]);
+                bind(v, memory[register_location9]);
                 register[code[state.P + 2]] = v;
             }
             state.P += 3;
@@ -5298,8 +5358,9 @@ function wam1()
         case 15: // get_variable
             if (code[state.P+1] === 0) // Y-register
             {
-                let register_location = state.E + code[state.P+2] + 2;
-                memory[register_location] = register[code[state.P+3]];
+                let register_location15 = state.E + code[state.P+2] + 2;
+                wamValidStackVarAddr('write stack var Y', code[state.P+2], register_location15, 'put_unsafe_value');
+                memory[register_location15] = register[code[state.P+3]];
             }
             else
             {
@@ -5314,8 +5375,9 @@ function wam1()
             gc_check(target);
             if (code[state.P + 1] === 0) // Y-register
             {
-                let register_location = state.E + code[state.P + 2] + 2;
-                source = memory[register_location];
+                let register_location16 = state.E + code[state.P + 2] + 2;
+                wamValidStackVarAddr('read stack var Y', code[state.P+2], register_location16, 'get_value');
+                source = memory[register_location16];
             } else {
                 source = register[code[state.P + 2]];
             }
@@ -5363,6 +5425,7 @@ function wam1()
             if (TAG(addr) === TAG_REF) {
                 state.mode = WRITE;
                 let a = alloc_structure(structure_ftor);
+                wamValidHeapOrStackAddr('bind addr', addr, 'get_list');
                 bind(memory[addr], a);
             } else if (TAG(addr) === TAG_STR && memory[VAL(addr)] === structure_ftor) {
                 state.mode = READ;
@@ -5381,6 +5444,7 @@ function wam1()
             if (TAG(addr) === TAG_REF) {
                 // predicate called with var and we are expecting a list
                 let l = state.H ^ (TAG_LST << WORD_BITS);
+                wamValidHeapOrStackAddr('bind addr', addr, 'get_list');
                 bind(memory[addr], l);
                 state.mode = WRITE;
             } else if (TAG(addr) === TAG_LST) {
@@ -5420,8 +5484,9 @@ function wam1()
 
         case 23: //unify_variable
             if (state.mode === READ) // If reading, consume the next symbol
-            {                
-                source = memory[state.S++]; 
+            {
+                wamValidHeapOrStackAddr('read S', state.S, 'unify_variable');
+                source = memory[state.S++];
             }
             else
             {
@@ -5429,9 +5494,10 @@ function wam1()
             }
             if (code[state.P+1] === 0) // Y-register
             {
-                let register_location = state.E + code[state.P+2] + 2;
+                let register_location23 = state.E + code[state.P+2] + 2;
                 // GC: This needs to be trailed if state.B is not 0, apparently
-                bind(memory[register_location], source);
+                wamValidStackVarAddr('stack environment var Y', code[state.P+2], register_location23, 'unify_variable');
+                bind(memory[register_location23], source);
             }
             else
             {
@@ -5444,20 +5510,25 @@ function wam1()
         {
             let did_fail = false;
             if (state.mode === READ) {
+                wamValidHeapOrStackAddr('read S', state.S, 'unify_value');
                 source = memory[state.S++];
                 if (code[state.P + 1] === 0) // Y-register
                 {
-                    let register_location = state.E + code[state.P + 2] + 2;
-                    did_fail = !unify(memory[register_location], source);
+                    let register_location24 = state.E + code[state.P + 2] + 2;
+                    wamValidStackVarAddr('stack environment var Y', code[state.P+2], register_location24, 'unify_value');
+                    did_fail = !unify(memory[register_location24], source);
                 } else {
                     did_fail = !unify(register[code[state.P + 2]], source);
                 }
             } else {
                 if (code[state.P + 1] === 0) // Y-register
                 {
-                    let register_location = state.E + code[state.P + 2] + 2;
-                    memory[state.H++] = memory[register_location];
+                    let register_location24 = state.E + code[state.P + 2] + 2;
+                    wamValidStackVarAddr('stack environment var Y', code[state.P+2], register_location24, 'unify_value');
+                    wamValidHeapAddr('heap top', state.H, 'unify_value');
+                    memory[state.H++] = memory[register_location24];
                 } else {
+                    wamValidHeapAddr('heap top', state.H, 'unify_value');
                     memory[state.H++] = register[code[state.P + 2]];
                 }
 
@@ -5475,11 +5546,13 @@ function wam1()
         {
             let did_fail = false;
             if (state.mode === READ) {
+                wamValidHeapOrStackAddr('read S', state.S, 'unify_local_value');
                 source = memory[state.S++];
                 if (code[state.P + 1] === 0) // Y-register
                 {
-                    let register_location = state.E + code[state.P + 2] + 2;
-                    did_fail = !unify(memory[register_location], source);
+                    let register_location25 = state.E + code[state.P + 2] + 2;
+                    wamValidStackVarAddr('stack environment var Y', code[state.P+2], register_location25, 'unify_local_value');
+                    did_fail = !unify(memory[register_location25], source);
                 } else {
                     did_fail = !unify(register[code[state.P + 2]], source);
                 }
@@ -5487,18 +5560,21 @@ function wam1()
                 let addr;
                 if (code[state.P + 1] === 0) // Y-register;
                 {
-                    let register_location = state.E + code[state.P + 2] + 2;
-                    addr = memory[register_location];
+                    let register_location25 = state.E + code[state.P + 2] + 2;
+                    wamValidStackVarAddr('stack environment var Y', code[state.P+2], register_location25, 'unify_local_value');
+                    addr = memory[register_location25];
                 } else {
                     addr = register[code[state.P + 2]];
                 }
                 addr = deref(addr);
                 if (VAL(addr) < state.H) {
                     // Address is on the heap. Just push the value onto the top of the heap
+                    wamValidHeapAddr('heap top', state.H, 'unify_local_value');
                     memory[state.H++] = addr;
                 } else {
                     // Address is on the stack. Push a new variable onto the heap and bind to the value
                     let fresh = state.H ^ (TAG_REF << WORD_BITS);
+                    wamValidHeapAddr('heap top', state.H, 'unify_local_value');
                     memory[state.H++] = fresh;
                     bind(fresh, addr);
                     if (code[state.P + 1] === 1)
@@ -5519,6 +5595,7 @@ function wam1()
         case 26: // unify_constant
             if (state.mode === READ)
             {
+                wamValidHeapOrStackAddr('read S', state.S, 'unify_constant');
                 let sym = deref(memory[state.S++]); // the state.s++ increment is as indicated by Ait-Kaci wamerratum.txt.
                 let arg = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
                 state.P += 2;
@@ -5532,6 +5609,7 @@ function wam1()
             }
             else
             {
+                wamValidHeapAddr('heap top', state.H, 'unify_constant');
                 memory[state.H++] = code[state.P+1] ^ (TAG_ATM << WORD_BITS);
                 if(state.H > maxHeapSize) {
                     maxHeapSize = state.H;
@@ -5542,6 +5620,7 @@ function wam1()
         case 27: // unify_integer
             if (state.mode === READ)
             {
+                wamValidHeapOrStackAddr('read S', state.S, 'unify_integer');
                 let sym = deref(memory[state.S++]);
                 let arg = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
                 state.P += 2;
@@ -5555,6 +5634,7 @@ function wam1()
             }
             else
             {
+                wamValidHeapAddr('heap top', state.H, 'unify_integer');
                 memory[state.H++] = (code[state.P+1] & ((1 << WORD_BITS)-1)) ^ (TAG_INT << WORD_BITS);
                 if(state.H > maxHeapSize) {
                     maxHeapSize = state.H;
@@ -5595,7 +5675,9 @@ function wam1()
         case 29: // retry_me_else
         {
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
+            wamValidStackAddr('choicepoint arity', state.B, 'retry_me_else');
             let arity = memory[state.B];
+            wamValidStackAddr('choicepoint end', state.B + arity + CP_SIZE, 'retry_me_else');
             for (let i = 0; i < arity; i++)
                 register[i] = memory[state.B + i + 1];
             // Now restore all the special-purpose registers
@@ -5642,7 +5724,9 @@ function wam1()
         case 30: // trust_me
         {
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
+            wamValidStackAddr('choicepoint arity', state.B, 'trust_me');
             let n = memory[state.B];
+            wamValidStackAddr('choicepoint end', state.B + n + CP_SIZE, 'trust_me');
             for (let i = 0; i < n; i++) {
                 register[i] = memory[state.B + i + 1];
             }
@@ -5663,8 +5747,12 @@ function wam1()
                 state.trace_info = memory[state.B + n + CP_TI];
             }
             state.B = memory[state.B + n + CP_B];
-            state.HB = memory[state.B + memory[state.B] + CP_H];
-            //state.HB = memory[state.B + n + CP_H];
+            if(state.B === 0) {
+                state.HB = 0;
+            } else {
+                wamValidStackAddr('previous choicepoint heap addr', state.B + memory[state.B] + CP_H, 'trust_me');
+                state.HB = memory[state.B + memory[state.B] + CP_H];
+            }
             state.P += 2;
         }
             continue;
@@ -5680,6 +5768,7 @@ function wam1()
                 }
                 state.B = state.B0;
                 if (state.B > 0) {
+                    wamValidStackAddr('previous choicepoint heap addr', state.B + memory[state.B] + CP_H, 'neck_cut');
                     state.HB = memory[state.B + memory[state.B] + CP_H]; // fix from wamerratum.txt
                     tidy_trail();
                 }
@@ -5692,7 +5781,9 @@ function wam1()
             continue;
         case 32: // cut(I)
         {
-            let y = VAL(memory[state.E + 2 + code[state.P + 1]]);
+            let register_location32 = state.E + 2 + code[state.P + 1];
+            wamValidStackVarAddr('stack environment var Y', code[state.P+1], register_location32, 'cut');
+            let y = VAL(memory[register_location32]);
             let result = true;
             if (state.B > y) {
                 while (cleanups[0] !== undefined && cleanups[0].B > y && cleanups[0].B < state.B0) {
@@ -5701,6 +5792,7 @@ function wam1()
                 }
                 state.B = y;
                 if (state.B > 0) {
+                    wamValidStackAddr('previous choicepoint heap addr', state.B + memory[state.B] + CP_H, 'cut');
                     state.HB = memory[state.B + memory[state.B] + CP_H]; // fix from wamerratum.txt
                     tidy_trail();
                 }
@@ -5715,7 +5807,9 @@ function wam1()
         }
 
         case 33: // get_level(I)
-            memory[state.E + 2 + code[state.P+1]] = state.B0 ^ (TAG_INT << WORD_BITS);
+            let register_location33 = state.E + 2 + code[state.P + 1];
+            wamValidStackVarAddr('stack environment var Y', code[state.P+1], register_location33, 'get_level');
+            memory[register_location33] = state.B0 ^ (TAG_INT << WORD_BITS);
             state.P += 2;
             continue;
 
@@ -5738,6 +5832,7 @@ function wam1()
 
         case 42: // retry_foreign
         {
+            wamValidStackAddr('choicepoint specials', state.B + FCP_C, 'retry_foreign');
             state.foreign_value = memory[state.B + FCP_V];
             state.P = memory[state.B + FCP_C].offset;
             code = memory[state.B + FCP_C].code;
@@ -5751,6 +5846,7 @@ function wam1()
             }
 
             let n = memory[state.B];
+            wamValidStackAddr('choicepoint end', state.B + n + CP_SIZE, 'retry_foreign');
             state.foreign_retry = true;
             for (let i = 0; i <= n - FCP_R; i++) {
                 register[i] = memory[state.B + FCP_R + i];
@@ -5774,13 +5870,19 @@ function wam1()
         case 43: // get_choicepoint
         {
             let i = code[state.P + 1];
+            let max = i;
             let choice = state.B;
             while (i !== 0) {
+                let ordinal = max - i;
+                let suffix = ordinal === 1 ? 'st' : ordinal === 2 ? 'nd' : ordinal === 3 ? 'rd' : 'th';
+                wamValidStackAddr(ordinal + suffix + ' previous choicepoint base', choice, 'get_choicepoint');
                 choice = memory[choice + memory[choice] + CP_B];
                 i--;
             }
 
-            memory[state.E + 2 + code[state.P + 2]] = (choice ^ TAG_INT << WORD_BITS);
+            let register_location43 = state.E + 2 + code[state.P + 2];
+            wamValidStackVarAddr('stack environment var Y', code[state.P+2], register_location43, 'get_level');
+            memory[register_location43] = (choice ^ TAG_INT << WORD_BITS);
             state.P += 3;
         }
             continue;
@@ -5855,6 +5957,7 @@ function wam1()
         {
             let codePosition = state.P;
             let argument1 = deref(register[0]);
+            wamValidHeapOrStackAddr('switch argument', VAL(argument1), 'switch_on_structure');
             let predicateIndicator = VAL(memory[VAL(argument1)]);
             let T = code[codePosition + 1];
             let result = search_table_type(T, predicateIndicator, codePosition + 2);
@@ -5885,14 +5988,15 @@ function wam1()
             let codePosition = state.P;
             let L = code[codePosition + 1];
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
+            wamValidStackAddr('choicepoint base', state.B, 'retry');
             let arity = memory[state.B];
+            wamValidStackAddr('choicepoint end', state.B + arity + CP_SIZE, 'retry');
             for (let i = 0; i < arity; i++)
                 register[i] = memory[state.B + i + 1];
             // Now restore all the special-purpose registers
-            if (memory[state.B + arity + CP_E] < HEAP_SIZE)
-                abort("Top of frame contains E which is in the heap");
-            if (memory[state.B + arity + CP_E] > HEAP_SIZE + STACK_SIZE)
-                abort("Top of frame contains E which exceeds the stack");
+
+            wamValidStackAddr('choicepoint environment', memory[state.B + arity + CP_E], 'retry');
+
             state.E = memory[state.B + arity + CP_E];
             state.CP = memory[state.B + arity + CP_CP];
             let next = state.P + 2;
@@ -5926,13 +6030,14 @@ function wam1()
             let codePosition = state.P;
             let L = code[codePosition + 1];
             // Unwind the last goal. The arity if the first thing on the stack, then the saved values for A1...An
+            wamValidStackAddr('choicepoint base', state.B, 'trust');
             let n = memory[state.B];
+            wamValidStackAddr('choicepoint end', state.B + n + CP_SIZE, 'trust');
             for (let i = 0; i < n; i++) {
                 register[i] = memory[state.B + i + 1];
             }
             // Now restore all the special-purpose registers
-            if (memory[state.B + n + CP_E] < HEAP_SIZE || memory[state.B + n + CP_E] > HEAP_SIZE + STACK_SIZE)
-                abort("Top of frame exceeds bounds in trust. Read from memory[" + (state.B + n + CP_E) + "]. State.B is " + state.B);
+            wamValidStackAddr('choicepoint environment', memory[state.B + n + CP_E], 'trust');
             state.E = memory[state.B + n + CP_E];
             state.CP = memory[state.B + n + CP_CP];
             unwind_trail(memory[state.B + n + CP_TR], state.TR);
@@ -5947,8 +6052,12 @@ function wam1()
                 state.trace_info = memory[state.B + n + CP_TI];
             }
             state.B = memory[state.B + n + CP_B];
-            state.HB = memory[state.B + memory[state.B] + CP_H];
-            //state.HB = memory[state.B + n + CP_H];
+            if(state.B === 0) {
+                state.HB = 0;
+            } else {
+                wamValidStackAddr('previous choicepoint heap addr', state.B + memory[state.B] + CP_H, 'trust');
+                state.HB = memory[state.B + memory[state.B] + CP_H];
+            }
             gotoAddress(L);
         }
             continue;
@@ -5984,6 +6093,7 @@ function wam1()
         case 52: // unify_float
             if (state.mode === READ)
             {
+                wamValidHeapOrStackAddr('read S', state.S, 'unify_float');
                 sym = deref(memory[state.S++]);
                 arg = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
                 state.P += 2;
@@ -5997,6 +6107,7 @@ function wam1()
             }
             else
             {
+                wamValidHeapAddr('heap top', state.H, 'unify_float');
                 memory[state.H++] = code[state.P+1] ^ (TAG_FLT << WORD_BITS);
                 if(state.H > maxHeapSize) {
                     maxHeapSize = state.H;
@@ -6009,8 +6120,9 @@ function wam1()
         {
             // Note that this is different from put_variable(Yn, Ai) in that it ONLY puts a fresh variable into Yn
             // This is needed to make garbage collection safe
-            let register_location = state.E + code[state.P + 1] + 2;
-            memory[register_location] = register_location ^ (TAG_REF << WORD_BITS);
+            let register_location60 = state.E + code[state.P + 1] + 2;
+            wamValidStackVarAddr('new var Y', code[state.P + 1], register_location60, 'put_variable');
+            memory[register_location60] = register_location60 ^ (TAG_REF << WORD_BITS);
             state.P += 2;
             // noinspection UnnecessaryContinueJS
             continue;
@@ -10001,6 +10113,18 @@ function dump_environments(initial, envsize, cp)
 
         gcWrite('environment at ' + e + ' has ' + envsize + ' slots. predicate=' + predicate + ', cp.predicate.key=' + envcp.predicate.key + ', cp.offset=' + envcp.offset);
         envcp = memory[e+1];
+        if(typeof envcp === 'undefined' ) {
+            gcWrite('CP is undefined at ' + e+1);
+            break;
+        } else if(typeof envcp.code === 'undefined' ) {
+            gcWrite('CP.code is undefined for envcp ' + envcp + ' at ' + e+1);
+            break;
+        } else if(typeof envcp.offset === 'undefined' ) {
+            gcWrite('CP.offset is undefined for envcp ' + envcp + ' at ' + e+1);
+            break;
+        }
+
+
         // work out the size of the previous environment, using the CP pointer saved in THIS environment.
         // This is why we had to pass size in to mark_environments()
         envsize = envcp.code[envcp.offset-1];
@@ -10884,7 +11008,8 @@ function call_directives(mode) {
 function proscriptls(queryJS, displaySucceededMsg) {
     if(state.wamYielded) {
         // delay until wamYielded is false.
-        setTimeout(proscriptls(queryJS, displaySucceededMsg), 0);
+        gcWrite('waiting on wamYielded: proscriptls(' + queryJS + ',' + displaySucceededMsg + ')');
+        setTimeout(proscriptls, 10, queryJS, displaySucceededMsg);
         return;
     }
 
@@ -10982,7 +11107,7 @@ function proscriptls_apply(goalArguments, module, goal) {
         let argumentUnificationsPrefix = unificationExpressions.join(", ");
         goalReconstituted = argumentUnificationsPrefix + ", " + goalString;
     } else {
-        goalReconstituted = goal;
+        goalReconstituted = module + ": (" + goal + ")";
     }
 
     proscriptls(goalReconstituted);
@@ -11363,7 +11488,7 @@ function decode_instruction_general(predicateID, codePosition, code) {
         {
             let I = code[codePosition + 1];
             instruction = opNames[op] + '(x(' + I + '))';
-            instructionSize = 1;
+            instructionSize = 2;
             break;
         }
         case 12: // put_structure: [12, F, I]
@@ -11662,11 +11787,11 @@ function decode_instruction_general(predicateID, codePosition, code) {
             let table;
             let size;
             if(T === 0) {
-                let decoding = decode_switch_table_sequence('constant',codePosition + 2);
+                let decoding = decode_switch_table_sequence('constant',codePosition + 2, code);
                 size = decoding.size;
                 table = 'seq(' + decoding.string + ')';
             } else if(T === 1) {
-                let decoding = decode_switch_table_hash('constant',codePosition + 2);
+                let decoding = decode_switch_table_hash('constant',codePosition + 2, code);
                 size = decoding.size;
                 table = 'hash(' + decoding.string + ')';
             }
@@ -11680,11 +11805,11 @@ function decode_instruction_general(predicateID, codePosition, code) {
             let table = '';
             let size;
             if(T === 0) {
-                let decoding = decode_switch_table_sequence('structure',codePosition + 2);
+                let decoding = decode_switch_table_sequence('structure',codePosition + 2, code);
                 size = decoding.size;
                 table = 'seq(' + decoding.string + ')';
             } else if(T === 1) {
-                let decoding = decode_switch_table_hash('structure',codePosition + 2);
+                let decoding = decode_switch_table_hash('structure',codePosition + 2, code);
                 size = decoding.size;
                 table = 'hash(' + decoding.string + ')';
             }
@@ -11748,7 +11873,7 @@ function decode_address(address) {
     }
 }
 
-function decode_switch_table_sequence(dataType, codePosition) {
+function decode_switch_table_sequence(dataType, codePosition, code) {
     let N = code[codePosition];
     let table = '';
     for(let ofst = 0;ofst < 2*N;ofst+=2) {
@@ -11774,7 +11899,7 @@ function decode_switch_table_sequence(dataType, codePosition) {
     return {size: size, string: table};
 }
 
-function decode_switch_table_hash(dataType, codePosition) {
+function decode_switch_table_hash(dataType, codePosition, code) {
     // hash: Size, BA1, ..., BASize, B1N, B1K1, B1V1, ..., B1KN, B1VN, B2N, ...
     // hash([a,b...],[c,d,...],...)
 
@@ -11788,7 +11913,7 @@ function decode_switch_table_hash(dataType, codePosition) {
             seq = 'fail';
         } else {
             let BAX = BA ^ 0x80000000;
-            let decoding = decode_switch_table_sequence(dataType, BAX);
+            let decoding = decode_switch_table_sequence(dataType, BAX, code);
             size += decoding.size;
             seq = '[' + decoding.string + ']';
         }
@@ -15604,14 +15729,16 @@ function convert_result(resultJS, spec, module, resultContainer, reportError) {
     } else if(spec.type === 'dom_rect') {
         let ftor = lookup_functor('dom_rect', 8);
         resultPL = alloc_structure(ftor);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.left);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.top);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.right);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.bottom);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.x);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.y);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.width);
-        memory[state.H++] = getIntegerPLPropertyValue(resultJS.height);
+        let elements = [resultJS.left, resultJS.top, resultJS.right, resultJS.bottom,
+            resultJS.x, resultJS.y, resultJS.width, resultJS.height];
+        for(let element of elements) {
+            let localContainer = {};
+            if (!getNumberPLPropertyValue(element, localContainer, reportError)) {
+                return false;
+            } else {
+                memory[state.H++] = localContainer.value;
+            }
+        }
     } else {
         return reportError && type_error('method result specification type', lookup_atom(spec.type));
     }
