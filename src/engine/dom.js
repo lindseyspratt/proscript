@@ -396,6 +396,8 @@ function get_element_object(term, ref) {
 }
 
 function string_to_codes(string) {
+    string = '' + string; // Ensure that string value is a character string and not a number or undefined.
+
     if(string.length === 0) {
         return NIL;
     }
