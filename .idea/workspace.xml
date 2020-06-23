@@ -4,11 +4,26 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Fixed string_to_codes function to ensure arg is a string.">
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Added HTMLUnknownElement. Fixed returns type for getElementsByTagName/NS.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/dom.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/dom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/calculator_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/calculator_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/console_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/consult_console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/consult_console_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index_about.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_about.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index_doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_doc.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index_download.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index_download.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/likes_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/likes_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/simple_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/simple_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/tiles_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tiles_source.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/api.sidenav.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/api.sidenav.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/type_references.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/type_references.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/object.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/object.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/web_interfaces.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/web_interfaces.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -25,19 +40,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
+        <entry file="file://$PROJECT_DIR$/src/engine/object.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="1328" column="52" selection-start-line="1328" selection-start-column="52" selection-end-line="1328" selection-end-column="52" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="405" column="43" selection-start-line="405" selection-start-column="43" selection-end-line="405" selection-end-column="43" />
+            <state relative-caret-position="3150">
+              <caret line="210" column="31" selection-start-line="210" selection-start-column="31" selection-end-line="210" selection-end-column="31" />
             </state>
           </provider>
         </entry>
@@ -45,17 +51,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/engine/object_method.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="274">
-              <caret line="461" column="19" selection-start-line="461" selection-start-column="19" selection-end-line="461" selection-end-column="19" />
+            <state relative-caret-position="1995">
+              <caret line="133" column="104" selection-start-line="133" selection-start-column="90" selection-end-line="133" selection-end-column="104" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/object_property.js">
+        <entry file="file://$PROJECT_DIR$/src/engine/web_interfaces.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="194">
-              <caret line="434" column="11" selection-start-line="434" selection-start-column="11" selection-end-line="434" selection-end-column="11" />
+            <state relative-caret-position="5790">
+              <caret line="386" column="144" selection-start-line="386" selection-start-column="144" selection-end-line="386" selection-end-column="144" />
             </state>
           </provider>
         </entry>
@@ -63,8 +69,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Makefile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="33" selection-start-line="15" selection-start-column="33" selection-end-line="15" selection-end-column="33" />
+            <state relative-caret-position="510">
+              <caret line="34" lean-forward="true" selection-start-line="34" selection-end-line="34" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/web_test_element.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1560">
+              <caret line="104" selection-start-line="104" selection-end-line="104" />
             </state>
           </provider>
         </entry>
@@ -72,60 +87,44 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/Makefile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" column="60" lean-forward="true" selection-start-line="14" selection-start-column="60" selection-end-line="14" selection-end-column="60" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bench/Makefile">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+            <state relative-caret-position="120">
+              <caret line="8" selection-start-line="8" selection-end-line="8" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/engine/read.js">
+        <entry file="file://$PROJECT_DIR$/bench/Makefile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="185">
-              <caret line="1489" column="50" selection-start-line="1489" selection-start-column="50" selection-end-line="1489" selection-end-column="50" />
+            <state relative-caret-position="90">
+              <caret line="6" selection-start-line="6" selection-end-line="6" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/promise.js">
+        <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="106" column="14" selection-start-line="106" selection-start-column="8" selection-end-line="106" selection-end-column="21" />
+            <state relative-caret-position="960">
+              <caret line="64" column="48" selection-start-line="64" selection-start-column="27" selection-end-line="64" selection-end-column="48" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="219" column="14" selection-start-line="219" selection-start-column="12" selection-end-line="219" selection-end-column="15" />
-            </state>
-          </provider>
+        <entry file="file://$PROJECT_DIR$/src/tools/type_references.pl">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/engine/Makefile">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>switch_on_constant</find>
-      <find>op_name</find>
-      <find>val(</find>
-      <find>register_indexed</find>
-      <find>register_indexed_predicate</find>
-      <find>Inst</find>
-      <find>dumpPred</find>
-      <find>wam error</find>
       <find>complete_h</find>
       <find>append(</find>
       <find>wam err</find>
@@ -148,6 +147,14 @@
       <find>unify_local</find>
       <find>function string_to_c</find>
       <find>put_nil</find>
+      <find>idsToTypes</find>
+      <find>htmlelement</find>
+      <find>TagProperty</find>
+      <find>array</find>
+      <find>arrayType</find>
+      <find>multiple</find>
+      <find>document</find>
+      <find>htmlcollection</find>
     </findStrings>
     <replaceStrings>
       <replace>:-</replace>
@@ -212,7 +219,6 @@
         <option value="$PROJECT_DIR$/test/test_local_storage.html" />
         <option value="$PROJECT_DIR$/src/docs/debugger.doc.template" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/src/engine/object.js" />
         <option value="$PROJECT_DIR$/src/system/random.pl" />
         <option value="$PROJECT_DIR$/src/system/system_util.pl" />
         <option value="$PROJECT_DIR$/test/tests.html" />
@@ -230,13 +236,10 @@
         <option value="$PROJECT_DIR$/src/engine/record.js" />
         <option value="$PROJECT_DIR$/src/engine/stream.js" />
         <option value="$PROJECT_DIR$/test/Makefile" />
-        <option value="$PROJECT_DIR$/src/engine/web_interfaces.js" />
         <option value="$PROJECT_DIR$/src/system/bootstrap_js.pl" />
         <option value="$PROJECT_DIR$/test/tests.pl" />
-        <option value="$PROJECT_DIR$/version_date.txt" />
         <option value="$PROJECT_DIR$/src/system/debugger.pl" />
         <option value="$PROJECT_DIR$/examples/tiles.html" />
-        <option value="$PROJECT_DIR$/version.txt" />
         <option value="$PROJECT_DIR$/src/system/wam_compiler.pl" />
         <option value="$PROJECT_DIR$/src/system/decode_instructions.pl" />
         <option value="$PROJECT_DIR$/src/engine/decode_instruction.js" />
@@ -249,19 +252,25 @@
         <option value="$PROJECT_DIR$/src/engine/wam.js" />
         <option value="$PROJECT_DIR$/src/engine/dom.js" />
         <option value="$PROJECT_DIR$/src/engine/read.js" />
+        <option value="$PROJECT_DIR$/version.txt" />
+        <option value="$PROJECT_DIR$/version_date.txt" />
+        <option value="$PROJECT_DIR$/src/engine/object.js" />
+        <option value="$PROJECT_DIR$/src/engine/web_interfaces.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="y" value="23" />
-    <option name="width" value="1440" />
-    <option name="height" value="836" />
+    <option name="x" value="-5568" />
+    <option name="y" value="-846" />
+    <option name="width" value="2560" />
+    <option name="height" value="1417" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -269,11 +278,20 @@
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="bench" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -310,21 +328,15 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Makefile.all (5)">
+  <component name="RunManager" selected="Makefile.all (2)">
     <configuration name="all (1)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/bench/Makefile" target="all" workingDirectory="" arguments="">
+      <makefile filename="$PROJECT_DIR$/test/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
     </configuration>
     <configuration name="all (2)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
-        <envs />
-      </makefile>
-      <method v="2" />
-    </configuration>
-    <configuration name="all (3)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/test/Makefile" target="all" workingDirectory="" arguments="">
+      <makefile filename="$PROJECT_DIR$/bench/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
@@ -341,6 +353,12 @@
       </makefile>
       <method v="2" />
     </configuration>
+    <configuration name="all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="NodeJSConfigurationType" application-parameters="../test/proscriptls_state.js" path-to-js-file="../node_tools/node_toplevel.js" working-dir="test">
       <method v="2" />
     </configuration>
@@ -351,21 +369,21 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Makefile.all (4)" />
+      <item itemvalue="Makefile.all" />
+      <item itemvalue="Makefile.all (1)" />
+      <item itemvalue="Makefile.all (5)" />
+      <item itemvalue="Makefile.all (2)" />
       <item itemvalue="Node.js.node_toplevel.js" />
       <item itemvalue="Node.js.node_goal.js " />
-      <item itemvalue="Makefile.all (1)" />
-      <item itemvalue="Makefile.all (2)" />
-      <item itemvalue="Makefile.all (3)" />
-      <item itemvalue="Makefile.all (4)" />
-      <item itemvalue="Makefile.all (5)" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Makefile.all (5)" />
-        <item itemvalue="Makefile.all (4)" />
-        <item itemvalue="Makefile.all (3)" />
         <item itemvalue="Makefile.all (2)" />
         <item itemvalue="Makefile.all (1)" />
+        <item itemvalue="Makefile.all" />
+        <item itemvalue="Makefile.all (2)" />
+        <item itemvalue="Makefile.all (5)" />
       </list>
     </recent_temporary>
   </component>
@@ -402,7 +420,8 @@
       <workItem from="1587483537244" duration="61000" />
       <workItem from="1587486567560" duration="5890000" />
       <workItem from="1587741107740" duration="80345000" />
-      <workItem from="1590792717541" duration="24365000" />
+      <workItem from="1590792717541" duration="30825000" />
+      <workItem from="1592595759083" duration="2286000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -607,11 +626,25 @@
       <option name="project" value="LOCAL" />
       <updated>1591292859485</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="Fixed string_to_codes function to ensure arg is a string.">
+      <created>1591820133519</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1591820133519</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Updated to version 1.5.8">
+      <created>1591820234407</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1591820234407</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="247766000" />
+    <option name="totallyTimeSpent" value="256512000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -623,16 +656,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="836" extended-state="6" />
-    <editor active="true" />
+    <frame x="-5568" y="-846" width="2560" height="1417" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.6963351" visible="true" weight="0.22532189" />
-      <window_info id="Structure" order="1" sideWeight="0.30366492" side_tool="true" visible="true" weight="0.22532189" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6948775" visible="true" weight="0.12668785" />
+      <window_info id="Structure" order="1" sideWeight="0.3051225" side_tool="true" visible="true" weight="0.12668785" />
       <window_info id="Favorites" order="2" sideWeight="0.33809525" side_tool="true" weight="0.20413026" />
-      <window_info anchor="bottom" id="Inspection Results" sideWeight="0.49928468" weight="0.3293011" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49427754" weight="0.18010753" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4899857" weight="0.32392472" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48888007" visible="true" weight="0.32226416" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4985694" weight="0.25672042" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -640,8 +671,9 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.5765379" weight="0.27553764" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.3261745" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50143063" side_tool="true" visible="true" weight="0.22983871" />
-      <window_info active="true" anchor="bottom" id="Messages" order="11" sideWeight="0.4985694" visible="true" weight="0.22983871" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.51111996" side_tool="true" visible="true" weight="0.32226416" />
+      <window_info anchor="bottom" id="Messages" order="11" sideWeight="0.4985694" weight="0.22983871" />
+      <window_info anchor="bottom" id="Inspection Results" order="12" sideWeight="0.49928468" weight="0.3293011" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -703,7 +735,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="update workspace.xml." />
     <MESSAGE value="Merge branch 'local_storage'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="Changed version to 1.5.0. Added documentation. Cleaned up tiles.html.&#10;&#10;Fixed doc generator to not put empty parentheses on predicates." />
     <MESSAGE value="Extended data_predicates.pl with undo. Updated version to 1.5.2.&#10;&#10;Changed console.pl to use new data_predicates/4.&#10;data_predicates.pl: changed to data_predicates/4 from /3 to add 'option' (undoable, ephemeral) argument; added use of undo module; added cuts for performance optimization; added 'action' predicate generation for get, set, update, and clear.&#10;Extended object.pl with &gt;&gt;$/2 - this is &gt;&gt;/2 with a trailing cut; added cuts for performance optimization.&#10;Added undo.pl to support undoing assertions (primarily of data_predicates data).&#10;bootstrap_js.pl: added cuts to partition/4 and key_partition/4 to prevent sort/2 from creating needless choicepoints.&#10;Fixed proscript_interpreter_terminal.js to use $.terminal.escape_formatting on strings to be output in the terminal (fixes a bug with strings containing '[[' due to nested lists).&#10;Updated JQuery terminal to 2.9.0." />
@@ -728,7 +759,8 @@
     <MESSAGE value="Changed version to 1.5.7" />
     <MESSAGE value="Fixed backtrack-to-beginning for trust_me and trust(L) instructions. Fixed proscriptls function handling of wamYielded. Fixed WebAPI dom_rect type to allow float values. Improved decode_instruction tools. Added heap and stack validation.&#10;&#10;decode_instruction.js: Fixed put_nil to advance P correctly, fixed decode_switch_table_sequence function (used in switch_on_constant instruction decoding).&#10;dom.js: fixed 'wamYielded' call of setTimeout to properly invoke proscriptls function and added log of timeout; fixed proscriptls_apply to properly annotate goal with module when goal does *not* have typedArgumentStrings.&#10;gc.js: fixed dump_environments to check that envcp is valid.&#10;object_method.js: fixed convert_result function to allow dom_rect values to be integer or float ('number') and to properly use prolog exception if there is a type error.&#10;wam.js: Extended wam function catch to dump environments and choicepoints to log; changed all references to stack or heap in wam1 function to be validated using wamValidStackAddr, wamValidStackVarAddr, wamValidHeapAddr, or wamValidHeapOrStackAddr functions; fixed trust_me and trust(L) cases in wam1 function to check for state.B === 0 when updating state.HB (updating it to 0 in that situation).&#10;decode_instructions.pl: new module to decode instructions in prolog (debugging tool).&#10;wam_compiler.pl: Changed to define yield/0 when compiling in SWI-Prolog.&#10;web_test_element.pl, web_test_html_input_element.pl: updated some tests for slightly changed numeric values." />
     <MESSAGE value="Fixed string_to_codes function to ensure arg is a string." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed string_to_codes function to ensure arg is a string." />
+    <MESSAGE value="Updated to version 1.5.8" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated to version 1.5.8" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -742,44 +774,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/test/web_test_event_target.pl">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/web_interfaces.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="862" column="4" selection-start-line="862" selection-start-column="4" selection-end-line="862" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/debugger.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="293">
-          <caret line="20" column="22" selection-start-line="20" selection-start-column="22" selection-end-line="20" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version_date.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="3" selection-start-column="3" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/tiles.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1765">
-          <caret line="136" column="10" selection-start-line="136" selection-start-column="10" selection-end-line="136" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/tests.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="461" column="25" selection-start-line="461" selection-start-column="25" selection-end-line="461" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/fli.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="159">
@@ -808,22 +802,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/version.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="5" selection-start-column="5" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bench/qsort.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="225">
           <caret line="15" column="22" lean-forward="true" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/Makefile">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/test/tests.html">
       <provider selected="true" editor-type-id="text-editor">
@@ -948,20 +932,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/web_test_html_element.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-247">
-          <caret line="28" selection-start-line="28" selection-end-line="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/web_test_element.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="393">
-          <caret line="121" column="45" selection-start-line="121" selection-start-column="45" selection-end-line="121" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/web_test_html_input_element.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="62">
@@ -1021,45 +991,103 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/object_method.js">
+    <entry file="file://$PROJECT_DIR$/src/engine/read.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="461" column="19" selection-start-line="461" selection-start-column="19" selection-end-line="461" selection-end-column="19" />
+        <state relative-caret-position="185">
+          <caret line="1489" column="50" selection-start-line="1489" selection-start-column="50" selection-end-line="1489" selection-end-column="50" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="5" selection-start-column="5" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version_date.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="4" selection-start-column="4" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/web_test_html_element.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="28" selection-start-line="28" selection-end-line="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/type_references.template">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="405" column="43" selection-start-line="405" selection-start-column="43" selection-end-line="405" selection-end-column="43" />
+        <state relative-caret-position="5805">
+          <caret line="387" column="9" selection-start-line="387" selection-start-column="9" selection-end-line="387" selection-end-column="9" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/object.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3150">
+          <caret line="210" column="31" selection-start-line="210" selection-start-column="31" selection-end-line="210" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/object_method.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1995">
+          <caret line="133" column="104" selection-start-line="133" selection-start-column="90" selection-end-line="133" selection-end-column="104" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/web_interfaces.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5790">
+          <caret line="386" column="144" selection-start-line="386" selection-start-column="144" selection-end-line="386" selection-end-column="144" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/web_test_element.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1560">
+          <caret line="104" selection-start-line="104" selection-end-line="104" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="960">
+          <caret line="64" column="48" selection-start-line="64" selection-start-column="27" selection-end-line="64" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tools/type_references.pl">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/Makefile">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/Makefile">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="33" selection-start-line="15" selection-start-column="33" selection-end-line="15" selection-end-column="33" />
+        <state relative-caret-position="510">
+          <caret line="34" lean-forward="true" selection-start-line="34" selection-end-line="34" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/Makefile">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="60" lean-forward="true" selection-start-line="14" selection-start-column="60" selection-end-line="14" selection-end-column="60" />
+        <state relative-caret-position="120">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bench/Makefile">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
-          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/read.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="1489" column="50" selection-start-line="1489" selection-start-column="50" selection-end-line="1489" selection-end-column="50" />
+          <caret line="6" selection-start-line="6" selection-end-line="6" />
         </state>
       </provider>
     </entry>

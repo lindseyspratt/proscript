@@ -147,7 +147,8 @@ var parentMap = new Map([
     ['blob', []],
     ['storage', []],
     ['windowlocalstorage',[]], // mixin
-    ['windowsessionstorage',[]] // mixin
+    ['windowsessionstorage',[]], // mixin
+    ['htmlunknownelement', ['htmlelement']]
 ]);
 
 var childMap = new Map();
@@ -198,7 +199,8 @@ var constructorMap = {
     "BarProp" : 'barprop',
     "Navigator" : 'navigator',
     "Blob" : 'blob',
-    "Storage" : 'storage'
+    "Storage" : 'storage',
+    "HTMLUnknownElement" : 'htmlunknownelement'
 };
 
 var distinctivePropertyMap = {

@@ -293,7 +293,7 @@
 </li>
 <li class="indexed" id="api_htmlelement"><h5>HTMLElement (<a href="https://www.w3.org/TR/2017/REC-html52-20171214/dom.html#htmlelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement'>MDN</a>): htmlelement</h5>
 <h6>Parents</h6><ul><li><a href='#api_element'>element</a></li></ul>
-<h6>Children</h6><ul><li><a href='#api_htmlcanvaselement'>htmlcanvaselement</a></li><li><a href='#api_htmlformelement'>htmlformelement</a></li><li><a href='#api_htmlimageelement'>htmlimageelement</a></li><li><a href='#api_htmlinputelement'>htmlinputelement</a></li><li><a href='#api_htmloptionelement'>htmloptionelement</a></li><li><a href='#api_htmlselectelement'>htmlselectelement</a></li><li><a href='#api_htmltextareaelement'>htmltextareaelement</a></li></ul>
+<h6>Children</h6><ul><li><a href='#api_htmlcanvaselement'>htmlcanvaselement</a></li><li><a href='#api_htmlformelement'>htmlformelement</a></li><li><a href='#api_htmlimageelement'>htmlimageelement</a></li><li><a href='#api_htmlinputelement'>htmlinputelement</a></li><li><a href='#api_htmloptionelement'>htmloptionelement</a></li><li><a href='#api_htmlselectelement'>htmlselectelement</a></li><li><a href='#api_htmltextareaelement'>htmltextareaelement</a></li><li><a href='#api_htmlunknownelement'>htmlunknownelement</a></li></ul>
 <h6>Properties</h6>
 	<ul>
 		<li><b>contentEditable</b>: <i>atom</i></li>
@@ -474,6 +474,11 @@
 		<li><b>setRangeText</b>(<i>string</i>, <i>number</i>, <i>number</i>, <i>string</i>)</li>
 		<li><b>setSelectionRange</b>(<i>number</i>, <i>number</i>, <i>string</i>)</li>
 	</ul>
+</li>
+<li class="indexed" id="api_htmlunknownelement"><h5>HTMLUnknownElement (<a href="https://www.w3.org/TR/html52/dom.html#htmlunknownelement">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/HTMLUnknownElement'>MDN</a>): htmlunknownelement</h5>
+<h6>Parents</h6><ul><li><a href='#api_htmlelement'>htmlelement</a></li></ul>
+	(no properties)
+	(no methods)
 </li>
 <li class="indexed" id="api_imagedata"><h5>ImageData (<a href="https://www.w3.org/TR/2dcontext/#imagedata">Standard</a>, <a href='https://developer.mozilla.org/en-US/docs/Web/API/ImageData'>MDN</a>): imagedata</h5>
 <h6>Properties</h6>

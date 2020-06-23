@@ -22,6 +22,7 @@
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_htmloptionelement, 'index_doc.html', 'HTMLOptionElement']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_htmlselectelement, 'index_doc.html', 'HTMLSelectElement']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_htmltextareaelement, 'index_doc.html', 'HTMLTextAreaElement']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_htmlunknownelement, 'index_doc.html', 'HTMLUnknownElement']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_imagedata, 'index_doc.html', 'ImageData']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_location, 'index_doc.html', 'Location']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, api_mouseevent, 'index_doc.html', 'MouseEvent']}}</li>

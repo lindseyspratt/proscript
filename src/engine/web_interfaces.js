@@ -383,8 +383,8 @@ var documentInterfaceProperties = new Map([
 ]);
 
 var documentMethodSpecs = new Map([
-    ['getElementsByTagName',{name:'getElementsByTagName',arguments:[{type:'string'}],returns:{type:'object'}}],
-    ['getElementsByTagNameNS',{name:'getElementsByTagNameNS',arguments:[{type:'string'},{type:'string'}],returns:{type:'object'}}],
+    ['getElementsByTagName',{name:'getElementsByTagName',arguments:[{type:'string'}],returns:{type: 'object', multiple: true}}],
+    ['getElementsByTagNameNS',{name:'getElementsByTagNameNS',arguments:[{type:'string'},{type:'string'}],returns:{type: 'object', multiple: true}}],
     ['createElement',{name:'createElement',arguments:[{type:'string'},{type:'object'}],returns:{type:'object'}}], // input ElementCreationOptions, output Element
     ['createElementNS',{name:'createElementNS',arguments:[{type:'string'},{type:'string'},{type:'object'}],returns:{type:'object'}}], // input ElementCreationOptions, output Element
     ['createDocumentFragment',{name:'createDocumentFragment',arguments:[],returns:{type:'object'}}], // DocumentFragment
@@ -1552,6 +1552,23 @@ webInterfaces.set('windoworworkerglobalscope',
         reference: {name:'windowOrWorkerGlobalScope',
             standard:'https://html.spec.whatwg.org/multipage/webappapis.html#windoworworkerglobalscope-mixin',
             mdn:'https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope'
+        }
+    });
+
+var htmlUnknownElementInterfaceProperties = new Map( [
+]);
+
+var htmlUnknownElementMethodSpecs = new Map([
+
+]);
+
+webInterfaces.set('htmlunknownelement',
+    {name: 'htmlunknownelement',
+        properties:htmlUnknownElementInterfaceProperties,
+        methods:htmlUnknownElementMethodSpecs,
+        reference: {name:'HTMLUnknownElement',
+            standard:'https://www.w3.org/TR/html52/dom.html#htmlunknownelement',
+            mdn:'https://developer.mozilla.org/en-US/docs/Web/API/HTMLUnknownElement'
         }
     });
 
