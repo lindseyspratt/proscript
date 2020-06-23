@@ -1,7 +1,7 @@
 # ProscriptLS SDK
 ## Software Development Kit for ProscriptLS
 ### Javascript implementation of Prolog
-#### (version 1.5.8, June 2020)
+#### (version 1.5.9, June 2020)
 
 This SDK contains all of the ProscriptLS libraries and support files needed to create
 web pages using ProscriptLS as the scripting language instead of Javascript.
