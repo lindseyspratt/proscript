@@ -639,6 +639,22 @@ transform_body(Module : once(Goal), Position, NewBody, ExtraClauses, Tail, CutVa
 % aux_2(_,_,_).
 % aux_3:- Catcher = !, call(Cleanup), halt.
 
+
+transform_body(setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+    var(Setup),
+    !,
+    transform_body(setup_call_catcher_cleanup(call(Setup), Goal, Catcher, Cleanup), Position, NewBody, ExtraClauses, Tail, CutVariable).
+transform_body(setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+    nonvar(Setup),
+    var(Goal),
+    !,
+    transform_body(setup_call_catcher_cleanup(Setup, call(Goal), Catcher, Cleanup), Position, NewBody, ExtraClauses, Tail, CutVariable).
+transform_body(setup_call_catcher_cleanup(Setup, Goal, Catcher, Cleanup), Position, NewBody, ExtraClauses, Tail, CutVariable):-
+    nonvar(Setup),
+    nonvar(Goal),
+    var(Cleanup),
+    !,
+    transform_body(setup_call_catcher_cleanup(Setup, Goal, Catcher, call(Cleanup)), Position, NewBody, ExtraClauses, Tail, CutVariable).
 % Some interesting things:
 % A) aux_1, before even calling the goal, appears to call aux_3. The reason for this is that mark_top_choicepoint/2 is extralogical, and saves the information about the *next instruction* to the stack, so that we can go back to it when a cut is detected.
 %    >> It then skips the next instruction!

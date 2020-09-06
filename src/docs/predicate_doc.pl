@@ -148,7 +148,8 @@ doc(current_char_conversion/2,
     [arg(inChar, "a single-character atom"), arg(outChar, "a single-character atom"), compat(iso), cat(term_io)]).
 doc(write_term/3, write_term(+ < stream * term, + < term * term, + < options * list(write_option_term)),
     "Write Term to Stream in a form determined by Options.",
-    [arg(stream, "a stream term"), arg(term, "a term"), arg(options, "a list of write_term option terms.")]).
+    [arg(stream, "a stream term"), arg(term, "a term"), arg(options,
+    "a list of write_term option terms - quoted(true/false), numbervars(true/false), ignore_ops(true/false), max_depth(N)"), compat(iso), cat(term_io)]).
 doc(current_op/3, current_op(? < priority * integer, ? < specifier * atom, ? < operator * atom),
     "Operator is currently defined with Priority and Specifier for reading and writing terms.",
     [arg(priority, "an integer"), arg(specifier, "an atom: fx, fy, xfx, xfy, yfx, yf, xf"), arg(operator, "an atom"), compat(iso), cat(term_io)]).

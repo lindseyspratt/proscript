@@ -1,4 +1,5 @@
 :- dynamic(test/1).
+:- dynamic(caught/2).
 
 :- if(true).
 macro1(if).
@@ -449,7 +450,7 @@ test(keysort(1), exit) :-
 test(keysort(2), exit) :-
     keysort([2-b,1-a,2-c], X),
     !,
-    X = [1-a,2-b].
+    X = [1-a,2-b,2-c].
 
 test(keysort(3), exit) :-
     keysort([3-c,2-b,1-a], X),

@@ -241,6 +241,7 @@
 <li><a  class="index" id="pred_op_3_index" href="#pred_op_3"> op/3 </a></li>
 <li><a  class="index" id="pred_read_term_2_index" href="#pred_read_term_2"> read_term/2 </a></li>
 <li><a  class="index" id="pred_read_term_3_index" href="#pred_read_term_3"> read_term/3 </a></li>
+<li><a  class="index" id="pred_write_term_3_index" href="#pred_write_term_3"> write_term/3 </a></li>
 <li><a  class="index" id="pred_writeln_1_index" href="#pred_writeln_1"> writeln/1 </a></li>
 </ul></li>
 <li><span class="caret"></span><a  class="index" id="pred_cat_term_unification_index" href="#pred_cat_term_unification"> term unification </a>
@@ -3086,6 +3087,18 @@ The unique predicates include several predicates for working with HTML documents
 <br><b>arg</b>: <i>Stream</i>. a stream term.
 <br><b>arg</b>: <i>Term</i>. a term.
 <br><b>arg</b>: <i>Options</i>. a read options list.
+<br><b>compat</b>: iso.
+<br><b>cat</b>: term_io.
+</li>
+
+<li class="indexed" id="pred_write_term_3">
+<h5>write_term/3</h5>
+<br><b>write_term</b>(+<i>Stream</i>:term,+<i>Term</i>:term,+<i>Options</i>:list(write_option_term))
+<br><br>Write Term to Stream in a form determined by Options.
+<br>
+<br><b>arg</b>: <i>Stream</i>. a stream term.
+<br><b>arg</b>: <i>Term</i>. a term.
+<br><b>arg</b>: <i>Options</i>. a list of write_term option terms - quoted(true/false), numbervars(true/false), ignore_ops(true/false), max_depth(N).
 <br><b>compat</b>: iso.
 <br><b>cat</b>: term_io.
 </li>

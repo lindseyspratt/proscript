@@ -12,6 +12,7 @@
          callable/1, retractall/1, sort/2, keysort/2, length/2, delete/3,
          call_with_module/2,
          call/1, call/2, call/3, call/4, call/5, call/6, call/7, call/8,
+         setup_call_cleanup/3,
          decode_instructions/2, yield/0
          ]).
 
@@ -287,7 +288,7 @@ list_instances(NewKey-Term, Key, NVars, OldBag, NewBag) :-
 replace_key_variables(0, _, _) :- !.
 replace_key_variables(N, OldKey, NewKey) :-
 	arg(N, NewKey, Arg),
-	nonvar(Arg), !,
+	ground(Arg), !,
 	M is N-1,
 	replace_key_variables(M, OldKey, NewKey).
 replace_key_variables(N, OldKey, NewKey) :-
@@ -314,6 +315,10 @@ concordant_subset(More, _,   _,   Clavis, Answer) :-
 
 
 % ISO predicates
+% 7.8.11 setup_call_cleanup/3
+setup_call_cleanup(S, G, C) :-
+    setup_call_catcher_cleanup(S, G, _, C).
+
 % 8.2
 % =/2 (foreign)
 unify_with_occurs_check(A, A):- acyclic_term(A).
@@ -532,9 +537,9 @@ check_keysorted([H1-V1,H2-V2|T], L) :-
     check_keysorted(Next, LT).
 
 keysort1([Key-X|Xs],Ys, YsTail) :-
-        key_partition(Xs,Key,Left,Right),
-        keysort1(Left,Ys, [Key-X|Rs]),
-        keysort1(Right,Rs, YsTail).
+	key_partition(Xs, Key, Left, EQ, EQT, Right),
+	keysort1(Left,  Ys, [Key-X|EQ]),
+	keysort1(Right, EQT, YsTail).
 keysort1([],Ys,Ys).
 
 partition([X|Xs],Y,Ls,Rs) :-
@@ -551,15 +556,21 @@ partition([X|Xs],Y,Ls,[X|Rs]) :-
         partition(Xs,Y,Ls,Rs).
 partition([],_,[],[]).
 
-key_partition([XKey-X|Xs],YKey,[XKey-X|Ls],Rs) :-
-        XKey @=< YKey,
-        !,
-        key_partition(Xs,YKey,Ls,Rs).
-key_partition([XKey-X|Xs],YKey,Ls,[XKey-X|Rs]) :-
-%        XKey @> YKey,
-        !,
-        key_partition(Xs,YKey,Ls,Rs).
-key_partition([],_,[],[]).
+key_partition('-', _, _, _, _, _) :-
+	throw(instantiation_error).
+key_partition([XKey-X| Xs], YKey, [XKey-X| Ls], EQ, EQT, Rs) :-
+	XKey @< YKey,
+	!,
+	key_partition(Xs, YKey, Ls, EQ, EQT, Rs).
+key_partition([XKey-X| Xs], YKey, Ls, [XKey-X| EQ], EQT, Rs) :-
+	XKey == YKey,
+	!,
+	key_partition(Xs, YKey, Ls, EQ, EQT, Rs).
+key_partition([XKey-X| Xs], YKey, Ls, EQ, EQT, [XKey-X| Rs]) :-
+%	XKey @> YKey,
+	!,
+	key_partition(Xs, YKey, Ls, EQ, EQT, Rs).
+key_partition([], _, [], EQT, EQT, []).
 
 
 append([],Ys,Ys).

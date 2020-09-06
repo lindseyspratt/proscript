@@ -5000,8 +5000,8 @@ function wam() {
         return wam1();
     } catch (e) {
         wamExit(e);
-        dump_environments();
-        dump_choicepoints();
+        // dump_environments();
+        // dump_choicepoints();
         throw e;
     }
 }

@@ -148,6 +148,7 @@
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_op_3, 'index_doc.html', 'op/3']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_read_term_2, 'index_doc.html', 'read_term/2']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_read_term_3, 'index_doc.html', 'read_term/3']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_write_term_3, 'index_doc.html', 'write_term/3']}}</li>
 <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_writeln_1, 'index_doc.html', 'writeln/1']}}</li>
 </ul></li>
 <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, doc, pred_cat_term_unification, 'index_doc.html', 'term unification']}}
