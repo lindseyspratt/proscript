@@ -1,0 +1,43 @@
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'additional-requirements', 'index_status.html', 'Additional requirements']}}</li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'core-standard', 'index_status.html', 'Core standard']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'directives', 'index_status.html', '7.4.2 Directives']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'control-constructs', 'index_status.html', '7.8 Control constructs']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'stream-properties', 'index_status.html', '7.10.2.13 Stream properties']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'read-options', 'index_status.html', '7.10.3 Read-options list']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'write-options', 'index_status.html', '7.10.4 Write-options list']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'flags-integer', 'index_status.html', '7.11.1 Flags defining integer type I']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'other-flags', 'index_status.html', '7.11.2 Other flags']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'errors', 'index_status.html', '7.12.2 Error classification']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'term-unification', 'index_status.html', '8.2 Term unification']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'type-testing', 'index_status.html', '8.3 Type testing']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'term-comparison', 'index_status.html', '8.4 Term comparison']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'term-creation', 'index_status.html', '8.5 Term creation and decomposition']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'arithmetic-evaluation', 'index_status.html', '8.6 Arithmetic evaluation']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'arithmetic-comparison', 'index_status.html', '8.7 Arithmetic comparison']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'clause-retrieval', 'index_status.html', '8.8 Clause retrieval and information']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'clause-creation', 'index_status.html', '8.9 Clause creation and destruction']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'all-solutions', 'index_status.html', '8.10 All solutions']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'stream-selection', 'index_status.html', '8.11 Stream selection and control']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'character-io', 'index_status.html', '8.12 Character input/output']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'byte-io', 'index_status.html', '8.13 Byte input/output']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'term-io', 'index_status.html', '8.14 Term input/output']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'logic-and-control', 'index_status.html', '8.15 Logic and control']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'atomic-term', 'index_status.html', '8.16 Atomic term processing']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'hooks', 'index_status.html', '8.17 Implementation defined hooks']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'arithmetic-functors', 'index_status.html', '9.1 The simple arithmetic functors']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'other-arithmetic-functors', 'index_status.html', '9.3 Other arithmetic functors']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'bitwise-functors', 'index_status.html', '9.4 Bitwise functors']}}</li>
+</ul></li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'modules', 'index_status.html', 'Part 2: Modules']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'module-predicates', 'index_status.html', '7.2 Module predicates']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'module-predicates', 'index_status.html', '7.2 Module predicates']}}</li>
+</ul></li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'prologue', 'index_status.html', 'Proposed for Prolog prologue']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'further', 'index_status.html', 'Further propositions']}}</li>
+<li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'needed', 'index_status.html', 'Summary of items needing to be implemented']}}
+<ul class='nested'>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'needed-standard', 'index_status.html', 'Standard items']}}</li>
+<li>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, 'needed-other', 'index_status.html', 'Other items']}}</li>
+</ul></li>

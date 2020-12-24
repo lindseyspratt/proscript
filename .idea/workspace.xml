@@ -4,14 +4,13 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="">
+    <list default="true" id="9214ae30-6691-490b-b87c-27b1aaf8d8a8" name="Default Changelist" comment="Added status to docs. Extended undo.pl with redo.">
+      <change afterPath="$PROJECT_DIR$/docs/index_status.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/docs/content.index_status.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/docs/index_status.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/docs/status.sidenav.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/docs/tasks_doc.pl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/nrev.pl" beforeDir="false" afterPath="$PROJECT_DIR$/bench/nrev.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bench/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/bench/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_engine_for_node.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/proscriptls_state.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/calculator_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/calculator_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/console_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/consult_console_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/consult_console_source.html" afterDir="false" />
@@ -22,18 +21,10 @@
       <change beforePath="$PROJECT_DIR$/docs/likes_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/likes_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/simple_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/simple_source.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/tiles_source.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tiles_source.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_demo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/proscriptls_state_tiles.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/items.predicates.doc.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/items.predicates.doc.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/predicate_doc.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/predicate_doc.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/predicates.sidenav.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/predicates.sidenav.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/proscriptls_state_doc.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/wam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/wam.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/bootstrap_js.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/bootstrap_js.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/system/wam_compiler.pl" beforeDir="false" afterPath="$PROJECT_DIR$/src/system/wam_compiler.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/proscriptls_state.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/proscriptls_state.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/tests.pl" beforeDir="false" afterPath="$PROJECT_DIR$/test/tests.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/undo.pl" beforeDir="false" afterPath="$PROJECT_DIR$/library/undo.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/docs/sidenav.index.template" beforeDir="false" afterPath="$PROJECT_DIR$/src/docs/sidenav.index.template" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/../proscript/.tmp/" />
     <ignored path="$PROJECT_DIR$/../proscript/temp/" />
@@ -49,90 +40,77 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="597">
-              <caret line="528" lean-forward="true" selection-start-line="528" selection-end-line="528" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/tests.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="403">
-              <caret line="463" lean-forward="true" selection-start-line="463" selection-end-line="463" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/docs/index.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1304" />
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/docs/predicate_doc.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="455">
-              <caret line="151" column="121" selection-start-line="151" selection-start-column="121" selection-end-line="151" selection-end-column="121" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/engine/read.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-995">
-              <caret line="631" column="9" selection-start-line="631" selection-start-column="9" selection-end-line="631" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="48" column="59" selection-start-line="48" selection-start-column="59" selection-end-line="48" selection-end-column="59" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/tools/generate_predicate_doc.pl">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="101">
-              <caret line="24" column="37" selection-start-line="24" selection-start-column="11" selection-end-line="24" selection-end-column="37" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/test/Makefile">
+        <entry file="file://$PROJECT_DIR$/bench/common.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="220">
-              <caret line="15" column="96" selection-start-line="15" selection-start-column="96" selection-end-line="15" selection-end-column="96" />
+            <state relative-caret-position="105">
+              <caret line="7" column="18" lean-forward="true" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
+        <entry file="file://$PROJECT_DIR$/bench/hook.pl">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="191">
-              <caret line="436" column="24" lean-forward="true" selection-start-line="436" selection-start-column="24" selection-end-line="436" selection-end-column="24" />
+            <state relative-caret-position="387">
+              <caret line="1115" selection-start-line="1115" selection-end-line="1115" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Makefile">
+        <entry file="file://$PROJECT_DIR$/bench/Makefile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="21" column="29" selection-start-line="21" selection-start-column="29" selection-end-line="21" selection-end-column="29" />
+            <state relative-caret-position="285">
+              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/bench/cal.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1969" />
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/bench/queens.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1110">
+              <caret line="74" column="17" selection-start-line="74" selection-start-column="17" selection-end-line="74" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/library/listut.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3030">
+              <caret line="202" column="25" selection-start-line="202" selection-start-column="25" selection-end-line="202" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/library/setutl.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3555">
+              <caret line="237" column="30" selection-start-line="237" selection-start-column="30" selection-end-line="237" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/bench/boyer.pl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="5355">
+              <caret line="357" column="15" selection-start-line="357" selection-start-column="15" selection-end-line="357" selection-end-column="15" />
             </state>
           </provider>
         </entry>
@@ -141,39 +119,38 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>block</find>
-      <find>local_cut</find>
-      <find>B0</find>
-      <find>state.B0</find>
-      <find>include_cut_point_as_argument_if_needed</find>
-      <find>compile_auxiliary_goals</find>
-      <find>cleanups</find>
-      <find>clean</find>
-      <find>throw</find>
-      <find>commit_to_cut</find>
-      <find>except</find>
-      <find>set_of</find>
-      <find>sort</find>
-      <find>function deref</find>
-      <find>retry_foreign</find>
-      <find>existent</find>
-      <find>setof</find>
-      <find>state.CP =</find>
-      <find>E_CP</find>
-      <find>setup_ca</find>
-      <find>setup_c</find>
-      <find>setup_call_cleanup</find>
-      <find>8.1</find>
-      <find>predicate_fa</find>
-      <find>Setup</find>
-      <find>run_cl</find>
-      <find>numbervars</find>
-      <find>format</find>
-      <find>write_term</find>
-      <find>write_ter</find>
+      <find>subsumes_term</find>
+      <find>compare/</find>
+      <find>term_var</find>
+      <find>=\=</find>
+      <find>current_pred</find>
+      <find>abolish</find>
+      <find>open/4</find>
+      <find>set_stream</find>
+      <find>put_byte/1</find>
+      <find>current_char_con</find>
+      <find>once/</find>
+      <find>number_codes</find>
+      <find>halt/1</find>
+      <find>predicate_is</find>
+      <find>pi</find>
+      <find>predicate_pr</find>
+      <find>between(</find>
+      <find>select</find>
+      <find>succ</find>
+      <find>maplist</find>
+      <find>nl</find>
+      <find>phrase</find>
+      <find>reverse</find>
+      <find>nth</find>
+      <find>rev</find>
+      <find>predicate_statistics</find>
+      <find>undo</find>
+      <find>undoable_assert</find>
+      <find>plus</find>
+      <find>has_cut</find>
     </findStrings>
     <replaceStrings>
-      <replace>:-</replace>
       <replace>Heap</replace>
       <replace>proscriptls_in</replace>
       <replace>ProscriptLS</replace>
@@ -199,12 +176,19 @@
       <replace>register_location33</replace>
       <replace>register_location43</replace>
       <replace>register_location60</replace>
+      <replace>,&lt;/li&gt;</replace>
+      <replace>&lt;/li&gt;</replace>
+      <replace>.&lt;/li&gt;</replace>
+      <replace>&lt;li&gt;</replace>
+      <replace>plus1</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/src/system</dir>
-      <dir>$PROJECT_DIR$</dir>
-      <dir>$PROJECT_DIR$/src</dir>
       <dir>$PROJECT_DIR$/src/engine</dir>
+      <dir>$PROJECT_DIR$/src/docs</dir>
+      <dir>$PROJECT_DIR$/src</dir>
+      <dir>$PROJECT_DIR$/library</dir>
+      <dir>$PROJECT_DIR$</dir>
     </dirStrings>
   </component>
   <component name="Git.Settings">
@@ -223,23 +207,11 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/docs/objects.doc.template" />
-        <option value="$PROJECT_DIR$/src/docs/syntax.doc.template" />
-        <option value="$PROJECT_DIR$/terminal/jquery_terminal.js" />
-        <option value="$PROJECT_DIR$/terminal/proscript_interpreter_terminal.js" />
-        <option value="$PROJECT_DIR$/terminal/terminal_test.html" />
-        <option value="$PROJECT_DIR$/library/data_predicates.pl" />
-        <option value="$PROJECT_DIR$/src/tools/wam_bootstrap.pl" />
-        <option value="$PROJECT_DIR$/src/docs/docs_test.html" />
-        <option value="$PROJECT_DIR$/examples/calculator.html" />
-        <option value="$PROJECT_DIR$/test/test_local_storage.html" />
-        <option value="$PROJECT_DIR$/src/docs/debugger.doc.template" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/src/system/random.pl" />
         <option value="$PROJECT_DIR$/src/system/system_util.pl" />
         <option value="$PROJECT_DIR$/test/tests.html" />
         <option value="$PROJECT_DIR$/bench/sort_terms.pl" />
-        <option value="$PROJECT_DIR$/bench/Makefile" />
         <option value="$PROJECT_DIR$/src/docs/predicates.sidenav.template" />
         <option value="$PROJECT_DIR$/docs/index_doc.html" />
         <option value="$PROJECT_DIR$/src/tools/generate_predicate_doc.pl" />
@@ -274,19 +246,33 @@
         <option value="$PROJECT_DIR$/src/system/wam_compiler.pl" />
         <option value="$PROJECT_DIR$/src/system/bootstrap_js.pl" />
         <option value="$PROJECT_DIR$/src/docs/predicate_doc.pl" />
+        <option value="$PROJECT_DIR$/src/docs/index_status.template" />
+        <option value="$PROJECT_DIR$/src/docs/content.index_status.html" />
+        <option value="$PROJECT_DIR$/src/docs/sidenav.index.template" />
+        <option value="$PROJECT_DIR$/src/docs/Makefile" />
+        <option value="$PROJECT_DIR$/src/docs/status.sidenav.template" />
+        <option value="$PROJECT_DIR$/src/docs/content.index_status.template" />
+        <option value="$PROJECT_DIR$/src/docs/tasks_doc.pl" />
+        <option value="$PROJECT_DIR$/library/undo.pl" />
+        <option value="$PROJECT_DIR$/bench/boyer.pl" />
+        <option value="$PROJECT_DIR$/bench/common.pl" />
+        <option value="$PROJECT_DIR$/bench/hooklvm.pl" />
+        <option value="$PROJECT_DIR$/bench/Makefile" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="y" value="23" />
-    <option name="width" value="1334" />
-    <option name="height" value="769" />
+    <option name="x" value="180" />
+    <option name="y" value="127" />
+    <option name="width" value="1080" />
+    <option name="height" value="628" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -297,19 +283,23 @@
             <path>
               <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
               <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
+              <item name="bench" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proscriptls" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proscriptls" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/system" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/bench" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
@@ -325,6 +315,8 @@
       <recent name="$PROJECT_DIR$/terminal" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/bench" />
+      <recent name="$PROJECT_DIR$/src/docs" />
       <recent name="$PROJECT_DIR$/src/system" />
     </key>
   </component>
@@ -340,33 +332,33 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Makefile.all (3)">
-    <configuration name="all (1)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
-        <envs />
-      </makefile>
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Makefile.all">
     <configuration name="all (2)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
+      <makefile filename="$PROJECT_DIR$/src/docs/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
     </configuration>
     <configuration name="all (3)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/test/Makefile" target="all" workingDirectory="" arguments="">
+      <makefile filename="$PROJECT_DIR$/src/docs/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
     </configuration>
     <configuration name="all (4)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
+      <makefile filename="$PROJECT_DIR$/src/docs/Makefile" target="all" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="all (5)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/src/docs/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
     </configuration>
     <configuration name="all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/test/Makefile" target="all" workingDirectory="" arguments="">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
@@ -388,20 +380,20 @@
     </configuration>
     <list>
       <item itemvalue="Makefile.tak" />
-      <item itemvalue="Makefile.all" />
-      <item itemvalue="Makefile.all (1)" />
       <item itemvalue="Makefile.all (2)" />
       <item itemvalue="Makefile.all (3)" />
       <item itemvalue="Makefile.all (4)" />
+      <item itemvalue="Makefile.all (5)" />
+      <item itemvalue="Makefile.all" />
       <item itemvalue="Node.js.node_toplevel.js" />
       <item itemvalue="Node.js.node_goal.js " />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Makefile.all (3)" />
-        <item itemvalue="Makefile.all (2)" />
-        <item itemvalue="Makefile.all (1)" />
         <item itemvalue="Makefile.all" />
+        <item itemvalue="Makefile.all" />
+        <item itemvalue="Makefile.all" />
+        <item itemvalue="Makefile.all (5)" />
         <item itemvalue="Makefile.all (4)" />
       </list>
     </recent_temporary>
@@ -445,7 +437,12 @@
       <workItem from="1595001816162" duration="23403000" />
       <workItem from="1597930115966" duration="541000" />
       <workItem from="1598030446066" duration="331000" />
-      <workItem from="1598922159268" duration="4314000" />
+      <workItem from="1598922159268" duration="23796000" />
+      <workItem from="1599668374658" duration="3728000" />
+      <workItem from="1599832933134" duration="11305000" />
+      <workItem from="1603818382294" duration="9428000" />
+      <workItem from="1605666165201" duration="1831000" />
+      <workItem from="1608214667646" duration="3283000" />
     </task>
     <task id="LOCAL-00001" summary="minor compilation update.">
       <created>1572617583079</created>
@@ -678,11 +675,18 @@
       <option name="project" value="LOCAL" />
       <updated>1592925071395</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="&#10;&#10;nrev.pl: fixed to use my_append/3.&#10;predicate_doc.pl: fixed write_term/3 doc to have cat(term_io).&#10;wam.js: disabled dump_choicepoints and dump_environments on exception exit from wam.&#10;bootstrap_js.pl: added setup_call_cleanup/3; fixed bug in setof/3 and bagof/3 by fixing replace_key_variables/3 to use ground/1 check instead of nonvar/1; fixed keysort/2 to not remove duplicate keyed values.&#10;wam_compiler.pl: fixed setup_call_catcher_cleanup/4 to allow Setup, Call, and Cleanup to be variables at compile time.&#10;tests.pl: extended keysort test to check for duplicate key handling.">
+      <created>1599426255618</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1599426255618</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="303949000" />
+    <option name="totallyTimeSpent" value="353006000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -694,23 +698,23 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1334" height="769" extended-state="0" />
+    <frame x="180" y="127" width="1080" height="628" extended-state="0" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5239923" visible="true" weight="0.18730651" />
-      <window_info id="Structure" order="1" sideWeight="0.47600767" side_tool="true" visible="true" weight="0.18730651" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5157385" visible="true" weight="0.18593448" />
+      <window_info id="Structure" order="1" sideWeight="0.4842615" side_tool="true" visible="true" weight="0.18593448" />
       <window_info id="Favorites" order="2" sideWeight="0.33809525" side_tool="true" weight="0.20413026" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4914163" weight="0.2774799" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48640916" visible="true" weight="0.23042837" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48640916" visible="true" weight="0.20833333" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49785408" weight="0.25637585" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32751676" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.5746032" weight="0.18734491" />
+      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.5746032" weight="0.18611522" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.3261745" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50858366" side_tool="true" weight="0.27651006" />
-      <window_info anchor="bottom" id="Messages" order="11" sideWeight="0.4985694" weight="0.22983871" />
+      <window_info active="true" anchor="bottom" id="Messages" order="11" sideWeight="0.4985694" visible="true" weight="0.22947761" />
       <window_info anchor="bottom" id="Inspection Results" order="12" sideWeight="0.49928468" weight="0.3293011" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -773,8 +777,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Extended data_predicates.pl with undo. Updated version to 1.5.2.&#10;&#10;Changed console.pl to use new data_predicates/4.&#10;data_predicates.pl: changed to data_predicates/4 from /3 to add 'option' (undoable, ephemeral) argument; added use of undo module; added cuts for performance optimization; added 'action' predicate generation for get, set, update, and clear.&#10;Extended object.pl with &gt;&gt;$/2 - this is &gt;&gt;/2 with a trailing cut; added cuts for performance optimization.&#10;Added undo.pl to support undoing assertions (primarily of data_predicates data).&#10;bootstrap_js.pl: added cuts to partition/4 and key_partition/4 to prevent sort/2 from creating needless choicepoints.&#10;Fixed proscript_interpreter_terminal.js to use $.terminal.escape_formatting on strings to be output in the terminal (fixes a bug with strings containing '[[' due to nested lists).&#10;Updated JQuery terminal to 2.9.0." />
-    <MESSAGE value="Merge with 'undo' branch." />
     <MESSAGE value="Added WindowOrWorkerGlobalScope interface and random builtins.&#10;&#10;Optimized sort/2 to check if the 'input' list is already in sorted order.&#10;Added random/1 and random_between/3." />
     <MESSAGE value="Fixed compare_terms to deref args and handle lists correctly.&#10;&#10;Extended keysort/2 with presorted check.&#10;Added term compare tests." />
     <MESSAGE value="Added sort_terms benchmark." />
@@ -798,7 +800,9 @@
     <MESSAGE value="Updated to version 1.5.8" />
     <MESSAGE value="Added HTMLUnknownElement. Fixed returns type for getElementsByTagName/NS." />
     <MESSAGE value="Updated to 1.5.9." />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated to 1.5.9." />
+    <MESSAGE value="&#10;&#10;nrev.pl: fixed to use my_append/3.&#10;predicate_doc.pl: fixed write_term/3 doc to have cat(term_io).&#10;wam.js: disabled dump_choicepoints and dump_environments on exception exit from wam.&#10;bootstrap_js.pl: added setup_call_cleanup/3; fixed bug in setof/3 and bagof/3 by fixing replace_key_variables/3 to use ground/1 check instead of nonvar/1; fixed keysort/2 to not remove duplicate keyed values.&#10;wam_compiler.pl: fixed setup_call_catcher_cleanup/4 to allow Setup, Call, and Cleanup to be variables at compile time.&#10;tests.pl: extended keysort test to check for duplicate key handling." />
+    <MESSAGE value="Added status to docs. Extended undo.pl with redo." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added status to docs. Extended undo.pl with redo." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -817,172 +821,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/system/decode_instructions.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="88">
-          <caret line="89" column="42" selection-start-line="89" selection-start-column="42" selection-end-line="89" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/library/undo.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="244">
-          <caret line="45" column="49" selection-start-line="45" selection-start-column="49" selection-end-line="45" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="13" column="6" selection-start-line="13" selection-start-column="6" selection-end-line="13" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/gc.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="804" column="9" selection-start-line="804" selection-start-column="9" selection-end-line="804" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/library/object.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="529">
-          <caret line="218" column="21" selection-start-line="218" selection-start-column="4" selection-end-line="218" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/web_test_html_input_element.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="62">
-          <caret line="141" column="41" selection-start-line="141" selection-start-column="41" selection-end-line="141" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/dump.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="110" column="64" lean-forward="true" selection-start-line="110" selection-start-column="64" selection-end-line="110" selection-end-column="64" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/decode_instruction.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-893">
-          <caret line="135" column="9" selection-start-line="135" selection-start-column="9" selection-end-line="135" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/promise.pl">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/promise.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="106" column="14" selection-start-line="106" selection-start-column="8" selection-end-line="106" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/terminal/proscriptls_interpreter_terminal.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="219" column="14" selection-start-line="219" selection-start-column="12" selection-end-line="219" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/object_property.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="194">
-          <caret line="434" column="11" selection-start-line="434" selection-start-column="11" selection-end-line="434" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/web_test_html_element.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="28" selection-start-line="28" selection-end-line="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/type_references.template">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/object.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3150">
-          <caret line="210" column="31" selection-start-line="210" selection-start-column="31" selection-end-line="210" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/object_method.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1995">
-          <caret line="133" column="104" selection-start-line="133" selection-start-column="90" selection-end-line="133" selection-end-column="104" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/web_interfaces.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5790">
-          <caret line="386" column="144" selection-start-line="386" selection-start-column="144" selection-end-line="386" selection-end-column="144" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/web_test_element.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1560">
-          <caret line="104" selection-start-line="104" selection-end-line="104" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/tools/type_references.pl">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/library/listut.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1560">
-          <caret line="104" selection-start-line="104" selection-end-line="104" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/library/listut2.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="26" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="5" selection-start-column="5" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/version_date.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="4" selection-start-column="4" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/Makefile">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/bench/proscriptls_state.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="5" column="7840" selection-start-line="5" selection-start-column="7840" selection-end-line="5" selection-end-column="7840" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/bench/nrev.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="27" column="2" selection-start-line="27" selection-start-column="2" selection-end-line="27" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/dom.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1365">
@@ -1015,34 +853,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bench/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="36" selection-start-line="3" selection-start-column="36" selection-end-line="3" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="668" column="106" selection-start-line="668" selection-start-column="106" selection-end-line="668" selection-end-column="106" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="23130">
-          <caret line="1542" column="47" selection-start-line="1542" selection-start-column="41" selection-end-line="1542" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="31635">
-          <caret line="2109" column="16" selection-start-line="2109" selection-start-column="13" selection-end-line="2109" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external/lib.es5.d.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="18960">
@@ -1070,30 +880,9 @@
     <entry file="file://$PROJECT_DIR$/src/system/system_util.pl">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="597">
-          <caret line="528" lean-forward="true" selection-start-line="528" selection-end-line="528" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/tests.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="403">
-          <caret line="463" lean-forward="true" selection-start-line="463" selection-end-line="463" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/docs/index.pl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1304" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="48" column="59" selection-start-line="48" selection-start-column="59" selection-end-line="48" selection-end-column="59" />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/tools/generate_predicate_doc.pl">
@@ -1103,24 +892,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="436" column="24" lean-forward="true" selection-start-line="436" selection-start-column="24" selection-end-line="436" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/engine/read.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-995">
           <caret line="631" column="9" selection-start-line="631" selection-start-column="9" selection-end-line="631" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/docs/predicate_doc.pl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="455">
-          <caret line="151" column="121" selection-start-line="151" selection-start-column="121" selection-end-line="151" selection-end-column="121" />
         </state>
       </provider>
     </entry>
@@ -1133,8 +908,231 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/Makefile">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="15" column="96" selection-start-line="15" selection-start-column="96" selection-end-line="15" selection-end-column="96" />
+        <state relative-caret-position="235">
+          <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/docs_test.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/framework.index.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-40">
+          <caret line="8" column="29" selection-start-line="8" selection-start-column="25" selection-end-line="8" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/content.index.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="39" selection-start-line="9" selection-start-column="39" selection-end-line="9" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/index.template">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/index_about.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="107" selection-start-column="107" selection-end-column="107" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/api.sidenav.template">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/predicates.sidenav.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="19" lean-forward="true" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/anchor.sidenav.template">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/index_status.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="94" selection-start-column="94" selection-end-column="94" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="585">
+          <caret line="39" column="94" selection-start-line="39" selection-start-column="94" selection-end-line="39" selection-end-column="94" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/sidenav.index.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1095">
+          <caret line="73" column="128" selection-start-line="73" selection-start-column="77" selection-end-line="73" selection-end-column="128" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/status.sidenav.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="585">
+          <caret line="39" column="19" selection-start-line="39" selection-start-column="19" selection-end-line="39" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/content.index_about.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/content.index_status.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="19" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/predicate_doc.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2265">
+          <caret line="151" column="121" selection-start-line="151" selection-start-column="121" selection-end-line="151" selection-end-column="121" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/stream.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6075">
+          <caret line="405" column="44" selection-start-line="405" selection-start-column="25" selection-end-line="405" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/docs/tasks_doc.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/foreign.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="249">
+          <caret line="1953" column="1" selection-start-line="1953" selection-start-column="1" selection-end-line="1953" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/system/bootstrap_js.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8490">
+          <caret line="566" column="6" selection-start-line="566" selection-start-column="6" selection-end-line="566" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/engine/wam.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12300">
+          <caret line="820" column="11" selection-start-line="820" selection-start-column="11" selection-end-line="820" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/library/data_predicates.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1740">
+          <caret line="116" column="15" selection-start-line="116" selection-start-column="11" selection-end-line="116" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/library/undo.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2835">
+          <caret line="189" column="46" selection-start-line="189" selection-start-column="46" selection-end-line="189" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/library/listut2.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="26" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/nrev.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1335">
+          <caret line="89" selection-start-line="89" selection-end-line="89" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/tests.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2040">
+          <caret line="136" column="31" selection-start-line="136" selection-start-column="31" selection-end-line="136" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/queens.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1110">
+          <caret line="74" column="17" selection-start-line="74" selection-start-column="17" selection-end-line="74" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/library/listut.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3030">
+          <caret line="202" column="25" selection-start-line="202" selection-start-column="25" selection-end-line="202" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/library/setutl.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3555">
+          <caret line="237" column="30" selection-start-line="237" selection-start-column="30" selection-end-line="237" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/boyer.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5355">
+          <caret line="357" column="15" selection-start-line="357" selection-start-column="15" selection-end-line="357" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/system/wam_compiler.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="387">
+          <caret line="1115" selection-start-line="1115" selection-end-line="1115" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/cal.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1969" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/hook.pl">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/hooklvm.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" selection-start-line="21" selection-end-line="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bench/common.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="18" lean-forward="true" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
         </state>
       </provider>
     </entry>

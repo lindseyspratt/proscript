@@ -71,5 +71,10 @@
         </ul>
     </li>
     <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, down, download, 'index_download.html', 'Download', main]}}</li>
+    <li><span class="caret"></span>{{1 @ Type & 'anchor.sidenav.template' # [Type, status, status, 'index_status.html', 'Status', main]}}
+        <ul class='nested'>
+            {{1 @ Type & 'status.sidenav.template' # [Type]}}
+        </ul>
+    </li>
     <li>{{1 @ Type & 'anchor.sidenav.template' # [Type, about, about, 'index_about.html', 'About', main]}}</li>
 </ul>

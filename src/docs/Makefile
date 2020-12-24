@@ -2,7 +2,7 @@ JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
 DEBUG=false
 SWIPL=/usr/local/bin/swipl --traditional
 DIST_DOC=../../docs
-HTML := $(addprefix $(DIST_DOC)/, index.html index_about.html index_download.html index_doc.html calculator_source.html\
+HTML := $(addprefix $(DIST_DOC)/, index.html index_about.html index_status.html index_download.html index_doc.html calculator_source.html\
     console_source.html simple_source.html likes_source.html consult_console_source.html tiles_source.html)
 TOP_HTML := ../../index.html
 DIST_LIB := ../../dist/proscriptls.js
@@ -37,7 +37,7 @@ $(DIST_DOC)/index_doc.html: type_references.template library.doc.template object
 				compilation.doc.template syntax.doc.template items.predicates.doc.template predicates.doc.template
 
 $(DIST_DOC)/%.html : %.template content.%.template sidenav.index.template api.sidenav.template anchor.sidenav.template \
-				predicates.sidenav.template framework.index.template \
+				predicates.sidenav.template framework.index.template status.sidenav.template \
 				../../version.txt ../../version_date.txt ../../library/template.pl
 		$(SWIPL) -q -f ../../library/template.pl\
 		    -g "substitute_template('$<', '$@'), halt"
@@ -46,10 +46,10 @@ $(ENGINE):
 		../../make $(ROOT_ENGINE)
 
 proscriptls_state_doc.js:	$(SRC_SYSTEM)/debugger.pl $(SRC_SYSTEM)/bootstrap_js.pl $(SRC_SYSTEM)/wam_compiler.pl\
-                $(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
+				$(SRC_SYSTEM)/wam_assemble.pl $(SRC_SYSTEM)/wam_util.pl\
                 $(SRC_TOOLS)/wam_bootstrap_master.pl $(SRC_TOOLS)/wam_bootstrap.pl $(SRC_TOOLS)/wam_bootstrap_util.pl\
-				$(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl $(SRC_SYSTEM)/promise.pl\
-				$(SRC_TOOLS)/type_references.pl
+                $(SRC_SYSTEM)/url.pl $(SRC_SYSTEM)/not.pl $(SRC_SYSTEM)/promise.pl\
+                $(SRC_TOOLS)/type_references.pl
 		$(SWIPL) -q -f $(SRC_TOOLS)/wam_bootstrap_master.pl -g \
 			"bootstrap('$(SRC_SYSTEM)/', [index(basic), '$(SRC_TOOLS)/type_references.pl'], 'proscriptls_state_doc.js', true), halt"
 

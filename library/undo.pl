@@ -1,4 +1,5 @@
-:- module(undo, [undoable_update/2, undo_update/2, undoable_assert/1, undoable_retract/1, undoable_term/2]).
+:- module(undo, [undoable_update/2, undo_update/2, undoable_assert/1, undoable_retract/1, undoable_term/2,
+    redo_update/2, redoable_term/2]).
 
 :- meta_predicate((
     undoable_update((:), (:)),
@@ -8,6 +9,7 @@
     )).
 
 :- dynamic(undoable_term/2).
+:- dynamic(redoable_term/2).
 
 undoable_update(M1: VarG, G2) :-
     var(VarG),
@@ -23,12 +25,14 @@ undoable_update(Old, New) :-
 undoable_update1(G1, M1 :VarG2) :-
     var(VarG2),
     !,
-    undoable_update2(G1, M1 :VarG2).
+    undoable_update2(G1, M1 :VarG2),
+    clear_redo.
 undoable_update1(G1, _M1 : M2 : G2) :-
     !,
     undoable_update1(G1, M2 : G2).
 undoable_update1(Old, New) :-
     undoable_update2(Old, New),
+    clear_redo,
     !.
 
 undoable_update2(OldTerm, NewTerm) :-
@@ -125,6 +129,7 @@ undo_update2(OldTerm, NewTerm) :-
       -> repeat,
          retract(undoable_term(OldTermX, NewTermX)),
          undo_single_update(OldTermX, NewTermX),
+         asserta(redoable_term(OldTermX, NewTermX)),
          OldTermX = OldTerm,
          NewTermX = NewTerm
     ;
@@ -151,3 +156,39 @@ required_retract(NewTermX) :-
       -> true
     ;
     throw(missing_term_for_undo(NewTermX)).
+
+redo_update(M1: VarG, G2) :-
+    var(VarG),
+    !,
+    redo_update1(M1 : VarG, G2).
+redo_update(_M1: M2: G, G2) :-
+    !,
+    redo_update(M2 : G, G2).
+redo_update(Old, New) :-
+    redo_update1(Old, New),
+    !.
+
+redo_update1(G1, M1 :VarG2) :-
+    var(VarG2),
+    !,
+    redo_update2(G1, M1 : VarG2).
+redo_update1(G1, _M1 : M2 : G2) :-
+    !,
+    redo_update1(G1, M2 : G2).
+redo_update1(G1, G2) :-
+    !,
+    redo_update2(G1, G2).
+
+redo_update2(OldTerm, NewTerm) :-
+    redoable_term(OldTerm, NewTerm)
+      -> repeat,
+         retract(redoable_term(OldTermX, NewTermX)),
+         undoable_update2(OldTermX, NewTermX),
+         OldTermX = OldTerm,
+         NewTermX = NewTerm
+    ;
+    throw(redo_not_defined(OldTerm, NewTerm)).
+
+clear_redo :-
+    retractall(redoable_term(_,_)).
+
