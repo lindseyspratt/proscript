@@ -3927,9 +3927,9 @@ function predicate_fetch_promise(url, promise) {
 }
 
 async function fetch_promise(urlJS) {
-    if (!urlJS.includes(".")) {
-        urlJS += ".pl";
-    }
+    // if (!urlJS.includes(".")) {
+    //     urlJS += ".pl";
+    // }
     if(typeof document !== 'undefined') {
         const response = await fetch(urlJS);
         return response.text();
